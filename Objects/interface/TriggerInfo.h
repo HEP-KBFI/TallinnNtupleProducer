@@ -3,11 +3,11 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"     // edm::ParameterSet
 
-#include <TTree>                                            // TTree
-
 #include <ostream>                                          // std::ostream
 #include <string>                                           // std::string
 #include <vector>                                           // std::vector
+
+class TTree; // forward declaration
 
 namespace trigger
 {
@@ -56,14 +56,37 @@ namespace trigger
     const std::vector<HLTPath>&
     hltPaths() const;
 
+    unsigned
+    min_numElectrons() const;
+    unsigned 
+    min_numMuons() const;
+    unsigned
+    min_numHadTaus() const;
+
+    const std::vector<unsigned> &
+    hltFilterBits_e() const;
+    const std::vector<unsigned> &
+    hltFilterBits_mu() const;
+    const std::vector<unsigned> &
+    hltFilterBits_tau() const;
+
     const std::string &
     in_PD() const;
+
+    bool
+    use_it() const;
 
     friend class TriggerInfoReader;
 
    private:
     std::string type_;
     std::vector<HLTPath> hltPaths_;
+    unsigned min_numElectrons_;
+    unsigned min_numMuons_;
+    unsigned min_numHadTaus_;
+    std::vector<unsigned> hltFilterBits_e_;
+    std::vector<unsigned> hltFilterBits_mu_;
+    std::vector<unsigned> hltFilterBits_tau_;
     std::string in_PD_;
     bool use_it_;
   };
