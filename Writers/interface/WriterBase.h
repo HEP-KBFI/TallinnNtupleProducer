@@ -1,6 +1,8 @@
 #ifndef TallinnNtupleProducer_Writers_WriterBase_h
 #define TallinnNtupleProducer_Writers_WriterBase_h
 
+#include "FWCore/ParameterSet/interface/ParameterSet.h"    // edm::ParameterSet
+
 #include "TallinnNtupleProducer/Objects/interface/Event.h" // Event
 
 class TTree; // forward declaration

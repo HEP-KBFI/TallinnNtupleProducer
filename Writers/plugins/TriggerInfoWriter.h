@@ -1,6 +1,8 @@
 #ifndef TallinnNtupleProducer_Writers_TriggerInfoWriter_h
 #define TallinnNtupleProducer_Writers_TriggerInfoWriter_h
 
+#include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
+
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h" // WriterBase
 #include "TallinnNtupleProducer/Objects/interface/Event.h"      // Event
 
@@ -30,8 +32,6 @@ class TriggerInfoWriter : public WriterBase
  private:
   int PD_;
   std::vector<int> PD_priority_;
-
-  std::string branchName_passesTrigger_;
   bool passesTrigger_;
 };
 

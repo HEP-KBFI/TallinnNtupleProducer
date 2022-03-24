@@ -1,7 +1,9 @@
-#include "TallinnNtupleProducer/Writers/interface/TriggerInfoWriter.h"
+#include "TallinnNtupleProducer/Writers/plugins/TriggerInfoWriter.h"
 
 #include "TallinnNtupleProducer/Framework/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/Framework/interface/cmsException.h"             // cmsException()
+
+#include "TTree.h"                                                              // TTree
 
 typedef std::vector<std::string> vstring;
 
@@ -25,8 +27,7 @@ namespace
 
 TriggerInfoWriter::TriggerInfoWriter(const edm::ParameterSet & cfg)
   : PD_(PD_type::kUndefined)
-  , branchName_passesTrigger_("passesTrigger")
-  , passesTrigger_(false)
+  , isTriggered_(false)
 {
   std::string PD_string = cfg.getParameter<std::string>("PD");
   PD_ = convertPD_to_int(PD_string);
@@ -44,7 +45,7 @@ void
 TriggerInfoWriter::setBranches(TTree * tree)
 {
   BranchAddressInitializer bai(tree);
-  bai.setBranch(passesTrigger_, branchName_passesTrigger_);
+  bai.setBranch(passesTrigger_, "passesTrigger");
 }
 
 namespace
