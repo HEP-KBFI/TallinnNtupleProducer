@@ -24,6 +24,13 @@ class RecoHadTauWriter : public WriterBase
   setBranches(TTree * tree);
 
   /**
+   * @brief Switch branches to those for the central value or for systematic shifts.
+   *        This method needs to be called before each call to the "write" method in the event loop.
+   */
+  void
+  set_central_or_shift(const std::string & central_or_shift) const;
+
+  /**
    * @brief Write relevant information to tree
    */
   void
@@ -33,29 +40,36 @@ class RecoHadTauWriter : public WriterBase
   std::string branchName_num_;
   std::string branchName_obj_;
 
-  UInt_t nHadTaus_;
-  Float_t * pt_;
-  Float_t * eta_;
-  Float_t * phi_;
-  Float_t * mass_;
-  Int_t * decayMode_;
-  Int_t * charge_;
-  Bool_t * isFakeable_;
-  Bool_t * isTight_;
-  // CV: The value of the genMatch variable is bit-coded.
-  //     The bit-coding is based on
-  //       https://github.com/HEP-KBFI/tth-htt/blob/master/src/hadTauGenMatchingAuxFunctions.cc#L323-L359
-  //     The values are:
-  //       1 = isGenHadTau
-  //       2 = isGenHadTauChargeFlip
-  //       4 = isGenElectron
-  //       8 = isGenElectronChargeFlip
-  //      16 = isGenMuon
-  //      32 = isGenMuonChargeFlip
-  //      64 = isGenJet
-  Int_t * genMatch_;
-  Bool_t * isFake_; // true if genMatch = 64, false otherwise
-  Bool_t * isFlip_; // true if genMatch = 2 or 8 or 32, false otherwise
+  UInt_t max_nHadTaus_;
+
+  struct central_or_shiftEntry
+  {
+    UInt_t nHadTaus_;
+    Float_t * pt_;
+    Float_t * eta_;
+    Float_t * phi_;
+    Float_t * mass_;
+    Int_t * decayMode_;
+    Int_t * charge_;
+    Bool_t * isFakeable_;
+    Bool_t * isTight_;
+    // CV: The value of the genMatch variable is bit-coded.
+    //     The bit-coding is based on
+    //       https://github.com/HEP-KBFI/tth-htt/blob/master/src/hadTauGenMatchingAuxFunctions.cc#L323-L359
+    //     The values are:
+    //       1 = isGenHadTau
+    //       2 = isGenHadTauChargeFlip
+    //       4 = isGenElectron
+    //       8 = isGenElectronChargeFlip
+    //      16 = isGenMuon
+    //      32 = isGenMuonChargeFlip
+    //      64 = isGenJet
+    Int_t * genMatch_;
+    Bool_t * isFake_; // true if genMatch = 64, false otherwise
+    Bool_t * isFlip_; // true if genMatch = 2 or 8 or 32, false otherwise
+  };
+  std::map<std::string, central_or_shiftEntry> central_or_shiftEntries_; // key = central_or_shift
+  mutable central_or_shiftEntry * current_central_or_shiftEntry_;
 };
 
 #endif // TallinnNtupleProducer_Writers_RecoHadTauWriter_h
