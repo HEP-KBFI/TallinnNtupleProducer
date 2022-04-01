@@ -1,8 +1,8 @@
 #include "TallinnNtupleProducer/Objects/interface/Event.h"
 
-#include <TString> // TString
+#include <TString.h> // TString
 
-#include <string>  // std::string
+#include <string>    // std::string
 
 const EventInfo&
 Event::eventInfo() const
@@ -122,16 +122,16 @@ namespace
 {
   template <typename T>
   void 
-  printCollection(const std::string & label, const std::vector<const T*> & collection)
+  printCollection(std::ostream & stream, const std::string & label, const std::vector<const T*> & collection)
   {
     std::string collectionName = TString(label.data()).ReplaceAll("[s]", "s").Data();
     std::string objectName = TString(label.data()).ReplaceAll("[s]", "").Data();
     stream << "#" << collectionName << " = " << collection.size() << std::endl;
-    size_t numObjects = objects.size();
+    size_t numObjects = collection.size();
     for ( size_t idxObject = 0; idxObject < numObjects; ++idxObject )
     {
       const T* object = collection[idxObject];
-      std::cout << objectName << " #" << idxObject << ": " << *object;
+      stream << objectName << " #" << idxObject << ": " << *object;
     }
   }
 }
@@ -143,26 +143,27 @@ operator << (std::ostream & stream, const Event & event)
 
   stream << event.triggerInfo();
 
-  printCollection("preselMuon[s]", preselMuons_);
-  printCollection("fakeableMuon[s]", fakeableMuons_);
-  printCollection("tightMuon[s]", tightMuons_);
+  printCollection(stream, "looseMuon[s]", event.looseMuons());
+  printCollection(stream, "fakeableMuon[s]", event.fakeableMuons());
+  printCollection(stream, "tightMuon[s]", event.tightMuons());
 
-  printCollection("preselElectron[s]", preselElectrons_);
-  printCollection("fakeableElectron[s]", fakeableElectrons_);
-  printCollection("tightElectron[s]", tightElectrons_);
+  printCollection(stream, "looseElectron[s]", event.looseElectrons());
+  printCollection(stream, "fakeableElectron[s]", event.fakeableElectrons());
+  printCollection(stream, "tightElectron[s]", event.tightElectrons());
 
-  printCollection("preselHadTau[s]", preselHadTaus_);
-  printCollection("fakeableHadTau[s]", fakeableHadTaus_);
-  printCollection("tightHadTau[s]", tightHadTaus_);
+  printCollection(stream, "fakeableHadTau[s]", event.fakeableHadTaus());
+  printCollection(stream, "tightHadTau[s]", event.tightHadTaus());
 
-  printCollection("selJet[s]AK4", selJetsAK4_);
+  printCollection(stream, "selJet[s]AK4", event.selJetsAK4());
 
-  printCollection("selBJet[s]AK4_loose", selBJetsAK4_loose_);
-  printCollection("selBJet[s]AK4_medium", selBJetsAK4_medium_);
+  printCollection(stream, "selBJet[s]AK4_loose", event.selBJetsAK4_loose());
+  printCollection(stream, "selBJet[s]AK4_medium", event.selBJetsAK4_medium());
 
-  printCollection("selJet[s]AK8", selJetsAK8_);
+  printCollection(stream, "selJet[s]AK8", event.selJetsAK8());
 
-  stream << " met: " << met_;
+  stream << " met: " << event.met();
 
-  stream << " vertex: " << vertex_;
+  stream << " vertex: " << event.vertex();
+
+  return stream;
 }

@@ -1,7 +1,9 @@
 #ifndef TallinnNtupleProducer_Objects_TriggerInfo_h
-#define TallinnNtupleProducer_Objects_HLTPath_h
+#define TallinnNtupleProducer_Objects_TriggerInfo_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"     // edm::ParameterSet
+
+#include <Rtypes.h>                                         // Bool_t
 
 #include <ostream>                                          // std::ostream
 #include <string>                                           // std::string
@@ -17,7 +19,7 @@ namespace trigger
   {
    public:
     HLTPath(const std::string & branchName);
-    ~HLTPath() {}
+    ~HLTPath();
 
     const std::string &
     branchName() const;
@@ -53,7 +55,7 @@ namespace trigger
     const std::string &
     type() const;
 
-    const std::vector<HLTPath>&
+    const std::vector<trigger::HLTPath>&
     hltPaths() const;
 
     unsigned
@@ -80,7 +82,7 @@ namespace trigger
 
    private:
     std::string type_;
-    std::vector<HLTPath> hltPaths_;
+    std::vector<trigger::HLTPath> hltPaths_;
     unsigned min_numElectrons_;
     unsigned min_numMuons_;
     unsigned min_numHadTaus_;
@@ -104,7 +106,7 @@ class TriggerInfo
 {
  public:
   TriggerInfo(const edm::ParameterSet & cfg);
-  ~TriggerInfo() {}
+  ~TriggerInfo();
 
   const std::vector<trigger::Entry> &
   entries() const;
@@ -112,7 +114,7 @@ class TriggerInfo
   friend class TriggerInfoReader;
 
  private:
-  std::vector entries_;
+  std::vector<trigger::Entry> entries_;
 };
 
 std::ostream &

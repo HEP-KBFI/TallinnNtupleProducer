@@ -2,6 +2,7 @@
 #define TallinnNtupleProducer_Objects_Event_h
 
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"    // EventInfo
+#include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"    // MEtFilter
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"  // TriggerInfo
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h" // RecoElectronPtrCollection
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"   // RecoHadTauPtrCollection
@@ -9,6 +10,7 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"   // RecoJetPtrCollectionAK8
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"   // RecoLeptonPtrCollection
 #include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"      // RecoMEt
+#include "TallinnNtupleProducer/Objects/interface/RecoMuon.h"     // RecoMuonPtrCollection
 #include "TallinnNtupleProducer/Objects/interface/RecoVertex.h"   // RecoVertex
 
 class Event
