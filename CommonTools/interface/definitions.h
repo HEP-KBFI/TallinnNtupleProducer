@@ -1,6 +1,10 @@
 #ifndef TallinnNtupleProducer_CommonTools_definitions_h
 #define TallinnNtupleProducer_CommonTools_definitions_h
 
+#include <map>    // std::map
+#include <string> // std::string
+#include <vector> // std::vector
+
 //--- declare constants
 const double wBosonMass = 80.379; // GeV
 const double z_mass   = 91.1876;
@@ -195,5 +199,11 @@ const std::map<Era, std::map<Btag, std::map<BtagWP, double>>> BtagWP_map = {
     },
   },
 };
+
+Era
+get_era(const std::string & eraString);
+
+std::string
+get_era(Era era);
 
 #endif // TallinnNtupleProducer_CommonTools_definitions_h
