@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"   // as_integer()
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/definitions.h"  // TauID
-#include "TallinnNtupleProducer/Objects/interface/GenJet.h"           // GenJet
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"        // GenLepton
+#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"         // as_integer()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"       // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"  // TauID
+#include "TallinnNtupleProducer/Objects/interface/GenJet.h"                 // GenJet
+#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"              // GenLepton
 
 RecoHadTau::RecoHadTau(const GenHadTau & particle,
                        Double_t corrFactor,

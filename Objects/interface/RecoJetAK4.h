@@ -15,6 +15,7 @@
 #include <map>                                                   // std::map
 
 enum class Btag;
+enum class pileupJetID;
 
 class RecoJetAK4 : public RecoJetBase
 {
@@ -63,7 +64,7 @@ class RecoJetAK4 : public RecoJetBase
   Double_t maxPt() const;
 
   bool hasBtag(Btag btag) const;
-  bool passesPUID(int puIdWP) const;
+  bool passesPUID(pileupJetID puIdWP) const;
   bool is_PUID_taggable() const;
 
   int get_default_systematics() const;

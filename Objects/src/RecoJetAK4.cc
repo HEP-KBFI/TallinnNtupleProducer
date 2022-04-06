@@ -1,7 +1,8 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"   // as_integer()
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"     // as_integer()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag, pileupJetID
 
 RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Double_t charge,
@@ -166,9 +167,9 @@ RecoJetAK4::hasBtag(Btag btag) const
 }
 
 bool
-RecoJetAK4::passesPUID(int puIdWP) const
+RecoJetAK4::passesPUID(pileupJetID puIdWP) const
 {
-  return this->puId() & puIdWP;
+  return this->puId() & (int)puIdWP;
 }
 
 bool
