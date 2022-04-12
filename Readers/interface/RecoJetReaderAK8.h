@@ -42,7 +42,7 @@ class RecoJetReaderAK8 : public ReaderBase
   std::vector<RecoJetAK8>
   read() const;
 
-protected:
+ protected:
  /**
    * @brief Initialize names of branches to be read from tree
    */
@@ -51,7 +51,7 @@ protected:
 
   Era era_;
   bool isMC_;
-  const unsigned int max_nJets_;
+  unsigned int max_nJets_;
   std::string branchName_num_;
   std::string branchName_obj_;
 

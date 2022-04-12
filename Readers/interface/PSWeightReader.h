@@ -1,18 +1,19 @@
-#ifndef tthAnalysis_HiggsToTauTau_PSWeightReader_h
-#define tthAnalysis_HiggsToTauTau_PSWeightReader_h
+#ifndef TallinnNtupleProducer_Readers_PSWeightReader_h
+#define TallinnNtupleProducer_Readers_PSWeightReader_h
 
-#include "tthAnalysis/HiggsToTauTau/interface/ReaderBase.h" // ReaderBase
+#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h" // ReaderBase
 
-#include <Rtypes.h> // *_t
+#include <Rtypes.h>                                             // Float_t, UInt_t
 
-#include <map> // std::map<,>
+#include <map>                                                  // std::map
+#include <string>                                               // std::string
+#include <vector>                                               // std::vector
 
-class PSWeightReader
-  : public ReaderBase
+
+class PSWeightReader : public ReaderBase
 {
-public:
-  PSWeightReader(bool has_PS_weights,
-                 bool apply_LHE_nom);
+ public:
+  PSWeightReader(const edm::ParameterSet & cfg);
   ~PSWeightReader();
 
   /**
@@ -39,7 +40,7 @@ public:
 
   double get_LHE_nom() const;
 
-protected:
+ protected:
   /**
     * @brief Initialize names of branches to be read from tree
     */

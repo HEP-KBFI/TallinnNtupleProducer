@@ -10,6 +10,7 @@ std::map<std::string, int> GenMEtReader::numInstances_;
 std::map<std::string, GenMEtReader *> GenMEtReader::instances_;
 
 GenMEtReader::GenMEtReader(const edm::ParameterSet & cfg)
+  : ReaderBase(cfg)
 {
   branchName_obj_ = cfg.getParameter<std::string>("branchName");
   setBranchNames();

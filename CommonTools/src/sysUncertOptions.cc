@@ -1,11 +1,14 @@
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"
 
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"            // Era
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag
 
 #include <TString.h>                                                    // Form()
 
 #include <boost/algorithm/string/predicate.hpp>                         // boost::algorithm::starts_with(), boost::algorithm::ends_with()
+
+#include <assert.h>                                                     // assert()
 
 namespace 
 {

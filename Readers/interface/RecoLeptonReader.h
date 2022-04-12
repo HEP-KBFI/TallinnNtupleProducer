@@ -1,20 +1,23 @@
-#ifndef tthAnalysis_HiggsToTauTau_RecoLeptonReader_h
-#define tthAnalysis_HiggsToTauTau_RecoLeptonReader_h
+#ifndef TallinnNtupleProducer_Readers_RecoLeptonReader_h
+#define TallinnNtupleProducer_Readers_RecoLeptonReader_h
 
-#include "tthAnalysis/HiggsToTauTau/interface/RecoLepton.h" // RecoLepton
-#include "tthAnalysis/HiggsToTauTau/interface/GenLeptonReader.h" // GenLeptonReader
-#include "tthAnalysis/HiggsToTauTau/interface/GenHadTauReader.h" // GenHadTauReader
-#include "tthAnalysis/HiggsToTauTau/interface/GenPhotonReader.h" // GenPhotonReader
-#include "tthAnalysis/HiggsToTauTau/interface/GenJetReader.h" // GenJetReader
+#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"      // RecoLepton
+#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h" // GenHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"    // GenJetReader
+#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h" // GenLeptonReader
+#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h" // GenPhotonReader
+#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"      // ReaderBase
+
+#include <map>                                                       // std::map
+#include <string>                                                    // std::string
 
 // forward declarations
 enum class Btag;
 enum class Era;
 
-class RecoLeptonReader
-  : public ReaderBase
+class RecoLeptonReader : public ReaderBase
 {
-public:
+ public:
   RecoLeptonReader(const edm::ParameterSet & cfg);
   ~RecoLeptonReader();
 
@@ -27,14 +30,14 @@ public:
   friend class RecoElectronReader;
   friend class RecoMuonReader;
 
-protected:
+ protected:
  /**
    * @brief Initialize names of branches to be read from tree
    */
   void
   setBranchNames();
 
-  const unsigned int max_nLeptons_;
+  unsigned int max_nLeptons_;
   std::string branchName_num_;
   std::string branchName_obj_;
   bool isMC_;
@@ -148,4 +151,4 @@ protected:
   static std::map<std::string, RecoLeptonReader *> instances_;
 };
 
-#endif // tthAnalysis_HiggsToTauTau_RecoLeptonReader_h
+#endif // TallinnNtupleProducer_Readers_RecoLeptonReader_h

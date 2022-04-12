@@ -12,7 +12,8 @@ std::map<std::string, int> LHEParticleReader::numInstances_;
 std::map<std::string, LHEParticleReader *> LHEParticleReader::instances_;
 
 LHEParticleReader::LHEParticleReader(const edm::ParameterSet & cfg)
-  : max_nParticles_(32)
+  : ReaderBase(cfg)
+  , max_nParticles_(32)
   , branchName_num_("")
   , branchName_obj_("")
   , particle_pt_(nullptr)
@@ -42,7 +43,7 @@ LHEParticleReader::~LHEParticleReader()
     delete[] gInstance->particle_mass_;
     delete[] gInstance->particle_pdgId_;
     delete[] gInstance->particle_status_;
-    instances_[branchName_particles_] = nullptr;
+    instances_[branchName_obj_] = nullptr;
   }
 }
 

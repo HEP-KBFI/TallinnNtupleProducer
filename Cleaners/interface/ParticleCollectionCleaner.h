@@ -5,6 +5,8 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // get_human_line()
 
+#include <iostream>                                                   // std::cout
+
 template <typename T>
 class ParticleCollectionCleaner
 {
@@ -102,6 +104,6 @@ typedef ParticleCollectionCleaner<GenJet> GenJetCollectionCleaner;
 
 typedef ParticleCollectionCleaner<RecoJetAK8> RecoJetCollectionCleanerAK8;
 
-#include "TallinnNtupleProducer/Objects/interface/RecoJetCollectionCleanerByIndexAK4.h"
+#include "TallinnNtupleProducer/Cleaners/interface/RecoJetCollectionCleanerByIndexAK4.h"
 
 #endif // TallinnNtupleProducer_Cleaners_ParticleCollectionCleaner_h

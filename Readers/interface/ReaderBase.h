@@ -10,7 +10,7 @@ enum class Era;
 class ReaderBase
 {
  public:
-  ReaderBase(const edm::ParameterSet & cfg) = default;
+  ReaderBase(const edm::ParameterSet & cfg) {}
   virtual ~ReaderBase() {}
 
   virtual std::vector<std::string>

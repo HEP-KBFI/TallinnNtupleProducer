@@ -1,4 +1,4 @@
-#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"
+#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
@@ -16,7 +16,8 @@ std::map<std::string, int> RecoJetReaderAK4::numInstances_;
 std::map<std::string, RecoJetReaderAK4 *> RecoJetReaderAK4::instances_;
 
 RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
-  : era_(Era::kUndefined)
+  : ReaderBase(cfg)
+  , era_(Era::kUndefined)
   , isMC_(false)
   , max_nJets_(256)
   , branchName_num_("")
@@ -24,7 +25,7 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , genLeptonReader_(nullptr)
   , genHadTauReader_(nullptr)
   , genJetReader_(nullptr)
-  , readGenMatching_(readGenMatching)
+  , readGenMatching_(false)
   , btag_(Btag::kDeepJet)
   , btag_central_or_shift_(kBtag_central)
   , ptMassOption_(-1)
@@ -49,12 +50,18 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   branchName_num_ = Form("n%s", branchName_obj_.data());
   isMC_ = cfg.getParameter<bool>("isMC");
   ptMassOption_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
-  readGenMatching_ = isMC && !cfg.getParameter<bool>("redoGenMatching");
+  readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
   if(readGenMatching_)
   {
-    genLeptonReader_ = new GenLeptonReader(Form("%s_genLepton", branchName_obj_.data()), max_nJets_);
-    genHadTauReader_ = new GenHadTauReader(Form("%s_genTau",    branchName_obj_.data()), max_nJets_);
-    genJetReader_    = new GenJetReader   (Form("%s_genJet",    branchName_obj_.data()), max_nJets_);
+    edm::ParameterSet cfg_genLepton = makeReader_cfg(era_, Form("%s_genLepton", branchName_obj_.data()), true);
+    cfg_genLepton.addParameter<unsigned int>("max_nLeptons", max_nJets_);
+    genLeptonReader_ = new GenLeptonReader(cfg_genLepton);
+    edm::ParameterSet cfg_genTau = makeReader_cfg(era_, Form("%s_genTau", branchName_obj_.data()), true);
+    cfg_genTau.addParameter<unsigned int>("max_nHadTaus", max_nJets_);
+    genHadTauReader_ = new GenHadTauReader(cfg_genTau);
+    edm::ParameterSet cfg_genJet = makeReader_cfg(era_, Form("%s_genJet", branchName_obj_.data()), true);
+    cfg_genJet.addParameter<unsigned int>("max_nJets", max_nJets_);
+    genJetReader_ = new GenJetReader(cfg_genJet);
   }
   setBranchNames();
 }

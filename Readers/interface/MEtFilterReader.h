@@ -1,24 +1,26 @@
 #ifndef TallinnNtupleProducer_Readers_MEtFilterReader_h
 #define TallinnNtupleProducer_Readers_MEtFilterReader_h
 
+#include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"     // MEtFilter
 #include "TallinnNtupleProducer/Objects/interface/MEtFilterFlag.h" // MEtFilterFlag::
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"    // ReaderBase
 
 #include <array>                                                   // std::array
 
 // forward declarations
-class MEtFilter;
 enum class Era;
 
 class MEtFilterReader : public ReaderBase
 {
  public:
-  MEtFilterReader(MEtFilter * metFilter,
-                  Era era);
+  MEtFilterReader(const edm::ParameterSet & cfg);
   ~MEtFilterReader();
 
   std::vector<std::string>
   setBranchAddresses(TTree * tree) override;
+
+  const MEtFilter &
+  read() const;
 
  protected:
  /**

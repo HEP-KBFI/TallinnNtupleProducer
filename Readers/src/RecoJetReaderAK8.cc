@@ -1,9 +1,10 @@
-#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"
+#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_fatJet(), kFatJet_*
+#include "TallinnNtupleProducer/Objects/interface/RecoSubjetAK8.h"            // RecoSubjetAK8
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/Readers/interface/RecoSubjetReaderAK8.h"      // RecoSubjetReaderAK8
 
@@ -14,7 +15,8 @@ std::map<std::string, int> RecoJetReaderAK8::numInstances_;
 std::map<std::string, RecoJetReaderAK8 *> RecoJetReaderAK8::instances_;
 
 RecoJetReaderAK8::RecoJetReaderAK8(const edm::ParameterSet & cfg)
-  : era_(Era::kUndefined)
+  : ReaderBase(cfg)
+  , era_(Era::kUndefined)
   , isMC_(false)
   , max_nJets_(32)
   , branchName_num_("")
@@ -43,7 +45,6 @@ RecoJetReaderAK8::RecoJetReaderAK8(const edm::ParameterSet & cfg)
   isMC_ = cfg.getParameter<bool>("isMC");
   sysOption_central_ = ( isMC_ ) ? kFatJet_central : kFatJet_central_nonNominal;
   ignoreSys_ = ( isMC_ ) ? kFatJetJMS + kFatJetJMR + kFatJetPUPPI : kFatJetNone;
-  readGenMatching_ = isMC && !cfg.getParameter<bool>("redoGenMatching");
   std::string branchName_subjet = cfg.getParameter<std::string>("branchName_subjet"); // default = "SubJet"
   subjetReader_ = new RecoSubjetReaderAK8(cfg);
   setBranchNames();
@@ -133,6 +134,43 @@ RecoJetReaderAK8::ignoreSys(int flag)
     ;
   }
   ignoreSys_ = flag;
+}
+
+namespace
+{
+  std::string
+  getCorrectionString(int code)
+  {
+    switch(code)
+    {
+      case kFatJetJMS:   return "JMS";
+      case kFatJetJMR:   return "JMR";
+      case kFatJetPUPPI: return "PUPPI";
+      default:           assert(false);
+    }
+    assert(false);
+  }
+
+  double
+  updateWithCorrections(double input,
+                        int flag,
+                        const std::map<int, double> & corrections,
+                        bool undo)
+  {
+    double factor = 1.;
+    for(const auto & kv: corrections)
+    {
+      if(flag & kv.first)
+      {
+        factor *= kv.second;
+      }
+    }
+    if(undo)
+    {
+      factor = std::fpclassify(factor) != FP_ZERO ? 1. / factor : 0.;
+    }
+    return input * factor;
+  }
 }
 
 void

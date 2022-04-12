@@ -4,8 +4,10 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                                       // edm::ParameterSet
 
 #include "TallinnNtupleProducer/Cleaners/interface/ParticleCollectionCleaner.h"               // RecoElectronCollectionCleaner, RecoHadTauCollectionCleaner, RecoJetCollectionCleanerAK4, RecoMuonCollectionCleaner
-#include "TallinnNtupleProducer/Cleaners/interface/RecoJetCollectionCleanerByIndexAK4.h       // RecoJetCollectionCleanerByIndexAK4
-
+#include "TallinnNtupleProducer/Cleaners/interface/RecoJetCollectionCleanerByIndexAK4.h"      // RecoJetCollectionCleanerByIndexAK4
+#include "TallinnNtupleProducer/Objects/interface/Event.h"                                    // Event
+#include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"                          // EventInfoReader
+#include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"                          // MEtFilterReader
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                               // ReaderBase
 #include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"                       // RecoElectronReader
 #include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"                         // RecoHadTauReader
@@ -14,7 +16,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                            // RecoMEtReader
 #include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"                           // RecoMuonReader
 #include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"                         // RecoVertexReader
-
+#include "TallinnNtupleProducer/Selectors/interface/MEtFilterSelector.h"                      // MEtFilterSelector
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorFakeable.h" // RecoElectronCollectionSelectorFakeable
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorLoose.h"    // RecoElectronCollectionSelectorLoose
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorTight.h"    // RecoElectronCollectionSelectorTight
@@ -23,35 +25,40 @@
 #include "TallinnNtupleProducer/Selectors/interface/RecoHadTauCollectionSelectorTight.h"      // RecoHadTauCollectionSelectorTight
 #include "TallinnNtupleProducer/Selectors/interface/RecoJetCollectionSelectorAK4.h"           // RecoJetCollectionSelectorAK4
 #include "TallinnNtupleProducer/Selectors/interface/RecoJetCollectionSelectorAK4_btag.h"      // RecoJetCollectionSelectorAK4_btag
+#include "TallinnNtupleProducer/Selectors/interface/RecoJetCollectionSelectorAK8.h"           // RecoJetCollectionSelectorAK8
 #include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorFakeable.h"     // RecoMuonCollectionSelectorFakeable
 #include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorLoose.h"        // RecoMuonCollectionSelectorLoose
 #include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorTight.h"        // RecoMuonCollectionSelectorTight
 
+#include <set>                                                                                // std::set
+#include <string>                                                                             // std::string
+#include <vector>                                                                             // std::vector
+
 // forward declarations
 class TTree;
 
-namespace
-{
-  void
-  add_systematic_shifts(std::set<std::string> & systematic_shifts, const std::vector<std::string> & shifts_to_add)
-  {
-    for ( auto shift : shifts_to_add )
-    {
-      systematic_shifts.insert(shift);
-    }
-  }
-
-  std::vector<std::string>
-  convert_to_vector(std::set<std::string> & systematic_shifts)
-  {
-    std::vector<std::string> retVal;
-    for ( auto shift : systematic_shifts )
-    {
-      retVal.push_back(shift);
-    }
-    return retVal;
-  }
-}
+//namespace
+//{
+//  void
+//  add_systematic_shifts(std::set<std::string> & systematic_shifts, const std::vector<std::string> & shifts_to_add)
+//  {
+//    for ( auto shift : shifts_to_add )
+//    {
+//      systematic_shifts.insert(shift);
+//    }
+//  }
+//
+//  std::vector<std::string>
+//  convert_to_vector(std::set<std::string> & systematic_shifts)
+//  {
+//    std::vector<std::string> retVal;
+//    for ( auto shift : systematic_shifts )
+//    {
+//      retVal.push_back(shift);
+//    }
+//    return retVal;
+//  }
+//}
 
 class EventReader : public ReaderBase
 {
@@ -78,6 +85,8 @@ class EventReader : public ReaderBase
  protected:
   unsigned numNominalLeptons_;
   unsigned numNominalHadTaus_;
+
+  EventInfoReader * eventInfoReader_;
 
   RecoMuonReader * muonReader_;
   RecoMuonCollectionSelectorLoose * looseMuonSelector_;

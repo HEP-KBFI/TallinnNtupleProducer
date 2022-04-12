@@ -12,7 +12,8 @@ std::map<std::string, int> RecoSubjetReaderAK8::numInstances_;
 std::map<std::string, RecoSubjetReaderAK8 *> RecoSubjetReaderAK8::instances_;
 
 RecoSubjetReaderAK8::RecoSubjetReaderAK8(const edm::ParameterSet & cfg)
-  : era_(Era::kUndefined)
+  : ReaderBase(cfg)
+  , era_(Era::kUndefined)
   , btag_(Btag::kDeepCSV) // maybe read DeepJet ?
   , max_nJets_(88)
   , branchName_num_("")

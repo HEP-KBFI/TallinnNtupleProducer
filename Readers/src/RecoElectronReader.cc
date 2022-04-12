@@ -13,7 +13,8 @@ std::map<std::string, int> RecoElectronReader::numInstances_;
 std::map<std::string, RecoElectronReader *> RecoElectronReader::instances_;
 
 RecoElectronReader::RecoElectronReader(const edm::ParameterSet & cfg)
-  : era_(Era::kUndefined)
+  : ReaderBase(cfg)
+  , era_(Era::kUndefined)
   , branchName_num_("")
   , branchName_obj_("")
   , leptonReader_(nullptr)

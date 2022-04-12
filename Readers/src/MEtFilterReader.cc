@@ -13,6 +13,7 @@ int MEtFilterReader::numInstances_ = 0;
 MEtFilterReader * MEtFilterReader::instance_ = nullptr;
 
 MEtFilterReader::MEtFilterReader(const edm::ParameterSet & cfg)
+  : ReaderBase(cfg)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   setBranchNames();
@@ -65,9 +66,15 @@ MEtFilterReader::setBranchAddresses(TTree * tree)
           //metFilterFlagString += "_bool";
         }
       }
-      bai.setBranchAddress(metFilter_->getFlagRef(flag_enum), metFilterFlagString);
+      bai.setBranchAddress(metFilter_.getFlagRef(flag_enum), metFilterFlagString);
     }
     return bai.getBoundBranchNames();
   }
   return {};
+}
+
+const MEtFilter &
+MEtFilterReader::read() const
+{
+  return metFilter_;
 }

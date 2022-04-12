@@ -12,7 +12,7 @@ class TTree;
 class GenJetReader : public ReaderBase
 {
  public:
-  explicit GenJetReader(const edm::ParameterSet & cfg)
+  explicit GenJetReader(const edm::ParameterSet & cfg);
   ~GenJetReader();
 
   /**
@@ -40,7 +40,7 @@ class GenJetReader : public ReaderBase
 
   bool read_partonFlavour_;
 
-  const unsigned int max_nJets_;
+  unsigned int max_nJets_;
   std::string branchName_num_;
   std::string branchName_obj_;
 

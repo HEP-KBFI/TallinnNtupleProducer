@@ -16,7 +16,8 @@ std::map<std::string, int> LHEInfoReader::numInstances_;
 std::map<std::string, LHEInfoReader*> LHEInfoReader::instances_;
 
 LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
-  : max_scale_nWeights_(9)
+  : ReaderBase(cfg)
+  , max_scale_nWeights_(9)
   , branchName_scale_nWeights_("")
   , branchName_scale_weights_("")
   , max_pdf_nWeights_(103)
@@ -37,15 +38,16 @@ LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
   , weight_scale_xyDown_(1.)
   , weight_scale_Up_(1.)
   , weight_scale_Down_(1.)
-  , has_LHE_weights_(has_LHE_weights)
+  , has_LHE_weights_(false)
   , correctiveFactor_(1.)
 {
-  branchName_scale_weights_ = cfg.getParameter<std::string>("branchName_scale_weights");       // default = "LHEScaleWeight"
+  branchName_scale_weights_ = cfg.getParameter<std::string>("branchName_scale_weights");               // default = "LHEScaleWeight"
   branchName_scale_nWeights_ = Form("n%s", branchName_scale_weights_.data());
-  branchName_pdf_weights_ = cfg.getParameter<std::string>("branchName_pdf_weights");         // default = "LHEPdfWeight"
+  branchName_pdf_weights_ = cfg.getParameter<std::string>("branchName_pdf_weights");                   // default = "LHEPdfWeight"
   branchName_pdf_nWeights_ = Form("n%s", branchName_pdf_weights_.data());
-  branchName_envelope_weight_up_ = cfg.getParameter<std::string>("branchName_envelope_weight_up")   // default = "LHEEnvelopeWeightUp"
-  branchName_envelope_weight_down_ = cfg.getParameter<std::string>("branchName_envelope_weight_down") // default = "LHEEnvelopeWeightDown"
+  branchName_envelope_weight_up_ = cfg.getParameter<std::string>("branchName_envelope_weight_up");     // default = "LHEEnvelopeWeightUp"
+  branchName_envelope_weight_down_ = cfg.getParameter<std::string>("branchName_envelope_weight_down"); // default = "LHEEnvelopeWeightDown"
+  has_LHE_weights_ = cfg.getParameter<bool>("has_LHE_weights");
   setBranchNames();
 }
 

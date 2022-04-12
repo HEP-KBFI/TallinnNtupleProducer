@@ -10,11 +10,11 @@ Event::eventInfo() const
   return eventInfo_;
 }
 
-const TriggerInfo&
-Event::triggerInfo() const
-{
-  return triggerInfo_;
-}
+//const TriggerInfo&
+//Event::triggerInfo() const
+//{
+//  return triggerInfo_;
+//}
 
 const RecoMuonPtrCollection&
 Event::looseMuons() const
@@ -141,7 +141,7 @@ operator << (std::ostream & stream, const Event & event)
 {
   stream << event.eventInfo();
 
-  stream << event.triggerInfo();
+  //stream << event.triggerInfo();
 
   printCollection(stream, "looseMuon[s]", event.looseMuons());
   printCollection(stream, "fakeableMuon[s]", event.fakeableMuons());

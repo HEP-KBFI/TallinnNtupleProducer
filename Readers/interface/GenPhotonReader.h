@@ -42,7 +42,7 @@ class GenPhotonReader : public ReaderBase
   void
   setBranchNames();
 
-  const unsigned int max_nPhotons_;
+  unsigned int max_nPhotons_;
   std::string branchName_num_;
   std::string branchName_obj_;
 

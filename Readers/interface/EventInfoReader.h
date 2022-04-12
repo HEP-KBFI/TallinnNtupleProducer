@@ -10,24 +10,24 @@ class EventInfo;
 class EventInfoReader : public ReaderBase
 {
  public:
-  explicit EventInfoReader(bool read_genHiggsDecayMode = true,
-                           bool read_puWeight = true);
-  explicit EventInfoReader(EventInfo * info,
-                           bool read_genHiggsDecayMode = true,
-                           bool read_puWeight = true);
+  explicit EventInfoReader(const edm::ParameterSet & cfg);
   ~EventInfoReader() override;
 
   std::vector<std::string>
   setBranchAddresses(TTree * tree) override;
 
   void
-  setEventInfo(EventInfo * info);
-
-  void
   setTopPtRwgtBranchName(const std::string & branchName);
 
   std::string
   getTopPtRwgtBranchName() const;
+
+  /**
+   * @brief Read branches from tree and use information to fill EventInfo object
+   * @return reference to EventInfo object
+   */
+  const EventInfo &
+  read() const;
 
  protected:
   bool read_genHiggsDecayMode_;

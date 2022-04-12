@@ -35,7 +35,7 @@ class GenHadTauReader : public ReaderBase
   void
   setBranchNames();
 
-  const unsigned int max_nHadTaus_;
+  unsigned int max_nHadTaus_;
   std::string branchName_num_;
   std::string branchName_obj_;
 

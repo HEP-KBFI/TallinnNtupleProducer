@@ -1,13 +1,17 @@
-#include "tthAnalysis/HiggsToTauTau/interface/GenHadTauReader.h" // GenHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"
 
-#include "tthAnalysis/HiggsToTauTau/interface/cmsException.h" // cmsException()
-#include "tthAnalysis/HiggsToTauTau/interface/BranchAddressInitializer.h" // BranchAddressInitializer, TTree, Form()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+
+#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                            // TTree
 
 std::map<std::string, int> GenHadTauReader::numInstances_;
 std::map<std::string, GenHadTauReader *> GenHadTauReader::instances_;
 
 GenHadTauReader::GenHadTauReader(const edm::ParameterSet & cfg)
-  : max_nHadTaus_(36)
+  : ReaderBase(cfg)
+  , max_nHadTaus_(36)
   , branchName_num_("")
   , branchName_obj_("")
   , hadTau_pt_(nullptr)
@@ -17,6 +21,10 @@ GenHadTauReader::GenHadTauReader(const edm::ParameterSet & cfg)
   , hadTau_charge_(nullptr)
   , hadTau_status_(nullptr)
 {
+  if ( cfg.exists("max_nHadTaus") )
+  {
+    max_nHadTaus_ = cfg.getParameter<unsigned int>("max_nHadTaus");
+  }
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "GenVisTau"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   setBranchNames();

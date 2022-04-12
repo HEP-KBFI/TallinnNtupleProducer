@@ -1,11 +1,16 @@
-#include "tthAnalysis/HiggsToTauTau/interface/TauESTool.h"
+#include "TallinnNtupleProducer/Readers/interface/TauESTool.h"
 
-#include "tthAnalysis/HiggsToTauTau/interface/generalAuxFunctions.h"      // get_fullpath()
-#include "tthAnalysis/HiggsToTauTau/interface/analysisAuxFunctions.h" // Era::k*
+#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"        // as_integer()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"      // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"      // get_fullpath()
+#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h" // TauID
 
-#include <TString.h> // Form()
-#include <TFile.h>   // TFile
-#include <TH1.h>     // TH1
+#include "TFile.h"                                                         // TFile
+#include "TH1.h"                                                           // TH1
+#include "TString.h"                                                       // Form()
+#include "TTree.h"                                                         // TTree
+
+#include <iostream>                                                        // std::cout
 
 TauESTool::TauESTool(Era era,
                      TauID tauID,

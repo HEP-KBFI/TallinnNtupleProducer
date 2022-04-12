@@ -14,7 +14,8 @@ std::map<std::string, int> PSWeightReader::numInstances_;
 std::map<std::string, PSWeightReader*> PSWeightReader::instances_;
 
 PSWeightReader::PSWeightReader(const edm::ParameterSet & cfg)
-  : max_nPSWeights_(4)
+  : ReaderBase(cfg)
+  , max_nPSWeights_(4)
   , branchName_nPSWeights_("")
   , branchName_PSweights_("")
   , branchName_LHE_nom_("")

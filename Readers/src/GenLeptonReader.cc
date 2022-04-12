@@ -1,25 +1,33 @@
-#include "tthAnalysis/HiggsToTauTau/interface/GenLeptonReader.h" // GenLeptonReader
+#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"
 
-#include "tthAnalysis/HiggsToTauTau/interface/cmsException.h" // cmsException()
-#include "tthAnalysis/HiggsToTauTau/interface/BranchAddressInitializer.h" // BranchAddressInitializer, TTree, Form()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+
+#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                            // TTree
 
 std::map<std::string, int> GenLeptonReader::numInstances_;
 std::map<std::string, GenLeptonReader *> GenLeptonReader::instances_;
 
 GenLeptonReader::GenLeptonReader(const edm::ParameterSet & cfg)
-  : max_nPromptLeptons_(36)
-  , branchName_nPromptLeptons_("")
-  , branchName_promptLeptons_("")
+  : ReaderBase(cfg)
+  , max_nLeptons_(36)
+  , branchName_num_("")
+  , branchName_obj_("")
   , readGenPartFlav_(false)
-  , promptLepton_pt_(nullptr)
-  , promptLepton_eta_(nullptr)
-  , promptLepton_phi_(nullptr)
-  , promptLepton_mass_(nullptr)
-  , promptLepton_pdgId_(nullptr)
-  , promptLepton_status_(nullptr)
-  , promptLepton_statusFlags_(nullptr)
-  , promptLepton_genPartFlav_(nullptr)
+  , lepton_pt_(nullptr)
+  , lepton_eta_(nullptr)
+  , lepton_phi_(nullptr)
+  , lepton_mass_(nullptr)
+  , lepton_pdgId_(nullptr)
+  , lepton_status_(nullptr)
+  , lepton_statusFlags_(nullptr)
+  , lepton_genPartFlav_(nullptr)
 {
+  if ( cfg.exists("max_nLeptons") )
+  {
+    max_nLeptons_ = cfg.getParameter<unsigned int>("max_nLeptons");
+  }
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "GenLep"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   setBranchNames();
@@ -27,21 +35,21 @@ GenLeptonReader::GenLeptonReader(const edm::ParameterSet & cfg)
 
 GenLeptonReader::~GenLeptonReader()
 {
-  --numInstances_[branchName_promptLeptons_];
-  assert(numInstances_[branchName_promptLeptons_] >= 0);
-  if(numInstances_[branchName_promptLeptons_] == 0)
+  --numInstances_[branchName_obj_];
+  assert(numInstances_[branchName_obj_] >= 0);
+  if(numInstances_[branchName_obj_] == 0)
   {
-    GenLeptonReader * const gInstance = instances_[branchName_promptLeptons_];
+    GenLeptonReader * const gInstance = instances_[branchName_obj_];
     assert(gInstance);
-    delete[] gInstance->promptLepton_pt_;
-    delete[] gInstance->promptLepton_eta_;
-    delete[] gInstance->promptLepton_phi_;
-    delete[] gInstance->promptLepton_mass_;
-    delete[] gInstance->promptLepton_pdgId_;
-    delete[] gInstance->promptLepton_status_;
-    delete[] gInstance->promptLepton_statusFlags_;
-    delete[] gInstance->promptLepton_genPartFlav_;
-    instances_[branchName_promptLeptons_] = nullptr;
+    delete[] gInstance->lepton_pt_;
+    delete[] gInstance->lepton_eta_;
+    delete[] gInstance->lepton_phi_;
+    delete[] gInstance->lepton_mass_;
+    delete[] gInstance->lepton_pdgId_;
+    delete[] gInstance->lepton_status_;
+    delete[] gInstance->lepton_statusFlags_;
+    delete[] gInstance->lepton_genPartFlav_;
+    instances_[branchName_obj_] = nullptr;
   }
 }
 
@@ -54,52 +62,49 @@ GenLeptonReader::readGenPartFlav(bool flag)
 void
 GenLeptonReader::setBranchNames()
 {
-  if(numInstances_[branchName_promptLeptons_] == 0)
+  if(numInstances_[branchName_obj_] == 0)
   {
-    branchName_promptLepton_pt_ = Form("%s_%s", branchName_promptLeptons_.data(), "pt");
-    branchName_promptLepton_eta_ = Form("%s_%s", branchName_promptLeptons_.data(), "eta");
-    branchName_promptLepton_phi_ = Form("%s_%s", branchName_promptLeptons_.data(), "phi");
-    branchName_promptLepton_mass_ = Form("%s_%s", branchName_promptLeptons_.data(), "mass");
-    branchName_promptLepton_pdgId_ = Form("%s_%s", branchName_promptLeptons_.data(), "pdgId");
-    branchName_promptLepton_status_ = Form("%s_%s", branchName_promptLeptons_.data(), "status");
-    branchName_promptLepton_statusFlags_ = Form("%s_%s", branchName_promptLeptons_.data(), "statusFlags");
-    branchName_promptLepton_genPartFlav_ = Form("%s_%s", branchName_promptLeptons_.data(), "genPartFlav");
-    instances_[branchName_promptLeptons_] = this;
+    branchName_pt_ = Form("%s_%s", branchName_obj_.data(), "pt");
+    branchName_eta_ = Form("%s_%s", branchName_obj_.data(), "eta");
+    branchName_phi_ = Form("%s_%s", branchName_obj_.data(), "phi");
+    branchName_mass_ = Form("%s_%s", branchName_obj_.data(), "mass");
+    branchName_pdgId_ = Form("%s_%s", branchName_obj_.data(), "pdgId");
+    branchName_status_ = Form("%s_%s", branchName_obj_.data(), "status");
+    branchName_statusFlags_ = Form("%s_%s", branchName_obj_.data(), "statusFlags");
+    branchName_genPartFlav_ = Form("%s_%s", branchName_obj_.data(), "genPartFlav");
+    instances_[branchName_obj_] = this;
   }
   else
   {
-    const GenLeptonReader * const gInstance = instances_[branchName_promptLeptons_];
+    const GenLeptonReader * const gInstance = instances_[branchName_obj_];
     assert(gInstance);
-    if(branchName_nPromptLeptons_  != gInstance->branchName_nPromptLeptons_)
+    if(branchName_num_  != gInstance->branchName_num_)
     {
       throw cmsException(this)
-        << "Association between configuration parameters 'branchName_nPromptLeptons', 'branchName_nLeptonsFromTau', "
-           "'branchName_leptonsFromTau' and 'branchName_promptLeptons' must be unique:"
-           " present association 'branchName_nPromptLeptons' = " << branchName_nPromptLeptons_ << ","
-           " with 'branchName_promptLeptons' = " << branchName_promptLeptons_
-        << " does not match previous association 'branchName_nPromptLeptons' = " << gInstance->branchName_nPromptLeptons_ << ","
-           " with 'branchName_promptLeptons' = " << gInstance->branchName_promptLeptons_ << " !!\n";
+        << "Association between configuration parameters 'branchName_num' and 'branchName_obj' must be unique:"
+           " present association 'branchName_num' = " << branchName_num_ << " with 'branchName_obj' = " << branchName_obj_
+        << " does not match previous association 'branchName_num' = " << instances_[branchName_obj_]->branchName_num_
+        << " with 'branchName_obj' = " << instances_[branchName_obj_]->branchName_obj_ << " !!\n";
     }
   }
-  ++numInstances_[branchName_promptLeptons_];
+  ++numInstances_[branchName_obj_];
 }
 
 std::vector<std::string>
 GenLeptonReader::setBranchAddresses(TTree * tree)
 {
-  if(instances_[branchName_promptLeptons_] == this)
+  if(instances_[branchName_obj_] == this)
   {
-    std::cout << "setting branch addresses for PromptLeptons: " << branchName_promptLeptons_ << '\n';
-    BranchAddressInitializer bai(tree, max_nPromptLeptons_);
-    bai.setBranchAddress(nPromptLeptons_, branchName_nPromptLeptons_);
-    bai.setBranchAddress(promptLepton_pt_, branchName_promptLepton_pt_);
-    bai.setBranchAddress(promptLepton_eta_, branchName_promptLepton_eta_);
-    bai.setBranchAddress(promptLepton_phi_, branchName_promptLepton_phi_);
-    bai.setBranchAddress(promptLepton_mass_, branchName_promptLepton_mass_);
-    bai.setBranchAddress(promptLepton_pdgId_, branchName_promptLepton_pdgId_);
-    bai.setBranchAddress(promptLepton_status_, branchName_promptLepton_status_);
-    bai.setBranchAddress(promptLepton_statusFlags_, branchName_promptLepton_statusFlags_);
-    bai.setBranchAddress(promptLepton_genPartFlav_, readGenPartFlav_ ? branchName_promptLepton_genPartFlav_ : "");
+    BranchAddressInitializer bai(tree, max_nLeptons_);
+    bai.setBranchAddress(nLeptons_, branchName_num_);
+    bai.setBranchAddress(lepton_pt_, branchName_pt_);
+    bai.setBranchAddress(lepton_eta_, branchName_eta_);
+    bai.setBranchAddress(lepton_phi_, branchName_phi_);
+    bai.setBranchAddress(lepton_mass_, branchName_mass_);
+    bai.setBranchAddress(lepton_pdgId_, branchName_pdgId_);
+    bai.setBranchAddress(lepton_status_, branchName_status_);
+    bai.setBranchAddress(lepton_statusFlags_, branchName_statusFlags_);
+    bai.setBranchAddress(lepton_genPartFlav_, readGenPartFlav_ ? branchName_genPartFlav_ : "");
     return bai.getBoundBranchNames();
   }
   return {};
@@ -108,32 +113,32 @@ GenLeptonReader::setBranchAddresses(TTree * tree)
 std::vector<GenLepton>
 GenLeptonReader::read() const
 {
-  const GenLeptonReader * const gInstance = instances_[branchName_promptLeptons_];
+  const GenLeptonReader * const gInstance = instances_[branchName_obj_];
   assert(gInstance);
 
-  const UInt_t nPromptLeptons = gInstance->nPromptLeptons_;
-  if(nPromptLeptons > max_nPromptLeptons_)
+  const UInt_t nLeptons = gInstance->nLeptons_;
+  if(nLeptons > max_nLeptons_)
   {
     throw cmsException(this)
-      << "Number of prompt leptons stored in Ntuple = " << nPromptLeptons << ","
-         " exceeds max_nPromptLeptons = " << max_nPromptLeptons_ << " !!\n";
+      << "Number of leptons stored in Ntuple = " << nLeptons << ","
+         " exceeds max_nLeptons = " << max_nLeptons_ << " !!\n";
   }
 
   std::vector<GenLepton> leptons;
-  if(nPromptLeptons > 0)
+  if(nLeptons > 0)
   {
-    leptons.reserve(nPromptLeptons);
-    for(UInt_t idxLepton = 0; idxLepton < nPromptLeptons; ++idxLepton)
+    leptons.reserve(nLeptons);
+    for(UInt_t idxLepton = 0; idxLepton < nLeptons; ++idxLepton)
     {
       leptons.push_back({
-        gInstance->promptLepton_pt_[idxLepton],
-        gInstance->promptLepton_eta_[idxLepton],
-        gInstance->promptLepton_phi_[idxLepton],
-        gInstance->promptLepton_mass_[idxLepton],
-        gInstance->promptLepton_pdgId_[idxLepton],
-        gInstance->promptLepton_status_[idxLepton],
-        gInstance->promptLepton_statusFlags_[idxLepton],
-        gInstance->promptLepton_genPartFlav_[idxLepton],
+        gInstance->lepton_pt_[idxLepton],
+        gInstance->lepton_eta_[idxLepton],
+        gInstance->lepton_phi_[idxLepton],
+        gInstance->lepton_mass_[idxLepton],
+        gInstance->lepton_pdgId_[idxLepton],
+        gInstance->lepton_status_[idxLepton],
+        gInstance->lepton_statusFlags_[idxLepton],
+        gInstance->lepton_genPartFlav_[idxLepton],
       });
     }
   }

@@ -14,8 +14,8 @@ class RecoJetCollectionCleanerByIndexAK4 : public ParticleCollectionCleaner<Reco
   ~RecoJetCollectionCleanerByIndexAK4() {}
 
   template <typename Toverlap>
-  std::vector<const RecoJet *>
-  operator()(const std::vector<const RecoJet *> & jets,
+  std::vector<const RecoJetAK4 *>
+  operator()(const std::vector<const RecoJetAK4 *> & jets,
              const std::vector<const Toverlap *> & overlaps) const
   {
     if(debug_)
@@ -23,8 +23,8 @@ class RecoJetCollectionCleanerByIndexAK4 : public ParticleCollectionCleaner<Reco
       std::cout << get_human_line(this, __func__, __LINE__) << '\n';
     }
 
-    std::vector<const RecoJet *> cleanedJets;
-    for(const RecoJet * jet: jets)
+    std::vector<const RecoJetAK4 *> cleanedJets;
+    for(const RecoJetAK4 * jet: jets)
     {
       const int jet_idx = jet->idx();
       bool isOverlap = false;
@@ -54,15 +54,17 @@ class RecoJetCollectionCleanerByIndexAK4 : public ParticleCollectionCleaner<Reco
 
   template <typename Toverlap,
             typename... Args>
-  std::vector<const RecoJet *>
-  operator()(const std::vector<const RecoJet *> & jets,
+  std::vector<const RecoJetAK4 *>
+  operator()(const std::vector<const RecoJetAK4 *> & jets,
              const std::vector<const Toverlap *> & overlaps,
              Args... args) const
   {
-    std::vector<const RecoJet *> cleanedJets = (*this)(jets, overlaps);
+    std::vector<const RecoJetAK4 *> cleanedJets = (*this)(jets, overlaps);
     return (*this)(cleanedJets, args...);
   }
 
  protected:
   bool debug_;
-}; // TallinnNtupleProducer_Cleaners_ParticleCollectionCleanerByIndexAK4_h
+}; 
+
+#endif // TallinnNtupleProducer_Cleaners_ParticleCollectionCleanerByIndexAK4_h

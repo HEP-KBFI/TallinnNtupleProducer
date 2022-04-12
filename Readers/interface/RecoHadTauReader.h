@@ -17,7 +17,7 @@ enum class Era;
 class RecoHadTauReader : public ReaderBase
 {
  public:
-  RecoHadTauReader(const edm::ParameterSet & cfg)
+  RecoHadTauReader(const edm::ParameterSet & cfg);
   ~RecoHadTauReader();
 
   void
@@ -54,7 +54,7 @@ class RecoHadTauReader : public ReaderBase
   setBranchNames();
 
   Era era_;
-  const int max_nHadTaus_;
+  unsigned int max_nHadTaus_;
   std::string branchName_num_;
   std::string branchName_obj_;
   bool isMC_;
@@ -92,7 +92,7 @@ class RecoHadTauReader : public ReaderBase
   std::map<TauID, std::string> branchNames_rawMVA_;
 
   TauID tauID_;
-  TauESTool * const tauESTool_;
+  TauESTool * tauESTool_;
 
   UInt_t nHadTaus_;
   Float_t * hadTau_pt_;

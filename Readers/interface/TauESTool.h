@@ -1,16 +1,17 @@
-#ifndef tthAnalysis_HiggsToTauTau_TauESTool_h
-#define tthAnalysis_HiggsToTauTau_TauESTool_h
+#ifndef TallinnNtupleProducer_Readers_TauESTool_h
+#define TallinnNtupleProducer_Readers_TauESTool_h
 
-#include "tthAnalysis/HiggsToTauTau/interface/sysUncertOptions.h"
-#include "tthAnalysis/HiggsToTauTau/interface/analysisAuxFunctions.h" // Era
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"               // Era
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"  // kHadTauPt_central
 
-#include <map> // std::map
+#include <map>                                                             // std::map
+#include <string>                                                          // std::string
 
 enum class TauID;
 
 class TauESTool
 {
-public:
+ public:
   TauESTool(Era era,
             TauID tauID,
             int central_or_shift = kHadTauPt_central,
@@ -27,7 +28,7 @@ public:
          int dm,
          int genmatch) const;
 
-private:
+ private:
   std::string
   get_era_str() const;
 

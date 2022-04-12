@@ -14,7 +14,7 @@ class TTree;
 class RecoVertexReader : public ReaderBase
 {
  public:
-  RecoMEtReader(const edm::ParameterSet & cfg);
+  RecoVertexReader(const edm::ParameterSet & cfg);
   ~RecoVertexReader() override;
 
   /**

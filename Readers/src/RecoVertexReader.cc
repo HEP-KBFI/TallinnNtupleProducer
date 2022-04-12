@@ -10,6 +10,7 @@ std::map<std::string, int> RecoVertexReader::numInstances_;
 std::map<std::string, RecoVertexReader *> RecoVertexReader::instances_;
 
 RecoVertexReader::RecoVertexReader(const edm::ParameterSet & cfg)
+  : ReaderBase(cfg)
 {
   branchName_ = cfg.getParameter<std::string>("branchName"); // default = "PV"
   setBranchNames();

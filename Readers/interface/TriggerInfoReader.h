@@ -22,7 +22,7 @@ class TriggerInfoReader : public ReaderBase
 
   /**
    * @brief Read branches from tree and use information to fill TriggerInfo object
-   * @return TriggerInfo object
+   * @return reference to TriggerInfo object
    */
   const TriggerInfo &
   read() const;

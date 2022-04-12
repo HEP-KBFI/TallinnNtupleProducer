@@ -3,10 +3,11 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
 
-#include "TallinnNtupleProducer_Readers/interface/ReaderBase.h" // ReaderBase
 #include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"    // RecoMEt
+#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h" // ReaderBase
 
 #include <map>                                                  // std::map
+#include <string>                                               // std::string
 
 // forward declarations
 class TTree;

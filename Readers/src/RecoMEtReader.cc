@@ -6,11 +6,15 @@
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"         // METXYCorr_Met_MetPhi()
 
-#include "TTree.h"                                                            // TTree
 #include "TString.h"                                                          // Form()
+#include "TTree.h"                                                            // TTree
+
+std::map<std::string, int> RecoMEtReader::numInstances_;
+std::map<std::string, RecoMEtReader *> RecoMEtReader::instances_;
 
 RecoMEtReader::RecoMEtReader(const edm::ParameterSet & cfg)
-  : era_(Era::kUndefined)
+  : ReaderBase(cfg)
+  , era_(Era::kUndefined)
   , isMC_(false)
   , branchName_obj_("")
   , branchName_cov_("")

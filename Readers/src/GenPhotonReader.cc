@@ -1,14 +1,17 @@
-#include "tthAnalysis/HiggsToTauTau/interface/GenPhotonReader.h" // GenPhotonReader
+#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"
 
-#include "tthAnalysis/HiggsToTauTau/interface/cmsException.h" // cmsException()
-#include "tthAnalysis/HiggsToTauTau/interface/BranchAddressInitializer.h" // BranchAddressInitializer, TTree, Form()
-#include "tthAnalysis/HiggsToTauTau/interface/analysisAuxFunctions.h" // filterByStatus()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+
+#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                            // TTree
 
 std::map<std::string, int> GenPhotonReader::numInstances_;
 std::map<std::string, GenPhotonReader *> GenPhotonReader::instances_;
 
 GenPhotonReader::GenPhotonReader(const edm::ParameterSet & cfg)
-  : max_nPhotons_(36)
+  : ReaderBase(cfg)
+  , max_nPhotons_(36)
   , branchName_num_("")
   , branchName_obj_("")
   , readGenPartFlav_(false)
@@ -21,6 +24,10 @@ GenPhotonReader::GenPhotonReader(const edm::ParameterSet & cfg)
   , photon_statusFlags_(nullptr)
   , photon_genPartFlav_(nullptr)
 {
+  if ( cfg.exists("max_nPhotons") )
+  {
+    max_nPhotons_ = cfg.getParameter<unsigned int>("max_nPhotons");
+  }
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "GenPhoton"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   setBranchNames();
@@ -99,6 +106,28 @@ GenPhotonReader::setBranchAddresses(TTree * tree)
     return bai.getBoundBranchNames();
   }
   return {};
+}
+
+namespace
+{
+  template <typename T>
+  std::vector<T>
+  filterByStatus(const std::vector<T> & genParticles, int status)
+  {
+    if(status > 0)
+    {
+      std::vector<T> filteredGenParticles;
+      std::copy_if(
+        genParticles.cbegin(), genParticles.cend(), std::back_inserter(filteredGenParticles),
+          [status](const GenParticle & genParticle) -> bool
+          {
+            return genParticle.status() == status;
+          }
+      );
+      return filteredGenParticles;
+    }
+    return genParticles;
+  }
 }
 
 std::vector<GenPhoton>

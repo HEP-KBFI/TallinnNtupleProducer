@@ -1,12 +1,14 @@
 #include "TallinnNtupleProducer/Readers/interface/TriggerInfoReader.h"
 
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Framework/interface/cmsException.h"           // cmsException()
 
 #include <set>                                                                // std::set
+#include <string>                                                             // std::string
 
 TriggerInfoReader::TriggerInfoReader(const edm::ParameterSet & cfg)
-  : triggerInfo_(cfg)
+  : ReaderBase(cfg)
+  , triggerInfo_(cfg)
 {}
 
 TriggerInfoReader::~TriggerInfoReader()
@@ -16,19 +18,19 @@ std::vector<std::string>
 TriggerInfoReader::setBranchAddresses(TTree * tree)
 {
   const std::vector<std::string> available_branches = this->get_available_branches(tree);
-  std::set<string> used_branches;
+  std::set<std::string> used_branches;
   BranchAddressInitializer bai(tree);
   for ( auto entry : triggerInfo_.entries_ )
   {
     for ( auto hltPath : entry.hltPaths_ )
     {
-      if ( std::find(available_branches.cbegin(), available_branches.cend(), hltPath.branchName_) != available_branches.cend() )
+      if ( std::find(available_branches.cbegin(), available_branches.cend(), hltPath.branchName()) != available_branches.cend() )
       {
         if ( used_branches.find(hltPath.branchName_) != used_branches.end() )
           throw cmsException(__func__, __LINE__) 
-            << "Branch '" << hltPath.branchName_ << "' cannot be read more than once !!";
+            << "Branch '" << hltPath.branchName() << "' cannot be read more than once !!";
         bai.setBranchAddress(hltPath.status_, hltPath.branchName_);         
-        used_branches.insert(hltPath.branchName_);
+        used_branches.insert(hltPath.branchName());
       }
       else
       {

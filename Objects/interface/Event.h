@@ -16,7 +16,7 @@
 class Event
 {
  public:
-  Event();
+  Event() {}
   ~Event() {}
 
   /**
@@ -25,7 +25,7 @@ class Event
    */
   const EventInfo& eventInfo() const;
 
-  const TriggerInfo& triggerInfo() const;
+  //const TriggerInfo& triggerInfo() const;
 
   const RecoMuonPtrCollection& looseMuons() const;
   const RecoMuonPtrCollection& fakeableMuons() const;
@@ -59,7 +59,7 @@ class Event
  protected:
   EventInfo eventInfo_;
 
-  TriggerInfo triggerInfo_;
+  //TriggerInfo triggerInfo_;
 
   RecoMuonPtrCollection looseMuons_;
   RecoMuonPtrCollection fakeableMuons_;

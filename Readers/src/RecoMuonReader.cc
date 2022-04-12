@@ -12,7 +12,8 @@ std::map<std::string, int> RecoMuonReader::numInstances_;
 std::map<std::string, RecoMuonReader *> RecoMuonReader::instances_;
 
 RecoMuonReader::RecoMuonReader(const edm::ParameterSet & cfg)
-  : era_(Era::kUndefined)
+  : ReaderBase(cfg)
+  , era_(Era::kUndefined)
   , branchName_num_("")
   , branchName_obj_("")
   , leptonReader_(nullptr)

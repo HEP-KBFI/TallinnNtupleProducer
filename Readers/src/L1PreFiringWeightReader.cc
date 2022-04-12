@@ -1,45 +1,50 @@
-#include "tthAnalysis/HiggsToTauTau/interface/L1PreFiringWeightReader.h" // L1PreFiringWeightReader
+#include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"
 
-#include "tthAnalysis/HiggsToTauTau/interface/BranchAddressInitializer.h" // BranchAddressInitializer, TTree, Form()
-#include "tthAnalysis/HiggsToTauTau/interface/analysisAuxFunctions.h" // Era::k2018
-#include "tthAnalysis/HiggsToTauTau/interface/sysUncertOptions.h" // L1PreFiringWeightSys
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // L1PreFiringWeightSys
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 
-#include <cassert> // assert()
+#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                            // TTree
+
+#include <assert.h>                                                           // assert()
 
 std::map<std::string, int> L1PreFiringWeightReader::numInstances_;
 std::map<std::string, L1PreFiringWeightReader*> L1PreFiringWeightReader::instances_;
 
 L1PreFiringWeightReader::L1PreFiringWeightReader(const edm::ParameterSet & cfg)
-  : era_(Era::kUndefined)
-  , branchName_obj_("")
+  : ReaderBase(cfg)
+  , era_(Era::kUndefined)
+  , branchName_("")
   , l1PreFiringWeight_nominal_(1.)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
-  branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "L1PreFiringWeight"
+  branchName_ = cfg.getParameter<std::string>("branchName"); // default = "L1PreFiringWeight"
   setBranchNames();
 }
 
 L1PreFiringWeightReader::~L1PreFiringWeightReader()
 {
-  --numInstances_[branchName_obj_];
-  assert(numInstances_[branchName_obj_] >= 0);
+  --numInstances_[branchName_];
+  assert(numInstances_[branchName_] >= 0);
 
-  if(numInstances_[branchName_obj_] == 0)
+  if(numInstances_[branchName_] == 0)
   {
-    L1PreFiringWeightReader * const gInstance = instances_[branchName_obj_];
+    L1PreFiringWeightReader * const gInstance = instances_[branchName_];
     assert(gInstance);
-    instances_[branchName_obj_] = nullptr;
+    instances_[branchName_] = nullptr;
   }
 }
 
 void
 L1PreFiringWeightReader::setBranchNames()
 {
-  if(numInstances_[branchName_obj_] == 0)
+  if(numInstances_[branchName_] == 0)
   {
-    instances_[branchName_obj_] = this;
+    instances_[branchName_] = this;
   }
-  ++numInstances_[branchName_obj_];
+  ++numInstances_[branchName_];
 }
 
 std::vector<std::string>
@@ -48,9 +53,9 @@ L1PreFiringWeightReader::setBranchAddresses(TTree * tree)
   if(era_ != Era::k2018)
   {
     BranchAddressInitializer bai(tree);
-    bai.setBranchAddress(l1PreFiringWeight_nominal_, Form("%s_Nom", branchName_obj_.data()), 1.);
-    bai.setBranchAddress(l1PreFiringWeight_up_,      Form("%s_Up",  branchName_obj_.data()), 1.);
-    bai.setBranchAddress(l1PreFiringWeight_down_,    Form("%s_Dn",  branchName_obj_.data()), 1.);
+    bai.setBranchAddress(l1PreFiringWeight_nominal_, Form("%s_Nom", branchName_.data()), 1.);
+    bai.setBranchAddress(l1PreFiringWeight_up_,      Form("%s_Up",  branchName_.data()), 1.);
+    bai.setBranchAddress(l1PreFiringWeight_down_,    Form("%s_Dn",  branchName_.data()), 1.);
     return bai.getBoundBranchNames();
   }
   return {};

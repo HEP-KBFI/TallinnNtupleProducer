@@ -9,7 +9,9 @@
 #include <string>                                           // std::string
 #include <vector>                                           // std::vector
 
-class TTree; // forward declaration
+// forward declarations
+class TTree;
+class TriggerInfoReader;
 
 namespace trigger
 {
@@ -32,7 +34,7 @@ namespace trigger
     Bool_t
     status() const;
 
-    friend class TriggerInfoReader;
+    friend class ::TriggerInfoReader;
 
    private:
     std::string branchName_;
@@ -78,7 +80,7 @@ namespace trigger
     bool
     use_it() const;
 
-    friend class TriggerInfoReader;
+    friend class ::TriggerInfoReader;
 
    private:
     std::string type_;

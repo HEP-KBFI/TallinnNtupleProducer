@@ -60,7 +60,7 @@ class RecoJetReaderAK4 : public ReaderBase
 
   Era era_;
   bool isMC_;
-  const unsigned int max_nJets_;
+  unsigned int max_nJets_;
   std::string branchName_num_;
   std::string branchName_obj_;
 

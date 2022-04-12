@@ -1,13 +1,17 @@
-#include "tthAnalysis/HiggsToTauTau/interface/GenJetReader.h" // GenJetReader
+#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"
 
-#include "tthAnalysis/HiggsToTauTau/interface/cmsException.h" // cmsException()
-#include "tthAnalysis/HiggsToTauTau/interface/BranchAddressInitializer.h" // BranchAddressInitializer, TTree, Form()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+
+#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                            // TTree
 
 std::map<std::string, int> GenJetReader::numInstances_;
 std::map<std::string, GenJetReader *> GenJetReader::instances_;
 
 GenJetReader::GenJetReader(const edm::ParameterSet & cfg)
-  : read_partonFlavour_(false)
+  : ReaderBase(cfg)
+  , read_partonFlavour_(false)
   , max_nJets_(36)
   , branchName_num_("")
   , branchName_obj_("")
@@ -17,6 +21,10 @@ GenJetReader::GenJetReader(const edm::ParameterSet & cfg)
   , jet_mass_(nullptr)
   , jet_pdgId_(nullptr)
 {
+  if ( cfg.exists("max_nJets") )
+  {
+    max_nJets_ = cfg.getParameter<unsigned int>("max_nJets");
+  }
   branchName_obj_ = cfg.getParameter<std::string>("branchName");
   branchName_num_ = Form("n%s", branchName_obj_.data());
   setBranchNames();
