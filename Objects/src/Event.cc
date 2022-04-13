@@ -4,17 +4,25 @@
 
 #include <string>    // std::string
 
+Event::Event(const EventInfo& eventInfo, const TriggerInfo& triggerInfo)
+  : eventInfo_(eventInfo)
+  , triggerInfo_(triggerInfo)
+{}
+
+Event::~Event()
+{}
+
 const EventInfo&
 Event::eventInfo() const
 {
   return eventInfo_;
 }
 
-//const TriggerInfo&
-//Event::triggerInfo() const
-//{
-//  return triggerInfo_;
-//}
+const TriggerInfo&
+Event::triggerInfo() const
+{
+  return triggerInfo_;
+}
 
 const RecoMuonPtrCollection&
 Event::looseMuons() const
@@ -89,15 +97,15 @@ Event::selJetsAK4() const
 }
 
 const RecoJetPtrCollectionAK4&
-Event::selBJetsAK4_loose() const
+Event::selJetsAK4_btagLoose() const
 {
-  return selBJetsAK4_loose_;
+  return selJetsAK4_btagLoose_;
 }
 
 const RecoJetPtrCollectionAK4&
-Event::selBJetsAK4_medium() const
+Event::selJetsAK4_btagMedium() const
 {
-  return selBJetsAK4_medium_;
+  return selJetsAK4_btagMedium_;
 }
 
 const RecoJetPtrCollectionAK8&
@@ -106,10 +114,28 @@ Event::selJetsAK8() const
   return selJetsAK8_;
 }
 
+const RecoJetPtrCollectionAK8&
+Event::selJetsAK8_Hbb() const
+{
+  return selJetsAK8_Hbb_;
+}
+
+const RecoJetPtrCollectionAK8&
+Event::selJetsAK8_Wjj() const
+{
+  return selJetsAK8_Wjj_;
+}
+
 const RecoMEt&
 Event::met() const
 {
   return met_;
+}
+
+const MEtFilter& 
+Event::metFilters() const
+{
+  return metFilters_;
 }
 
 const RecoVertex&
@@ -141,7 +167,7 @@ operator << (std::ostream & stream, const Event & event)
 {
   stream << event.eventInfo();
 
-  //stream << event.triggerInfo();
+  stream << event.triggerInfo();
 
   printCollection(stream, "looseMuon[s]", event.looseMuons());
   printCollection(stream, "fakeableMuon[s]", event.fakeableMuons());
@@ -155,11 +181,12 @@ operator << (std::ostream & stream, const Event & event)
   printCollection(stream, "tightHadTau[s]", event.tightHadTaus());
 
   printCollection(stream, "selJet[s]AK4", event.selJetsAK4());
-
-  printCollection(stream, "selBJet[s]AK4_loose", event.selBJetsAK4_loose());
-  printCollection(stream, "selBJet[s]AK4_medium", event.selBJetsAK4_medium());
+  printCollection(stream, "selJet[s]AK4_btagLoose", event.selJetsAK4_btagLoose());
+  printCollection(stream, "selJet[s]AK4_btagMedium", event.selJetsAK4_btagMedium());
 
   printCollection(stream, "selJet[s]AK8", event.selJetsAK8());
+  printCollection(stream, "selJet[s]AK8_Hbb", event.selJetsAK8_Hbb());
+  printCollection(stream, "selJet[s]AK8_Wjj", event.selJetsAK8_Wjj());
 
   stream << " met: " << event.met();
 

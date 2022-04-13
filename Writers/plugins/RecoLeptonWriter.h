@@ -9,7 +9,8 @@
 #include <string>                                               // std::string
 #include <vector>                                               // std::vector
 
-class TTree; // forward declaration
+// forward declarations
+class TTree;
 
 class RecoLeptonWriter : public WriterBase
 {
@@ -29,9 +30,17 @@ class RecoLeptonWriter : public WriterBase
   void
   write(const Event & event);
  
+  /**
+   * @brief Return list of systematic uncertainties supported by this plugin
+   */
+  std::vector<std::string>
+  get_supported_systematics();
+
  private:
   std::string branchName_num_;
   std::string branchName_obj_;
+
+  UInt_t max_nLeptons_;
 
   UInt_t nLeptons_;
   Float_t * pt_;

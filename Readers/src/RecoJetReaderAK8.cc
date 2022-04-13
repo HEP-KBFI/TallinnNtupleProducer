@@ -2,7 +2,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_fatJet(), kFatJet_*
 #include "TallinnNtupleProducer/Objects/interface/RecoSubjetAK8.h"            // RecoSubjetAK8
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer

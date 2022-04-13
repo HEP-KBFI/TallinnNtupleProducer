@@ -1,7 +1,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h" // RecoHadTauReader
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"    // TauID
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"          // GenHadTauReader
@@ -21,6 +21,7 @@ RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   , branchName_num_("")
   , branchName_obj_("")
   , isMC_(false)
+  , era_(Era::kUndefined)
   , genLeptonReader_(nullptr)
   , genHadTauReader_(nullptr)
   , genJetReader_(nullptr)

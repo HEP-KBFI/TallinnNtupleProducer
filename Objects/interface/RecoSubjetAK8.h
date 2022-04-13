@@ -28,6 +28,8 @@ class RecoSubjetAK8 : public RecoJetBase
    */
   Double_t BtagCSV() const;
 
+  bool is_btagable() const;
+
  protected:
   Double_t BtagCSV_; ///< CSV b-tagging discriminator value
 };

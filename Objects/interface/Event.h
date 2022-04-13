@@ -16,8 +16,8 @@
 class Event
 {
  public:
-  Event() {}
-  ~Event() {}
+  Event(const EventInfo& eventInfo, const TriggerInfo& triggerInfo);
+  ~Event();
 
   /**
    * @brief Funtions to access collections of particles
@@ -25,7 +25,7 @@ class Event
    */
   const EventInfo& eventInfo() const;
 
-  //const TriggerInfo& triggerInfo() const;
+  const TriggerInfo& triggerInfo() const;
 
   const RecoMuonPtrCollection& looseMuons() const;
   const RecoMuonPtrCollection& fakeableMuons() const;
@@ -43,11 +43,12 @@ class Event
   const RecoHadTauPtrCollection& tightHadTaus() const;
 
   const RecoJetPtrCollectionAK4& selJetsAK4() const;
-
-  const RecoJetPtrCollectionAK4& selBJetsAK4_loose() const;
-  const RecoJetPtrCollectionAK4& selBJetsAK4_medium() const;
+  const RecoJetPtrCollectionAK4& selJetsAK4_btagLoose() const;
+  const RecoJetPtrCollectionAK4& selJetsAK4_btagMedium() const;
 
   const RecoJetPtrCollectionAK8& selJetsAK8() const;
+  const RecoJetPtrCollectionAK8& selJetsAK8_Hbb() const;
+  const RecoJetPtrCollectionAK8& selJetsAK8_Wjj() const;
 
   const RecoMEt& met() const;
   const MEtFilter& metFilters() const;
@@ -57,9 +58,9 @@ class Event
   friend class EventReader;
 
  protected:
-  EventInfo eventInfo_;
+  const EventInfo & eventInfo_;
 
-  //TriggerInfo triggerInfo_;
+  const TriggerInfo & triggerInfo_;
 
   RecoMuonPtrCollection looseMuons_;
   RecoMuonPtrCollection fakeableMuons_;
@@ -77,13 +78,15 @@ class Event
   RecoHadTauPtrCollection tightHadTaus_;
 
   RecoJetPtrCollectionAK4 selJetsAK4_;
-
-  RecoJetPtrCollectionAK4 selBJetsAK4_loose_;
-  RecoJetPtrCollectionAK4 selBJetsAK4_medium_;
+  RecoJetPtrCollectionAK4 selJetsAK4_btagLoose_;
+  RecoJetPtrCollectionAK4 selJetsAK4_btagMedium_;
 
   RecoJetPtrCollectionAK8 selJetsAK8_;
+  RecoJetPtrCollectionAK8 selJetsAK8_Hbb_;
+  RecoJetPtrCollectionAK8 selJetsAK8_Wjj_;
 
   RecoMEt met_;
+  MEtFilter metFilters_;
 
   RecoVertex vertex_;
 };

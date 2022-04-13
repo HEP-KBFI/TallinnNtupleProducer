@@ -1,7 +1,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 

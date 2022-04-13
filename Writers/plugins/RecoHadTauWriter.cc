@@ -1,58 +1,66 @@
-#include "TallinnNtupleProducer/Writers/interface/RecoHadTauWriter.h"
+#include "TallinnNtupleProducer/Writers/plugins/RecoHadTauWriter.h"
 
-#include "TallinnNtupleProducer/Framework/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Framework/interface/cmsException.h"             // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"           // RecoHadTauReader::get_supported_systematics()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
+#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                // GenHadTau
+#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                // GenLepton
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"         // RecoHadTauReader::get_supported_systematics()
 
-#include "TString.h"                                                            // Form()
+#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                            // TTree
+
+#include <assert.h>                                                           // assert()
 
 RecoHadTauWriter::RecoHadTauWriter(const edm::ParameterSet & cfg)
-  : max_nHadTaus_(cfg.getParameter<unsigned>("numNominalHadTaus"))
+  : WriterBase(cfg)
+  , max_nHadTaus_(cfg.getParameter<unsigned>("numNominalHadTaus"))
   , branchName_num_("ntau")
   , branchName_obj_("tau")
   , current_central_or_shiftEntry_(nullptr)
 {
   max_nHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
-  std::set<std::string> systematic_shifts;
+  assert(max_nHadTaus_ >= 1);
   for ( auto shift : RecoHadTauReader::get_supported_systematics() )
   {
-    systematic_shifts.insert(shift);
+    systematic_shifts_.insert(shift);
   }
   // CV: add central value 
-  systematic_shifts.insert("central");
-  for ( auto central_or_shift : systematic_shifts )
+  systematic_shifts_.insert("central");
+  for ( auto central_or_shift : systematic_shifts_ )
   {    
     central_or_shiftEntry it;
     it.nHadTaus_ = 0;
-    it.pt_ = new Float_t[nHadTaus_];
-    it.eta_ = new Float_t[nHadTaus_];
-    it.phi_ = new Float_t[nHadTaus_];
-    it.mass_ = new Float_t[nHadTaus_];
-    it.decayMode_ = new Int_t[nHadTaus_];
-    it.charge_ = new Int_t[nHadTaus_];
-    it.isFakeable_ = new Bool_t[nHadTaus_];
-    it.isTight_ = new Bool_t[nHadTaus_];
-    it.genMatch_ = new Int_t[nHadTaus_];
-    it.isFake_ = new Bool_t[nHadTaus_];
-    it.isFlip_ = new Bool_t[nHadTaus_];
+    it.pt_ = new Float_t[max_nHadTaus_];
+    it.eta_ = new Float_t[max_nHadTaus_];
+    it.phi_ = new Float_t[max_nHadTaus_];
+    it.mass_ = new Float_t[max_nHadTaus_];
+    it.decayMode_ = new Int_t[max_nHadTaus_];
+    it.charge_ = new Int_t[max_nHadTaus_];
+    it.isFakeable_ = new Bool_t[max_nHadTaus_];
+    it.isTight_ = new Bool_t[max_nHadTaus_];
+    it.genMatch_ = new Int_t[max_nHadTaus_];
+    it.isFake_ = new Bool_t[max_nHadTaus_];
+    it.isFlip_ = new Bool_t[max_nHadTaus_];
+    central_or_shiftEntries_[central_or_shift] = it;
   }
+  current_central_or_shiftEntry_ = &central_or_shiftEntries_["central"];
 }
 
 RecoHadTauWriter::~RecoHadTauWriter()
 {
   for ( auto it : central_or_shiftEntries_ )
   {
-    delete[] it.pt_;
-    delete[] it.eta_;
-    delete[] it.phi_;
-    delete[] it.mass_;
-    delete[] it.decayMode_;
-    delete[] it.charge_;
-    delete[] it.isFakeable_;
-    delete[] it.isTight_;
-    delete[] it.genMatch_;
-    delete[] it.isFake_;
-    delete[] it.isFlip_;
+    delete[] it.second.pt_;
+    delete[] it.second.eta_;
+    delete[] it.second.phi_;
+    delete[] it.second.mass_;
+    delete[] it.second.decayMode_;
+    delete[] it.second.charge_;
+    delete[] it.second.isFakeable_;
+    delete[] it.second.isTight_;
+    delete[] it.second.genMatch_;
+    delete[] it.second.isFake_;
+    delete[] it.second.isFlip_;
   }
 }
 
@@ -67,8 +75,8 @@ namespace
   std::string
   get_branchName_obj(const std::string & branchName_obj, int idx, const std::string & suffix, const std::string & central_or_shift)
   {
-    if ( central_or_shift == "central" ) return Form("%s%i_%s_%s", branchName_obj.data(), idx, suffix.data());
-    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), idx, central_or_shift.data(), suffix.data());
+    if ( central_or_shift == "central" ) return Form("%s%i_%s",    branchName_obj.data(), (int)idx, suffix.data());
+    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), (int)idx, central_or_shift.data(), suffix.data());
   }
 }
 
@@ -76,24 +84,24 @@ void
 RecoHadTauWriter::setBranches(TTree * tree)
 {
   BranchAddressInitializer bai(tree);
-  for ( auto central_or_shift : systematic_shifts )
+  for ( auto central_or_shift : systematic_shifts_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());
-    bai.setBranch(it->nHadTaus_, get_branchName_num(branchName_num_, central_or_shift));
-    for ( size_t idxHadTau = 0; idxHadTau < nHadTaus_; ++idxHadTau )
+    bai.setBranch(it->second.nHadTaus_, get_branchName_num(branchName_num_, central_or_shift));
+    for ( size_t idxHadTau = 0; idxHadTau < it->second.nHadTaus_; ++idxHadTau )
     {
-      bai.setBranch(it->pt_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "pt", central_or_shift));
-      bai.setBranch(it->eta_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "eta", central_or_shift));
-      bai.setBranch(it->phi_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "phi", central_or_shift));
-      bai.setBranch(it->mass_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "mass", central_or_shift));
-      bai.setBranch(it->decayMode_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "decayMode", central_or_shift));
-      bai.setBranch(it->charge_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "charge", central_or_shift));
-      bai.setBranch(it->isFakeable_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "isFakeable", central_or_shift));
-      bai.setBranch(it->isTight_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "isTight", central_or_shift));    
-      bai.setBranch(it->genMatch_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "genMatch", central_or_shift));
-      bai.setBranch(it->isFake_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "isFake", central_or_shift));  
-      bai.setBranch(it->isFlip_[idxHadTau], get_branchName_obj(branchName_obj_, idxHadTau, "isFlip", central_or_shift));  
+      bai.setBranch(it->second.pt_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "pt", central_or_shift));
+      bai.setBranch(it->second.eta_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "eta", central_or_shift));
+      bai.setBranch(it->second.phi_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "phi", central_or_shift));
+      bai.setBranch(it->second.mass_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "mass", central_or_shift));
+      bai.setBranch(it->second.decayMode_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "decayMode", central_or_shift));
+      bai.setBranch(it->second.charge_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "charge", central_or_shift));
+      bai.setBranch(it->second.isFakeable_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "isFakeable", central_or_shift));
+      bai.setBranch(it->second.isTight_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "isTight", central_or_shift));    
+      bai.setBranch(it->second.genMatch_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "genMatch", central_or_shift));
+      bai.setBranch(it->second.isFake_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "isFake", central_or_shift));  
+      bai.setBranch(it->second.isFlip_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "isFlip", central_or_shift));  
     }
   }
 }
@@ -102,9 +110,9 @@ void
 RecoHadTauWriter::set_central_or_shift(const std::string & central_or_shift) const
 {
   auto it = central_or_shiftEntries_.find(central_or_shift);
-  if ( it != central_or_shiftEntries_.end()
+  if ( it != central_or_shiftEntries_.end() )
   {
-    current_central_or_shiftEntry_ = &it->second;
+    current_central_or_shiftEntry_ = const_cast<central_or_shiftEntry *>(&it->second);
   }
   else throw cmsException(__func__, __LINE__) 
     << "Invalid systematic shift = '" << central_or_shift << "' !!";
@@ -183,7 +191,7 @@ RecoHadTauWriter::write(const Event & event)
 std::vector<std::string>
 RecoHadTauWriter::get_supported_systematics()
 {
-  
+  return RecoHadTauReader::get_supported_systematics();
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoHadTauWriter, "RecoHadTauWriter");

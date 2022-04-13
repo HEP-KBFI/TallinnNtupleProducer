@@ -16,6 +16,12 @@ RecoSubjetAK8::BtagCSV() const
   return BtagCSV_;
 }
 
+bool
+RecoSubjetAK8::is_btagable() const
+{
+  return pt_ >= 30.;
+}
+
 std::ostream &
 operator<<(std::ostream & stream,
            const RecoSubjetAK8 & jet)

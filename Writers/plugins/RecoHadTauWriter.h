@@ -6,10 +6,12 @@
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h" // WriterBase
 #include "TallinnNtupleProducer/Objects/interface/Event.h"      // Event
 
+#include <set>                                                  // std::set
 #include <string>                                               // std::string
 #include <vector>                                               // std::vector
 
-class TTree; // forward declaration
+// forward declarations
+class TTree;
 
 class RecoHadTauWriter : public WriterBase
 {
@@ -36,12 +38,19 @@ class RecoHadTauWriter : public WriterBase
   void
   write(const Event & event);
  
+  /**
+    * @brief Return list of systematic uncertainties supported by this plugin
+    */
+  std::vector<std::string>
+  get_supported_systematics();
+
  private:
   std::string branchName_num_;
   std::string branchName_obj_;
 
   UInt_t max_nHadTaus_;
 
+  std::set<std::string> systematic_shifts_;
   struct central_or_shiftEntry
   {
     UInt_t nHadTaus_;

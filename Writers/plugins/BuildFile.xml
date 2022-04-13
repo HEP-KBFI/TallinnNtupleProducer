@@ -1,0 +1,11 @@
+<use   name="FWCore/ParameterSet"/>
+<use   name="TallinnNtupleProducer/CommonTools"/>
+<use   name="TallinnNtupleProducer/Objects"/>
+<use   name="TallinnNtupleProducer/Readers"/>
+<use   name="TallinnNtupleProducer/Writers"/>
+<use   name="root"/>
+<Flags CXXFLAGS="-O3 -fPIC -Wswitch -Wswitch-enum -Werror -Wshadow -Wno-reorder -Wno-error=bool-compare" />
+<export>
+  <lib   name="1"/>
+</export>
+

@@ -1,9 +1,9 @@
 #include "TallinnNtupleProducer/Writers/plugins/TriggerInfoWriter.h"
 
-#include "TallinnNtupleProducer/Framework/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Framework/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 
-#include "TTree.h"                                                              // TTree
+#include "TTree.h"                                                            // TTree
 
 typedef std::vector<std::string> vstring;
 
@@ -26,8 +26,9 @@ namespace
 }
 
 TriggerInfoWriter::TriggerInfoWriter(const edm::ParameterSet & cfg)
-  : PD_(PD_type::kUndefined)
-  , isTriggered_(false)
+  : WriterBase(cfg)
+  , PD_(PD_type::kUndefined)
+  , passesTrigger_(false)
 {
   std::string PD_string = cfg.getParameter<std::string>("PD");
   PD_ = convertPD_to_int(PD_string);
@@ -52,7 +53,7 @@ namespace
 {
   template <typename T>
   unsigned
-  countTriggerMatchedObjects(std::vector<T> & objects, const std::vector<unsigned> & hltFilterBits)
+  countTriggerMatchedObjects(const std::vector<const T *> & objects, const std::vector<unsigned> & hltFilterBits)
   {
     unsigned numTriggerMatchedObjects = 0;
     if ( hltFilterBits.size() > 0 ) // at least one HLT filter bit defined
@@ -62,7 +63,7 @@ namespace
         bool passesHLTFilterBit = false;
         for ( auto hltFilterBit : hltFilterBits )
         {
-          if ( object.filterBits() & hltFilterBit )
+          if ( object->filterBits() & hltFilterBit )
           {
             passesHLTFilterBit = true;
             break;
@@ -94,7 +95,7 @@ TriggerInfoWriter::write(const Event & event)
     if ( !triggerEntry.use_it() ) continue;
 
     bool passesHLTPath = false;
-    const std::vector<HLTPath>& hltPaths = triggerEntry.hltPaths();
+    const std::vector<trigger::HLTPath>& hltPaths = triggerEntry.hltPaths();
     for ( auto hltPath : hltPaths )
     {
       if ( hltPath.status() )
@@ -123,7 +124,7 @@ TriggerInfoWriter::write(const Event & event)
       if ( numHadTaus < triggerEntry.min_numHadTaus() ) continue;
     }
 
-    int is_PD = convertPD_to_int(triggerEntry.in_PD());
+    int in_PD = convertPD_to_int(triggerEntry.in_PD());
     passesTriggerMap[in_PD] = true;
   }
 
@@ -134,9 +135,9 @@ TriggerInfoWriter::write(const Event & event)
   //    This logic is necessary to avoid that the same event is selected multiple times when processing different primary datasets.
   //    The trigger ranking is applied to data only. Simulated events pass once they qualify for any PD.
   passesTrigger_ = false;
-  for ( auto PD : PD_priority_ )
+  for ( auto PD_priority_iter : PD_priority_ )
   {
-    if ( passesTriggerMap[PD] )
+    if ( passesTriggerMap[PD_priority_iter] )
     {
       if ( PD_ == kMC ) // MC
       {
@@ -144,12 +145,18 @@ TriggerInfoWriter::write(const Event & event)
       }
       else              // data
       {
-        if ( PD_ != PD_priority_ ) passesTrigger_ = false; // event passes trigger for PD of higher priority
-        else                       passesTrigger_ = true;  // event does not pass trigger for any PD of higher priority
+        if ( PD_priority_iter != PD_ ) passesTrigger_ = false; // event passes trigger for PD of higher priority
+        else                           passesTrigger_ = true;  // event does not pass trigger for any PD of higher priority
       }
       break;
     }
   }
+}
+
+std::vector<std::string>
+TriggerInfoWriter::get_supported_systematics()
+{
+  return std::vector<std::string>();
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, TriggerInfoWriter, "TriggerInfoWriter");

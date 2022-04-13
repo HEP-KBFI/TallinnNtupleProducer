@@ -9,7 +9,8 @@
 #include <string>                                               // std::string
 #include <vector>                                               // std::vector
 
-class TTree; // forward declaration
+// forward declarations
+class TTree;
 
 class TriggerInfoWriter : public WriterBase
 {
@@ -29,6 +30,12 @@ class TriggerInfoWriter : public WriterBase
   void
   write(const Event & event);
  
+  /**
+   * @brief Return list of systematic uncertainties supported by this plugin
+   */
+  std::vector<std::string>
+  get_supported_systematics();
+
  private:
   int PD_;
   std::vector<int> PD_priority_;
