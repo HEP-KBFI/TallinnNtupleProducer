@@ -2,7 +2,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // kLHE_scale_*
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // kLHE_scale_*, PDFSys
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/Readers/interface/clip.h"                     // clip()
 
@@ -40,6 +40,10 @@ LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
   , weight_scale_Down_(1.)
   , has_LHE_weights_(false)
   , correctiveFactor_(1.)
+  , has_pdf_weights_(false)
+  , nof_pdf_members_(0)
+  , nof_alphaS_members_(0)
+  , pdf_is_replicas_(false)
 {
   branchName_scale_weights_ = cfg.getParameter<std::string>("branchName_scale_weights");               // default = "LHEScaleWeight"
   branchName_scale_nWeights_ = Form("n%s", branchName_scale_weights_.data());
@@ -73,19 +77,31 @@ LHEInfoReader::setBranchNames()
   {
     instances_[branchName_scale_weights_] = this;
   }
-  else if(has_LHE_weights_)
+  else
   {
     const LHEInfoReader * const gInstance = instances_[branchName_scale_weights_];
-    if(branchName_scale_nWeights_ != gInstance->branchName_scale_nWeights_ ||
-       branchName_pdf_nWeights_   != gInstance->branchName_pdf_nWeights_   ||
-       branchName_pdf_weights_    != gInstance->branchName_pdf_weights_     )
+    if(has_LHE_weights_)
     {
-      throw cmsException(this)
-        << "Association between configuration parameters 'branchName_scale_weights' and 'branchName_pdf_weights'"
-           " must be unique: present association 'branchName_scale_weights' = " << branchName_scale_weights_
-        << " with 'branchName_pdf_weights' = " << branchName_pdf_weights_
-        << " does not match previous association 'branchName_scale_weights' = " << gInstance->branchName_scale_weights_
-        << " with 'branchName_pdf_weights' = " << gInstance->branchName_pdf_weights_ << " !!\n";
+
+      if(branchName_scale_nWeights_ != gInstance->branchName_scale_nWeights_ ||
+         branchName_scale_weights_ != gInstance->branchName_scale_weights_)
+      {
+        throw cmsException(this)
+          << "Association between configuration parameters 'branchName_scale_weights'"
+             " must be unique: present association 'branchName_scale_weights' = " << branchName_scale_weights_
+          << " does not match previous association 'branchName_scale_weights' = " << gInstance->branchName_scale_weights_;
+      }
+    }
+    if(has_pdf_weights_)
+    {
+      if(branchName_pdf_nWeights_   != gInstance->branchName_pdf_nWeights_ ||
+         branchName_pdf_weights_    != gInstance->branchName_pdf_weights_   )
+      {
+        throw cmsException(this)
+          << "Association between configuration parameters branchName_pdf_weights'"
+             " must be unique: present association 'branchName_pdf_weights' = " << branchName_pdf_weights_
+          << " does not match previous association 'branchName_pdf_weights' = " << gInstance->branchName_pdf_weights_;
+      }
     }
   }
   ++numInstances_[branchName_scale_weights_];
@@ -94,15 +110,21 @@ LHEInfoReader::setBranchNames()
 std::vector<std::string>
 LHEInfoReader::setBranchAddresses(TTree * tree)
 {
-  if(instances_[branchName_scale_weights_] == this && has_LHE_weights_)
+  if(instances_[branchName_scale_weights_] == this)
   {
     BranchAddressInitializer bai(tree);
-    bai.setBranchAddress(scale_nWeights_, branchName_scale_nWeights_);
-    bai.setBranchAddress(pdf_nWeights_, branchName_pdf_nWeights_);
-    bai.setLenVar(max_scale_nWeights_).setBranchAddress(scale_weights_, branchName_scale_weights_);
-    bai.setLenVar(max_pdf_nWeights_).setBranchAddress(pdf_weights_, branchName_pdf_weights_);
-    bai.setBranchAddress(weight_scale_Up_, branchName_envelope_weight_up_, 1.);
-    bai.setBranchAddress(weight_scale_Down_, branchName_envelope_weight_down_, 1.);
+    if(has_LHE_weights_)
+    {
+      bai.setBranchAddress(scale_nWeights_, branchName_scale_nWeights_);
+      bai.setLenVar(max_scale_nWeights_).setBranchAddress(scale_weights_, branchName_scale_weights_);
+      bai.setBranchAddress(weight_scale_Up_, branchName_envelope_weight_up_, 1.);
+      bai.setBranchAddress(weight_scale_Down_, branchName_envelope_weight_down_, 1.);
+    }
+    if(has_pdf_weights_)
+    {
+      bai.setBranchAddress(pdf_nWeights_, branchName_pdf_nWeights_);
+      bai.setLenVar(max_pdf_nWeights_).setBranchAddress(pdf_weights_, branchName_pdf_weights_);
+    }
     return bai.getBoundBranchNames();
   }
   return {};
@@ -113,7 +135,7 @@ LHEInfoReader::read() const
 {
   const LHEInfoReader * const gInstance = instances_[branchName_scale_weights_];
   assert(gInstance);
-  if(! has_LHE_weights_)
+  if(! has_LHE_weights_ && ! has_pdf_weights_)
   {
     return;
   }
@@ -173,11 +195,42 @@ LHEInfoReader::read() const
     return;
   }
 
-  if(gInstance->pdf_nWeights_ > max_pdf_nWeights_)
+  if(gInstance->has_pdf_weights_ && gInstance->pdfNorms_.size() != gInstance->pdf_nWeights_)
   {
     throw cmsException(this)
       << "Number of PDF weights stored in Ntuple = " << gInstance->pdf_nWeights_
-      << ", exceeds max_pdf_nWeights_ = " << max_pdf_nWeights_ << " !!\n";
+      << " does not correspond to the expected number of PDF weights = " << gInstance->pdfNorms_.size();
+  }
+}
+
+void
+LHEInfoReader::set_pdfNorm(const edm::ParameterSet & cfg)
+{
+  pdfNorms_ = cfg.getParameter<std::vector<double>>("norm");
+  if(pdfNorms_.empty())
+  {
+    return;
+  }
+  has_pdf_weights_ = true;
+  const int pdf_lhaid = cfg.getParameter<int>("lhaid");
+  switch(pdf_lhaid)
+  {
+    case 91400:  nof_pdf_members_ = 33;                           nof_alphaS_members_ = 2; break; // https://lhapdfsets.web.cern.ch/current/PDF4LHC15_nnlo_30_pdfas/PDF4LHC15_nnlo_30_pdfas.info
+    case 306000: nof_pdf_members_ = 103;                          nof_alphaS_members_ = 2; break; // https://lhapdfsets.web.cern.ch/current/NNPDF31_nnlo_hessian_pdfas/NNPDF31_nnlo_hessian_pdfas.info
+    case 260000: nof_pdf_members_ = 101; pdf_is_replicas_ = true;                          break; // https://lhapdfsets.web.cern.ch/current/NNPDF30_nlo_as_0118/NNPDF30_nlo_as_0118.info
+    case 262000: nof_pdf_members_ = 101; pdf_is_replicas_ = true;                          break; // https://lhapdfsets.web.cern.ch/current/NNPDF30_lo_as_0118/NNPDF30_lo_as_0118.info
+    case 292000: nof_pdf_members_ = 103; pdf_is_replicas_ = true; nof_alphaS_members_ = 2; break; // https://lhapdfsets.web.cern.ch/current/NNPDF30_nlo_nf_4_pdfas/NNPDF30_nlo_nf_4_pdfas.info
+    case 292200: nof_pdf_members_ = 103; pdf_is_replicas_ = true; nof_alphaS_members_ = 2; break; // https://lhapdfsets.web.cern.ch/current/NNPDF30_nlo_nf_5_pdfas/NNPDF30_nlo_nf_5_pdfas.info
+    default: throw cmsException(this, __func__, __LINE__) << "Unknown LHA ID: " << pdf_lhaid;
+  }
+  assert(nof_pdf_members_ <= max_pdf_nWeights_);
+  if((pdfNorms_.size() != nof_pdf_members_) &&
+     (pdfNorms_.size() != (nof_pdf_members_ - 1)))
+  {
+    throw cmsException(this, __func__, __LINE__)
+      << "Expected " << nof_pdf_members_ << " from PDF set " << pdf_lhaid
+      << " but got " << pdfNorms_.size() << " normalization factors instead"
+    ;
   }
 }
 
@@ -293,13 +346,19 @@ LHEInfoReader::getNumWeights_pdf() const
   //        alphas(MZ)=0.130. mem=0 => average on replicas; mem=1-100 => PDF replicas
   //
   // In order to find out which PDF error set the sample has, open the Ntuple, read the LHEPDFweight array branch and look for LHEID in the title of the branch.
-  return has_LHE_weights_ ? pdf_nWeights_ : 1;
+  return has_pdf_weights_ ? pdf_nWeights_ : 0;
+}
+
+int
+LHEInfoReader::getPdfSize() const
+{
+  return pdfNorms_.size();
 }
 
 double
 LHEInfoReader::getWeight_pdf(unsigned int idx) const
 {
-  if(! has_LHE_weights_)
+  if(! has_pdf_weights_)
   {
     return 1.;
   }
@@ -310,4 +369,75 @@ LHEInfoReader::getWeight_pdf(unsigned int idx) const
       << pdf_nWeights_ << " !!\n";
   }
   return clip(correctiveFactor_ * pdf_weights_[idx]);
+}
+
+double
+LHEInfoReader::getWeightNorm_pdf(unsigned int idx) const
+{
+  return pdfNorms_.at(idx) * getWeight_pdf(idx);
+}
+
+double
+LHEInfoReader::getWeight_pdf(PDFSys option) const
+{
+  switch(option)
+  {
+    case PDFSys::central: return 1.;
+    case PDFSys::up:      return 1 + comp_pdf_unc();
+    case PDFSys::down:    return 1 - comp_pdf_unc();
+    default: assert(0); // should never happen
+  }
+  assert(0); // should never happen
+}
+
+namespace
+{
+  double
+  square(double x)
+  {
+    return x*x;
+  }
+}
+
+double
+LHEInfoReader::comp_pdf_unc() const
+{
+  assert(has_pdf_weights_);
+  double pdf_unc_stat = 0.;
+  const int first_member = pdfNorms_.size() == nof_pdf_members_ ? 1 : 0; // skip the 1st member if possible
+  const int last_member = getPdfSize() - nof_alphaS_members_;
+  const double nominal_weight = pdfNorms_.size() == nof_pdf_members_ ? getWeight_pdf(0) : 1.;
+
+  // Estimate the hessian/replica component of the uncertainty, where we exclude:
+  // 1) the nominal PDF member that represents the average over hessian/replica members
+  // 2) the members that correspond to different values of alpha_S
+  //
+  // The dispersion formulas are given in https://arxiv.org/pdf/1510.03865.pdf
+  // In particular:
+  // - hessian uncertainty by equation (20)
+  // - replica uncertainty by equation (21)
+  // - alpha_S uncertainty by equation (27)
+  // The normalization coefficients in each of the above case are different:
+  // - 1 for hessian
+  // - 1 / sqrt(Nrep - 1) for replicas (given Nrep replicas)
+  // - 1 / Nmem(alphaS)^2 for alpha_S uncertainty (given Nmem(alphaS) variations)
+  // Note that Nmem(alphaS) is squared because the equationnn (27) is in linear form.
+  for(int member_idx = first_member; member_idx < last_member; ++member_idx)
+  {
+    pdf_unc_stat += square(getWeightNorm_pdf(member_idx) - nominal_weight);
+  }
+  double pdf_unc_alphaS = 0.;
+  for(int member_idx = last_member; member_idx < getPdfSize(); ++member_idx)
+  {
+    pdf_unc_alphaS += square(getWeightNorm_pdf(member_idx) - nominal_weight);
+  }
+  // Subtracting 2 because nof_pdf_members_ also includes the average PDF set
+  const int denom = pdf_is_replicas_ ? nof_pdf_members_ - nof_alphaS_members_ - 2 : 1;
+  assert(denom > 0);
+  double pdf_unc2 = pdf_unc_stat / denom;
+  if(nof_alphaS_members_ > 0)
+  {
+    pdf_unc2 += pdf_unc_alphaS / square(nof_alphaS_members_);
+  }
+  return std::sqrt(pdf_unc2);
 }

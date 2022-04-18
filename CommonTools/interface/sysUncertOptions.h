@@ -438,4 +438,4 @@ getBranchName_fatJet(const std::string & default_branchName,
 std::string
 getBranchName_pileup(PUsys puSys_option);
 
-#endif // SYSUNCEROPTIONS_H
+#endif // TallinnNtupleProducer_CommonTools_sysUncertOptions_h

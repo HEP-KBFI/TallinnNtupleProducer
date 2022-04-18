@@ -9,9 +9,12 @@
 #include <string>                                               // std::string
 #include <vector>                                               // std::vector
 
+// forward declarations
+enum class PDFSys;
+
 class LHEInfoReader : public ReaderBase
 {
-public:
+ public:
   LHEInfoReader(const edm::ParameterSet & cfg);
   ~LHEInfoReader();
 
@@ -28,6 +31,9 @@ public:
   void
   read() const;
 
+  void
+  set_pdfNorm(const edm::ParameterSet & cfg);
+
   double getWeight_scale_nominal() const;
   double getWeight_scale_xUp() const;
   double getWeight_scale_xDown() const;
@@ -41,9 +47,12 @@ public:
   double getWeight_scale(int central_or_shift) const;
 
   int getNumWeights_pdf() const;
+  int getPdfSize() const;
   double getWeight_pdf(unsigned int idx) const;
+  double getWeightNorm_pdf(unsigned int idx) const;
+  double getWeight_pdf(PDFSys option) const;
 
-protected:
+ protected:
  /**
    * @brief Initialize names of branches to be read from tree
    */
@@ -53,6 +62,9 @@ protected:
   double
   getWeight(double weight,
             bool correct = true) const;
+
+  double
+  comp_pdf_unc() const;
 
   const unsigned int max_scale_nWeights_;
   std::string branchName_scale_nWeights_;
@@ -80,6 +92,12 @@ protected:
 
   bool has_LHE_weights_;
   mutable double correctiveFactor_;
+
+  bool has_pdf_weights_;
+  std::vector<double> pdfNorms_;
+  unsigned int nof_pdf_members_;
+  unsigned int nof_alphaS_members_;
+  bool pdf_is_replicas_;
 
   // CV: make sure that only one LHEInfoReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

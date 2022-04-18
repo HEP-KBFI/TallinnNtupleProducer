@@ -1,14 +1,14 @@
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"       // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/weightAuxFunctions.h" // get_tH_weight_str()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"    // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h" // get_tH_weight_str()
 
-#include <boost/range/adaptor/map.hpp>                                      // boost::adaptors::map_keys
-#include <boost/range/algorithm/copy.hpp>                                   // boost::copy()
+#include <boost/range/adaptor/map.hpp>                                   // boost::adaptors::map_keys
+#include <boost/range/algorithm/copy.hpp>                                // boost::copy()
 
-#include <cmath>                                                            // std::fabs()
-#include <cstring>                                                          // std::memcpy()
-#include <cassert>                                                          // assert()
+#include <cmath>                                                         // std::fabs()
+#include <cstring>                                                       // std::memcpy()
+#include <cassert>                                                       // assert()
 
 #define EPS 1E-2
 

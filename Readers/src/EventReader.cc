@@ -1,5 +1,6 @@
 #include "TallinnNtupleProducer/Readers/interface/EventReader.h"
 
+#include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"  // isHigherPt()
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h" // convert_to_ptrs()
 
 EventReader::EventReader(const edm::ParameterSet& cfg)
@@ -190,18 +191,6 @@ namespace
   isHigherConePt(const T * particle1, const T * particle2)
   {
     return particle1->cone_pt() > particle2->cone_pt();
-  }
-
-  /**
-   * @brief Auxiliary function used for sorting hadronic taus and jets by decreasing pT
-   * @param Given pair of either hadronic taus or jets
-   * @return True, if first particle has higher pT; false if second particle has higher pT
-   */
-  template <typename T>
-  bool
-  isHigherPt(const T * particle1, const T * particle2)
-  {
-    return particle1->pt() > particle2->pt();
   }
 
   /**

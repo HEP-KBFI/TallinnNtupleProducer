@@ -25,6 +25,9 @@ enum class pileupJetID
   kPileupJetID_disabled = 0, kPileupJetID_loose = 4, kPileupJetID_medium = 2, kPileupJetID_tight = 1
 };
 
+pileupJetID
+get_pileupJetID(const std::string & pileupJetID_str);
+
 //--- declare AK8 jet corrections
 enum 
 {
