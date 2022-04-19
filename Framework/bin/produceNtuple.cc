@@ -122,7 +122,9 @@ int main(int argc, char* argv[])
   bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
   bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("applyBtagSFRatio");
 
-  bool isDEBUG = cfg_analyze.getParameter<bool>("isDEBUG");
+  std::string selection = cfg_produceNtuple.getParameter<std::string>("selection");
+
+  bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
 
   std::vector<std::string> systematic_shifts = EventReader::get_supported_systematics();
   // CV: add central value 
@@ -156,17 +158,15 @@ int main(int argc, char* argv[])
   bool redoGenMatching = cfg_analyze.getParameter<bool>("redoGenMatching");
   bool genMatchingByIndex = cfg_analyze.getParameter<bool>("genMatchingByIndex");
 
-  std::string selEventsFileName_input = cfg_analyze.getParameter<std::string>("selEventsFileName_input");
-  std::cout << "selEventsFileName_input = " << selEventsFileName_input << std::endl;
+  std::string selEventsFileName = cfg_analyze.getParameter<std::string>("selEventsFileName");
+  std::cout << "selEventsFileName = " << selEventsFileName << std::endl;
   RunLumiEventSelector* run_lumi_eventSelector = 0;
   if ( selEventsFileName_input != "" ) {
-    edm::ParameterSet cfgRunLumiEventSelector;
-    cfgRunLumiEventSelector.addParameter<std::string>("inputFileName", selEventsFileName_input);
-    cfgRunLumiEventSelector.addParameter<std::string>("separator", ":");
-    run_lumi_eventSelector = new RunLumiEventSelector(cfgRunLumiEventSelector);
+    edm::ParameterSet cfg_run_lumi_eventSelector;
+    cfg_run_lumi_eventSelector.addParameter<std::string>("inputFileName", selEventsFileName);
+    cfg_run_lumi_eventSelector.addParameter<std::string>("separator", ":");
+    run_lumi_eventSelector = new RunLumiEventSelector(cfg_run_lumi_eventSelector);
   }
-
-  std::string selEventsFileName_output = cfg_analyze.getParameter<std::string>("selEventsFileName_output");
 
   fwlite::InputSource inputFiles(cfg);
   int maxEvents = inputFiles.maxEvents();
@@ -176,9 +176,13 @@ int main(int argc, char* argv[])
   fwlite::OutputFiles outputFile(cfg);
   fwlite::TFileService fs = fwlite::TFileService(outputFile.file().data());
 
-  TTreeWrapper * inputTree = new TTreeWrapper(treeName.data(), inputFiles.files(), maxEvents);
+  TTreeWrapper* inputTree = new TTreeWrapper(treeName.data(), inputFiles.files(), maxEvents);
+  std::cout << "Loaded " << inputTree->getFileCount() << " file(s).\n";
 
-  std::cout << "Loaded " << inputTree -> getFileCount() << " file(s).\n";
+  EventReader* eventReader = new EventReader();
+  inputTree->registerReader(eventReader);
+
+  TTree* outputTree = new TTree("events");
 
 //--- declare event-level variables
   EventInfo eventInfo(analysisConfig);
@@ -244,15 +248,18 @@ int main(int argc, char* argv[])
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
 
-//--- open output file containing run:lumi:event numbers of events passing final event selection criteria
-  std::ostream* selEventsFile = ( selEventsFileName_output != "" ) ? new std::ofstream(selEventsFileName_output.data(), std::ios::out) : 0;
-  std::cout << "selEventsFileName_output = " << selEventsFileName_output << std::endl;
+  edm::VParameterSet cfg_writers = cfg_analyze.getParameterSetVector("writerPlugins");
+  std::vector<WriterBase*> writers;
+  for ( auto cfg_writer : cfg_writers )
+  {
+    std::string pluginType = cfg_writer.getParameterSet("pluginType");
+    WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
+    writer->setBranches(outputTree);
+    writers.push_back(writer);
+  }
 
   int analyzedEntries = 0;
-  int selectedEntries = 0;
-  double selectedEntries_weighted = 0.;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
-  TH1* histogram_selectedEntries = fs.make<TH1D>("selectedEntries", "selectedEntries", 1, -0.5, +0.5);
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
     if ( inputTree->canReport(reportEvery) )
@@ -266,19 +273,12 @@ int main(int argc, char* argv[])
     ++analyzedEntries;
     histogram_analyzedEntries->Fill(0.);
 
-    if ( run_lumi_eventSelector && !(*run_lumi_eventSelector)(eventInfo) )
-    {
-      continue;
-    }
-
-    EvtWeightRecorder evtWeightRecorder(central_or_shifts_local, central_or_shift_main, isMC);
-
-    if ( isDEBUG ) {
-      std::cout << "event #" << inputTree -> getCurrentMaxEventIdx() << ' ' << eventInfo << '\n';
-    }
-
     if ( run_lumi_eventSelector )
-    {
+    { 
+      if ( !(*run_lumi_eventSelector)(eventInfo) )
+      {
+        continue;
+      }
       std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << eventInfo << '\n';
       if ( inputTree->isOpen() )
       {
@@ -286,27 +286,35 @@ int main(int argc, char* argv[])
       }
     }
 
-    if ( isMC )
+    if ( isDEBUG ) 
     {
-      if ( apply_genWeight         ) evtWeightRecorder.record_genWeight(eventInfo);
-      if ( eventWeightManager      ) evtWeightRecorder.record_auxWeight(eventWeightManager);
-      if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
-      if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(eventInfo.topPtRwgtSF);
-      lheInfoReader->read();
-      psWeightReader->read();
-      evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
-      evtWeightRecorder.record_psWeight(psWeightReader);
-      evtWeightRecorder.record_puWeight(&eventInfo);
-      evtWeightRecorder.record_nom_tH_weight(&eventInfo);
-      evtWeightRecorder.record_lumiScale(lumiScale);
+      std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << ' ' << eventInfo << '\n';
+    }
+
+    for ( auto central_or_shift : systematic_shifts )
+    {
+      EvtWeightRecorder evtWeightRecorder(central_or_shifts_local, central_or_shift_main, isMC);
+      if ( isMC )
+      {
+        if ( apply_genWeight         ) evtWeightRecorder.record_genWeight(eventInfo);
+        if ( eventWeightManager      ) evtWeightRecorder.record_auxWeight(eventWeightManager);
+        if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
+        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(eventInfo.topPtRwgtSF);
+        lheInfoReader->read();
+        psWeightReader->read();
+        evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
+        evtWeightRecorder.record_psWeight(psWeightReader);
+        evtWeightRecorder.record_puWeight(&eventInfo);
+        evtWeightRecorder.record_nom_tH_weight(&eventInfo);
+        evtWeightRecorder.record_lumiScale(lumiScale);
 
 //--- compute event-level weight for data/MC correction of b-tagging efficiency and mistag rate
 //   (using the method "Event reweighting using scale factors calculated with a tag and probe method",
 //    described on the BTV POG twiki https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration )
-      evtWeightRecorder.record_btagWeight(selJets);
-      if(btagSFRatioFacility)
+        evtWeightRecorder.record_btagWeight(selJets);
+      if(btagSFRatioInterface)
       {
-        evtWeightRecorder.record_btagSFRatio(btagSFRatioFacility, selJets.size());
+        evtWeightRecorder.record_btagSFRatio(btagSFRatioInterface, selJets.size());
       }
 
       if(isMC_EWK)
@@ -461,21 +469,34 @@ int main(int argc, char* argv[])
         }
     }
 
-TO-DO: LOOP OVER WRITER PLUGINS
+    Event event = eventReader->read();
 
+    for ( auto writer : writers )
+    {
+      writer->write(event);
+    }
 
+    outputTree->Fill();
   }
 
-TO-DO: APPLY LOOSE EVENT SELECTION ON PLAIN NTUPLE
+  TDirectory* outputDir = fs.make<TDirectory>("events");
+  outputDir->cd();
 
-    ++selectedEntries;
-    selectedEntries_weighted += evtWeightRecorder.get(central_or_shift_main);
-    histogram_selectedEntries->Fill(0.);
-
-  if ( plainNtuple )
+  TTree* outputTree_selected = outputTree->CopyTree(selection.data());
+  Float_t evtWeight;
+  outputTree_selected->SetBranchAddress("evtWeight", &evtWeight);
+  int selectedEntries = 0;
+  double selectedEntries_weighted = 0.;
+  TH1* histogram_selectedEntries = fs.make<TH1D>("selectedEntries", "selectedEntries", 1, -0.5, +0.5);
+  int numEntries = outputTree_selected->GetEntries();
+  for ( int idxEntry = 0; idxEntry < numEntries; ++idxEntry )
   {
-    plainNtuple->write();
+    idxEntry->GetEntry(idxEntry);
+    ++selectedEntries;
+    selectedEntries_weighted += evtWeight;
+    histogram_selectedEntries->Fill(0.);
   }
+  outputTree_selected->write();
 
   std::cout << "max num. Entries = " << inputTree->getCumulativeMaxEventCount()
             << " (limited by " << maxEvents << ") processed in "
@@ -493,6 +514,8 @@ TO-DO: APPLY LOOSE EVENT SELECTION ON PLAIN NTUPLE
   delete run_lumi_eventSelector;
 
   delete selEventsFile;
+
+  delete eventReader;
 
   delete muonReader;
   delete electronReader;
@@ -513,9 +536,10 @@ TO-DO: APPLY LOOSE EVENT SELECTION ON PLAIN NTUPLE
   delete eventWeightManager;
 
   delete inputTree;
-  delete plainNtuple;
-
-  clock.Show("prodNtuple");
+  delete outputTree;
+  delete outputTree_selected;
+  
+  clock.Show("produceNtuple");
 
   return EXIT_SUCCESS;
 }

@@ -145,7 +145,7 @@ RecoMuonReader::read() const
             gLeptonReader->genPartFlav_[idxLepton],
             gLeptonReader->genMatchIdx_[idxLepton],
           },
-          true, // Karl: all muon objects pass Muon POG's loose definition at the nanoAOD prodction level
+          true, // Karl: all muon objects pass Muon POG's loose definition at the nanoAOD production level
           gMuonReader->mediumIdPOG_[idxLepton],
           gMuonReader->segmentCompatibility_[idxLepton],
           gMuonReader->ptErr_[idxLepton]

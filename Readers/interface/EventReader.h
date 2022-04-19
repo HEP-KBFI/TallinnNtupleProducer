@@ -7,6 +7,10 @@
 #include "TallinnNtupleProducer/Cleaners/interface/RecoJetCollectionCleanerByIndexAK4.h"      // RecoJetCollectionCleanerByIndexAK4
 #include "TallinnNtupleProducer/Objects/interface/Event.h"                                    // Event
 #include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"                          // EventInfoReader
+#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                          // GenHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                             // GenJetReader
+#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"                          // GenLeptonReader
+#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"                          // GenPhotonReader
 #include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"                          // MEtFilterReader
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                               // ReaderBase
 #include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"                       // RecoElectronReader
@@ -70,7 +74,7 @@ class EventReader : public ReaderBase
   ~EventReader();
 
   void
-  set_central_or_shift(int central_or_shift);
+  set_central_or_shift(const std::string& central_or_shift);
 
   /**
    * @brief Call tree->SetBranchAddress for all particle-collection reader classes
@@ -91,6 +95,7 @@ class EventReader : public ReaderBase
 
   Era era_;
   bool isMC_;
+  bool readGenMatching_;
 
   EventInfoReader * eventInfoReader_;
 
@@ -119,6 +124,15 @@ class EventReader : public ReaderBase
   RecoJetCollectionSelectorAK4 * jetSelectorAK4_;
   RecoJetCollectionSelectorAK4_btagLoose * jetSelectorAK4_btagLoose_;
   RecoJetCollectionSelectorAK4_btagMedium * jetSelectorAK4_btagMedium_;
+
+  GenLeptonReader * genLeptonReader_;
+  GenHadTauReader * genHadTauReader_;
+  GenPhotonReader * genPhotonReader_;
+  GenJetReader * genJetReader_;
+  RecoMuonCollectionGenMatcher * muonGenMatcher_;
+  RecoElectronCollectionGenMatcher * electronGenMatcher_;
+  RecoHadTauCollectionGenMatcher * hadTauGenMatcher_;
+  RecoJetCollectionGenMatcher * jetGenMatcherAK4_;
 
   RecoJetReaderAK8 * jetReaderAK8_;
   RecoJetCollectionCleanerAK8 * jetCleanerAK8_dR08_;  // used for cleaning AK8 jets wrt electrons, muons, and tauh
