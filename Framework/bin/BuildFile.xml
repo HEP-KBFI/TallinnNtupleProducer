@@ -1,0 +1,19 @@
+<bin file="produceNtuple.cc" name="produceNtuple">
+  <use   name="FWCore/FWLite"/>
+  <use   name="FWCore/ParameterSet"/>
+  <use   name="FWCore/ParameterSetReader"/>
+  <use   name="FWCore/PythonParameterSet"/>
+  <use   name="FWCore/Utilities"/>
+  <use   name="DataFormats/FWLite"/>
+  <use   name="DataFormats/Math"/>
+  <use   name="PhysicsTools/FWLite"/>
+  <use   name="TallinnNtupleProducer/CommonTools"/>
+  <use   name="TallinnNtupleProducer/Framework"/>
+  <use   name="TallinnNtupleProducer/Objects"/>
+  <use   name="TallinnNtupleProducer/Readers"/>
+  <use   name="TallinnNtupleProducer/Writers"/>
+  <use   name="root"/>
+  <use   name="roottmva"/>
+  <use   name="boost"/>
+  <Flags CXXFLAGS="-g -Wshadow -Werror"/>
+</bin>
