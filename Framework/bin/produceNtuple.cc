@@ -126,6 +126,8 @@ int main(int argc, char* argv[])
   unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
 
+  bool apply_chargeMisIdRate = cfg_produceNtuple.getParameter<bool>("applyChargeMisIdRate");
+
   std::string selection = cfg_produceNtuple.getParameter<std::string>("selection");
 
   bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
@@ -358,8 +360,90 @@ int main(int argc, char* argv[])
         evtWeightRecorder.record_jetToLeptonRate(jetToLeptonFakeRateInterface, event.fakeableLeptons());
         evtWeightRecorder.record_jetToTauFakeRate(jetToHadTauFakeRateInterface, event.fakeableHadTaus());
         evtWeightRecorder.compute_FR();
+
+        if ( apply_chargeMisIdRate )
+        {
+          if ( numNominalLeptons == 2 && numNominalHadTaus == 0 )
+          {
+            double prob_chargeMisId_sum = 1.;
+            if ( event.fakeableLeptons().size() == 2 )
+            {
+              const RecoLepton* fakeableLepton_lead = event.fakeableLeptons().at(0);
+              const RecoLepton* fakeableLepton_sublead = event.fakeableLeptons().at(1);
+              if ( fakeableLepton_lead->charge()*fakeableLepton_sublead->charge() > 0 )
+              {
+                const double prob_chargeMisID_sum = chargeMisIdRate.get(fakeableLepton_lead, fakeableLepton_sublead);
+              }
+            }
+            // Karl: reject the event, if the applied probability of charge misidentification is 0;
+            //       note that this can happen only if both selected leptons are muons (their misId prob is 0).
+            if ( prob_chargeMisID_sum == 0. )
+            {
+              if ( run_lumi_eventSelector )
+              {
+                std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
+                          << "(leading lepton: charge = " << selLepton_lead->charge() << ", pdgId = " << selLepton_lead->pdgId() << "; "
+                          << " subleading lepton: charge = " << selLepton_sublead->charge() << ", pdgId = " << selLepton_sublead->pdgId() << ")\n";
+              }
+              continue;
+            }
+            evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId_sum);
+          }
+          else if ( numNominalLeptons == 2 && numNominalHadTaus == 1 )
+          {
+            double prob_chargeMisId = 1.;
+            if ( event.fakeableLeptons().size() == 2 && event.fakeableHadTaus().size() == 1 )
+            {
+              const RecoLepton* fakeableLepton_lead = event.fakeableLeptons().at(0);
+              const RecoLepton* fakeableLepton_sublead = event.fakeableLeptons().at(1);
+              const RecoHadTau* fakeableHadTau_sublead = event.fakeableHadTaus().at(0);
+
+
+BIS HIER !!!
+
+if ( chargeSumSelection == kOS ) {
+          // CV: apply charge misidentification probability to lepton of same charge as hadronic tau
+          //    (if the lepton of charge opposite to the charge of the hadronic tau "flips",
+          //     the event has sum of charges equal to three and fails "lepton+tau charge" cut)
+          if ( selLepton_lead->charge()*selHadTau->charge()    > 0 ) prob_chargeMisId_applied *= prob_chargeMisId_lead;
+          if ( selLepton_sublead->charge()*selHadTau->charge() > 0 ) prob_chargeMisId_applied *= prob_chargeMisId_sublead;
+        } else if ( chargeSumSelection == kSS ) {
+          // CV: apply charge misidentification probability to lepton of opposite charge as hadronic tau
+          //    (if the lepton of same charge as the hadronic tau "flips",
+          //     the event has sum of charges equal to one and fails "lepton+tau charge" cut)
+          if ( selLepton_lead->charge()*selHadTau->charge()    < 0 ) prob_chargeMisId_applied *= prob_chargeMisId_lead;
+          if ( selLepton_sublead->charge()*selHadTau->charge() < 0 ) prob_chargeMisId_applied *= prob_chargeMisId_sublead;
+        } else assert(0);
+
+            // Karl: reject the event, if the applied probability of charge misidentification is 0. This can happen only if
+      //       1) both selected leptons are muons (their misId prob is 0).
+      //       2) one lepton is a muon and the other is an electron, and the muon has the same sign as the selected tau.
+      if(prob_chargeMisId_applied == 0.)
+      {
+        if(run_lumi_eventSelector)
+        {
+          std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
+                       "(leading lepton charge (pdgId) = " << selLepton_lead->charge() << " (" << selLepton_lead->pdgId()
+                    << ") => misId prob = " << prob_chargeMisId_lead << "; "
+                       "subleading lepton charge (pdgId) = " << selLepton_sublead->charge() << " (" << selLepton_sublead->pdgId()
+                    << ") => misId prob = " << prob_chargeMisId_sublead << "); "
+                       "tau charge = " << selHadTau->charge() << ")\n"
+          ;
+        }
+        continue;
       }
+            evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId);
+          }
+          else 
+          {
+            throw cmsException("produceNtuple", __LINE__) 
+              << "Configuration parameter 'apply_chargeMisIdRate' = " << apply_chargeMisIdRate 
+              << " not supported for categories with " << numNominalLeptons << " lepton(s) and " << numNominalHadTaus << " hadronic tau(s) !!";
+          }
+        }
+ 
    
+
 
     if ( leptonChargeSelection == kOS ) {
       double prob_chargeMisId_lead = chargeMisIdRate.get(selLepton_lead);
