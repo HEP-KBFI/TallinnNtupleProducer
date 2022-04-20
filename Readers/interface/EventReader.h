@@ -12,6 +12,7 @@
 #include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"                          // GenLeptonReader
 #include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"                          // GenPhotonReader
 #include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"                          // MEtFilterReader
+#include "TallinnNtupleProducer/Readers/interface/ParticleCollectionGenMatcher.h"             // RecoElectronCollectionGenMatcher, RecoMuonCollectionGenMatcher, RecoHadTauCollectionGenMatcher, RecoJetCollectionGenMatcher
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                               // ReaderBase
 #include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"                       // RecoElectronReader
 #include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"                         // RecoHadTauReader
@@ -132,7 +133,7 @@ class EventReader : public ReaderBase
   RecoMuonCollectionGenMatcher * muonGenMatcher_;
   RecoElectronCollectionGenMatcher * electronGenMatcher_;
   RecoHadTauCollectionGenMatcher * hadTauGenMatcher_;
-  RecoJetCollectionGenMatcher * jetGenMatcherAK4_;
+  RecoJetCollectionGenMatcherAK4 * jetGenMatcherAK4_;
 
   RecoJetReaderAK8 * jetReaderAK8_;
   RecoJetCollectionCleanerAK8 * jetCleanerAK8_dR08_;  // used for cleaning AK8 jets wrt electrons, muons, and tauh

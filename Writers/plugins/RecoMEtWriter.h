@@ -1,5 +1,5 @@
-#ifndef TallinnNtupleProducer_Writers_RecoHadTauWriter_h
-#define TallinnNtupleProducer_Writers_RecoHadTauWriter_h
+#ifndef TallinnNtupleProducer_Writers_RecoMEtWriter_h
+#define TallinnNtupleProducer_Writers_RecoMEtWriter_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
 
@@ -12,11 +12,11 @@
 // forward declarations
 class TTree;
 
-class RecoHadTauWriter : public WriterBase
+class RecoMEtWriter : public WriterBase
 {
  public:
-  RecoHadTauWriter(const edm::ParameterSet & cfg);
-  ~RecoHadTauWriter();
+  RecoMEtWriter(const edm::ParameterSet & cfg);
+  ~RecoMEtWriter();
 
   /**
    * @brief Call tree->Branch for all branches
@@ -45,40 +45,23 @@ class RecoHadTauWriter : public WriterBase
   get_supported_systematics();
 
  private:
-  std::string branchName_num_;
-  std::string branchName_obj_;
-
-  UInt_t max_nHadTaus_;
+  std::string branchName_met_;
+  std::string branchName_htmiss_;
+  std::string branchName_ht_;
+  std::string branchName_stmet_;
 
   std::vector<std::string> systematic_shifts_;
   struct central_or_shiftEntry
   {
-    UInt_t nHadTaus_;
-    Float_t * pt_;
-    Float_t * eta_;
-    Float_t * phi_;
-    Float_t * mass_;
-    Int_t * decayMode_;
-    Int_t * charge_;
-    Bool_t * isFakeable_;
-    Bool_t * isTight_;
-    // CV: The value of the genMatch variable is bit-coded.
-    //     The bit-coding is based on
-    //       https://github.com/HEP-KBFI/tth-htt/blob/master/src/hadTauGenMatchingAuxFunctions.cc#L323-L359
-    //     The values are:
-    //       1 = isGenHadTau
-    //       2 = isGenHadTauChargeFlip
-    //       4 = isGenElectron
-    //       8 = isGenElectronChargeFlip
-    //      16 = isGenMuon
-    //      32 = isGenMuonChargeFlip
-    //      64 = isGenJet
-    Int_t * genMatch_;
-    Bool_t * isFake_; // true if genMatch = 64, false otherwise
-    Bool_t * isFlip_; // true if genMatch = 2 or 8 or 32, false otherwise
+    Float_t metPt_;
+    Float_t metPhi_;
+    Float_t metLD_;
+    Float_t htmiss_;
+    Float_t ht_;
+    Float_t stmet_;
   };
   std::map<std::string, central_or_shiftEntry> central_or_shiftEntries_; // key = central_or_shift
   mutable central_or_shiftEntry * current_central_or_shiftEntry_;
 };
 
-#endif // TallinnNtupleProducer_Writers_RecoHadTauWriter_h
+#endif // TallinnNtupleProducer_Writers_RecoMEtWriter_h

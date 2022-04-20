@@ -35,6 +35,13 @@ class RecoElectronReader : public ReaderBase
   std::vector<RecoElectron>
   read() const;
 
+  static
+  std::vector<std::string>
+  get_supported_systematics()
+  {
+    return {};
+  }
+
   void
   set_mvaTTH_wp(double mvaTTH_wp);
 

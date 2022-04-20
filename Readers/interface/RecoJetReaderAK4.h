@@ -51,6 +51,26 @@ class RecoJetReaderAK4 : public ReaderBase
   std::vector<RecoJetAK4>
   read() const;
 
+  static
+  std::vector<std::string>
+  get_supported_systematics()
+  {
+    return {  
+      "CMS_ttHl_JESAbsoluteUp",           "CMS_ttHl_JESAbsoluteDown",
+      "CMS_ttHl_JESAbsolute_EraUp",       "CMS_ttHl_JESAbsolute_EraDown",
+      "CMS_ttHl_JESBBEC1Up",              "CMS_ttHl_JESBBEC1Down",
+      "CMS_ttHl_JESBBEC1_EraUp",          "CMS_ttHl_JESBBEC1_EraDown",
+      "CMS_ttHl_JESEC2Up",                "CMS_ttHl_JESEC2Down",
+      "CMS_ttHl_JESEC2_EraUp",            "CMS_ttHl_JESEC2_EraDown",
+      "CMS_ttHl_JESFlavorQCDUp",          "CMS_ttHl_JESFlavorQCDDown",
+      "CMS_ttHl_JESHFUp",                 "CMS_ttHl_JESHFDown",
+      "CMS_ttHl_JESHF_EraUp",             "CMS_ttHl_JESHF_EraDown",
+      "CMS_ttHl_JESRelativeBalUp",        "CMS_ttHl_JESRelativeBalDown",
+      "CMS_ttHl_JESRelativeSample_EraUp", "CMS_ttHl_JESRelativeSample_EraDown",
+      "CMS_ttHl_JESHEMDown", // addresses HEM15/16, see https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
+    };
+  }
+
  protected:
  /**
    * @brief Initialize names of branches to be read from tree

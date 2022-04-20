@@ -27,13 +27,6 @@ class WriterBase
   virtual
   void
   write(const Event & event) = 0;
-
-  /**
-   * @brief Return list of systematic uncertainties supported by this plugin
-   */
-  virtual
-  std::vector<std::string>
-  get_supported_systematics() = 0;
 };
 
 #include "FWCore/PluginManager/interface/PluginFactory.h"  // edmplugin::PluginFactory

@@ -163,7 +163,7 @@ class ParticleCollectionGenMatcher
         );
         const double dPtRel = std::fabs(recParticle->pt() - genParticle.pt()) / genParticle.pt();
         bool passesConstraints = minDPtRel < dPtRel && dPtRel < maxDPtRel;
-        if(passesConstraints && typeid(Trec) != typeid(RecoJet) && ! genPartFlavs.empty())
+        if(passesConstraints && typeid(Trec) != typeid(RecoJetAK4) && ! genPartFlavs.empty())
         {
           passesConstraints &=
             std::find(genPartFlavs.begin(), genPartFlavs.end(), recParticle->genPartFlav()) != genPartFlavs.end()

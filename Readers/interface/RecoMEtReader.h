@@ -1,13 +1,15 @@
 #ifndef TallinnNtupleProducer_Readers_RecoMEtReader_h
 #define TallinnNtupleProducer_Readers_RecoMEtReader_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                          // edm::ParameterSet
 
-#include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"    // RecoMEt
-#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h" // ReaderBase
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
+#include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"                     // RecoMEt
+#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                  // ReaderBase
+#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"            // RecoJetReaderAK4::get_supported_systematics()
 
-#include <map>                                                  // std::map
-#include <string>                                               // std::string
+#include <map>                                                                   // std::map
+#include <string>                                                                // std::string
 
 // forward declarations
 class TTree;
@@ -45,6 +47,16 @@ class RecoMEtReader : public ReaderBase
    */
   RecoMEt
   read() const;
+
+  static
+  std::vector<std::string>
+  get_supported_systematics()
+  {
+    std::vector<std::string> systematic_shifts;
+    merge_systematic_shifts(systematic_shifts, RecoJetReaderAK4::get_supported_systematics());
+    merge_systematic_shifts(systematic_shifts, { "CMS_ttHl_UnclusteredEnUp", "CMS_ttHl_UnclusteredEnDown" });
+    return systematic_shifts;
+  }
 
  protected:
  /**

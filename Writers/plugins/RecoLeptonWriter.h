@@ -33,6 +33,7 @@ class RecoLeptonWriter : public WriterBase
   /**
    * @brief Return list of systematic uncertainties supported by this plugin
    */
+  static
   std::vector<std::string>
   get_supported_systematics();
 

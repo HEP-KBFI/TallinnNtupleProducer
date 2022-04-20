@@ -122,6 +122,9 @@ int main(int argc, char* argv[])
   bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
   bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("applyBtagSFRatio");
 
+  unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
+  unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
+
   std::string selection = cfg_produceNtuple.getParameter<std::string>("selection");
 
   bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
@@ -253,6 +256,8 @@ int main(int argc, char* argv[])
   for ( auto cfg_writer : cfg_writers )
   {
     std::string pluginType = cfg_writer.getParameterSet("pluginType");
+    cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
+    cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
     WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
     writer->setBranches(outputTree);
     writers.push_back(writer);

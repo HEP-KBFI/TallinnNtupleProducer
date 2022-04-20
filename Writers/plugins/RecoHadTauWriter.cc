@@ -1,15 +1,16 @@
 #include "TallinnNtupleProducer/Writers/plugins/RecoHadTauWriter.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                // GenHadTau
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                // GenLepton
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"         // RecoHadTauReader::get_supported_systematics()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
+#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                   // GenHadTau
+#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                   // GenLepton
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"    // BranchAddressInitializer
+#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"            // RecoHadTauReader::get_supported_systematics()
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                             // Form()
+#include "TTree.h"                                                               // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                              // assert()
 
 RecoHadTauWriter::RecoHadTauWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
@@ -20,12 +21,8 @@ RecoHadTauWriter::RecoHadTauWriter(const edm::ParameterSet & cfg)
 {
   max_nHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
   assert(max_nHadTaus_ >= 1);
-  for ( auto shift : RecoHadTauReader::get_supported_systematics() )
-  {
-    systematic_shifts_.insert(shift);
-  }
-  // CV: add central value 
-  systematic_shifts_.insert("central");
+  merge_systematic_shifts(systematic_shifts_, RecoHadTauReader::get_supported_systematics());
+  merge_systematic_shifts(systematic_shifts_, { "central" }); // CV: add central value
   for ( auto central_or_shift : systematic_shifts_ )
   {    
     central_or_shiftEntry it;

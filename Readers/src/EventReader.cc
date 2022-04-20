@@ -6,7 +6,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getMET_option()
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
-#include "TallinnNtupleProducer/Readers/interface/ParticleCollectionGenMatcher.h" // RecoElectronCollectionGenMatcher, RecoMuonCollectionGenMatcher, RecoHadTauCollectionGenMatcher, RecoJetCollectionGenMatcher
 
 EventReader::EventReader(const edm::ParameterSet& cfg)
   : ReaderBase(cfg)
@@ -66,7 +65,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
 
   muonReader_ = new RecoMuonReader(cfg);
   const double lep_mva_cut_mu = cfg.getParameter<double>("lep_mva_cut_mu");
-  muonReader->set_mvaTTH_wp(lep_mva_cut_mu);
+  muonReader_->set_mvaTTH_wp(lep_mva_cut_mu);
   looseMuonSelector_ = new RecoMuonCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableMuonSelector_ = new RecoMuonCollectionSelectorFakeable(era_, -1, isDEBUG_);
   tightMuonSelector_ = new RecoMuonCollectionSelectorTight(era_, -1, isDEBUG_);
@@ -84,12 +83,12 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   looseHadTauSelector_ = new RecoHadTauCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableHadTauSelector_ = new RecoHadTauCollectionSelectorFakeable(era_, -1, isDEBUG_);
   tightHadTauSelector_ = new RecoHadTauCollectionSelectorTight(era_, -1, isDEBUG_);
-  std::string hadTauWP_fakeable = cfg.getParameter<std::string>("hadTauWP_fakeable")
-  std::string hadTauWP_tight = cfg.getParameter<std::string>("hadTauWP_tight")
+  std::string hadTauWP_fakeable = cfg.getParameter<std::string>("hadTauWP_fakeable");
+  std::string hadTauWP_tight = cfg.getParameter<std::string>("hadTauWP_tight");
   if ( get_tau_id_wp_int(hadTauWP_tight) <= get_tau_id_wp_int(hadTauWP_fakeable) )
     throw cmsException("EventReader", __LINE__) << "Selection of 'tight' taus must be more stringent than selection of 'fakeable' taus !!";
-  fakeableHadTauSelector_.set(hadTauWP_fakeable);
-  tightHadTauSelector_.set(hadTauWP_tight);
+  fakeableHadTauSelector_->set(hadTauWP_fakeable);
+  tightHadTauSelector_->set(hadTauWP_tight);
 
   jetReaderAK4_ = new RecoJetReaderAK4(cfg);
   bool jetCleaningByIndex = cfg.getParameter<bool>("jetCleaningByIndex");
@@ -187,24 +186,23 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
   if ( contains(hadTauReader_->get_supported_systematics(), central_or_shift) )
   {
     const int hadTauPt_option = getHadTauPt_option(central_or_shift);
-    hadTauReader->setHadTauPt_central_or_shift(hadTauPt_option);
+    hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
   }
   if ( contains(jetReaderAK4_->get_supported_systematics(), central_or_shift) )
   {
     const int jetPt_option = getJet_option(central_or_shift, isMC_);
-    jetReader->setPtMass_central_or_shift(jetPt_option);
-    jetReader->read_btag_systematics(central_or_shift != "central" && isMC_);
+    jetReaderAK4_->setPtMass_central_or_shift(jetPt_option);
+    jetReaderAK4_->read_btag_systematics(central_or_shift != "central" && isMC_);
   }
   if ( contains(jetReaderAK8_->get_supported_systematics(), central_or_shift) )
   {
-    const int fatJetPt_option = getFatJet_option(central_or_shift, isMC+);
-    jetReaderAK8->set_central_or_shift(fatJetPt_option);
-    jetReaderAK8->ignoreSys(kFatJetNone);
+    const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
+    jetReaderAK8_->set_central_or_shift(fatJetPt_option);
   }
   if ( contains(metReader_->get_supported_systematics(), central_or_shift) )
   {
     const int met_option = getMET_option(central_or_shift, isMC_);
-    metReader->setMEt_central_or_shift(met_option);
+    metReader_->setMEt_central_or_shift(met_option);
   }
 }
 
@@ -364,7 +362,7 @@ EventReader::read() const
 
   if ( readGenMatching_ )
   {
-    std::vector<GenLepton> genLeptons = genLeptonReader->read();
+    std::vector<GenLepton> genLeptons = genLeptonReader_->read();
     std::vector<GenLepton> genElectrons;
     std::vector<GenLepton> genMuons;
     for ( auto genLepton : genLeptons )
@@ -415,7 +413,7 @@ EventReader::read() const
 
   event.vertex_ = vertexReader_->read();
 
-  metReader->set_phiModulationCorrDetails(&eventInfo, &event.vertex_);
+  metReader_->set_phiModulationCorrDetails(&eventInfo, &event.vertex_);
   event.met_ = metReader_->read();
   event.metFilters_ = metFilterReader_->read();
 
