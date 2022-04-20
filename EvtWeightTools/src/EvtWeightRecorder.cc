@@ -1107,512 +1107,136 @@ EvtWeightRecorder::record_muToTauFakeRate(const Data_to_MC_CorrectionInterface_B
 }
 
 void
-EvtWeightRecorder::record_jetToTau_FR_lead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                                           const RecoHadTau * const hadTau_lead)
+EvtWeightRecorder::record_jetToTauFakeRate(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
+                                           const std::vector<const RecoHadTau *> & hadTaus)
 {
-  const double hadTauPt_lead = hadTau_lead->pt();
-  const double hadTauAbsEta_lead = hadTau_lead->absEta();
-  weights_FR_hadTau_lead_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
+  assert(hadTauFakeRateInterface);
+  weights_jetToTauFakeRate_.clear();
+  for ( auto central_or_shift : central_or_shifts_ )
   {
     const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    if(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option))
+    if ( weights_jetToTauFakeRate_.count(jetToTauFakeRate_option) )
     {
       continue;
     }
-    weights_FR_hadTau_lead_[jetToTauFakeRate_option] = hadTauFakeRateInterface->getWeight_lead(
-      hadTauPt_lead, hadTauAbsEta_lead, jetToTauFakeRate_option
-    );
-  }
-}
-
-void
-EvtWeightRecorder::record_jetToTau_FR_sublead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                                              const RecoHadTau * const hadTau_sublead)
-{
-  const double hadTauPt_sublead = hadTau_sublead->pt();
-  const double hadTauAbsEta_sublead = hadTau_sublead->absEta();
-  weights_FR_hadTau_sublead_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    if(weights_FR_hadTau_sublead_.count(jetToTauFakeRate_option))
+    double weight = 1.;
+    for ( size_t idxHadTau = 0; idxHadTau < hadTaus.size(); ++idxHadTau )
     {
-      continue;
-    }
-    weights_FR_hadTau_sublead_[jetToTauFakeRate_option] = hadTauFakeRateInterface->getWeight_sublead(
-      hadTauPt_sublead, hadTauAbsEta_sublead, jetToTauFakeRate_option
-    );
-  }
-}
-
-void
-EvtWeightRecorder::record_jetToTau_SF_lead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                                           const RecoHadTau * const hadTau_lead)
-{
-  assert(isMC_);
-  const double hadTauPt_lead = hadTau_lead->pt();
-  const double hadTauAbsEta_lead = hadTau_lead->absEta();
-  weights_SF_hadTau_lead_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    if(weights_SF_hadTau_lead_.count(jetToTauFakeRate_option))
-    {
-      continue;
-    }
-    weights_SF_hadTau_lead_[jetToTauFakeRate_option] = hadTauFakeRateInterface->getSF_lead(
-      hadTauPt_lead, hadTauAbsEta_lead, jetToTauFakeRate_option
-    );
-  }
-}
-
-void
-EvtWeightRecorder::record_jetToTau_SF_sublead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                                              const RecoHadTau * const hadTau_sublead)
-{
-  assert(isMC_);
-  const double hadTauPt_sublead = hadTau_sublead->pt();
-  const double hadTauAbsEta_sublead = hadTau_sublead->absEta();
-  weights_SF_hadTau_sublead_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    if(weights_SF_hadTau_sublead_.count(jetToTauFakeRate_option))
-    {
-      continue;
-    }
-    weights_SF_hadTau_sublead_[jetToTauFakeRate_option] = hadTauFakeRateInterface->getSF_sublead(
-      hadTauPt_sublead, hadTauAbsEta_sublead, jetToTauFakeRate_option
-    );
-  }
-}
-
-void
-EvtWeightRecorder::record_jetToLepton_FR(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                                         const RecoLepton * const lepton,
-                                         std::map<int, double> & weights_FR_lepton)
-{
-  const int leptonPdgId = std::abs(lepton->pdgId());
-  const double leptonPt = lepton->cone_pt();
-  const double leptonAbsEta = lepton->absEta();
-  assert(leptonPdgId == 11 || leptonPdgId == 13);
-  weights_FR_lepton.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    if(weights_FR_lepton.count(jetToLeptonFakeRate_option))
-    {
-      continue;
-    }
-    if(leptonPdgId == 11)
-    {
-      int jetToLeptonFakeRate_option_e = jetToLeptonFakeRate_option;
-      if(jetToLeptonFakeRate_option_e >= kFRm_shape_ptUp && jetToLeptonFakeRate_option_e <= kFRm_shape_corrDown)
+      const RecoHadTau * hadTau = hadTaus[idxHadTau];
+      assert(hadTau);
+      const double hadTauPt = hadTau->pt();
+      const double hadTauAbsEta = hadTau->absEta();
+      assert(hadTau->isFakeable());
+      if ( !hadTau->isTight() )
       {
-        jetToLeptonFakeRate_option_e = kFRl_central;
+        weight *= hadTauFakeRateInterface->getWeight(idxHadTau, hadTauPt, hadTauAbsEta, jetToTauFakeRate_option);
       }
-      weights_FR_lepton[jetToLeptonFakeRate_option] = leptonFakeRateInterface->getWeight_e(
-        leptonPt, leptonAbsEta, jetToLeptonFakeRate_option_e
-      );
     }
-    else if(leptonPdgId == 13)
+    weights_jetToTauFakeRate_[jetToTauFakeRate_option] = weight;
+  }
+}
+
+void
+EvtWeightRecorder::record_jetToTauSF(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
+                                     const std::vector<const RecoHadTau *> & hadTaus)
+{
+  assert(hadTauFakeRateInterface);
+  weights_jetToTauSF_.clear();
+  for ( auto central_or_shift : central_or_shifts_ )
+  {
+    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
+    if ( weights_jetToTauSF_.count(jetToTauFakeRate_option) )
     {
-      int jetToLeptonFakeRate_option_m = jetToLeptonFakeRate_option;
-      if(jetToLeptonFakeRate_option_m >= kFRe_shape_ptUp && jetToLeptonFakeRate_option_m <= kFRe_shape_corrDown)
+      continue;
+    }
+    double weight = 1.;
+    for ( size_t idxHadTau = 0; idxHadTau < hadTaus.size(); ++idxHadTau )
+    {
+      const RecoHadTau * hadTau = hadTaus[idxHadTau];
+      assert(hadTau);
+      const double hadTauPt = hadTau->pt();
+      const double hadTauAbsEta = hadTau->absEta();
+      assert(hadTau->isFakeable());
+      if ( !hadTau->isTight() )
       {
-        jetToLeptonFakeRate_option_m = kFRl_central;
+        weight *= hadTauFakeRateInterface->getSF(idxHadTau, hadTauPt, hadTauAbsEta, jetToTauFakeRate_option);
       }
-      weights_FR_lepton[jetToLeptonFakeRate_option] = leptonFakeRateInterface->getWeight_mu(
-        leptonPt, leptonAbsEta, jetToLeptonFakeRate_option_m
-      );
     }
-    else
-    {
-      throw cmsException(this, __func__, __LINE__) << "Invalid PDG ID: " << leptonPdgId;
-    }
+    weights_jetToTauSF_[jetToTauFakeRate_option] = weight;
   }
 }
 
 void
-EvtWeightRecorder::record_jetToLepton_FR_lead(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                                              const RecoLepton * const lepton_lead)
+EvtWeightRecorder::record_jetToLeptonFakeRate(const LeptonFakeRateInterface * const leptonFakeRateInterface,
+                                              const std::vector<const RecoLepton *> & leptons)
 {
-  record_jetToLepton_FR(leptonFakeRateInterface, lepton_lead, weights_FR_lepton_lead_);
+  assert(leptonFakeRateInterface);
+  weights_jetToLeptonFakeRate_.clear();
+  for ( auto central_or_shift : central_or_shifts_ )
+  {
+    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
+    if ( weights_jetToLeptonFakeRate_.count(jetToLeptonFakeRate_option) )
+    {
+      continue;
+    }
+    double weight = 1.;
+    for ( size_t idxLepton = 0; idxLepton < leptons.size(); ++idxLepton )
+    {
+      const RecoLepton * lepton = leptons[idxLepton];
+      assert(lepton);
+      const double leptonPt = lepton->cone_pt();
+      const double leptonAbsEta = lepton->absEta();
+      const int leptonPdgId = std::abs(lepton->pdgId());
+      assert(lepton->isFakeable());
+      if ( !lepton->isTight() )
+      {
+        if ( leptonPdgId == 11 )
+        {
+          int jetToLeptonFakeRate_option_e = jetToLeptonFakeRate_option;
+          if ( jetToLeptonFakeRate_option_e >= kFRm_shape_ptUp && jetToLeptonFakeRate_option_e <= kFRm_shape_corrDown )
+          {
+            jetToLeptonFakeRate_option_e = kFRl_central;
+          }
+          weight *= leptonFakeRateInterface->getWeight_e(leptonPt, leptonAbsEta, jetToLeptonFakeRate_option_e);
+        }
+        else if ( leptonPdgId == 13 )
+        {
+          int jetToLeptonFakeRate_option_m = jetToLeptonFakeRate_option;
+          if ( jetToLeptonFakeRate_option_m >= kFRe_shape_ptUp && jetToLeptonFakeRate_option_m <= kFRe_shape_corrDown )
+          {
+            jetToLeptonFakeRate_option_m = kFRl_central;
+          }
+          weight *= leptonFakeRateInterface->getWeight_mu(leptonPt, leptonAbsEta, jetToLeptonFakeRate_option_m);
+        }
+        else
+        {
+          throw cmsException(this, __func__, __LINE__) << "Invalid PDG ID: " << leptonPdgId;
+        }
+      }
+    }
+    weights_jetToLeptonFakeRate_[jetToTauFakeRate_option] = weight;
+  }
 }
 
 void
-EvtWeightRecorder::record_jetToLepton_FR_sublead(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                                                 const RecoLepton * const lepton_sublead)
+EvtWeightRecorder::compute_FR()
 {
-  record_jetToLepton_FR(leptonFakeRateInterface, lepton_sublead, weights_FR_lepton_sublead_);
-}
-
-void
-EvtWeightRecorder::record_jetToLepton_FR_third(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                                               const RecoLepton * const lepton_third)
-{
-  record_jetToLepton_FR(leptonFakeRateInterface, lepton_third, weights_FR_lepton_third_);
-}
-
-void
-EvtWeightRecorder::record_jetToLepton_FR_fourth(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                                                const RecoLepton * const lepton_fourth)
-{
-  record_jetToLepton_FR(leptonFakeRateInterface, lepton_fourth, weights_FR_lepton_fourth_);
-}
-
-void
-EvtWeightRecorder::compute_FR_2l2tau(bool passesTight_lepton_lead,
-                                     bool passesTight_lepton_sublead,
-                                     bool passesTight_hadTau_lead,
-                                     bool passesTight_hadTau_sublead)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_lepton_sublead_.empty());
-  assert(! weights_FR_hadTau_lead_.empty());
-  assert(! weights_FR_hadTau_sublead_.empty());
+  assert(! weights_jetToLeptonFakeRate_.empty());
+  assert(! weights_jetToTauFakeRate_.empty());
   weights_FR_.clear();
   for(const std::string & central_or_shift: central_or_shifts_)
   {
     const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
     const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_sublead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-    assert(weights_FR_hadTau_sublead_.count(jetToTauFakeRate_option));
+    assert(weights_FR_lepton_.count(jetToLeptonFakeRate_option));
+    assert(weights_FR_hadTau_.count(jetToTauFakeRate_option));
     const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
     if(weights_FR_.count(weightKey))
     {
       continue;
     }
-    weights_FR_[weightKey] = getWeight_4L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option),    passesTight_lepton_lead,
-      weights_FR_lepton_sublead_.at(jetToLeptonFakeRate_option), passesTight_lepton_sublead,
-      weights_FR_hadTau_lead_.at(jetToTauFakeRate_option),       passesTight_hadTau_lead,
-      weights_FR_hadTau_sublead_.at(jetToTauFakeRate_option),    passesTight_hadTau_sublead
-    );
+    weights_FR_[weightKey] = weights_jetToLeptonFakeRate_.at(jetToLeptonFakeRate_option)*weights_jetToTauFakeRate_.at(jetToTauFakeRate_option);
   }
-}
-
-void
-EvtWeightRecorder::compute_FR_2l1tau(bool passesTight_lepton_lead,
-                                     bool passesTight_lepton_sublead,
-                                     bool passesTight_hadTau)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_lepton_sublead_.empty());
-  assert(! weights_FR_hadTau_lead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_sublead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_3L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option),    passesTight_lepton_lead,
-      weights_FR_lepton_sublead_.at(jetToLeptonFakeRate_option), passesTight_lepton_sublead,
-      weights_FR_hadTau_lead_.at(jetToTauFakeRate_option),       passesTight_hadTau
-    );
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_2l(bool passesTight_lepton_lead,
-                                 bool passesTight_lepton_sublead)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_lepton_sublead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_sublead_.count(jetToLeptonFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_2L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option),    passesTight_lepton_lead,
-      weights_FR_lepton_sublead_.at(jetToLeptonFakeRate_option), passesTight_lepton_sublead
-    );
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_3l(bool passesTight_lepton_lead,
-                                 bool passesTight_lepton_sublead,
-                                 bool passesTight_lepton_third)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_lepton_sublead_.empty());
-  assert(! weights_FR_lepton_third_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_sublead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_third_.count(jetToLeptonFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_3L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option),    passesTight_lepton_lead,
-      weights_FR_lepton_sublead_.at(jetToLeptonFakeRate_option), passesTight_lepton_sublead,
-      weights_FR_lepton_third_.at(jetToLeptonFakeRate_option),   passesTight_lepton_third
-    );
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_4l(bool passesTight_lepton_lead,
-                                 bool passesTight_lepton_sublead,
-                                 bool passesTight_lepton_third,
-                                 bool passesTight_lepton_fourth)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_lepton_sublead_.empty());
-  assert(! weights_FR_lepton_third_.empty());
-  assert(! weights_FR_lepton_fourth_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_sublead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_third_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_fourth_.count(jetToLeptonFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_4L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option),    passesTight_lepton_lead,
-      weights_FR_lepton_sublead_.at(jetToLeptonFakeRate_option), passesTight_lepton_sublead,
-      weights_FR_lepton_third_.at(jetToLeptonFakeRate_option),   passesTight_lepton_third,
-      weights_FR_lepton_fourth_.at(jetToLeptonFakeRate_option),  passesTight_lepton_fourth
-    );
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_3l1tau(bool passesTight_lepton_lead,
-                                     bool passesTight_lepton_sublead,
-                                     bool passesTight_lepton_third,
-                                     bool passesTight_hadTau)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_lepton_sublead_.empty());
-  assert(! weights_FR_lepton_third_.empty());
-  assert(! weights_FR_hadTau_lead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_sublead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_lepton_third_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_4L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option),    passesTight_lepton_lead,
-      weights_FR_lepton_sublead_.at(jetToLeptonFakeRate_option), passesTight_lepton_sublead,
-      weights_FR_lepton_third_.at(jetToLeptonFakeRate_option),   passesTight_lepton_third,
-      weights_FR_hadTau_lead_.at(jetToTauFakeRate_option),       passesTight_hadTau
-    );
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_1l2tau(bool passesTight_lepton,
-                                     bool passesTight_hadTau_lead,
-                                     bool passesTight_hadTau_sublead)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_hadTau_lead_.empty());
-  assert(! weights_FR_hadTau_sublead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-    assert(weights_FR_hadTau_sublead_.count(jetToTauFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_3L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option), passesTight_lepton,
-      weights_FR_hadTau_lead_.at(jetToTauFakeRate_option),    passesTight_hadTau_lead,
-      weights_FR_hadTau_sublead_.at(jetToTauFakeRate_option), passesTight_hadTau_sublead
-    );
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_1l1tau(bool passesTight_lepton,
-                                     bool passesTight_hadTau)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  assert(! weights_FR_hadTau_lead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_2L(
-      weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option), passesTight_lepton,
-      weights_FR_hadTau_lead_.at(jetToTauFakeRate_option),    passesTight_hadTau
-    );
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_1l(bool passesTight_lepton)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = ! passesTight_lepton ? getWeight_1L(weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option)) : 1.;
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_1tau(bool passesTight_hadTau)
-{
-  assert(! weights_FR_hadTau_lead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = ! passesTight_hadTau ? getWeight_1L(weights_FR_hadTau_lead_.at(jetToTauFakeRate_option)) : 1.;
-  }
-}
-
-void
-EvtWeightRecorder::compute_FR_2tau(bool passesTight_hadTau_lead,
-                                   bool passesTight_hadTau_sublead)
-{
-  assert(! weights_FR_hadTau_lead_.empty());
-  assert(! weights_FR_hadTau_sublead_.empty());
-  weights_FR_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-    const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-    assert(weights_FR_hadTau_sublead_.count(jetToTauFakeRate_option));
-    const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
-    if(weights_FR_.count(weightKey))
-    {
-      continue;
-    }
-    weights_FR_[weightKey] = getWeight_2L(
-      weights_FR_hadTau_lead_.at(jetToTauFakeRate_option),    passesTight_hadTau_lead,
-      weights_FR_hadTau_sublead_.at(jetToTauFakeRate_option), passesTight_hadTau_sublead
-    );
-  }
-}
-
-double
-EvtWeightRecorder::get_jetToLepton_FR_lead(const std::string & central_or_shift)
-{
-  assert(! weights_FR_lepton_lead_.empty());
-  const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-  assert(weights_FR_lepton_lead_.count(jetToLeptonFakeRate_option));
-  return weights_FR_lepton_lead_.at(jetToLeptonFakeRate_option);
-}
-
-double
-EvtWeightRecorder::get_jetToLepton_FR_sublead(const std::string & central_or_shift)
-{
-  assert(! weights_FR_lepton_sublead_.empty());
-  const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-  assert(weights_FR_lepton_sublead_.count(jetToLeptonFakeRate_option));
-  return weights_FR_lepton_sublead_.at(jetToLeptonFakeRate_option);
-}
-
-double
-EvtWeightRecorder::get_jetToLepton_FR_third(const std::string & central_or_shift)
-{
-  assert(! weights_FR_lepton_third_.empty());
-  const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-  assert(weights_FR_lepton_third_.count(jetToLeptonFakeRate_option));
-  return weights_FR_lepton_third_.at(jetToLeptonFakeRate_option);
-}
-
-double
-EvtWeightRecorder::get_jetToLepton_FR_fourth(const std::string & central_or_shift)
-{
-  assert(! weights_FR_lepton_fourth_.empty());
-  const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
-  assert(weights_FR_lepton_fourth_.count(jetToLeptonFakeRate_option));
-  return weights_FR_lepton_fourth_.at(jetToLeptonFakeRate_option);
-}
-
-double
-EvtWeightRecorder::get_jetToTau_FR_lead(const std::string & central_or_shift)
-{
-  assert(! weights_FR_hadTau_lead_.empty());
-  const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-  assert(weights_FR_hadTau_lead_.count(jetToTauFakeRate_option));
-  return weights_FR_hadTau_lead_.at(jetToTauFakeRate_option);
-}
-
-double
-EvtWeightRecorder::get_jetToTau_FR_sublead(const std::string & central_or_shift)
-{
-  assert(! weights_FR_hadTau_sublead_.empty());
-  const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-  assert(weights_FR_hadTau_sublead_.count(jetToTauFakeRate_option));
-  return weights_FR_hadTau_sublead_.at(jetToTauFakeRate_option);
 }
 
 std::ostream &

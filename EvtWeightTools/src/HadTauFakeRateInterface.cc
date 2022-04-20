@@ -130,67 +130,21 @@ HadTauFakeRateInterface::~HadTauFakeRateInterface()
 }
 
 double
-HadTauFakeRateInterface::getWeight_lead(double hadTauPt_lead,
-                                        double hadTauAbsEta_lead,
-                                        int central_or_shift) const
+HadTauFakeRateInterface::getWeight(int idxHadTau,
+                                   double hadTauPt,
+                                   double hadTauAbsEta,
+                                   int central_or_shift) const
 {
-  return getWeight_or_SF(hadTauPt_lead, hadTauAbsEta_lead, kWeight, 0, central_or_shift);
+  return getWeight_or_SF(hadTauPt, hadTauAbsEta, kWeight, idxHadTau, central_or_shift);
 }
 
 double
-HadTauFakeRateInterface::getWeight_sublead(double hadTauPt_sublead,
-                                           double hadTauAbsEta_sublead,
-                                           int central_or_shift) const
-{
-  return getWeight_or_SF(hadTauPt_sublead, hadTauAbsEta_sublead, kWeight, 1, central_or_shift);
-}
-
-double
-HadTauFakeRateInterface::getWeight_third(double hadTauPt_third,
-                                         double hadTauAbsEta_third,
-                                         int central_or_shift) const
-{
-  return getWeight_or_SF(hadTauPt_third, hadTauAbsEta_third, kWeight, 2, central_or_shift);
-}
-
-double
-HadTauFakeRateInterface::getWeight_fourth(double hadTauPt_fourth,
-                                          double hadTauAbsEta_fourth,
-                                          int central_or_shift) const
-{
-  return getWeight_or_SF(hadTauPt_fourth, hadTauAbsEta_fourth, kWeight, 3, central_or_shift);
-}
-
-double
-HadTauFakeRateInterface::getSF_lead(double hadTauPt_lead,
-                                    double hadTauAbsEta_lead,
+HadTauFakeRateInterface::getSF_lead(int idxHadTau,
+                                    double hadTauPt,
+                                    double hadTauAbsEta,
                                     int central_or_shift) const
 {
-  return getWeight_or_SF(hadTauPt_lead, hadTauAbsEta_lead, kSF, 0, central_or_shift);
-}
-
-double
-HadTauFakeRateInterface::getSF_sublead(double hadTauPt_sublead,
-                                       double hadTauAbsEta_sublead,
-                                       int central_or_shift) const
-{
-  return getWeight_or_SF(hadTauPt_sublead, hadTauAbsEta_sublead, kSF, 1, central_or_shift);
-}
-
-double
-HadTauFakeRateInterface::getSF_third(double hadTauPt_third,
-                                     double hadTauAbsEta_third,
-                                     int central_or_shift) const
-{
-  return getWeight_or_SF(hadTauPt_third, hadTauAbsEta_third, kSF, 2, central_or_shift);
-}
-
-double
-HadTauFakeRateInterface::getSF_fourth(double hadTauPt_fourth,
-                                      double hadTauAbsEta_fourth,
-                                      int central_or_shift) const
-{
-  return getWeight_or_SF(hadTauPt_fourth, hadTauAbsEta_fourth, kSF, 3, central_or_shift);
+  return getWeight_or_SF(hadTauPt, hadTauAbsEta, kSF, idxHadTau, central_or_shift);
 }
 
 double

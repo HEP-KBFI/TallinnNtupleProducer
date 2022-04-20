@@ -15,6 +15,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h"                        // get_tH_SM_str()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/BtagSFRatioInterface.h"                // BtagSFRatioInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/ChargeMisIdRateInterface.h"            // ChargeMisIdRateInterface
@@ -129,8 +130,13 @@ int main(int argc, char* argv[])
 
   bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
 
-  std::vector<std::string> systematic_shifts = EventReader::get_supported_systematics();
-  // CV: add central value 
+  std::vector<std::string> systematic_shifts;
+  // CV: process all systematic uncertainties supported by EventReader class (only for MC)
+  if ( isMC_ )
+  {
+    merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics());
+  }
+  // CV: add central value (for data and MC)
   systematic_shifts.insert("central");
 
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
@@ -152,11 +158,11 @@ int main(int argc, char* argv[])
 
   edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("leptonFakeRateWeight");
   cfg_leptonFakeRateWeight.addParameter<std::string>("era", era_string);
-  LeptonFakeRateInterface* leptonFakeRateInterface = new LeptonFakeRateInterface(cfg_leptonFakeRateWeight);
+  LeptonFakeRateInterface* jetToLeptonFakeRateInterface = new LeptonFakeRateInterface(cfg_leptonFakeRateWeight);
 
   edm::ParameterSet cfg_hadTauFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("hadTauFakeRateWeight");
   cfg_hadTauFakeRateWeight.addParameter<std::string>("hadTauSelection", hadTauSelection_part2);
-  HadTauFakeRateInterface* hadTauFakeRateInterface = new HadTauFakeRateInterface(cfg_hadTauFakeRateWeight);
+  HadTauFakeRateInterface* jetToHadTauFakeRateInterface = new HadTauFakeRateInterface(cfg_hadTauFakeRateWeight);
 
   bool redoGenMatching = cfg_analyze.getParameter<bool>("redoGenMatching");
   bool genMatchingByIndex = cfg_analyze.getParameter<bool>("genMatchingByIndex");
@@ -298,95 +304,62 @@ int main(int argc, char* argv[])
 
     for ( auto central_or_shift : systematic_shifts )
     {
+      Event event = eventReader->read();
+
       EvtWeightRecorder evtWeightRecorder(central_or_shifts_local, central_or_shift_main, isMC);
       if ( isMC )
       {
-        if ( apply_genWeight         ) evtWeightRecorder.record_genWeight(eventInfo);
+        if ( apply_genWeight         ) evtWeightRecorder.record_genWeight(event.eventInfo());
         if ( eventWeightManager      ) evtWeightRecorder.record_auxWeight(eventWeightManager);
         if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
-        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(eventInfo.topPtRwgtSF);
+        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.eventInfo().topPtRwgtSF);
         lheInfoReader->read();
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
         evtWeightRecorder.record_psWeight(psWeightReader);
-        evtWeightRecorder.record_puWeight(&eventInfo);
-        evtWeightRecorder.record_nom_tH_weight(&eventInfo);
+        evtWeightRecorder.record_puWeight(&event.eventInfo());
+        evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
 
 //--- compute event-level weight for data/MC correction of b-tagging efficiency and mistag rate
 //   (using the method "Event reweighting using scale factors calculated with a tag and probe method",
 //    described on the BTV POG twiki https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration )
-        evtWeightRecorder.record_btagWeight(selJets);
-      if(btagSFRatioInterface)
-      {
-        evtWeightRecorder.record_btagSFRatio(btagSFRatioInterface, selJets.size());
-      }
+        evtWeightRecorder.record_btagWeight(event.selJetsAK4());
+        if ( btagSFRatioInterface )
+        {
+          evtWeightRecorder.record_btagSFRatio(btagSFRatioInterface, event.selJetsAK4().size());
+        }
 
-      if(isMC_EWK)
-      {
-        evtWeightRecorder.record_ewk_jet(selJets);
-        evtWeightRecorder.record_ewk_bjet(selBJets_medium);
-      }
+        if ( isMC_EWK )
+        {
+          evtWeightRecorder.record_ewk_jet(event.selJetsAK4());
+          evtWeightRecorder.record_ewk_bjet(event.selJetsAK4_btagMedium());
+        }
 
-      dataToMCcorrectionInterface->setLeptons({ selLepton_lead, selLepton_sublead }, true);
+        dataToMCcorrectionInterface->setLeptons(event.fakeableLeptons(), true);
 
 //--- apply data/MC corrections for trigger efficiency
-      evtWeightRecorder.record_leptonTriggerEff(dataToMCcorrectionInterface);
+        evtWeightRecorder.record_leptonTriggerEff(dataToMCcorrectionInterface);
 
 //--- apply data/MC corrections for efficiencies for lepton to pass loose identification and isolation criteria
-      evtWeightRecorder.record_leptonIDSF_recoToLoose(dataToMCcorrectionInterface);
+        evtWeightRecorder.record_leptonIDSF_recoToLoose(dataToMCcorrectionInterface);
 
 //--- apply data/MC corrections for efficiencies of leptons passing the loose identification and isolation criteria
-//    to also pass the tight identification and isolation criteria
-      if(electronSelection >= kFakeable && muonSelection >= kFakeable)
-      {
-        // apply looseToTight SF to leptons matched to generator-level prompt leptons and passing Tight selection conditions
+//    to also pass the fakeable and/or tight identification and isolation criteria
         evtWeightRecorder.record_leptonIDSF_looseToTight(dataToMCcorrectionInterface, false);
-      }
 
 //--- apply data/MC corrections for hadronic tau identification efficiency
 //    and for e->tau and mu->tau misidentification rates
-      dataToMCcorrectionInterface->setHadTaus({ selHadTau });
-      evtWeightRecorder.record_hadTauID_and_Iso(dataToMCcorrectionInterface);
-      evtWeightRecorder.record_eToTauFakeRate(dataToMCcorrectionInterface);
-      evtWeightRecorder.record_muToTauFakeRate(dataToMCcorrectionInterface);
-    }
+        dataToMCcorrectionInterface->setHadTaus(event.fakeableHadTaus());
+        evtWeightRecorder.record_hadTauID_and_Iso(dataToMCcorrectionInterface);
+        evtWeightRecorder.record_eToTauFakeRate(dataToMCcorrectionInterface);
+        evtWeightRecorder.record_muToTauFakeRate(dataToMCcorrectionInterface);
 
-    bool passesTight_lepton_lead = isMatched(*selLepton_lead, tightElectrons) || isMatched(*selLepton_lead, tightMuons);
-    bool passesTight_lepton_sublead = isMatched(*selLepton_sublead, tightElectrons) || isMatched(*selLepton_sublead, tightMuons);
-    bool passesTight_hadTau = isMatched(*selHadTau, tightHadTausFull);
-
-    if(leptonFakeRateInterface)
-    {
-      evtWeightRecorder.record_jetToLepton_FR_lead(leptonFakeRateInterface, selLepton_lead);
-      evtWeightRecorder.record_jetToLepton_FR_sublead(leptonFakeRateInterface, selLepton_sublead);
-    }
-    if(jetToTauFakeRateInterface)
-    {
-      evtWeightRecorder.record_jetToTau_FR_lead(jetToTauFakeRateInterface, selHadTau);
-    }
-
-    if(! selectBDT)
-    {
-      if(applyFakeRateWeights == kFR_3L)
-      {
-        evtWeightRecorder.compute_FR_2l1tau(passesTight_lepton_lead, passesTight_lepton_sublead, passesTight_hadTau);
+        evtWeightRecorder.record_jetToLeptonRate(jetToLeptonFakeRateInterface, event.fakeableLeptons());
+        evtWeightRecorder.record_jetToTauFakeRate(jetToHadTauFakeRateInterface, event.fakeableHadTaus());
+        evtWeightRecorder.compute_FR();
       }
-      else if(applyFakeRateWeights == kFR_2lepton)
-      {
-        evtWeightRecorder.compute_FR_2l(passesTight_lepton_lead, passesTight_lepton_sublead);
-      }
-      else if (applyFakeRateWeights == kFR_1tau)
-      {
-        evtWeightRecorder.compute_FR_1tau(passesTight_hadTau);
-      }
-    }
-
-    // CV: apply data/MC ratio for jet->tau fake-rates in case data-driven "fake" background estimation is applied to leptons only
-    if(isMC && apply_hadTauFakeRateSF && hadTauSelection == kTight && !(selHadTau->genHadTau() || selHadTau->genLepton()))
-    {
-      evtWeightRecorder.record_jetToTau_SF_lead(jetToTauFakeRateInterface, selHadTau);
-    }
+   
 
     if ( leptonChargeSelection == kOS ) {
       double prob_chargeMisId_lead = chargeMisIdRate.get(selLepton_lead);
@@ -474,7 +447,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    Event event = eventReader->read();
+    
 
     for ( auto writer : writers )
     {

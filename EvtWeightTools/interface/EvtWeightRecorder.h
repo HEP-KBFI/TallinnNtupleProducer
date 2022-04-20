@@ -44,7 +44,7 @@ enum class SubjetBtagSys;
 
 class EvtWeightRecorder
 {
-public:
+ public:
   EvtWeightRecorder();
   EvtWeightRecorder(const std::vector<std::string> & central_or_shifts,
                     const std::string & central_or_shift,
@@ -296,111 +296,25 @@ public:
   record_muToTauFakeRate(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface);
 
   void
-  record_jetToTau_FR_lead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                          const RecoHadTau * const hadTau_lead);
+  record_jetToTauFakeRate(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
+                          const std::vector<const RecoHadTau *> & hadTaus);
 
   void
-  record_jetToTau_FR_sublead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                             const RecoHadTau * const hadTau_sublead);
+  record_jetToTauSF(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
+                    const std::vector<const RecoHadTau *> & hadTaus);
 
   void
-  record_jetToTau_SF_lead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                          const RecoHadTau * const hadTau_lead);
+  record_jetToLeptonRate(const LeptonFakeRateInterface * const leptonFakeRateInterface,
+                         const std::vector<const RecoLepton *> & leptons);
 
   void
-  record_jetToTau_SF_sublead(const HadTauFakeRateInterface * const hadTauFakeRateInterface,
-                             const RecoHadTau * const hadTau_sublead);
-
-  void
-  record_jetToLepton_FR_lead(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                             const RecoLepton * const lepton_lead);
-
-  void
-  record_jetToLepton_FR_sublead(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                                const RecoLepton * const lepton_sublead);
-
-  void
-  record_jetToLepton_FR_third(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                              const RecoLepton * const lepton_third);
-
-  void
-  record_jetToLepton_FR_fourth(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                               const RecoLepton * const lepton_fourth);
-
-  void
-  compute_FR_2l2tau(bool passesTight_lepton_lead,
-                    bool passesTight_lepton_sublead,
-                    bool passesTight_hadTau_lead,
-                    bool passesTight_hadTau_sublead);
-
-  void
-  compute_FR_2l1tau(bool passesTight_lepton_lead,
-                    bool passesTight_lepton_sublead,
-                    bool passesTight_hadTau);
-
-  void
-  compute_FR_2l(bool passesTight_lepton_lead,
-                bool passesTight_lepton_sublead);
-
-  void
-  compute_FR_3l(bool passesTight_lepton_lead,
-                bool passesTight_lepton_sublead,
-                bool passesTight_lepton_third);
-
-  void
-  compute_FR_4l(bool passesTight_lepton_lead,
-                bool passesTight_lepton_sublead,
-                bool passesTight_lepton_third,
-                bool passesTight_lepton_fourth);
-
-  void
-  compute_FR_3l1tau(bool passesTight_lepton_lead,
-                    bool passesTight_lepton_sublead,
-                    bool passesTight_lepton_third,
-                    bool passesTight_hadTau);
-
-  void
-  compute_FR_1l2tau(bool passesTight_lepton,
-                    bool passesTight_hadTau_lead,
-                    bool passesTight_hadTau_sublead);
-
-  void
-  compute_FR_1l1tau(bool passesTight_lepton,
-                    bool passesTight_hadTau);
-
-  void
-  compute_FR_1l(bool passesTight_lepton);
-
-  void
-  compute_FR_1tau(bool passesTight_hadTau);
-
-  void
-  compute_FR_2tau(bool passesTight_hadTau_lead,
-                  bool passesTight_hadTau_sublead);
-
-  double
-  get_jetToLepton_FR_lead(const std::string & central_or_shift);
-
-  double
-  get_jetToLepton_FR_sublead(const std::string & central_or_shift);
-
-  double
-  get_jetToLepton_FR_third(const std::string & central_or_shift);
-
-  double
-  get_jetToLepton_FR_fourth(const std::string & central_or_shift);
-
-  double
-  get_jetToTau_FR_lead(const std::string & central_or_shift);
-
-  double
-  get_jetToTau_FR_sublead(const std::string & central_or_shift);
+  compute_FR();
 
   friend std::ostream &
   operator<<(std::ostream & os,
              const EvtWeightRecorder & evtWeightRecorder);
 
-protected:
+ protected:
   void
   record_jetToLepton_FR(const LeptonFakeRateInterface * const leptonFakeRateInterface,
                         const RecoLepton * const lepton,
@@ -442,14 +356,9 @@ protected:
   std::map<TauIDSFsys, double> weights_hadTauID_and_Iso_;
   std::map<FRet, double> weights_eToTauFakeRate_;
   std::map<FRmt, double> weights_muToTauFakeRate_;
-  std::map<int, double> weights_FR_hadTau_lead_;
-  std::map<int, double> weights_FR_hadTau_sublead_;
-  std::map<int, double> weights_SF_hadTau_lead_;
-  std::map<int, double> weights_SF_hadTau_sublead_;
-  std::map<int, double> weights_FR_lepton_lead_;
-  std::map<int, double> weights_FR_lepton_sublead_;
-  std::map<int, double> weights_FR_lepton_third_;
-  std::map<int, double> weights_FR_lepton_fourth_;
+  std::map<int, double> weights_jetToTauFakeRate_;
+  std::map<int, double> weights_jetToTauSF_;
+  std::map<int, double> weights_jetToLeptonFakeRate_;
   std::map<std::string, double> weights_FR_;
   std::map<EWKJetSys, double> weights_ewk_jet_;
   std::map<EWKBJetSys, double> weights_ewk_bjet_;
