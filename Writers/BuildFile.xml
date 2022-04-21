@@ -1,5 +1,6 @@
 <use   name="FWCore/ParameterSet"/>
 <use   name="FWCore/PluginManager"/>
+<use   name="TallinnNtupleProducer/EvtWeightTools"/>
 <use   name="TallinnNtupleProducer/Objects"/>
 <use   name="root"/>
 <Flags CXXFLAGS="-O3 -fPIC -Wswitch -Wswitch-enum -Werror -Wshadow -Wno-reorder -Wno-error=bool-compare" />

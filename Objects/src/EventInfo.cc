@@ -40,27 +40,9 @@ const std::map<Int_t, std::string> EventInfo::productionMode_idString_singleHigg
   { 24000025, "WH" },
 };
 
-EventInfo::EventInfo()
-  : EventInfo(false, false, false, false, false)
-{}
-
 EventInfo::EventInfo(const AnalysisConfig & analysisConfig)
-  : EventInfo(analysisConfig.isMC(),
-              analysisConfig.isMC_H(),
-              analysisConfig.isMC_HH(),
-              analysisConfig.isHH_rwgt_allowed(),
-              analysisConfig.apply_topPtReweighting())
-{
-  process_string_ = analysisConfig.process();
-  std::cout << "<EventInfo::EventInfo()>: process = '" << process_string_ << "'\n";
-}
-
-EventInfo::EventInfo(bool isMC,
-                     bool isMC_H,
-                     bool isMC_HH,
-                     bool isHH_rwgt_allowed,
-                     bool apply_topPtRwgt)
-  : run(0)
+  : analysisConfig_(analysisConfig)
+  , run(0)
   , lumi(0)
   , event(0)
   , genHiggsDecayMode(-1)
@@ -70,11 +52,6 @@ EventInfo::EventInfo(bool isMC,
   , gen_mHH(0.)
   , gen_cosThetaStar(-2.)
   , topPtRwgtSF(-1.)
-  , isMC_(isMC)
-  , isMC_H_(isMC_H)
-  , isMC_HH_(isMC_HH)
-  , isHH_rwgt_allowed_(isHH_rwgt_allowed)
-  , apply_topPtRwgt_(apply_topPtRwgt)
   , central_or_shift_("central")
   , nLHEReweightingWeight(0)
   , LHEReweightingWeight(nullptr)
@@ -84,15 +61,18 @@ EventInfo::EventInfo(bool isMC,
   , refGenWeight_(0.)
   , productionMode_(-1)
 {
+  process_string_ = analysisConfig.process();
+  std::cout << "<EventInfo::EventInfo()>: process = '" << process_string_ << "'\n";
   int checksum = 0;
-  if ( isMC_H_  ) ++checksum;
-  if ( isMC_HH_ ) ++checksum;
-  if ( !(checksum == 0 || (checksum == 1 && isMC_)) )
+  assert(analysisConfig_);
+  if ( analysisConfig_->isMC_H()  ) ++checksum;
+  if ( analysisConfig_->isMC_HH() ) ++checksum;
+  if ( !(checksum == 0 || (checksum == 1 && analysisConfig_->isMC())) )
     throw cmsException(this, __func__, __LINE__)
       << "Invalid combination of Configuration parameters:\n" 
-      << " isMC = " << isMC_ << "\n" 
-      << " isMC_H = " << isMC_H_ << "\n"  
-      << " isMC_HH = " << isMC_HH_ << "\n";
+      << " isMC = " << analysisConfig_->isMC() << "\n" 
+      << " isMC_H = " << analysisConfig_->isMC_H() << "\n"  
+      << " isMC_HH = " << analysisConfig_->isMC_HH() << "\n";
 }
 
 EventInfo::EventInfo(const EventInfo & eventInfo)
@@ -111,21 +91,16 @@ EventInfo::operator=(const EventInfo & eventInfo)
 void
 EventInfo::copy(const EventInfo & eventInfo)
 {
+  analysisConfig_ = eventInfo.analysisConfig_;
   run = eventInfo.run;
   lumi = eventInfo.lumi;
   event = eventInfo.event;
   genHiggsDecayMode = eventInfo.genHiggsDecayMode;
   genWeight = eventInfo.genWeight;
-  isMC_H_ = eventInfo.isMC_H_;
-  isMC_ = eventInfo.isMC_;
   genDiHiggsDecayMode = eventInfo.genDiHiggsDecayMode;
-  isMC_HH_ = eventInfo.isMC_HH_;
-  isHH_rwgt_allowed_ = eventInfo.isHH_rwgt_allowed_;
   gen_mHH = eventInfo.gen_mHH;
   gen_cosThetaStar = eventInfo.gen_cosThetaStar;
-  apply_topPtRwgt_ = eventInfo.apply_topPtRwgt_;
   topPtRwgtSF = eventInfo.topPtRwgtSF;
-
   nLHEReweightingWeight = eventInfo.nLHEReweightingWeight;
   if(eventInfo.LHEReweightingWeight)
   {
@@ -147,29 +122,16 @@ EventInfo::copy(const EventInfo & eventInfo)
     is_owner = true;
     std::memcpy(LHEReweightingWeight, eventInfo.LHEReweightingWeight, nLHEReweightingWeight);
   }
-
   htxs_ = eventInfo.htxs_;
 }
 
 EventInfo::~EventInfo()
 {}
 
-bool
-EventInfo::isMC() const
+const AnalysisConfig &
+EventInfo::analysisConfig() const
 {
-  return isMC_;
-}
-
-bool
-EventInfo::isMC_H() const
-{
-  return isMC_H_;
-}
-
-bool
-EventInfo::isMC_HH() const
-{
-  return isMC_HH_;
+  return *analysisConfig_;
 }
 
 double

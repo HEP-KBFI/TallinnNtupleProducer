@@ -15,11 +15,6 @@ class EventInfo
  public:
   EventInfo();
   EventInfo(const AnalysisConfig & analysisConfig);
-  EventInfo(bool isMC,
-            bool isMC_H,
-            bool isMC_HH,
-            bool isHH_rwgt_allowed,
-            bool apply_topPtRwgt);
   EventInfo(const EventInfo & eventInfo);
   EventInfo &
   operator=(const EventInfo & eventInfo);
@@ -39,14 +34,8 @@ class EventInfo
   Float_t   gen_cosThetaStar;    ///< LHE parton-level cos(theta*) variable
   Float_t   topPtRwgtSF;         ///< SF correct ttbar samples in top quark pT distribution (only if MC)
 
-  bool
-  isMC() const;
-
-  bool
-  isMC_H() const;
-
-  bool
-  isMC_HH() const;
+  const AnalysisConfig &
+  analysisConfig() const;
 
   double
   genWeight_tH() const;
@@ -129,11 +118,8 @@ class EventInfo
   friend class EventInfoWriter;
 
  protected:
-  bool isMC_;
-  bool isMC_H_;
-  bool isMC_HH_;
-  bool isHH_rwgt_allowed_;
-  bool apply_topPtRwgt_;
+  AnalysisConfig * analysisConfig_;
+
   std::string central_or_shift_;
   std::string process_string_;
 

@@ -202,42 +202,9 @@ int main(int argc, char* argv[])
     const double ref_genWeight = cfg_analyze.getParameter<double>("ref_genWeight");
     eventInfo.set_refGetWeight(ref_genWeight);
   }
-  const std::string default_cat_str = "default";
-  std::vector<std::string> evt_cat_strs = { default_cat_str };
   const std::vector<std::pair<std::string, int>> evt_htxs_binning = get_htxs_binning(isMC_signal);
   eventInfo.read_htxs(!evt_htxs_binning.empty());
-
-//--- prepare HH reweighting/coupling scan
-  const edm::ParameterSet hhWeight_cfg = cfg_analyze.getParameterSet("hhWeight_cfg");
-  const bool apply_HH_rwgt_lo = analysisConfig.isHH_rwgt_allowed() && hhWeight_cfg.getParameter<bool>("apply_rwgt_lo");
-  const bool apply_HH_rwgt_nlo = analysisConfig.isHH_rwgt_allowed() && hhWeight_cfg.getParameter<bool>("apply_rwgt_nlo");
-  const HHWeightInterfaceCouplings * hhWeight_couplings = nullptr;
-  const HHWeightInterfaceLO * HHWeightLO_calc = nullptr;
-  const HHWeightInterfaceNLO * HHWeightNLO_calc = nullptr;
-  if ( apply_HH_rwgt_lo || apply_HH_rwgt_nlo )
-  {
-    hhWeight_couplings = new HHWeightInterfaceCouplings(hhWeight_cfg);
-
-    if ( apply_HH_rwgt_lo )
-    {
-      HHWeightLO_calc = new HHWeightInterfaceLO(hhWeight_couplings, hhWeight_cfg);
-      evt_cat_strs = hhWeight_couplings->get_bm_names();
-    }
-
-    if ( apply_HH_rwgt_nlo )
-    {
-      HHWeightNLO_calc = new HHWeightInterfaceNLO(hhWeight_couplings, era);
-    }
-  }
-
-  const std::vector<edm::ParameterSet> tHweights = cfg_analyze.getParameterSetVector("tHweights");
-  if ( (isMC_tH || isMC_signal) && ! tHweights.empty() )
-  {
-    eventInfo.set_central_or_shift(central_or_shift_main);
-    eventInfo.loadWeight_tH(tHweights);
-    const std::vector<std::string> evt_cat_tH_strs = eventInfo.getWeight_tH_str(central_or_shift_main);
-    evt_cat_strs.insert(evt_cat_strs.end(), evt_cat_tH_strs.begin(), evt_cat_tH_strs.end());
-  }
+  
   EventInfoReader eventInfoReader(&eventInfo);
   if ( apply_topPtReweighting )
   {
@@ -252,8 +219,8 @@ int main(int argc, char* argv[])
     inputTree->registerReader(l1PreFiringWeightReader);
   }
 
-  BtagSFRatioInterface * btagSFRatioInterface = nullptr;
-  if(apply_btagSFRatio)
+  BtagSFRatioInterface* btagSFRatioInterface = nullptr;
+  if ( apply_btagSFRatio )
   {
     const edm::ParameterSet btagSFRatio = cfg_analyze.getParameterSet("btagSFRatio");
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
@@ -306,6 +273,8 @@ int main(int argc, char* argv[])
 
     for ( auto central_or_shift : systematic_shifts )
     {
+      eventInfo.set_central_or_shift(central_or_shift);
+
       Event event = eventReader->read();
 
       EvtWeightRecorder evtWeightRecorder(central_or_shifts_local, central_or_shift_main, isMC);
@@ -382,8 +351,8 @@ int main(int argc, char* argv[])
               if ( run_lumi_eventSelector )
               {
                 std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
-                          << "(leading lepton: charge = " << selLepton_lead->charge() << ", pdgId = " << selLepton_lead->pdgId() << "; "
-                          << " subleading lepton: charge = " << selLepton_sublead->charge() << ", pdgId = " << selLepton_sublead->pdgId() << ")\n";
+                          << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << "; "
+                          << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ")\n";
               }
               continue;
             }
@@ -397,41 +366,36 @@ int main(int argc, char* argv[])
               const RecoLepton* fakeableLepton_lead = event.fakeableLeptons().at(0);
               const RecoLepton* fakeableLepton_sublead = event.fakeableLeptons().at(1);
               const RecoHadTau* fakeableHadTau_sublead = event.fakeableHadTaus().at(0);
-
-
-BIS HIER !!!
-
-if ( chargeSumSelection == kOS ) {
-          // CV: apply charge misidentification probability to lepton of same charge as hadronic tau
-          //    (if the lepton of charge opposite to the charge of the hadronic tau "flips",
-          //     the event has sum of charges equal to three and fails "lepton+tau charge" cut)
-          if ( selLepton_lead->charge()*selHadTau->charge()    > 0 ) prob_chargeMisId_applied *= prob_chargeMisId_lead;
-          if ( selLepton_sublead->charge()*selHadTau->charge() > 0 ) prob_chargeMisId_applied *= prob_chargeMisId_sublead;
-        } else if ( chargeSumSelection == kSS ) {
-          // CV: apply charge misidentification probability to lepton of opposite charge as hadronic tau
-          //    (if the lepton of same charge as the hadronic tau "flips",
-          //     the event has sum of charges equal to one and fails "lepton+tau charge" cut)
-          if ( selLepton_lead->charge()*selHadTau->charge()    < 0 ) prob_chargeMisId_applied *= prob_chargeMisId_lead;
-          if ( selLepton_sublead->charge()*selHadTau->charge() < 0 ) prob_chargeMisId_applied *= prob_chargeMisId_sublead;
-        } else assert(0);
-
-            // Karl: reject the event, if the applied probability of charge misidentification is 0. This can happen only if
-      //       1) both selected leptons are muons (their misId prob is 0).
-      //       2) one lepton is a muon and the other is an electron, and the muon has the same sign as the selected tau.
-      if(prob_chargeMisId_applied == 0.)
-      {
-        if(run_lumi_eventSelector)
-        {
-          std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
-                       "(leading lepton charge (pdgId) = " << selLepton_lead->charge() << " (" << selLepton_lead->pdgId()
-                    << ") => misId prob = " << prob_chargeMisId_lead << "; "
-                       "subleading lepton charge (pdgId) = " << selLepton_sublead->charge() << " (" << selLepton_sublead->pdgId()
-                    << ") => misId prob = " << prob_chargeMisId_sublead << "); "
-                       "tau charge = " << selHadTau->charge() << ")\n"
-          ;
-        }
-        continue;
-      }
+              if ( fakeableLepton_lead->charge()*fakeableLepton_sublead->charge() > 0 )
+              {
+                // CV: apply charge misidentification probability to lepton of same charge as hadronic tau
+                //    (if the lepton of charge opposite to the charge of the hadronic tau "flips",
+                //     the event has sum of charges equal to three and fails "lepton+tau charge" cut)
+                if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    > 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_lead);
+                if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() > 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_sublead);
+              }
+              else if ( fakeableLepton_lead->charge()*fakeableLepton_sublead->charge() < 0 )
+              {
+                // CV: apply charge misidentification probability to lepton of opposite charge as hadronic tau
+                //    (if the lepton of same charge as the hadronic tau "flips",
+                //     the event has sum of charges equal to one and fails "lepton+tau charge" cut)
+                if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    < 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_lead);
+                if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() < 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_sublead);
+              } else assert(0);
+              // Karl: reject the event, if the applied probability of charge misidentification is 0. This can happen only if
+              //       1) both selected leptons are muons (their misId prob is 0).
+              //       2) one lepton is a muon and the other is an electron, and the muon has the same sign as the selected tau.
+              if ( prob_chargeMisId == 0. )
+              {
+              if ( run_lumi_eventSelector )
+              {
+                std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
+                          << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << ";"
+                          << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ";" 
+                          << " hadTau: charge = " << selHadTau->charge() << ")\n";
+              }
+              continue;
+            }
             evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId);
           }
           else 
@@ -441,101 +405,12 @@ if ( chargeSumSelection == kOS ) {
               << " not supported for categories with " << numNominalLeptons << " lepton(s) and " << numNominalHadTaus << " hadronic tau(s) !!";
           }
         }
+      }
  
-   
-
-
-    if ( leptonChargeSelection == kOS ) {
-      double prob_chargeMisId_lead = chargeMisIdRate.get(selLepton_lead);
-      double prob_chargeMisId_sublead = chargeMisIdRate.get(selLepton_sublead);
-
-      double prob_chargeMisId_applied = 1.;
-      if ( apply_lepton_and_hadTauCharge_cut ) {
-        if ( chargeSumSelection == kOS ) {
-          // CV: apply charge misidentification probability to lepton of same charge as hadronic tau
-          //    (if the lepton of charge opposite to the charge of the hadronic tau "flips",
-          //     the event has sum of charges equal to three and fails "lepton+tau charge" cut)
-          if ( selLepton_lead->charge()*selHadTau->charge()    > 0 ) prob_chargeMisId_applied *= prob_chargeMisId_lead;
-          if ( selLepton_sublead->charge()*selHadTau->charge() > 0 ) prob_chargeMisId_applied *= prob_chargeMisId_sublead;
-        } else if ( chargeSumSelection == kSS ) {
-          // CV: apply charge misidentification probability to lepton of opposite charge as hadronic tau
-          //    (if the lepton of same charge as the hadronic tau "flips",
-          //     the event has sum of charges equal to one and fails "lepton+tau charge" cut)
-          if ( selLepton_lead->charge()*selHadTau->charge()    < 0 ) prob_chargeMisId_applied *= prob_chargeMisId_lead;
-          if ( selLepton_sublead->charge()*selHadTau->charge() < 0 ) prob_chargeMisId_applied *= prob_chargeMisId_sublead;
-        } else assert(0);
-      } else {
-        prob_chargeMisId_applied *= (prob_chargeMisId_lead + prob_chargeMisId_sublead);
-      }
-      // Karl: reject the event, if the applied probability of charge misidentification is 0. This can happen only if
-      //       1) both selected leptons are muons (their misId prob is 0).
-      //       2) one lepton is a muon and the other is an electron, and the muon has the same sign as the selected tau.
-      if(prob_chargeMisId_applied == 0.)
+      for ( auto writer : writers )
       {
-        if(run_lumi_eventSelector)
-        {
-          std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
-                       "(leading lepton charge (pdgId) = " << selLepton_lead->charge() << " (" << selLepton_lead->pdgId()
-                    << ") => misId prob = " << prob_chargeMisId_lead << "; "
-                       "subleading lepton charge (pdgId) = " << selLepton_sublead->charge() << " (" << selLepton_sublead->pdgId()
-                    << ") => misId prob = " << prob_chargeMisId_sublead << "); "
-                       "tau charge = " << selHadTau->charge() << ")\n"
-          ;
-        }
-        continue;
+        writer->write(event, evtWeightRecorder, central_or_shift);
       }
-      evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId_applied);
-    }
-
-    std::map<std::string, double> Weight_ktScan; // weights to do histograms for BMs
-    if(apply_HH_rwgt_lo)
-    {
-      assert(HHWeightLO_calc);
-      evtWeightRecorder.record_hhWeight_lo(HHWeightLO_calc, eventInfo, isDEBUG);
-      for(const std::string & HHWeightName: evt_cat_strs)
-      {
-        Weight_ktScan[HHWeightName] = HHWeightLO_calc->getRelativeWeight(HHWeightName, eventInfo.gen_mHH, eventInfo.gen_cosThetaStar, isDEBUG);
-      }
-    }
-    if(apply_HH_rwgt_nlo)
-    {
-      assert(HHWeightNLO_calc);
-      evtWeightRecorder.record_hhWeight_nlo(HHWeightNLO_calc, eventInfo, isDEBUG);
-      for(const std::string & HHWeightName: evt_cat_strs)
-      {
-        Weight_ktScan[HHWeightName] *= HHWeightNLO_calc->getRelativeWeight_LOtoNLO(HHWeightName, eventInfo.gen_mHH, eventInfo.gen_cosThetaStar, isDEBUG);
-      }
-    }
-
-        const std::string central_or_shift_tH = eventInfo.has_central_or_shift(central_or_shift) ? central_or_shift : central_or_shift_main;
-        const double evtWeight_tH_nom = evtWeightRecorder.get_nom_tH_weight(central_or_shift_tH);
-        for(const std::string & evt_cat_str: evt_cat_strs)
-        {
-          if(skipFilling && evt_cat_str != default_cat_str)
-          {
-            continue;
-          }
-	  if(isMC_tH)
-          {
-            const std::string evt_cat_str_query = evt_cat_str == default_cat_str ? get_tH_SM_str() : evt_cat_str;
-            tH_weight_map[evt_cat_str] = evtWeight / evtWeight_tH_nom * eventInfo.genWeight_tH(central_or_shift_tH, evt_cat_str_query);
-          }
-          else if(apply_HH_rwgt_lo)
-          {
-            tH_weight_map[evt_cat_str] = evtWeight * Weight_ktScan[evt_cat_str];
-          }
-          else
-          {
-            tH_weight_map[evt_cat_str] = evtWeight;
-          }
-        }
-    }
-
-    
-
-    for ( auto writer : writers )
-    {
-      writer->write(event);
     }
 
     outputTree->Fill();
@@ -568,34 +443,17 @@ if ( chargeSumSelection == kOS ) {
             << " selected = " << selectedEntries << " (weighted = " << selectedEntries_weighted << ")" << std::endl;
 
 //--- memory clean-up
-  delete dataToMCcorrectionInterface;
-
-  delete leptonFakeRateInterface;
-  delete jetToTauFakeRateInterface;
-
   delete run_lumi_eventSelector;
 
   delete selEventsFile;
 
   delete eventReader;
-
-  delete muonReader;
-  delete electronReader;
-  delete hadTauReader;
-  delete jetReader;
-  delete metReader;
-  delete metFilterReader;
-  delete memReader;
-  delete genLeptonReader;
-  delete genHadTauReader;
-  delete genPhotonReader;
-  delete genJetReader;
-  delete lheInfoReader;
-  delete psWeightReader;
-
   delete l1PreFiringWeightReader;
-  delete cutFlowHistManager;
-  delete eventWeightManager;
+
+  delete dataToMCcorrectionInterface;
+  delete jetToLeptonFakeRateInterface;
+  delete jetToTauFakeRateInterface;
+  delete btagSFRatioInterface;
 
   delete inputTree;
   delete outputTree;
