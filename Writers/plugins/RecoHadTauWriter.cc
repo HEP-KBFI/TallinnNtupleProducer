@@ -21,9 +21,9 @@ RecoHadTauWriter::RecoHadTauWriter(const edm::ParameterSet & cfg)
 {
   max_nHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
   assert(max_nHadTaus_ >= 1);
-  merge_systematic_shifts(systematic_shifts_, RecoHadTauReader::get_supported_systematics());
-  merge_systematic_shifts(systematic_shifts_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : systematic_shifts_ )
+  merge_systematic_shifts(supported_systematics_, RecoHadTauReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
+  for ( auto central_or_shift : supported_systematics_, )
   {    
     central_or_shiftEntry it;
     it.nHadTaus_ = 0;
@@ -81,7 +81,7 @@ void
 RecoHadTauWriter::setBranches(TTree * tree)
 {
   BranchAddressInitializer bai(tree);
-  for ( auto central_or_shift : systematic_shifts_ )
+  for ( auto central_or_shift : supported_systematics_, )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());
@@ -106,6 +106,7 @@ RecoHadTauWriter::setBranches(TTree * tree)
 void
 RecoHadTauWriter::set_central_or_shift(const std::string & central_or_shift) const
 {
+  WriterBase::set_central_or_shift(central_or_shift);
   auto it = central_or_shiftEntries_.find(central_or_shift);
   if ( it != central_or_shiftEntries_.end() )
   {
@@ -145,7 +146,7 @@ namespace
 }
 
 void
-RecoHadTauWriter::write(const Event & event)
+RecoHadTauWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   assert(current_central_or_shiftEntry_);
   const RecoHadTauPtrCollection& hadTaus = event.fakeableHadTaus();

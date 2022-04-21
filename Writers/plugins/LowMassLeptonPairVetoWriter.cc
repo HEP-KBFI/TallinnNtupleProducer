@@ -30,7 +30,7 @@ LowMassLeptonPairVetoWriter::setBranches(TTree * tree)
 }
 
 void
-LowMassLeptonPairVetoWriter::write(const Event & event)
+LowMassLeptonPairVetoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   passesLowMassLeptonPairVeto_ = true;
   const RecoLeptonPtrCollection& looseLeptons = event.looseLeptons();

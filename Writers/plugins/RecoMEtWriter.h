@@ -1,13 +1,14 @@
 #ifndef TallinnNtupleProducer_Writers_RecoMEtWriter_h
 #define TallinnNtupleProducer_Writers_RecoMEtWriter_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                       // edm::ParameterSet
 
-#include "TallinnNtupleProducer/Writers/interface/WriterBase.h" // WriterBase
-#include "TallinnNtupleProducer/Objects/interface/Event.h"      // Event
+#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h" // EvtWeightRecorder
+#include "TallinnNtupleProducer/Objects/interface/Event.h"                    // Event
+#include "TallinnNtupleProducer/Writers/interface/WriterBase.h"               // WriterBase
 
-#include <string>                                               // std::string
-#include <vector>                                               // std::vector
+#include <string>                                                             // std::string
+#include <vector>                                                             // std::vector
 
 // forward declarations
 class TTree;
@@ -30,12 +31,6 @@ class RecoMEtWriter : public WriterBase
    */
   void
   set_central_or_shift(const std::string & central_or_shift) const;
-
-  /**
-   * @brief Write relevant information to tree
-   */
-  void
-  write(const Event & event);
  
   /**
     * @brief Return list of systematic uncertainties supported by this plugin
@@ -45,6 +40,12 @@ class RecoMEtWriter : public WriterBase
   get_supported_systematics();
 
  private:
+  /**
+   * @brief Write relevant information to tree
+   */
+  void
+  writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder);
+
   std::string branchName_met_;
   std::string branchName_htmiss_;
   std::string branchName_ht_;

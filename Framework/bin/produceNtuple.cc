@@ -409,7 +409,8 @@ int main(int argc, char* argv[])
  
       for ( auto writer : writers )
       {
-        writer->write(event, evtWeightRecorder, central_or_shift);
+        writer->set_central_or_shift(central_or_shift);
+        writer->write(event, evtWeightRecorder);
       }
     }
 

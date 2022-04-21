@@ -31,7 +31,7 @@ ZbosonMassVetoWriter::setBranches(TTree * tree)
 }
 
 void
-ZbosonMassVetoWriter::write(const Event & event)
+ZbosonMassVetoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   passesZbosonMassVeto_ = true;
   const RecoLeptonPtrCollection& looseLeptons = event.looseLeptons();

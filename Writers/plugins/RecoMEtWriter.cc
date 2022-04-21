@@ -23,9 +23,9 @@ RecoMEtWriter::RecoMEtWriter(const edm::ParameterSet & cfg)
   , branchName_stmet_("stmet")
   , current_central_or_shiftEntry_(nullptr)
 {
-  merge_systematic_shifts(systematic_shifts_, RecoMEtWriter::get_supported_systematics());
-  merge_systematic_shifts(systematic_shifts_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : systematic_shifts_ )
+  merge_systematic_shifts(supported_systematics_, RecoMEtWriter::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
+  for ( auto central_or_shift : supported_systematics_, )
   {    
     central_or_shiftEntry it;
     it.metPt_ = 0.;
@@ -64,7 +64,7 @@ void
 RecoMEtWriter::setBranches(TTree * tree)
 {
   BranchAddressInitializer bai(tree);
-  for ( auto central_or_shift : systematic_shifts_ )
+  for ( auto central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());
@@ -80,6 +80,7 @@ RecoMEtWriter::setBranches(TTree * tree)
 void
 RecoMEtWriter::set_central_or_shift(const std::string & central_or_shift) const
 {
+  WriterBase::set_central_or_shift(central_or_shift);
   auto it = central_or_shiftEntries_.find(central_or_shift);
   if ( it != central_or_shiftEntries_.end() )
   {
@@ -161,7 +162,7 @@ namespace
 }
 
 void
-RecoMEtWriter::write(const Event & event)
+RecoMEtWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   assert(current_central_or_shiftEntry_);
   const RecoMEt& met = event.met();

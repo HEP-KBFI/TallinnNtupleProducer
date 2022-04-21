@@ -1,13 +1,14 @@
 #ifndef TallinnNtupleProducer_Writers_RecoLeptonWriter_h
 #define TallinnNtupleProducer_Writers_RecoLeptonWriter_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                       // edm::ParameterSet
 
-#include "TallinnNtupleProducer/Writers/interface/WriterBase.h" // WriterBase
-#include "TallinnNtupleProducer/Objects/interface/Event.h"      // Event
+#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h" // EvtWeightRecorder
+#include "TallinnNtupleProducer/Objects/interface/Event.h"                    // Event
+#include "TallinnNtupleProducer/Writers/interface/WriterBase.h"               // WriterBase
 
-#include <string>                                               // std::string
-#include <vector>                                               // std::vector
+#include <string>                                                             // std::string
+#include <vector>                                                             // std::vector
 
 // forward declarations
 class TTree;
@@ -23,12 +24,6 @@ class RecoLeptonWriter : public WriterBase
    */
   void
   setBranches(TTree * tree);
-
-  /**
-   * @brief Write relevant information to tree
-   */
-  void
-  write(const Event & event);
  
   /**
    * @brief Return list of systematic uncertainties supported by this plugin
@@ -38,6 +33,12 @@ class RecoLeptonWriter : public WriterBase
   get_supported_systematics();
 
  private:
+  /**
+   * @brief Write relevant information to tree
+   */
+  void
+  writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder);
+
   std::string branchName_num_;
   std::string branchName_obj_;
 

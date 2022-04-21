@@ -4,7 +4,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                // EventInfo
-#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"               // RecoLeptonPtrCollection
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 
 #include "TString.h"                                                          // Form()
@@ -60,7 +59,7 @@ EvtReweightWriter_HH::setBranches(TTree * tree)
 }
 
 void
-EvtReweightWriter_HH::write(const Event & event, const EvtWeightRecorder & evtWeightRecorder, const std::string & central_or_shift)
+EvtReweightWriter_HH::write(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   const EventInfo& eventInfo = event.eventInfo();
   const AnalysisConfig& analysisConfig = eventInfo.analysisConfig();

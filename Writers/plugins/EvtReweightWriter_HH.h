@@ -1,13 +1,14 @@
 #ifndef TallinnNtupleProducer_Writers_EvtReweightWriter_HH_h
 #define TallinnNtupleProducer_Writers_EvtReweightWriter_HH_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                       // edm::ParameterSet
 
-#include "TallinnNtupleProducer/Writers/interface/WriterBase.h" // WriterBase
-#include "TallinnNtupleProducer/Objects/interface/Event.h"      // Event
+#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h" // EvtWeightRecorder
+#include "TallinnNtupleProducer/Objects/interface/Event.h"                    // Event
+#include "TallinnNtupleProducer/Writers/interface/WriterBase.h"               // WriterBase
 
-#include <string>                                               // std::string
-#include <vector>                                               // std::vector
+#include <string>                                                             // std::string
+#include <vector>                                                             // std::vector
 
 // forward declarations
 class HHWeightInterfaceCouplings;
@@ -26,12 +27,6 @@ class EvtReweightWriter_HH : public WriterBase
    */
   void
   setBranches(TTree * tree);
-
-  /**
-   * @brief Write relevant information to tree
-   */
-  void
-  write(const Event & event, const EvtWeightRecorder & evtWeightRecorder, const std::string & central_or_shift);
  
   /**
    * @brief Return list of systematic uncertainties supported by this plugin
@@ -40,6 +35,12 @@ class EvtReweightWriter_HH : public WriterBase
   get_supported_systematics();
 
  private:
+  /**
+   * @brief Write relevant information to tree
+   */
+  void
+  writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder);
+
   std::map<std::string, std::string> branchNames_; // key = HH coupling scenario
   std::map<std::string, Float_t> hhReweights_;     // key = HH coupling scenario
 

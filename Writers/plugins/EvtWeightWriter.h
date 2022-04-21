@@ -1,5 +1,5 @@
-#ifndef TallinnNtupleProducer_Writers_LowMassLeptonPairVetoWriter_h
-#define TallinnNtupleProducer_Writers_LowMassLeptonPairVetoWriter_h
+#ifndef TallinnNtupleProducer_Writers_EvtWeightWriter_h
+#define TallinnNtupleProducer_Writers_EvtWeightWriter_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                       // edm::ParameterSet
 
@@ -13,11 +13,11 @@
 // forward declarations
 class TTree;
 
-class LowMassLeptonPairVetoWriter : public WriterBase
+class EvtWeightWriter : public WriterBase
 {
  public:
-  LowMassLeptonPairVetoWriter(const edm::ParameterSet & cfg);
-  ~LowMassLeptonPairVetoWriter();
+  EvtWeightWriter(const edm::ParameterSet & cfg);
+  ~EvtWeightWriter();
 
   /**
    * @brief Call tree->Branch for all branches
@@ -38,12 +38,12 @@ class LowMassLeptonPairVetoWriter : public WriterBase
   void
   writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder);
 
-  std::string branchName_;
-
-  bool requireSF_;
-  bool requireOS_;
-
-  Bool_t passesLowMassLeptonPairVeto_;
+  struct central_or_shiftEntry
+  {
+    Float_t evtWeight_;
+  };
+  std::map<std::string, central_or_shiftEntry> central_or_shiftEntries_; // key = central_or_shift
+  mutable central_or_shiftEntry * current_central_or_shiftEntry_;
 };
 
-#endif // TallinnNtupleProducer_Writers_LowMassLeptonPairVetoWriter_h
+#endif // TallinnNtupleProducer_Writers_EvtWeightWriter_h

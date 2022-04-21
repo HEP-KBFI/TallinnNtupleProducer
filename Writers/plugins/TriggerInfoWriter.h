@@ -23,12 +23,6 @@ class TriggerInfoWriter : public WriterBase
    */
   void
   setBranches(TTree * tree);
-
-  /**
-   * @brief Write relevant information to tree
-   */
-  void
-  write(const Event & event);
  
   /**
    * @brief Return list of systematic uncertainties supported by this plugin
@@ -37,6 +31,12 @@ class TriggerInfoWriter : public WriterBase
   get_supported_systematics();
 
  private:
+  /**
+   * @brief Write relevant information to tree
+   */
+  void
+  writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder);
+
   int PD_;
   std::vector<int> PD_priority_;
   bool passesTrigger_;

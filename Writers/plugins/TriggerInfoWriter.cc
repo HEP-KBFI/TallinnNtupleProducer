@@ -81,7 +81,7 @@ namespace
 }
 
 void
-TriggerInfoWriter::write(const Event & event)
+TriggerInfoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   const RecoElectronPtrCollection& electrons = event.fakeableElectrons();
   const RecoMuonPtrCollection& muons = event.fakeableMuons();
