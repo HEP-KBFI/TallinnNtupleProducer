@@ -27,6 +27,16 @@ class TriggerInfoReader : public ReaderBase
   const TriggerInfo &
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by TriggerInfoReader class
+    */
+  static
+  std::vector<std::string>
+  get_supported_systematics()
+  {
+    return {};
+  }
+
  private:
   std::vector<std::string>
   get_available_branches(TTree * tree) const;

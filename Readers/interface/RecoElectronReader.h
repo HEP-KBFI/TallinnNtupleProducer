@@ -35,6 +35,9 @@ class RecoElectronReader : public ReaderBase
   std::vector<RecoElectron>
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by RecoElectronReader class
+    */
   static
   std::vector<std::string>
   get_supported_systematics()

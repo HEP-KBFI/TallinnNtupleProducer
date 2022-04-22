@@ -48,6 +48,9 @@ class RecoMEtReader : public ReaderBase
   RecoMEt
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by RecoMEtReader class
+    */
   static
   std::vector<std::string>
   get_supported_systematics()

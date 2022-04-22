@@ -30,6 +30,16 @@ class RecoVertexReader : public ReaderBase
   RecoVertex
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by RecoVertexReader class
+    */
+  static
+  std::vector<std::string>
+  get_supported_systematics()
+  {
+    return {};
+  }
+
  protected:
  /**
    * @brief Initialize names of branches to be read from tree

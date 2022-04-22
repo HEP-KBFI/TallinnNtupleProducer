@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
   edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("process");
 
   edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
-  AnalysisConfig analysisConfig("produceNtuple", produceNtuple);
+  AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
 
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
 
@@ -134,12 +134,12 @@ int main(int argc, char* argv[])
 
   std::vector<std::string> systematic_shifts;
   // CV: process all systematic uncertainties supported by EventReader class (only for MC)
-  if ( isMC_ )
+  if ( isMC )
   {
     merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics());
   }
   // CV: add central value (for data and MC)
-  systematic_shifts.insert("central");
+  merge_systematic_shifts(systematic_shifts, { "central"});
 
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("era", era_string);

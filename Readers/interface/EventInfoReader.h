@@ -29,6 +29,16 @@ class EventInfoReader : public ReaderBase
   const EventInfo &
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by EventInfoReader class
+    */
+  static
+  std::vector<std::string>
+  get_supported_systematics()
+  {
+    return {};
+  }
+
  protected:
   bool read_genHiggsDecayMode_;
   bool read_puWeight_;

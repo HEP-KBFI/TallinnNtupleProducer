@@ -4,6 +4,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getMET_option()
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
 
@@ -418,4 +419,20 @@ EventReader::read() const
   event.metFilters_ = metFilterReader_->read();
 
   return event;
+}
+
+std::vector<std::string>
+EventReader::get_supported_systematics()
+{
+  std::vector<std::string> supported_systematics;
+  merge_systematic_shifts(supported_systematics, EventInfoReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoElectronReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoHadTauReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoJetReaderAK4::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoJetReaderAK8::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoMEtReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoMuonReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoVertexReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, TriggerInfoReader::get_supported_systematics());
+  return supported_systematics;
 }

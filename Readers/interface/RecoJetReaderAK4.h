@@ -51,6 +51,9 @@ class RecoJetReaderAK4 : public ReaderBase
   std::vector<RecoJetAK4>
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by RecoJetReaderAK4 class
+    */
   static
   std::vector<std::string>
   get_supported_systematics()

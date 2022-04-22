@@ -39,6 +39,9 @@ class RecoHadTauReader : public ReaderBase
   std::vector<RecoHadTau>
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by RecoHadTauReader class
+    */
   static
   std::vector<std::string>
   get_supported_systematics()

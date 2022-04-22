@@ -45,29 +45,6 @@
 // forward declarations
 class TTree;
 
-//namespace
-//{
-//  void
-//  add_systematic_shifts(std::set<std::string> & systematic_shifts, const std::vector<std::string> & shifts_to_add)
-//  {
-//    for ( auto shift : shifts_to_add )
-//    {
-//      systematic_shifts.insert(shift);
-//    }
-//  }
-//
-//  std::vector<std::string>
-//  convert_to_vector(std::set<std::string> & systematic_shifts)
-//  {
-//    std::vector<std::string> retVal;
-//    for ( auto shift : systematic_shifts )
-//    {
-//      retVal.push_back(shift);
-//    }
-//    return retVal;
-//  }
-//}
-
 class EventReader : public ReaderBase
 {
  public:
@@ -89,6 +66,13 @@ class EventReader : public ReaderBase
    */
   Event
   read() const;
+
+  /**
+    * @brief Return list of systematic uncertainties supported by EventReader class
+    */
+  static
+  std::vector<std::string>
+  get_supported_systematics();
 
  protected:
   unsigned numNominalLeptons_;
