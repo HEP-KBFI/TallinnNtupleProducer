@@ -41,6 +41,12 @@ class RecoJetAK4 : public RecoJetBase
   virtual ~RecoJetAK4();
 
   /**
+   * @brief Set flags indicating whether or not jet passes loose and medium b-jet selection criteria
+   */
+  void set_isBJet_loose() const;
+  void set_isBJet_medium() const;
+
+  /**
    * @brief Funtions to access data-members
    * @return Values of data-members
    */
@@ -70,6 +76,9 @@ class RecoJetAK4 : public RecoJetBase
   int get_default_systematics() const;
   const Particle::LorentzVector get_systematics_p4(int central_or_shift) const;
 
+  bool isBJet_loose() const;
+  bool isBJet_medium() const;
+
   friend class RecoJetReaderAK4;
 
 protected:
@@ -95,6 +104,10 @@ protected:
   std::map<int, Double_t> mass_systematics_;
   int default_systematics_;
   //---------------------------------------------------------
+
+//--- flags indicating whether or not jet passes loose and medium b-jet selection criteria
+  mutable bool isBJet_loose_;
+  mutable bool isBJet_medium_;
 };
 
 typedef std::vector<RecoJetAK4> RecoJetCollectionAK4;

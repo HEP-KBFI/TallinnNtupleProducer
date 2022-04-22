@@ -35,10 +35,24 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
   , genMatchIdx_(genMatchIdx)
   , btag_(btag)
   , default_systematics_(central_or_shift)
+  , isBJet_loose_(false)
+  , isBJet_medium_(false)
 {}
 
 RecoJetAK4::~RecoJetAK4()
 {}
+
+void
+RecoJetAK4::set_isBJet_loose() const
+{
+  isBJet_loose_ = true;
+}
+
+void
+RecoJetAK4::set_isBJet_medium() const
+{
+  isBJet_medium_ = true;
+}
 
 Double_t
 RecoJetAK4::charge() const
@@ -194,6 +208,18 @@ RecoJetAK4::get_systematics_p4(int central_or_shift) const
     throw cmsException(this, __func__, __LINE__) << "No such systematics available: " << central_or_shift;
   }
   return { pt_systematics_.at(central_or_shift), eta_, phi_, mass_systematics_.at(central_or_shift) };
+}
+
+bool
+RecoJetAK4::isBJet_loose() const
+{
+  return isBJet_loose_;
+}
+
+bool
+RecoJetAK4::isBJet_medium() const
+{
+  return isBJet_medium_;
 }
 
 std::ostream &
