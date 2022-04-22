@@ -40,8 +40,8 @@ const std::map<Int_t, std::string> EventInfo::productionMode_idString_singleHigg
   { 24000025, "WH" },
 };
 
-EventInfo::EventInfo(const AnalysisConfig & analysisConfig)
-  : analysisConfig_(analysisConfig)
+EventInfo::EventInfo()
+  : analysisConfig_(nullptr)
   , run(0)
   , lumi(0)
   , event(0)
@@ -60,7 +60,12 @@ EventInfo::EventInfo(const AnalysisConfig & analysisConfig)
   , read_htxs_(false)
   , refGenWeight_(0.)
   , productionMode_(-1)
+{}
+
+EventInfo::EventInfo(const AnalysisConfig & analysisConfig)
+  : EventInfo()
 {
+  analysisConfig_ = &analysisConfig; 
   process_string_ = analysisConfig.process();
   std::cout << "<EventInfo::EventInfo()>: process = '" << process_string_ << "'\n";
   int checksum = 0;
@@ -296,7 +301,8 @@ EventInfo::is_initialized() const
 std::string
 EventInfo::getDecayModeString() const
 {
-  if(! isMC_H_)
+  assert(analysisConfig_);
+  if(! analysisConfig_->isMC_H())
   {
     throw cmsException(this, __func__, __LINE__)
       << "The event " << *this << " is not a H signal event => request "
@@ -309,7 +315,8 @@ EventInfo::getDecayModeString() const
 std::string
 EventInfo::getDiHiggsDecayModeString() const
 {
-  if(! (isMC_HH_))
+  assert(analysisConfig_);
+  if(! analysisConfig_->isMC_HH())
   {
     throw cmsException(this, __func__, __LINE__)
       << "The event " << *this << " is not a HH signal event => request "
@@ -322,7 +329,8 @@ EventInfo::getDiHiggsDecayModeString() const
 std::string
 EventInfo::getProductionModeString() const
 {
-  if(! isMC_H_)
+  assert(analysisConfig_);
+  if(! analysisConfig_->isMC_H())
   {
     throw cmsException(this, __func__, __LINE__)
       << "The event " << *this << " is not a H signal event => request "

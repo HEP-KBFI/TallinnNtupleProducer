@@ -118,7 +118,7 @@ class EventInfo
   friend class EventInfoWriter;
 
  protected:
-  AnalysisConfig * analysisConfig_;
+  const AnalysisConfig * analysisConfig_;
 
   std::string central_or_shift_;
   std::string process_string_;
