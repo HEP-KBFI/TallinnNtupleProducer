@@ -139,10 +139,10 @@ HadTauFakeRateInterface::getWeight(int idxHadTau,
 }
 
 double
-HadTauFakeRateInterface::getSF_lead(int idxHadTau,
-                                    double hadTauPt,
-                                    double hadTauAbsEta,
-                                    int central_or_shift) const
+HadTauFakeRateInterface::getSF(int idxHadTau,
+                               double hadTauPt,
+                               double hadTauAbsEta,
+                               int central_or_shift) const
 {
   return getWeight_or_SF(hadTauPt, hadTauAbsEta, kSF, idxHadTau, central_or_shift);
 }

@@ -8,6 +8,8 @@
 #include "TString.h"                                                          // Form()
 #include "TTree.h"                                                            // TTree
 
+#include <assert.h>                                                           // assert()
+
 EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
   , read_genHiggsDecayMode_(true)
@@ -32,7 +34,7 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
 
 EventInfoReader::~EventInfoReader()
 {
-  if(info_ && info_->isMC_)
+  if(info_ && info_->analysisConfig().isMC())
   {
     delete[] info_->LHEReweightingWeight;
   }
@@ -47,7 +49,7 @@ EventInfoReader::setBranchAddresses(TTree * tree)
   bai.setBranchAddress(info_->run, branchName_run);
   bai.setBranchAddress(info_->lumi, branchName_lumi);
   bai.setBranchAddress(info_->event, branchName_event);
-  if(info_->isMC_H_)
+  if(info_->analysisConfig().isMC_H())
   {
     if(info_->read_htxs())
     {
@@ -55,14 +57,14 @@ EventInfoReader::setBranchAddresses(TTree * tree)
       bai.setBranchAddress(info_->htxs_.y_, branchName_htxs_y);
     }
   }
-  if(info_->isMC_H_ || info_->isMC_HH_)
+  if(info_->analysisConfig().isMC_H() || info_->analysisConfig().isMC_HH())
   {
     if(read_genHiggsDecayMode_)
     {
       bai.setBranchAddress(info_->genHiggsDecayMode, branchName_genHiggsDecayMode);
     }
   }
-  if(info_->isMC_)
+  if(info_->analysisConfig().isMC())
   {
     bai.setBranchAddress(info_->genWeight, branchName_genWeight);
     if(read_puWeight_)
@@ -71,12 +73,12 @@ EventInfoReader::setBranchAddresses(TTree * tree)
       bai.setBranchAddress(info_->pileupWeightUp, getBranchName_pileup(PUsys::up));
       bai.setBranchAddress(info_->pileupWeightDown, getBranchName_pileup(PUsys::down));
     }
-    if(info_->apply_topPtRwgt_)
+    if(info_->analysisConfig().apply_topPtReweighting())
     {
       bai.setBranchAddress(info_->topPtRwgtSF, branchName_topPtRwgt);
     }
   }
-  if(info_->isMC_ && ! info_->tH_sf.empty())
+  if(info_->analysisConfig().isMC() && ! info_->tH_sf.empty())
   {
     BranchAddressInitializer bai_LHEReweight(tree, info_->LHEReweightingWeight_max);
     bai_LHEReweight.setBranchAddress(info_->nLHEReweightingWeight, branchName_nLHEReweightingWeight);
@@ -85,9 +87,8 @@ EventInfoReader::setBranchAddresses(TTree * tree)
     const std::vector<std::string> lhe_branches = bai_LHEReweight.getBoundBranchNames();
     bound_branches.insert(bound_branches.end(), lhe_branches.begin(), lhe_branches.end());
   }
-  //if(info_->isMC_HH_  && info_->isHH_rwgt_allowed_)
-  if(info_->isMC_HH_  && (info_->isHH_rwgt_allowed_ ||
-			    info_->process_string_.find("signal_ggf_nonresonant") != std::string::npos) ) // Siddhesh: Read gen_mHH for HH LO and NLO samples to make LOvsNLO HHreweighting comparison plots without much editing
+  // Siddhesh: Read gen_mHH for HH LO and NLO samples to make LOvsNLO HHreweighting comparison plots without much code editing
+  if(info_->analysisConfig().isMC_HH() && (info_->analysisConfig().isHH_rwgt_allowed() || info_->analysisConfig().isMC_HH_nonresonant()))
   {
     bai.setBranchAddress(info_->gen_mHH, branchName_gen_mHH);
     bai.setBranchAddress(info_->gen_cosThetaStar, branchName_gen_cosThetaStar);

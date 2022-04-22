@@ -304,8 +304,8 @@ class EvtWeightRecorder
                     const std::vector<const RecoHadTau *> & hadTaus);
 
   void
-  record_jetToLeptonRate(const LeptonFakeRateInterface * const leptonFakeRateInterface,
-                         const std::vector<const RecoLepton *> & leptons);
+  record_jetToLeptonFakeRate(const LeptonFakeRateInterface * const leptonFakeRateInterface,
+                             const std::vector<const RecoLepton *> & leptons);
 
   void
   compute_FR();

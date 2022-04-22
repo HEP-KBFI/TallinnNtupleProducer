@@ -8,7 +8,7 @@
 
 #include <cmath>                                                         // std::fabs()
 #include <cstring>                                                       // std::memcpy()
-#include <cassert>                                                       // assert()
+#include <assert.h>                                                      // assert()
 
 #define EPS 1E-2
 
@@ -263,7 +263,7 @@ EventInfo::get_refGenWeight() const
 }
 
 void
-EventInfo::set_central_or_shift(const std::string & central_or_shift)
+EventInfo::set_central_or_shift(const std::string & central_or_shift) const
 {
   central_or_shift_ = central_or_shift;
 }

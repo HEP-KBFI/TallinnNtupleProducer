@@ -69,7 +69,7 @@ class EventInfo
   get_refGenWeight() const;
 
   void
-  set_central_or_shift(const std::string & central_or_shift);
+  set_central_or_shift(const std::string & central_or_shift) const;
 
   bool
   has_central_or_shift(const std::string & central_or_shift) const;
@@ -120,7 +120,7 @@ class EventInfo
  protected:
   const AnalysisConfig * analysisConfig_;
 
-  std::string central_or_shift_;
+  mutable std::string central_or_shift_;
   std::string process_string_;
 
   UInt_t nLHEReweightingWeight;

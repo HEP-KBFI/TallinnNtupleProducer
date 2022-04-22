@@ -1,21 +1,22 @@
-#include "TallinnNtupleProducer/Writers/plugins/EvtReweightWriter_tH.h"
+#include "TallinnNtupleProducer/Writers/plugins/EvtWeightWriter.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"               // RecoLeptonPtrCollection
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts.()
+#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                  // RecoLeptonPtrCollection
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"    // BranchAddressInitializer
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                             // Form()
+#include "TTree.h"                                                               // TTree
 
-#include <assert.h>                                                           // assert()
-#include <cstdlib>                                                            // std::abs()
+#include <assert.h>                                                              // assert()
+#include <cstdlib>                                                               // std::abs()
 
 EvtWeightWriter::EvtWeightWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
 {
   merge_systematic_shifts(supported_systematics_, EvtWeightWriter::get_supported_systematics());
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : supported_systematics_, )
+  for ( auto central_or_shift : supported_systematics_ )
   {    
     central_or_shiftEntry it;
     it.evtWeight_ = 0.;
@@ -41,7 +42,7 @@ void
 EvtWeightWriter::setBranches(TTree * tree)
 {
   BranchAddressInitializer bai(tree);
-  for ( auto central_or_shift : supported_systematics_, )
+  for ( auto central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());

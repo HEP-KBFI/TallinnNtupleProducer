@@ -14,7 +14,6 @@ EvtReweightWriter_tH::EvtReweightWriter_tH(const edm::ParameterSet & cfg)
   , tHweights_(cfg.getParameterSetVector("tHweights"))
   , eventInfo_isInitialized_(false)
   , tree_(nullptr)
-  , branchAddresses_isInitialized_(false)
 {}
 
 EvtReweightWriter_tH::~EvtReweightWriter_tH()
@@ -40,14 +39,13 @@ void
 EvtReweightWriter_tH::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   const EventInfo& eventInfo = event.eventInfo();
-  const AnalysisConfig& analysisConfig = eventInfo.analysisConfig();
-  if ( eventInfo.isMC_tH() && !tHweights_.empty() )
+  if ( eventInfo.analysisConfig().isMC_tH() && !tHweights_.empty() )
   {
     const std::string central_or_shift_tH = eventInfo.has_central_or_shift(current_central_or_shift_) ? current_central_or_shift_ : "central";
     eventInfo.set_central_or_shift(central_or_shift_tH);
     if ( !eventInfo_isInitialized_ )
     {
-      eventInfo.loadWeight_tH(tHweights_);
+      (const_cast<EventInfo*>(&eventInfo))->loadWeight_tH(tHweights_);
     }
     std::vector<std::string> couplingScenarios = eventInfo.getWeight_tH_str(central_or_shift_tH);
     if ( !branchAddresses_isInitialized_[central_or_shift_tH] )
@@ -67,6 +65,7 @@ EvtReweightWriter_tH::writeImp(const Event & event, const EvtWeightRecorder & ev
       }
       branchAddresses_isInitialized_[central_or_shift_tH] = true;
     }
+    const double evtWeight = evtWeightRecorder.get(central_or_shift_tH);
     const double evtWeight_tH_nom = evtWeightRecorder.get_nom_tH_weight(central_or_shift_tH);
     for ( auto couplingScenario : couplingScenarios )
     {

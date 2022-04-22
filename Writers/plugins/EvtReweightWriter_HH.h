@@ -1,14 +1,17 @@
 #ifndef TallinnNtupleProducer_Writers_EvtReweightWriter_HH_h
 #define TallinnNtupleProducer_Writers_EvtReweightWriter_HH_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"                       // edm::ParameterSet
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                                // edm::ParameterSet
 
-#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h" // EvtWeightRecorder
-#include "TallinnNtupleProducer/Objects/interface/Event.h"                    // Event
-#include "TallinnNtupleProducer/Writers/interface/WriterBase.h"               // WriterBase
+#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"          // EvtWeightRecorder
+#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h" // HHWeightInterfaceCouplings
+#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceLO.h"        // HHWeightInterfaceCouplings
+#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceNLO.h"       // HHWeightInterfaceCouplings
+#include "TallinnNtupleProducer/Objects/interface/Event.h"                             // Event
+#include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                        // WriterBase
 
-#include <string>                                                             // std::string
-#include <vector>                                                             // std::vector
+#include <string>                                                                      // std::string
+#include <vector>                                                                      // std::vector
 
 // forward declarations
 class HHWeightInterfaceCouplings;

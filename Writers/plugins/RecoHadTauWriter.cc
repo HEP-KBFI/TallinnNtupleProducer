@@ -14,16 +14,15 @@
 
 RecoHadTauWriter::RecoHadTauWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
-  , max_nHadTaus_(cfg.getParameter<unsigned>("numNominalHadTaus"))
   , branchName_num_("ntau")
   , branchName_obj_("tau")
   , current_central_or_shiftEntry_(nullptr)
 {
   max_nHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
   assert(max_nHadTaus_ >= 1);
-  merge_systematic_shifts(supported_systematics_, RecoHadTauReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics_, RecoHadTauWriter::get_supported_systematics());
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : supported_systematics_, )
+  for ( auto central_or_shift : supported_systematics_ )
   {    
     central_or_shiftEntry it;
     it.nHadTaus_ = 0;
@@ -81,7 +80,7 @@ void
 RecoHadTauWriter::setBranches(TTree * tree)
 {
   BranchAddressInitializer bai(tree);
-  for ( auto central_or_shift : supported_systematics_, )
+  for ( auto central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());

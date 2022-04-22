@@ -25,7 +25,7 @@ RecoMEtWriter::RecoMEtWriter(const edm::ParameterSet & cfg)
 {
   merge_systematic_shifts(supported_systematics_, RecoMEtWriter::get_supported_systematics());
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : supported_systematics_, )
+  for ( auto central_or_shift : supported_systematics_ )
   {    
     central_or_shiftEntry it;
     it.metPt_ = 0.;

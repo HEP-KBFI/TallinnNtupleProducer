@@ -23,7 +23,7 @@ EvtReweightWriter_HH::EvtReweightWriter_HH(const edm::ParameterSet & cfg)
   if ( apply_HH_rwgt_lo_ || apply_HH_rwgt_nlo_ )
   {
     hhWeightInterface_couplings_ = new HHWeightInterfaceCouplings(cfg);
-    bmNames_ = hhWeight_couplings->get_bm_names();
+    bmNames_ = hhWeightInterface_couplings_->get_bm_names();
     if ( apply_HH_rwgt_lo_ )
     {
       hhWeightInterfaceLO_ = new HHWeightInterfaceLO(hhWeightInterface_couplings_, cfg);
@@ -59,7 +59,7 @@ EvtReweightWriter_HH::setBranches(TTree * tree)
 }
 
 void
-EvtReweightWriter_HH::write(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
+EvtReweightWriter_HH::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   const EventInfo& eventInfo = event.eventInfo();
   const AnalysisConfig& analysisConfig = eventInfo.analysisConfig();
@@ -70,13 +70,13 @@ EvtReweightWriter_HH::write(const Event & event, const EvtWeightRecorder & evtWe
       double hhReweight = 1.;
       if ( apply_HH_rwgt_lo_ )
       {
-        assert(HHWeightLO_calc_);
-        hhReweight = HHWeightLO_calc_->getRelativeWeight(bmName, eventInfo_.gen_mHH, eventInfo_.gen_cosThetaStar);
+        assert(hhWeightInterfaceLO_);
+        hhReweight = hhWeightInterfaceLO_->getRelativeWeight(bmName, eventInfo.gen_mHH, eventInfo.gen_cosThetaStar);
       }
       if ( apply_HH_rwgt_nlo_ )
       {
-        assert(HHWeightNLO_calc_);
-        hhReweight *= HHWeightNLO_calc_->getRelativeWeight_LOtoNLO(bmName, eventInfo_.gen_mHH, eventInfo_.gen_cosThetaStar);
+        assert(hhWeightInterfaceNLO_);
+        hhReweight *= hhWeightInterfaceNLO_->getRelativeWeight_LOtoNLO(bmName, eventInfo.gen_mHH, eventInfo.gen_cosThetaStar);
       }
       hhReweights_[bmName] = hhReweight;
     }

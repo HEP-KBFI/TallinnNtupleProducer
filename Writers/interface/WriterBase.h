@@ -45,7 +45,7 @@ class WriterBase
   writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder) = 0;
 
   std::vector<std::string> supported_systematics_;
-  std::string current_central_or_shift_;
+  mutable std::string current_central_or_shift_;
 };
 
 #include "FWCore/PluginManager/interface/PluginFactory.h"  // edmplugin::PluginFactory

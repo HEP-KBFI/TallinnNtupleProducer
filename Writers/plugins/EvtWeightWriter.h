@@ -26,6 +26,13 @@ class EvtWeightWriter : public WriterBase
   setBranches(TTree * tree);
  
   /**
+   * @brief Switch branches to those for the central value or for systematic shifts.
+   *        This method needs to be called before each call to the "write" method in the event loop.
+   */
+  void
+  set_central_or_shift(const std::string & central_or_shift) const;
+
+  /**
    * @brief Return list of systematic uncertainties supported by this plugin
    */
   std::vector<std::string>

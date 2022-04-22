@@ -1,7 +1,7 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                                      // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                                  // EWKJetSys, EWKBJetSys, kFRjt_central, kFRl_central, TriggerSFsysChoice
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                                  // EWKJetSys, EWKBJetSys, getJetToLeptonFR_option(), getJetToTauFR_option(), kFRjt_central, kFRl_central, TriggerSFsysChoice
 #include "TallinnNtupleProducer/EvtWeightTools/interface/BtagSFRatioInterface.h"                           // BtagSFRatioInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_Base.h"            // Data_to_MC_CorrectionInterface_Base
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_2tau_trigger.h" // Data_to_MC_CorrectionInterface_0l_2tau_trigger
@@ -438,13 +438,9 @@ EvtWeightRecorder::get_tauSF(const std::string & central_or_shift) const
       tauSF_weight *= weights_muToTauFakeRate_.at(muToTauFakeRate_option);
     }
     const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    if(weights_SF_hadTau_lead_.count(jetToTauFakeRate_option))
+    if(weights_jetToTauSF_.count(jetToTauFakeRate_option))
     {
-      tauSF_weight *= weights_SF_hadTau_lead_.at(jetToTauFakeRate_option);
-    }
-    if(weights_SF_hadTau_sublead_.count(jetToTauFakeRate_option))
-    {
-      tauSF_weight *= weights_SF_hadTau_sublead_.at(jetToTauFakeRate_option);
+      tauSF_weight *= weights_jetToTauSF_.at(jetToTauFakeRate_option);
     }
   }
   return tauSF_weight;
@@ -1214,7 +1210,7 @@ EvtWeightRecorder::record_jetToLeptonFakeRate(const LeptonFakeRateInterface * co
         }
       }
     }
-    weights_jetToLeptonFakeRate_[jetToTauFakeRate_option] = weight;
+    weights_jetToLeptonFakeRate_[jetToLeptonFakeRate_option] = weight;
   }
 }
 
@@ -1228,8 +1224,8 @@ EvtWeightRecorder::compute_FR()
   {
     const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
     const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
-    assert(weights_FR_lepton_.count(jetToLeptonFakeRate_option));
-    assert(weights_FR_hadTau_.count(jetToTauFakeRate_option));
+    assert(weights_jetToLeptonFakeRate_.count(jetToLeptonFakeRate_option));
+    assert(weights_jetToTauFakeRate_.count(jetToTauFakeRate_option));
     const std::string weightKey = jetToLeptonFakeRate_option == kFRl_central && jetToTauFakeRate_option == kFRjt_central ? "central" : central_or_shift;
     if(weights_FR_.count(weightKey))
     {

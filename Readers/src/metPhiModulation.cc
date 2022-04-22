@@ -4,6 +4,8 @@
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"  // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/RecoVertex.h" // RecoVertex
 
+#include <assert.h>                                             // assert()
+
 /**
  * @see https://lathomas.web.cern.ch/lathomas/METStuff/XYCorrections/XYMETCorrection_withUL17andUL18.h
  */
@@ -34,7 +36,7 @@ METXYCorr_Met_MetPhi(const EventInfo * const eventInfo,
   assert(recoVertex);
 
   const int npv = std::min(recoVertex->npvs(), 100);
-  const bool isMC = eventInfo->isMC();
+  const bool isMC = eventInfo->analysisConfig().isMC();
   const unsigned runnb = eventInfo->run;
 
   TheRunEra runera = TheRunEra::yUnknown;
