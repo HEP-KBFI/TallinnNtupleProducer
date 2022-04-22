@@ -39,7 +39,7 @@ enum
 
 //--- declare b-tagging working points
 
-enum class BtagWP { kLoose, kMedium, kTight };
+enum class BtagWP { kUndefined, kLoose, kMedium, kTight };
 
 const std::map<Era, std::map<Btag, std::map<BtagWP, double>>> BtagWP_map = {
   {
