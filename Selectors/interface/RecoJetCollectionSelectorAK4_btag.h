@@ -5,6 +5,7 @@
 #include "TallinnNtupleProducer/Selectors/interface/ParticleCollectionSelector.h"    // ParticleCollectionSelector
 #include "TallinnNtupleProducer/Selectors/interface/RecoJetCollectionSelectorAK4.h"  // RecoJetSelectorAK4
 
+enum class BtagWP;
 enum class Era;
 
 class RecoJetSelectorAK4_btag : public RecoJetSelectorAK4
@@ -28,6 +29,7 @@ class RecoJetSelectorAK4_btag : public RecoJetSelectorAK4
 
  protected:
   Double_t min_BtagCSV_; ///< lower cut threshold on CSV b-tagging discriminator value
+  BtagWP BtagWP_;
 };
 
 class RecoJetSelectorAK4_btagLoose : public RecoJetSelectorAK4_btag
