@@ -1,6 +1,7 @@
 #include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/AnalysisConfig.h"       // AnalysisConfig
+#include "TallinnNtupleProducer/CommonTools/interface/get_htxs_binning.h"     // get_htxs_binning()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_pileup()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                // EventInfo
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
@@ -30,6 +31,15 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   std::string analysis = "produceNtuple";
   AnalysisConfig analysisConfig(analysis, cfg);
   info_ = new EventInfo(analysisConfig);
+  const bool isMC = cfg.getParameter<bool>("isMC");
+  if ( isMC )
+  {
+    const double ref_genWeight = cfg.getParameter<double>("ref_genWeight");
+    info_->set_refGetWeight(ref_genWeight);
+  }
+  const bool isMC_ttH = analysisConfig.isMC_ttH();
+  const std::vector<std::pair<std::string, int>> evt_htxs_binning = get_htxs_binning(isMC_ttH);
+  info_->read_htxs(!evt_htxs_binning.empty());
 }
 
 EventInfoReader::~EventInfoReader()
@@ -96,6 +106,12 @@ EventInfoReader::setBranchAddresses(TTree * tree)
   const std::vector<std::string> evt_branches = bai.getBoundBranchNames();
   bound_branches.insert(bound_branches.end(), evt_branches.begin(), evt_branches.end());
   return bound_branches;
+}
+
+void
+EventInfoReader::set_central_or_shift(const std::string& central_or_shift)
+{
+  info_->set_central_or_shift(central_or_shift);
 }
 
 void

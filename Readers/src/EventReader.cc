@@ -61,6 +61,12 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
 
   eventInfoReader_ = new EventInfoReader(cfg);
+  const std::string apply_topPtReweighting_str = cfg.getParameter<std::string>("apply_topPtReweighting");
+  const bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
+  if ( apply_topPtReweighting )
+  {
+    eventInfoReader_->setTopPtRwgtBranchName(apply_topPtReweighting_str);
+  }
 
   triggerInfoReader_ = new TriggerInfoReader(cfg);
 
@@ -84,12 +90,18 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   looseHadTauSelector_ = new RecoHadTauCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableHadTauSelector_ = new RecoHadTauCollectionSelectorFakeable(era_, -1, isDEBUG_);
   tightHadTauSelector_ = new RecoHadTauCollectionSelectorTight(era_, -1, isDEBUG_);
-  std::string hadTauWP_fakeable = cfg.getParameter<std::string>("hadTauWP_fakeable");
-  std::string hadTauWP_tight = cfg.getParameter<std::string>("hadTauWP_tight");
-  if ( get_tau_id_wp_int(hadTauWP_tight) <= get_tau_id_wp_int(hadTauWP_fakeable) )
+  std::string hadTauWP_againstJets_fakeable = cfg.getParameter<std::string>("hadTauWP_againstJets_fakeable");
+  std::string hadTauWP_againstJets_tight = cfg.getParameter<std::string>("hadTauWP_againstJets_tight");
+  if ( get_tau_id_wp_int(hadTauWP_againstJets_tight) <= get_tau_id_wp_int(hadTauWP_againstJets_fakeable) )
     throw cmsException("EventReader", __LINE__) << "Selection of 'tight' taus must be more stringent than selection of 'fakeable' taus !!";
-  fakeableHadTauSelector_->set(hadTauWP_fakeable);
-  tightHadTauSelector_->set(hadTauWP_tight);
+  fakeableHadTauSelector_->set(hadTauWP_againstJets_fakeable);
+  tightHadTauSelector_->set(hadTauWP_againstJets_tight);
+  int hadTauWP_againstElectrons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstElectrons"));
+  fakeableHadTauSelector_->set_min_antiElectron(hadTauWP_againstElectrons);
+  tightHadTauSelector_->set_min_antiElectron(hadTauWP_againstElectrons);
+  int hadTauWP_againstMuons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstMuons"));
+  fakeableHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
+  tightHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
 
   jetReaderAK4_ = new RecoJetReaderAK4(cfg);
   bool jetCleaningByIndex = cfg.getParameter<bool>("jetCleaningByIndex");
@@ -176,6 +188,7 @@ EventReader::~EventReader()
 void
 EventReader::set_central_or_shift(const std::string& central_or_shift)
 {
+  eventInfoReader_->set_central_or_shift(central_or_shift);
   if ( contains(muonReader_->get_supported_systematics(), central_or_shift) )
   {
     // CV: muon momentum scale uncertainty not implemented yet

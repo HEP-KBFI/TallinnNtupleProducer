@@ -52,6 +52,8 @@ const std::map<std::string, TauID> TauID_PyMap = {
   { "dR03mva", TauID::MVAoldDMdR032017v2 },
   { "dR05mva", TauID::MVAoldDM2017v2     },
   { "deepVSj", TauID::DeepTau2017v2VSjet },
+  { "deepVSe", TauID::DeepTau2017v2VSe   },
+  { "deepVSm", TauID::DeepTau2017v2VSmu  },
 };
 
 TauID

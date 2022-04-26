@@ -58,6 +58,19 @@ TTreeWrapper::~TTreeWrapper()
   close();
 }
 
+void
+TTreeWrapper::reset()
+{
+  currentFileIdx_ = 0;
+  currentEventIdx_ = 0;
+  currentMaxEvents_ = -1;
+  currentMaxEventIdx_ = 0;
+  currentFilePtr_ = nullptr;
+  currentTreePtr_ = nullptr;
+  cumulativeMaxEventCount_ = 0;
+  eventCount_ = -1;
+}
+
 int
 TTreeWrapper::getFileCount() const
 {

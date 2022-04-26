@@ -57,7 +57,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , numHadTaus_(0)
   , numJets_(0)
 {
-  const std::string hadTauSelection_string = cfg.getParameter<std::string>("hadTauSelection");
+  const std::string hadTauSelection_string = cfg.getParameter<std::string>("hadTauSelection_againstJets");
   applyHadTauSF_ = hadTauSelection_string != "disabled";
   if(applyHadTauSF_)
   {
@@ -69,7 +69,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
     hadTauSelection_antiElectron_[idxHadTau] = -1;
     if(cfg.exists("hadTauSelection_antiElectron"))
     {
-      hadTauSelection_antiElectron_[idxHadTau] = cfg.getParameter<int>("hadTauSelection_antiElectron");
+      hadTauSelection_antiElectron_[idxHadTau] = cfg.getParameter<int>("hadTauSelection_againstElectrons");
     }
     else
     {
@@ -83,7 +83,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
     hadTauSelection_antiMuon_[idxHadTau] = -1;
     if(cfg.exists("hadTauSelection_antiMuon"))
     {
-      hadTauSelection_antiMuon_[idxHadTau] = cfg.getParameter<int>("hadTauSelection_antiMuon");
+      hadTauSelection_antiMuon_[idxHadTau] = cfg.getParameter<int>("hadTauSelection_againstMuons");
     }
     else
     {

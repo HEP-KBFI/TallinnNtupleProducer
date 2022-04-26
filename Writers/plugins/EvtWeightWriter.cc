@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts.()
-#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                  // RecoLeptonPtrCollection
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"    // BranchAddressInitializer
 
 #include "TString.h"                                                             // Form()

@@ -15,6 +15,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h"                        // get_tH_SM_str()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/BtagSFRatioInterface.h"                // BtagSFRatioInterface
@@ -22,6 +23,7 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h" // Data_to_MC_CorrectionInterface_2016
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2017.h" // Data_to_MC_CorrectionInterface_2017
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2018.h" // Data_to_MC_CorrectionInterface_2018
+#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"                    // EvtWeightManager
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"                   // EvtWeightRecorder
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HadTauFakeRateInterface.h"             // HadTauFakeRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h"          // HHWeightInterfaceCouplings
@@ -52,6 +54,7 @@
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
 #include <TString.h>                                                                            // TString, Form()
+#include <TTree.h>                                                                              // TTree
      
 #include <boost/algorithm/string/replace.hpp>                                                   // boost::replace_all_copy()
 #include <boost/algorithm/string/predicate.hpp>                                                 // boost::starts_with()
@@ -97,17 +100,9 @@ int main(int argc, char* argv[])
 
   edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
   AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
+  std::string process = cfg_produceNtuple.getParameter<std::string>("process");
 
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
-
-  std::string process_string = cfg_produceNtuple.getParameter<std::string>("process");
-  const bool isMC_tH     = analysisConfig.isMC_tH();
-  const bool isMC_VH     = analysisConfig.isMC_VH();
-  const bool isMC_H      = analysisConfig.isMC_H();
-  const bool isMC_HH     = analysisConfig.isMC_HH();
-  const bool isMC_EWK    = analysisConfig.isMC_EWK();
-  const bool isMC_signal = analysisConfig.isMC_ttH();
-  const bool isSignal    = isMC_signal || isMC_tH || isMC_VH || isMC_HH || isMC_H;
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
   const Era era = get_era(era_string);
@@ -115,9 +110,6 @@ int main(int argc, char* argv[])
   bool isMC = cfg_produceNtuple.getParameter<bool>("isMC");
   edm::VParameterSet lumiScale = cfg_produceNtuple.getParameter<edm::VParameterSet>("lumiScale");
   bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
-  bool hasLHE = cfg_produceNtuple.getParameter<bool>("hasLHE");
-  bool hasPS = cfg_produceNtuple.getParameter<bool>("hasPS");
-  bool apply_LHE_nom = cfg_produceNtuple.getParameter<bool>("apply_LHE_nom");
   std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
   bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
   bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
@@ -125,6 +117,11 @@ int main(int argc, char* argv[])
 
   unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
+
+  std::string hadTauWP_againstJets = cfg.getParameter<std::string>("hadTauWP_againstJets_tight");
+  std::string hadTauWP_againstElectrons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstElectrons");
+  std::string hadTauWP_againstMuons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstMuons");
+  std::string lep_mva_wp = cfg_produceNtuple.getParameter<std::string>("lep_mva_wp");
 
   bool apply_chargeMisIdRate = cfg_produceNtuple.getParameter<bool>("applyChargeMisIdRate");
 
@@ -143,36 +140,33 @@ int main(int argc, char* argv[])
 
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("era", era_string);
-  cfg_dataToMCcorrectionInterface.addParameter<std::string>("hadTauSelection", hadTauSelection_part2);
-  cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_antiElectron", hadTauSelection_antiElectron);
-  cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_antiMuon", hadTauSelection_antiMuon);
+  cfg_dataToMCcorrectionInterface.addParameter<std::string>("hadTauSelection_againstJets", hadTauWP_againstJets);
+  cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstElectrons", get_tau_id_wp_int(hadTauWP_againstElectrons));
+  cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstMuons", get_tau_id_wp_int(hadTauWP_againstMuons));
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("lep_mva_wp", lep_mva_wp);
   cfg_dataToMCcorrectionInterface.addParameter<bool>("isDEBUG", isDEBUG);
   Data_to_MC_CorrectionInterface_Base * dataToMCcorrectionInterface = nullptr;
-  switch(era)
+  switch ( era )
   {
     case Era::k2016: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2016(cfg_dataToMCcorrectionInterface); break;
     case Era::k2017: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2017(cfg_dataToMCcorrectionInterface); break;
     case Era::k2018: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2018(cfg_dataToMCcorrectionInterface); break;
     default: throw cmsException("produceNtuple", __LINE__) << "Invalid era = " << static_cast<int>(era);
   }
-  const ChargeMisIdRate chargeMisIdRate(era);
+  const ChargeMisIdRateInterface chargeMisIdRateInterface(era);
 
   edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("leptonFakeRateWeight");
   cfg_leptonFakeRateWeight.addParameter<std::string>("era", era_string);
   LeptonFakeRateInterface* jetToLeptonFakeRateInterface = new LeptonFakeRateInterface(cfg_leptonFakeRateWeight);
 
   edm::ParameterSet cfg_hadTauFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("hadTauFakeRateWeight");
-  cfg_hadTauFakeRateWeight.addParameter<std::string>("hadTauSelection", hadTauSelection_part2);
+  cfg_hadTauFakeRateWeight.addParameter<std::string>("hadTauSelection", hadTauWP_againstJets);
   HadTauFakeRateInterface* jetToHadTauFakeRateInterface = new HadTauFakeRateInterface(cfg_hadTauFakeRateWeight);
 
-  bool redoGenMatching = cfg_analyze.getParameter<bool>("redoGenMatching");
-  bool genMatchingByIndex = cfg_analyze.getParameter<bool>("genMatchingByIndex");
-
-  std::string selEventsFileName = cfg_analyze.getParameter<std::string>("selEventsFileName");
+  std::string selEventsFileName = cfg_produceNtuple.getParameter<std::string>("selEventsFileName");
   std::cout << "selEventsFileName = " << selEventsFileName << std::endl;
   RunLumiEventSelector* run_lumi_eventSelector = 0;
-  if ( selEventsFileName_input != "" ) {
+  if ( selEventsFileName != "" ) {
     edm::ParameterSet cfg_run_lumi_eventSelector;
     cfg_run_lumi_eventSelector.addParameter<std::string>("inputFileName", selEventsFileName);
     cfg_run_lumi_eventSelector.addParameter<std::string>("separator", ":");
@@ -190,98 +184,111 @@ int main(int argc, char* argv[])
   TTreeWrapper* inputTree = new TTreeWrapper(treeName.data(), inputFiles.files(), maxEvents);
   std::cout << "Loaded " << inputTree->getFileCount() << " file(s).\n";
 
-  EventReader* eventReader = new EventReader();
+  EventReader* eventReader = new EventReader(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
 
-  TTree* outputTree = new TTree("events");
+  TTree* outputTree = new TTree("events", "events");
 
-//--- declare event-level variables
-  EventInfo eventInfo(analysisConfig);
-  if ( isMC )
+  const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("evtWeight");
+  const bool applyAdditionalEvtWeight = additionalEvtWeight.getParameter<bool>("apply");
+  EvtWeightManager* eventWeightManager = nullptr;
+  if ( applyAdditionalEvtWeight )
   {
-    const double ref_genWeight = cfg_analyze.getParameter<double>("ref_genWeight");
-    eventInfo.set_refGetWeight(ref_genWeight);
+    eventWeightManager = new EvtWeightManager(additionalEvtWeight);
+    eventWeightManager->set_central_or_shift("central");
+    inputTree->registerReader(eventWeightManager);
   }
-  const std::vector<std::pair<std::string, int>> evt_htxs_binning = get_htxs_binning(isMC_signal);
-  eventInfo.read_htxs(!evt_htxs_binning.empty());
-  
-  EventInfoReader eventInfoReader(&eventInfo);
-  if ( apply_topPtReweighting )
-  {
-    eventInfoReader.setTopPtRwgtBranchName(apply_topPtReweighting_str);
-  }
-  inputTree->registerReader(&eventInfoReader);
 
   L1PreFiringWeightReader* l1PreFiringWeightReader = nullptr;
   if ( apply_l1PreFireWeight )
   {
-    l1PreFiringWeightReader = new L1PreFiringWeightReader(era);
+    l1PreFiringWeightReader = new L1PreFiringWeightReader(cfg_produceNtuple);
     inputTree->registerReader(l1PreFiringWeightReader);
+  }
+
+  LHEInfoReader* lheInfoReader = nullptr;
+  PSWeightReader* psWeightReader = nullptr;
+  if ( isMC )
+  {
+    lheInfoReader = new LHEInfoReader(cfg_produceNtuple);
+    inputTree->registerReader(lheInfoReader);
+    psWeightReader = new PSWeightReader(cfg_produceNtuple);
+    inputTree->registerReader(psWeightReader);
   }
 
   BtagSFRatioInterface* btagSFRatioInterface = nullptr;
   if ( apply_btagSFRatio )
   {
-    const edm::ParameterSet btagSFRatio = cfg_analyze.getParameterSet("btagSFRatio");
+    const edm::ParameterSet btagSFRatio = cfg_produceNtuple.getParameterSet("btagSFRatio");
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
 
-  edm::VParameterSet cfg_writers = cfg_analyze.getParameterSetVector("writerPlugins");
+  edm::VParameterSet cfg_writers = cfg_produceNtuple.getParameterSetVector("writerPlugins");
   std::vector<WriterBase*> writers;
   for ( auto cfg_writer : cfg_writers )
   {
-    std::string pluginType = cfg_writer.getParameterSet("pluginType");
+    std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
-    WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
+    cfg_writer.addParameter<std::string>("process", process);
+    WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer).get();
     writer->setBranches(outputTree);
     writers.push_back(writer);
   }
 
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
-  while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
+  for ( auto central_or_shift : systematic_shifts )
   {
-    if ( inputTree->canReport(reportEvery) )
+    inputTree->reset();
+    while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
     {
-      std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx()
-                << " or " << inputTree->getCurrentEventIdx() << " entry in #"
-                << (inputTree->getProcessedFileCount() - 1)
-                << " (" << eventInfo
-                << ") file (" << selectedEntries << " Entries selected)\n";
-    }
-    ++analyzedEntries;
-    histogram_analyzedEntries->Fill(0.);
-
-    if ( run_lumi_eventSelector )
-    { 
-      if ( !(*run_lumi_eventSelector)(eventInfo) )
-      {
-        continue;
-      }
-      std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << eventInfo << '\n';
-      if ( inputTree->isOpen() )
-      {
-        std::cout << "input File = " << inputTree->getCurrentFileName() << '\n';
-      }
-    }
-
-    if ( isDEBUG ) 
-    {
-      std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << ' ' << eventInfo << '\n';
-    }
-
-    for ( auto central_or_shift : systematic_shifts )
-    {
-      eventInfo.set_central_or_shift(central_or_shift);
-
+      eventReader->set_central_or_shift(central_or_shift);
       Event event = eventReader->read();
+      if ( central_or_shift == "central" )
+      {
+        if ( inputTree->canReport(reportEvery) )
+        {
+          std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx()
+                    << " or " << inputTree->getCurrentEventIdx() << " entry in #"
+                    << (inputTree->getProcessedFileCount() - 1)
+                    << " (" << event.eventInfo()
+                    << ") file\n";
+        }
+        ++analyzedEntries;
+        histogram_analyzedEntries->Fill(0.);
+      }
 
-      EvtWeightRecorder evtWeightRecorder(central_or_shifts_local, central_or_shift_main, isMC);
+      if ( run_lumi_eventSelector )
+      { 
+        if ( !(*run_lumi_eventSelector)(event.eventInfo()) )
+        {
+          continue;
+        }
+        if ( central_or_shift == "central" )
+        {
+          std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << event.eventInfo() << '\n';
+          if ( inputTree->isOpen() )
+          {
+            std::cout << "input File = " << inputTree->getCurrentFileName() << '\n';
+          }
+        }
+      }
+
+      if ( central_or_shift == "central"  && isDEBUG )
+      {
+        std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << ' ' << event.eventInfo() << '\n';
+      }
+
+      EvtWeightRecorder evtWeightRecorder({ central_or_shift }, central_or_shift, isMC);
       if ( isMC )
       {
         if ( apply_genWeight         ) evtWeightRecorder.record_genWeight(event.eventInfo());
-        if ( eventWeightManager      ) evtWeightRecorder.record_auxWeight(eventWeightManager);
+        if ( eventWeightManager      )
+        { 
+          eventWeightManager->set_central_or_shift(central_or_shift);
+          evtWeightRecorder.record_auxWeight(eventWeightManager);
+        }
         if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
         if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.eventInfo().topPtRwgtSF);
         lheInfoReader->read();
@@ -301,7 +308,7 @@ int main(int argc, char* argv[])
           evtWeightRecorder.record_btagSFRatio(btagSFRatioInterface, event.selJetsAK4().size());
         }
 
-        if ( isMC_EWK )
+        if ( analysisConfig.isMC_EWK() )
         {
           evtWeightRecorder.record_ewk_jet(event.selJetsAK4());
           evtWeightRecorder.record_ewk_bjet(event.selJetsAK4_btagMedium());
@@ -326,7 +333,7 @@ int main(int argc, char* argv[])
         evtWeightRecorder.record_eToTauFakeRate(dataToMCcorrectionInterface);
         evtWeightRecorder.record_muToTauFakeRate(dataToMCcorrectionInterface);
 
-        evtWeightRecorder.record_jetToLeptonRate(jetToLeptonFakeRateInterface, event.fakeableLeptons());
+        evtWeightRecorder.record_jetToLeptonFakeRate(jetToLeptonFakeRateInterface, event.fakeableLeptons());
         evtWeightRecorder.record_jetToTauFakeRate(jetToHadTauFakeRateInterface, event.fakeableHadTaus());
         evtWeightRecorder.compute_FR();
 
@@ -341,20 +348,20 @@ int main(int argc, char* argv[])
               const RecoLepton* fakeableLepton_sublead = event.fakeableLeptons().at(1);
               if ( fakeableLepton_lead->charge()*fakeableLepton_sublead->charge() > 0 )
               {
-                const double prob_chargeMisID_sum = chargeMisIdRate.get(fakeableLepton_lead, fakeableLepton_sublead);
+                prob_chargeMisId_sum = chargeMisIdRateInterface.get(fakeableLepton_lead, fakeableLepton_sublead);
               }
-            }
-            // Karl: reject the event, if the applied probability of charge misidentification is 0;
-            //       note that this can happen only if both selected leptons are muons (their misId prob is 0).
-            if ( prob_chargeMisID_sum == 0. )
-            {
-              if ( run_lumi_eventSelector )
+              // Karl: reject the event, if the applied probability of charge misidentification is 0;
+              //       note that this can happen only if both selected leptons are muons (their misId prob is 0).
+              if ( prob_chargeMisId_sum == 0. )
               {
-                std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
-                          << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << "; "
-                          << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ")\n";
+                if ( run_lumi_eventSelector )
+                {
+                  std::cout << "event " << event.eventInfo().str() << " FAILS charge flip selection\n"
+                            << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << "; "
+                            << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ")\n";
+                }
+                continue;
               }
-              continue;
             }
             evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId_sum);
           }
@@ -365,36 +372,37 @@ int main(int argc, char* argv[])
             {
               const RecoLepton* fakeableLepton_lead = event.fakeableLeptons().at(0);
               const RecoLepton* fakeableLepton_sublead = event.fakeableLeptons().at(1);
-              const RecoHadTau* fakeableHadTau_sublead = event.fakeableHadTaus().at(0);
+              const RecoHadTau* fakeableHadTau = event.fakeableHadTaus().at(0);
               if ( fakeableLepton_lead->charge()*fakeableLepton_sublead->charge() > 0 )
               {
                 // CV: apply charge misidentification probability to lepton of same charge as hadronic tau
                 //    (if the lepton of charge opposite to the charge of the hadronic tau "flips",
                 //     the event has sum of charges equal to three and fails "lepton+tau charge" cut)
-                if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    > 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_lead);
-                if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() > 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_sublead);
+                if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    > 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_lead);
+                if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() > 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_sublead);
               }
               else if ( fakeableLepton_lead->charge()*fakeableLepton_sublead->charge() < 0 )
               {
                 // CV: apply charge misidentification probability to lepton of opposite charge as hadronic tau
                 //    (if the lepton of same charge as the hadronic tau "flips",
                 //     the event has sum of charges equal to one and fails "lepton+tau charge" cut)
-                if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    < 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_lead);
-                if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() < 0 ) prob_chargeMisId *= chargeMisIdRate.get(fakeableLepton_sublead);
+                if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    < 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_lead);
+                if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() < 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_sublead);
               } else assert(0);
               // Karl: reject the event, if the applied probability of charge misidentification is 0. This can happen only if
               //       1) both selected leptons are muons (their misId prob is 0).
               //       2) one lepton is a muon and the other is an electron, and the muon has the same sign as the selected tau.
               if ( prob_chargeMisId == 0. )
               {
-              if ( run_lumi_eventSelector )
-              {
-                std::cout << "event " << eventInfo.str() << " FAILS charge flip selection\n"
-                          << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << ";"
-                          << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ";" 
-                          << " hadTau: charge = " << selHadTau->charge() << ")\n";
+                if ( run_lumi_eventSelector )
+                {
+                  std::cout << "event " << event.eventInfo().str() << " FAILS charge flip selection\n"
+                            << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << ";"
+                            << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ";" 
+                            << " hadTau: charge = " << fakeableHadTau->charge() << ")\n";
+                }
+                continue;
               }
-              continue;
             }
             evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId);
           }
@@ -417,8 +425,8 @@ int main(int argc, char* argv[])
     outputTree->Fill();
   }
 
-  TDirectory* outputDir = fs.make<TDirectory>("events");
-  outputDir->cd();
+  TFileDirectory outputDir = fs.mkdir("events");
+  outputDir.cd();
 
   TTree* outputTree_selected = outputTree->CopyTree(selection.data());
   Float_t evtWeight;
@@ -429,12 +437,12 @@ int main(int argc, char* argv[])
   int numEntries = outputTree_selected->GetEntries();
   for ( int idxEntry = 0; idxEntry < numEntries; ++idxEntry )
   {
-    idxEntry->GetEntry(idxEntry);
+    outputTree_selected->GetEntry(idxEntry);
     ++selectedEntries;
     selectedEntries_weighted += evtWeight;
     histogram_selectedEntries->Fill(0.);
   }
-  outputTree_selected->write();
+  outputTree_selected->Write();
 
   std::cout << "max num. Entries = " << inputTree->getCumulativeMaxEventCount()
             << " (limited by " << maxEvents << ") processed in "
@@ -446,15 +454,20 @@ int main(int argc, char* argv[])
 //--- memory clean-up
   delete run_lumi_eventSelector;
 
-  delete selEventsFile;
-
   delete eventReader;
   delete l1PreFiringWeightReader;
+  delete lheInfoReader;
+  delete psWeightReader;
 
   delete dataToMCcorrectionInterface;
   delete jetToLeptonFakeRateInterface;
-  delete jetToTauFakeRateInterface;
+  delete jetToHadTauFakeRateInterface;
   delete btagSFRatioInterface;
+
+  for ( auto writer : writers )
+  {
+    delete writer;
+  }
 
   delete inputTree;
   delete outputTree;

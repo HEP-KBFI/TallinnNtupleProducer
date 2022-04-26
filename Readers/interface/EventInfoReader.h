@@ -17,6 +17,9 @@ class EventInfoReader : public ReaderBase
   setBranchAddresses(TTree * tree) override;
 
   void
+  set_central_or_shift(const std::string& central_or_shift);
+
+  void
   setTopPtRwgtBranchName(const std::string & branchName);
 
   std::string

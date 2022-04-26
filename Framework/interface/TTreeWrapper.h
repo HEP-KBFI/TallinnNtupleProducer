@@ -44,6 +44,12 @@ class TTreeWrapper
   ~TTreeWrapper();
 
   /**
+   * @brief Restart processing of all events from the first event in the first file
+   */
+  void
+  reset();
+
+  /**
    * @brief Return the total number of available files
    * @return The number of files to be read
    */
