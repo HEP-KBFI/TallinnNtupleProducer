@@ -52,6 +52,7 @@ LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
   branchName_envelope_weight_up_ = cfg.getParameter<std::string>("branchName_envelope_weight_up");     // default = "LHEEnvelopeWeightUp"
   branchName_envelope_weight_down_ = cfg.getParameter<std::string>("branchName_envelope_weight_down"); // default = "LHEEnvelopeWeightDown"
   has_LHE_weights_ = cfg.getParameter<bool>("has_LHE_weights");
+  has_pdf_weights_ = cfg.getParameter<bool>("has_pdf_weights");
   setBranchNames();
 }
 

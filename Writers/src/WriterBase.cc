@@ -1,12 +1,17 @@
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/contains.h" // contains()
+#include "TallinnNtupleProducer/CommonTools/interface/contains.h"     // contains()
+#include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h" // TTreeWrapper
 
 WriterBase::WriterBase(const edm::ParameterSet & cfg)
   : current_central_or_shift_("central")
 {}
 
 WriterBase::~WriterBase()
+{}
+
+void
+WriterBase::registerReaders(TTreeWrapper * inputTree)
 {}
 
 void

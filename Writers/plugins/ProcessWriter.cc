@@ -13,9 +13,9 @@ ProcessWriter::~ProcessWriter()
 {}
 
 void
-ProcessWriter::setBranches(TTree * tree)
+ProcessWriter::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   bai.setBranch(process_, "process");
 }
 

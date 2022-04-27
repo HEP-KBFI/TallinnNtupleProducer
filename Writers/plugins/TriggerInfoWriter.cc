@@ -43,9 +43,9 @@ TriggerInfoWriter::~TriggerInfoWriter()
 {}
 
 void
-TriggerInfoWriter::setBranches(TTree * tree)
+TriggerInfoWriter::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   bai.setBranch(passesTrigger_, "passesTrigger");
 }
 

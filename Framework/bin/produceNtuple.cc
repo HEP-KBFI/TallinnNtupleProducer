@@ -18,6 +18,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h"                        // get_tH_SM_str()
+#include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"                           // TTreeWrapper
 #include "TallinnNtupleProducer/EvtWeightTools/interface/BtagSFRatioInterface.h"                // BtagSFRatioInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/ChargeMisIdRateInterface.h"            // ChargeMisIdRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h" // Data_to_MC_CorrectionInterface_2016
@@ -30,8 +31,6 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceLO.h"                 // HHWeightInterfaceLO
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceNLO.h"                // HHWeightInterfaceNLO
 #include "TallinnNtupleProducer/EvtWeightTools/interface/LeptonFakeRateInterface.h"             // LeptonFakeRateInterface
-#include "TallinnNtupleProducer/Framework/interface/GenMatchInterface.h"                        // GenMatchInterface
-#include "TallinnNtupleProducer/Framework/interface/TTreeWrapper.h"                             // TTreeWrapper
 #include "TallinnNtupleProducer/Objects/interface/Event.h"                                      // Event
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                  // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                                  // GenHadTau
@@ -231,7 +230,9 @@ int main(int argc, char* argv[])
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
     cfg_writer.addParameter<std::string>("process", process);
+    cfg_writer.addParameter<bool>("isMC", isMC);
     WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer).get();
+    writer->registerReaders(inputTree);
     writer->setBranches(outputTree);
     writers.push_back(writer);
   }

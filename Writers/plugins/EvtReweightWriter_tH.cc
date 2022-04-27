@@ -13,16 +13,16 @@ EvtReweightWriter_tH::EvtReweightWriter_tH(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
   , tHweights_(cfg.getParameterSetVector("tHweights"))
   , eventInfo_isInitialized_(false)
-  , tree_(nullptr)
+  , outputTree_(nullptr)
 {}
 
 EvtReweightWriter_tH::~EvtReweightWriter_tH()
 {}
 
 void
-EvtReweightWriter_tH::setBranches(TTree * tree)
+EvtReweightWriter_tH::setBranches(TTree * outputTree)
 {
-  tree_ = tree;
+  outputTree_ = outputTree;
 }
 
 namespace
@@ -50,8 +50,8 @@ EvtReweightWriter_tH::writeImp(const Event & event, const EvtWeightRecorder & ev
     std::vector<std::string> couplingScenarios = eventInfo.getWeight_tH_str(central_or_shift_tH);
     if ( !branchAddresses_isInitialized_[central_or_shift_tH] )
     {
-      assert(tree_);
-      BranchAddressInitializer bai(tree_);
+      assert(outputTree_);
+      BranchAddressInitializer bai(outputTree_);
       central_or_shiftEntry it;
       for ( auto couplingScenario : couplingScenarios )
       {

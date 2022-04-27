@@ -1,5 +1,4 @@
 <use   name="FWCore/ParameterSet"/>
-<use   name="TallinnNtupleProducer/Cleaners"/>
 <use   name="TallinnNtupleProducer/CommonTools"/>
 <use   name="TallinnNtupleProducer/Objects"/>
 <use   name="TallinnNtupleProducer/Selectors"/>

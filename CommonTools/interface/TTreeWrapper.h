@@ -1,5 +1,5 @@
-#ifndef TallinnNtupleProducer_Framework_TTreeWrapper_h
-#define TallinnNtupleProducer_Framework_TTreeWrapper_h
+#ifndef TallinnNtupleProducer_CommonTools_TTreeWrapper_h
+#define TallinnNtupleProducer_CommonTools_TTreeWrapper_h
 
 #include <algorithm>   // std::transform()
 #include <string>      // std::string

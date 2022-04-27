@@ -22,7 +22,7 @@ class TriggerInfoWriter : public WriterBase
    * @brief Call tree->Branch for all branches
    */
   void
-  setBranches(TTree * tree);
+  setBranches(TTree * outputTree);
  
   /**
    * @brief Return list of systematic uncertainties supported by this plugin

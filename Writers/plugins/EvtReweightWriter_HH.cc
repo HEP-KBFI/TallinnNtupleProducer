@@ -49,9 +49,9 @@ EvtReweightWriter_HH::~EvtReweightWriter_HH()
 }
 
 void
-EvtReweightWriter_HH::setBranches(TTree * tree)
+EvtReweightWriter_HH::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   for ( auto bmName : bmNames_ )
   {
     bai.setBranch(hhReweights_[bmName], branchNames_[bmName]);

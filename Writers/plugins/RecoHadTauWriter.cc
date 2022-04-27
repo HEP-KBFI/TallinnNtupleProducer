@@ -77,9 +77,9 @@ namespace
 }
 
 void
-RecoHadTauWriter::setBranches(TTree * tree)
+RecoHadTauWriter::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   for ( auto central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);

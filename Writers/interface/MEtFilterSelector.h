@@ -1,5 +1,5 @@
-#ifndef TallinnNtupleProducer_Selectors_MEtFilterSelector_h
-#define TallinnNtupleProducer_Selectors_MEtFilterSelector_h
+#ifndef TallinnNtupleProducer_Writers_MEtFilterSelector_h
+#define TallinnNtupleProducer_Writers_MEtFilterSelector_h
 
 #include <FWCore/ParameterSet/interface/ParameterSet.h>        // edm::ParameterSet
 
@@ -23,4 +23,4 @@ class MEtFilterSelector
   bool verbose_;
 };
 
-#endif // TallinnNtupleProducer_Selectors_MEtFilterSelector_h
+#endif // TallinnNtupleProducer_Writers_MEtFilterSelector_h

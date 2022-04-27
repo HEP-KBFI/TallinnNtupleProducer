@@ -51,9 +51,9 @@ RecoLeptonWriter::~RecoLeptonWriter()
 }
 
 void
-RecoLeptonWriter::setBranches(TTree * tree)
+RecoLeptonWriter::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   bai.setBranch(nLeptons_, branchName_num_);
   for ( size_t idxLepton = 0; idxLepton < nLeptons_; ++idxLepton )
   {

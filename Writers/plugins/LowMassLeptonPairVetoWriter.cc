@@ -23,9 +23,9 @@ LowMassLeptonPairVetoWriter::~LowMassLeptonPairVetoWriter()
 {}
 
 void
-LowMassLeptonPairVetoWriter::setBranches(TTree * tree)
+LowMassLeptonPairVetoWriter::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   bai.setBranch(passesLowMassLeptonPairVeto_, branchName_);
 }
 

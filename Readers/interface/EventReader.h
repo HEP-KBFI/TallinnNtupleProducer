@@ -22,7 +22,6 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"                           // RecoMuonReader
 #include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"                         // RecoVertexReader
 #include "TallinnNtupleProducer/Readers/interface/TriggerInfoReader.h"                        // TriggerInfoReader
-#include "TallinnNtupleProducer/Selectors/interface/MEtFilterSelector.h"                      // MEtFilterSelector
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorFakeable.h" // RecoElectronCollectionSelectorFakeable
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorLoose.h"    // RecoElectronCollectionSelectorLoose
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorTight.h"    // RecoElectronCollectionSelectorTight
@@ -127,7 +126,6 @@ class EventReader : public ReaderBase
   
   RecoMEtReader * metReader_;
   MEtFilterReader * metFilterReader_;
-  MEtFilterSelector * metFilterSelector_;
 
   RecoVertexReader * vertexReader_;
 

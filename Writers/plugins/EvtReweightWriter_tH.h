@@ -23,7 +23,7 @@ class EvtReweightWriter_tH : public WriterBase
    * @brief Call tree->Branch for all branches
    */
   void
-  setBranches(TTree * tree);
+  setBranches(TTree * outputTree);
  
   /**
    * @brief Return list of systematic uncertainties supported by this plugin
@@ -49,7 +49,7 @@ class EvtReweightWriter_tH : public WriterBase
   std::map<std::string, central_or_shiftEntry> central_or_shiftEntries_; // key = central_or_shift
   mutable central_or_shiftEntry * current_central_or_shiftEntry_;
 
-  TTree* tree_;
+  TTree* outputTree_;
   std::map<std::string, bool> branchAddresses_isInitialized_; // key = central_or_shift
 };
 

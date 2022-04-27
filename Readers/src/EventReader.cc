@@ -49,7 +49,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , jetSelectorAK8_Wjj_(nullptr)
   , metReader_(nullptr)
   , metFilterReader_(nullptr)
-  , metFilterSelector_(nullptr)
   , vertexReader_(nullptr)
   , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
 {
@@ -138,8 +137,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
 
   metReader_ = new RecoMEtReader(cfg);
   metFilterReader_ = new MEtFilterReader(cfg);
-  edm::ParameterSet cfg_metFilters = cfg.getParameter<edm::ParameterSet>("metFilters");
-  metFilterSelector_ = new MEtFilterSelector(cfg_metFilters, isMC_);
 
   vertexReader_ = new RecoVertexReader(cfg);
 }
@@ -181,7 +178,6 @@ EventReader::~EventReader()
   delete jetSelectorAK8_Wjj_;
   delete metReader_;
   delete metFilterReader_;
-  delete metFilterSelector_;
   delete vertexReader_;
 }
 

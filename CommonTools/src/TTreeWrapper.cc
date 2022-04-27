@@ -1,4 +1,4 @@
-#include "TallinnNtupleProducer/Framework/interface/TTreeWrapper.h"
+#include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"     // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/TFileOpenWrapper.h" // TFileOpenWrapper::

@@ -24,9 +24,9 @@ ZbosonMassVetoWriter::~ZbosonMassVetoWriter()
 {}
 
 void
-ZbosonMassVetoWriter::setBranches(TTree * tree)
+ZbosonMassVetoWriter::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   bai.setBranch(passesZbosonMassVeto_, branchName_);
 }
 

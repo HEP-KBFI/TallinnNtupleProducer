@@ -10,6 +10,7 @@
 
 // forward declarations
 class TTree;
+class TTreeWrapper;
 
 class WriterBase
 {
@@ -18,11 +19,20 @@ class WriterBase
   virtual ~WriterBase();
 
   /**
+   * @brief Call inputTree->registerReader(reader)
+   *        in case writer plugin uses "private" reader instances to read information from inputTree
+   *       (this concerns information not handled via the EventReader class)
+   */
+  virtual
+  void
+  registerReaders(TTreeWrapper * inputTree);
+
+  /**
    * @brief Call tree->Branch for all branches
    */
   virtual
   void
-  setBranches(TTree * tree) = 0;
+  setBranches(TTree * outputTree) = 0;
 
   /**
    * @brief Switch branches to those for the central value or for systematic shifts.

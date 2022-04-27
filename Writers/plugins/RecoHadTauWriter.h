@@ -23,7 +23,7 @@ class RecoHadTauWriter : public WriterBase
    * @brief Call tree->Branch for all branches
    */
   void
-  setBranches(TTree * tree);
+  setBranches(TTree * outputTree);
 
   /**
    * @brief Switch branches to those for the central value or for systematic shifts.

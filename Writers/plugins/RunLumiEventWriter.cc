@@ -12,9 +12,9 @@ RunLumiEventWriter::~RunLumiEventWriter()
 {}
 
 void
-RunLumiEventWriter::setBranches(TTree * tree)
+RunLumiEventWriter::setBranches(TTree * outputTree)
 {
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(outputTree);
   bai.setBranch(run_,   "run");
   bai.setBranch(lumi_,  "lumi");
   bai.setBranch(event_, "event");  
