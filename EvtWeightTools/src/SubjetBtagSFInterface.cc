@@ -1,6 +1,7 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/SubjetBtagSFInterface.h"
 
-#include "CondTools/BTau/interface/BTagCalibrationReader.h"                                     // BTagCalibrationReader, BTagCalibration
+#include "CondFormats/BTauObjects/interface/BTagCalibration.h"                                  // BTagCalibration
+#include "CondTools/BTau/interface/BTagCalibrationReader.h"                                     // BTagCalibrationReader
 #include "DataFormats/Math/interface/deltaR.h"                                                  // deltaR()
 
 #include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"                             // as_integer()
@@ -60,7 +61,7 @@ SubjetBtagSFInterface::SubjetBtagSFInterface(Era era,
     assert(0);
   }();
   const std::string csvFullPath = LocalFileInPath(Form("PhysicsTools/NanoAODTools/data/btagSF/%s", csvBaseName.data())).fullPath();
-  calibration_ = new BTagCalibration("deepcsv", csvFullPath);
+  calibration_ = new BTagCalibration("deepcsv", csvFullPath, true);
 
   for(const auto & kv: flavorMap_)
   {

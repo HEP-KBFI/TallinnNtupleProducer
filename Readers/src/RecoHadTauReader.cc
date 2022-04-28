@@ -17,11 +17,11 @@ std::map<std::string, RecoHadTauReader *> RecoHadTauReader::instances_;
 
 RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
+  , era_(Era::kUndefined)
   , max_nHadTaus_(36)
   , branchName_num_("")
   , branchName_obj_("")
   , isMC_(false)
-  , era_(Era::kUndefined)
   , genLeptonReader_(nullptr)
   , genHadTauReader_(nullptr)
   , genJetReader_(nullptr)

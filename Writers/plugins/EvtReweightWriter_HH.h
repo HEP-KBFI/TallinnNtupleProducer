@@ -47,14 +47,14 @@ class EvtReweightWriter_HH : public WriterBase
   std::map<std::string, std::string> branchNames_; // key = HH coupling scenario
   std::map<std::string, Float_t> hhReweights_;     // key = HH coupling scenario
 
-  bool apply_HH_rwgt_lo_;
-  bool apply_HH_rwgt_nlo_;
-
   HHWeightInterfaceCouplings * hhWeightInterface_couplings_;
   HHWeightInterfaceLO * hhWeightInterfaceLO_;
   HHWeightInterfaceNLO * hhWeightInterfaceNLO_;
 
   std::vector<std::string> bmNames_;
+  
+  bool apply_HH_rwgt_lo_;
+  bool apply_HH_rwgt_nlo_;
 };
 
 #endif // TallinnNtupleProducer_Writers_EvtReweightWriter_HH_h

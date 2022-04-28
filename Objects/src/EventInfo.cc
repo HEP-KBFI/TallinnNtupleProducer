@@ -41,8 +41,7 @@ const std::map<Int_t, std::string> EventInfo::productionMode_idString_singleHigg
 };
 
 EventInfo::EventInfo()
-  : analysisConfig_(nullptr)
-  , run(0)
+  : run(0)
   , lumi(0)
   , event(0)
   , genHiggsDecayMode(-1)
@@ -52,6 +51,7 @@ EventInfo::EventInfo()
   , gen_mHH(0.)
   , gen_cosThetaStar(-2.)
   , topPtRwgtSF(-1.)
+  , analysisConfig_(nullptr)
   , central_or_shift_("central")
   , nLHEReweightingWeight(0)
   , LHEReweightingWeight(nullptr)
