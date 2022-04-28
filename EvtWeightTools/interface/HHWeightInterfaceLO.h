@@ -70,7 +70,6 @@ class HHWeightInterfaceLO
   getNorm() const;
 
  private:
-
   double
   getNorm(const HHCoupling * const coupling) const;
 

@@ -1,13 +1,11 @@
 <use   name="CondTools/BTau"/>
-<use   name="DataFormats/Math"/>
 <use   name="FWCore/ParameterSet"/>
 <use   name="TallinnNtupleProducer/CommonTools"/>
 <use   name="TallinnNtupleProducer/Objects"/>
 <use   name="TallinnNtupleProducer/Readers"/>
 <use   name="TauPOG/TauIDSFs"/>
 <use   name="TauAnalysisTools/TauTriggerSFs"/>
-<use   name="boost" />
-<use   name="python3" />
+<use   name="python3"/>
 <use   name="root"/>
 <Flags CXXFLAGS="-O3 -fPIC -Wswitch -Wswitch-enum -Werror -Wshadow -Wno-reorder -Wno-error=bool-compare" />
 <export>
