@@ -79,6 +79,7 @@ namespace
 void
 RecoHadTauWriter::setBranches(TTree * outputTree)
 {
+std::cout << "<RecoHadTauWriter::setBranches>:" << std::endl;
 std::cout << "break-point B.1 reached" << std::endl;
   BranchAddressInitializer bai(outputTree);
 std::cout << "break-point B.2 reached" << std::endl;

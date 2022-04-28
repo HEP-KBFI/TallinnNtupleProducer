@@ -149,18 +149,18 @@ process.produceNtuple = cms.PSet(
     jetCleaningByIndex = cms.bool(True),
 
     writerPlugins = cms.VPSet(       
-        writers_fakeableHadTaus,
-        writers_fakeableLeptons,
+##        writers_fakeableHadTaus,
+##        writers_fakeableLeptons,
         writers_genPhotonFilter,
-        writers_lowMassLeptonPairVeto,
-        writers_met,
-        writers_metFilters,
-        writers_process,
-        writers_run_lumi_event,
-        writers_selJetsAK4,
-        writers_selJetsAK4_btagLoose,
-        writers_selJetsAK4_btagMedium,
-        writers_ZbosonMassVeto
+##        writers_lowMassLeptonPairVeto,
+##        writers_met,
+##        writers_metFilters,
+##        writers_process,
+##        writers_run_lumi_event,
+##        writers_selJetsAK4,
+##        writers_selJetsAK4_btagLoose,
+##        writers_selJetsAK4_btagMedium,
+##        writers_ZbosonMassVeto
     ),
 
     selEventsFileName = cms.string(''),

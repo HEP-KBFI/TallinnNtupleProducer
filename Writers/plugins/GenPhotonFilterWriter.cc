@@ -58,6 +58,8 @@ GenPhotonFilterWriter::~GenPhotonFilterWriter()
 void
 GenPhotonFilterWriter::registerReaders(TTreeWrapper * inputTree)
 {
+std::cout << "<GenPhotonFilterWriter::registerReaders>:" << std::endl;
+  assert(inputTree);
   inputTree->registerReader(genPhotonReader_);
   inputTree->registerReader(genProxyPhotonReader_);
   inputTree->registerReader(genParticlesFromHardProcessReader_);
@@ -66,6 +68,7 @@ GenPhotonFilterWriter::registerReaders(TTreeWrapper * inputTree)
 void
 GenPhotonFilterWriter::setBranches(TTree * outputTree)
 {
+std::cout << "<GenPhotonFilterWriter::setBranches>:" << std::endl;
   BranchAddressInitializer bai(outputTree);
   bai.setBranch(passesGenPhotonFilter_, branchName_);
 }
