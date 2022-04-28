@@ -20,7 +20,7 @@ process = cms.PSet()
 
 process.fwliteInput = cms.PSet(
     fileNames = cms.vstring(),
-    maxEvents = cms.int32(-1),
+    maxEvents = cms.int32(100),
     outputEvery = cms.uint32(100000)
 )
 
@@ -151,9 +151,9 @@ process.produceNtuple = cms.PSet(
     writerPlugins = cms.VPSet(       
 ##        writers_fakeableHadTaus,
 ##        writers_fakeableLeptons,
-        writers_genPhotonFilter,
+##        writers_genPhotonFilter,
 ##        writers_lowMassLeptonPairVeto,
-##        writers_met,
+        writers_met,
 ##        writers_metFilters,
 ##        writers_process,
 ##        writers_run_lumi_event,

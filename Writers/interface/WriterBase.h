@@ -32,7 +32,7 @@ class WriterBase
    */
   virtual
   void
-  setBranches(TTree * outputTree);
+  setBranches(TTree * outputTree) = 0;
 
   /**
    * @brief Switch branches to those for the central value or for systematic shifts.

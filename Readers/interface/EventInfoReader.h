@@ -6,6 +6,7 @@
 // forward declarations
 class TTree;
 class EventInfo;
+class AnalysisConfig;
 
 class EventInfoReader : public ReaderBase
 {
@@ -46,6 +47,7 @@ class EventInfoReader : public ReaderBase
   bool read_genHiggsDecayMode_;
   bool read_puWeight_;
 
+  const AnalysisConfig * analysisConfig_;
   EventInfo * info_;
 
   std::string branchName_topPtRwgt;
