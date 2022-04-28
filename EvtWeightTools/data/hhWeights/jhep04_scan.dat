@@ -1,0 +1,14 @@
+kl=7.5  kt=1   c2=-1   cg=0     c2g=0    name=JHEP04BM1  training=BM1
+kl=1    kt=1   c2=0.5  cg=-0.8  c2g=0.6  name=JHEP04BM2  training=BM2
+kl=1    kt=1   c2=-1.5 cg=0     c2g=-0.8 name=JHEP04BM3  training=BM3
+kl=-3.5 kt=1.5 c2=-3   cg=0     c2g=0    name=JHEP04BM4  training=BM4
+kl=1    kt=1   c2=0    cg=0.8   c2g=-1   name=JHEP04BM5  training=BM5
+kl=2.4  kt=1   c2=0    cg=0.2   c2g=-0.2 name=JHEP04BM6  training=BM6
+kl=5    kt=1   c2=0    cg=0.2   c2g=-0.2 name=JHEP04BM7  training=BM7
+kl=15   kt=1   c2=0    cg=-1    c2g=1    name=JHEP04BM8  training=BM8
+kl=1    kt=1   c2=1    cg=-0.6  c2g=0.6  name=JHEP04BM9  training=BM9
+kl=10   kt=1.5 c2=-1   cg=0     c2g=0    name=JHEP04BM10 training=BM10
+kl=2.4  kt=1   c2=0    cg=1     c2g=-1   name=JHEP04BM11 training=BM11
+kl=15   kt=1   c2=1    cg=0     c2g=0    name=JHEP04BM12 training=BM12
+kl=1    kt=1   c2=0.5  cg=0.8/3 c2g=0    name=JHEP04BM8a training=BM9 # [*]
+# https://github.com/HEP-KBFI/hh-multilepton/issues/38#issuecomment-821278740

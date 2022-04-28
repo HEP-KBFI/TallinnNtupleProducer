@@ -1,0 +1,31 @@
+# kl=1 kt=1 c2=0.10 cg=0 c2g=0
+# kl=1 kt=1 c2=0.35 cg=0 c2g=0
+# kl=1 kt=1 c2=-2   cg=0 c2g=0
+# kl=1 kt=1 c2=3    cg=0 c2g=0
+# kl=1 kt=1 c2=0.10 cg=0 c2g=0 name=c2_0p10_BM3  training=BM3
+# kl=1 kt=1 c2=0.35 cg=0 c2g=0 name=c2_0p35_BM3  training=BM3
+# kl=1 kt=1 c2=-2   cg=0 c2g=0 name=c2_m2p00_BM3 training=BM3
+# kl=1 kt=1 c2=3    cg=0 c2g=0 name=c2_3p00_BM3  training=BM3
+# kl=1 kt=1 c2=0.10 cg=0 c2g=0 name=c2_0p10_BM4  training=BM4
+# kl=1 kt=1 c2=0.35 cg=0 c2g=0 name=c2_0p35_BM4  training=BM4
+# kl=1 kt=1 c2=-2   cg=0 c2g=0 name=c2_m2p00_BM4 training=BM4
+# kl=1 kt=1 c2=3    cg=0 c2g=0 name=c2_3p00_BM4  training=BM4
+# kl=1 kt=1 c2=0.10 cg=0 c2g=0 name=c2_0p10_BM9  training=BM9
+# kl=1 kt=1 c2=0.35 cg=0 c2g=0 name=c2_0p35_BM9  training=BM9
+# kl=1 kt=1 c2=-2   cg=0 c2g=0 name=c2_m2p00_BM9 training=BM9
+# kl=1 kt=1 c2=3    cg=0 c2g=0 name=c2_3p00_BM9  training=BM9
+# kl=1 kt=1 c2=-1 cg=0 c2g=0
+# kl=1 kt=1 c2=-0.5 cg=0 c2g=0
+# kl=1 kt=1 c2=0.5  cg=0 c2g=0
+# kl=1 kt=1 c2=1    cg=0 c2g=0
+# kl=1 kt=1 c2=1.5  cg=0 c2g=0
+# kl=1 kt=1 c2=2    cg=0 c2g=0
+# kl=1 kt=1 c2=2.5  cg=0 c2g=0
+kl=1 kt=1 c2=0.35 cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_0p35_BM9  training=BM9
+kl=1 kt=1 c2=3    cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_3p00_BM9  training=BM9
+kl=1 kt=1 c2=0.10 cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_0p10_BM9  training=BM9
+kl=1 kt=1 c2=-2    cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_m2p00_BM9  training=BM9
+kl=1 kt=1 c2=0.35 cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_0p35_BM7  training=BM7
+kl=1 kt=1 c2=3    cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_3p00_BM7  training=BM7
+kl=1 kt=1 c2=0.10 cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_0p10_BM7  training=BM7
+kl=1 kt=1 c2=-2    cg=0 c2g=0 name=kl_1p00_kt_1p00_c2_m2p00_BM7  training=BM7

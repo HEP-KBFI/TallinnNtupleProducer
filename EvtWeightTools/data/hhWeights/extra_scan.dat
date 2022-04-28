@@ -1,0 +1,16 @@
+kl=0 kt=1 c2=0 cg=0 c2g=0 name=kl_0p00_kt_1p00_c2_0p00_BM9 training=BM9
+kl=0 kt=1 c2=1 cg=0 c2g=0 name=kl_0p00_kt_1p00_c2_1p00_BM9 training=BM9
+kl=0 kt=1 c2=0 cg=0 c2g=0 name=kl_0p00_kt_1p00_c2_0p00_BM7 training=BM7
+kl=0 kt=1 c2=1 cg=0 c2g=0 name=kl_0p00_kt_1p00_c2_1p00_BM7 training=BM7
+# kl=0 kt=1 c2=0 cg=0 c2g=0 name=box
+# kl=0 kt=1 c2=1 cg=0 c2g=0
+# kl=1 kt=-0.5 c2=-2 cg=0 c2g=0
+# kl=1 kt=-0.5 c2=-0.5 cg=0 c2g=0
+# kl=1 kt=-0.5 c2=0.5 cg=0 c2g=0
+# kl=1 kt=-0.5 c2=1.5 cg=0 c2g=0
+# kl=1 kt=-0.5 c2=2.5 cg=0 c2g=0
+# kl=1 kt=2 c2=-2 cg=0 c2g=0
+# kl=1 kt=2 c2=-0.5 cg=0 c2g=0
+# kl=1 kt=2 c2=0.5 cg=0 c2g=0
+# kl=1 kt=2 c2=1.5 cg=0 c2g=0
+# kl=1 kt=2 c2=2.5 cg=0 c2g=0
