@@ -16,7 +16,7 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   // Downloaded from: https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2?rev=104#94X_series_Fall17V2_Scale_factor
   sfElectronID_and_Iso_loose_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/el_scaleFactors_gsf_ptLt20.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/el_scaleFactors_gsf_ptLt20.root",
     "EGamma_SF2D",
     lut::kXetaYpt, -2.5, +2.5, lut::kLimit, -1., 20., lut::kLimit_and_Cut
   ));
@@ -25,7 +25,7 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   // Downloaded from: https://twiki.cern.ch/twiki/bin/view/CMS/EgammaIDRecipesRun2?rev=104#94X_series_Fall17V2_Scale_factor
   sfElectronID_and_Iso_loose_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/el_scaleFactors_gsf_ptGt20.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/el_scaleFactors_gsf_ptGt20.root",
     "EGamma_SF2D",
     lut::kXetaYpt, -2.5, +2.5, lut::kLimit, 20., -1., lut::kLimit_and_Cut
   ));
@@ -33,14 +33,14 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/TnP_loose_ele_2017.root
   sfElectronID_and_Iso_loose_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/TnP_loose_ele_2017.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/TnP_loose_ele_2017.root",
     "EGamma_SF2D",
     lut::kXabsEtaYpt
   ));
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/TnP_loosettH_ele_2017.root
   sfElectronID_and_Iso_loose_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/TnP_loosettH_ele_2017.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/TnP_loosettH_ele_2017.root",
     "EGamma_SF2D",
     lut::kXabsEtaYpt
   ));
@@ -49,14 +49,14 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/TnP_ttH_ele_2017_3l/passttH/egammaEffi.txt_EGM2D.root
   sfElectronID_and_Iso_tight_to_loose_woTightCharge_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_e_3l.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_e_3l.root",
     "EGamma_SF2D",
     lut::kXabsEtaYpt
   ));
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/TnP_ttH_ele_2017_2lss/passttH/egammaEffi.txt_EGM2D.root
   sfElectronID_and_Iso_tight_to_loose_wTightCharge_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_e_2lss.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_e_2lss.root",
     "EGamma_SF2D",
     lut::kXabsEtaYpt
   ));
@@ -64,18 +64,18 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/error/SFttbar_2017_ele_pt.root
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/error/SFttbar_2017_ele_eta.root
   sfElectronID_and_Iso_tight_to_loose_errors_up_.push_back(new lutWrapperTH2(
-    inputFiles_, "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_e_error.root", "histo_eff_data_max",
+    inputFiles_, "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_e_error.root", "histo_eff_data_max",
     lut::kXabsEtaYpt
   ));
   sfElectronID_and_Iso_tight_to_loose_errors_down_.push_back(new lutWrapperTH2(
-    inputFiles_, "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_e_error.root", "histo_eff_data_min",
+    inputFiles_, "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_e_error.root", "histo_eff_data_min",
     lut::kXabsEtaYpt
   ));
 
   // Loose muon SFs, measured by the CERN group
   sfMuonID_and_Iso_loose_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/TnP_loose_muon_2017.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/TnP_loose_muon_2017.root",
     "EGamma_SF2D",
     lut::kXabsEtaYpt
   ));
@@ -84,14 +84,14 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/TnP_ttH_muon_2017_3l/passttH/egammaEffi.txt_EGM2D.root
   sfMuonID_and_Iso_tight_to_loose_woTightCharge_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_m_3l.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_m_3l.root",
     "EGamma_SF2D",
     lut::kXabsEtaYpt
   ));
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/TnP_ttH_muon_2017_2lss/passttH/egammaEffi.txt_EGM2D.root
   sfMuonID_and_Iso_tight_to_loose_wTightCharge_.push_back(new lutWrapperTH2(
     inputFiles_,
-    "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_m_2lss.root",
+    "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_m_2lss.root",
     "EGamma_SF2D",
     lut::kXabsEtaYpt
   ));
@@ -99,11 +99,11 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/error/SFttbar_2017_muon_pt.root
   // /afs/cern.ch/user/b/balvarez/work/public/ttHAnalysis/error/SFttbar_2017_muon_eta.root
   sfMuonID_and_Iso_tight_to_loose_errors_up_.push_back(new lutWrapperTH2(
-    inputFiles_, "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_m_error.root", "histo_eff_data_max",
+    inputFiles_, "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_m_error.root", "histo_eff_data_max",
     lut::kXabsEtaYpt
   ));
   sfMuonID_and_Iso_tight_to_loose_errors_down_.push_back(new lutWrapperTH2(
-    inputFiles_, "tthAnalysis/HiggsToTauTau/data/leptonSF/2017/lepMVAEffSF_m_error.root", "histo_eff_data_min",
+    inputFiles_, "TallinnNtupleProducer/EvtWeightTools/data/leptonSF/2017/lepMVAEffSF_m_error.root", "histo_eff_data_min",
     lut::kXabsEtaYpt
   ));
 

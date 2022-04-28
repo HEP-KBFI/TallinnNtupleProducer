@@ -16,11 +16,10 @@ std::map<std::string, L1PreFiringWeightReader*> L1PreFiringWeightReader::instanc
 L1PreFiringWeightReader::L1PreFiringWeightReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
   , era_(Era::kUndefined)
-  , branchName_("")
+  , branchName_("L1PreFiringWeight")
   , l1PreFiringWeight_nominal_(1.)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
-  branchName_ = cfg.getParameter<std::string>("branchName"); // default = "L1PreFiringWeight"
   setBranchNames();
 }
 

@@ -11,6 +11,8 @@
 #include "DataFormats/FWLite/interface/OutputFiles.h"                                           // fwlite::OutputFiles
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                                         // edm::ParameterSet
 #include "FWCore/ParameterSetReader/interface/ParameterSetReader.h"                             // edm::readPSetsFrom()
+#include "FWCore/PluginManager/interface/PluginManager.h"                                       // edmplugin::PluginManager::configure()
+#include "FWCore/PluginManager/interface/standard.h"                                            // edmplugin::standard::config()
 #include "PhysicsTools/FWLite/interface/TFileService.h"                                         // fwlite::TFileService
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
@@ -100,7 +102,7 @@ std::cout << "break-point 3 reached" << std::endl;
   edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
   AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
   std::string process = cfg_produceNtuple.getParameter<std::string>("process");
-std::cout << "break-point 3 reached" << std::endl;
+std::cout << "break-point 4 reached" << std::endl;
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
@@ -112,17 +114,17 @@ std::cout << "break-point 3 reached" << std::endl;
   std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
   bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
   bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
-  bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("applyBtagSFRatio");
-std::cout << "break-point 4 reached" << std::endl;
+  bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");
+std::cout << "break-point 5 reached" << std::endl;
   unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
-std::cout << "break-point 5 reached" << std::endl;
-  std::string hadTauWP_againstJets = cfg.getParameter<std::string>("hadTauWP_againstJets_tight");
+
+  std::string hadTauWP_againstJets = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstJets_tight");
   std::string hadTauWP_againstElectrons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstElectrons");
   std::string hadTauWP_againstMuons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstMuons");
   std::string lep_mva_wp = cfg_produceNtuple.getParameter<std::string>("lep_mva_wp");
 std::cout << "break-point 6 reached" << std::endl;
-  bool apply_chargeMisIdRate = cfg_produceNtuple.getParameter<bool>("applyChargeMisIdRate");
+  bool apply_chargeMisIdRate = cfg_produceNtuple.getParameter<bool>("apply_chargeMisIdRate");
 
   std::string selection = cfg_produceNtuple.getParameter<std::string>("selection");
 
@@ -140,9 +142,16 @@ std::cout << "break-point 8 reached" << std::endl;
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("era", era_string);
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("hadTauSelection_againstJets", hadTauWP_againstJets);
+std::cout << "break-point 8.1 reached" << std::endl;
+std::cout << "hadTauWP_againstJets = " << hadTauWP_againstJets << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstElectrons", get_tau_id_wp_int(hadTauWP_againstElectrons));
+std::cout << "break-point 8.2 reached" << std::endl;
+std::cout << "hadTauWP_againstElectrons = " << get_tau_id_wp_int(hadTauWP_againstElectrons) << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstMuons", get_tau_id_wp_int(hadTauWP_againstMuons));
+std::cout << "break-point 8.3 reached" << std::endl;
+std::cout << "hadTauWP_againstMuons = " << get_tau_id_wp_int(hadTauWP_againstMuons) << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("lep_mva_wp", lep_mva_wp);
+std::cout << "lep_mva_wp = " << lep_mva_wp << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<bool>("isDEBUG", isDEBUG);
   Data_to_MC_CorrectionInterface_Base * dataToMCcorrectionInterface = nullptr;
   switch ( era )
@@ -222,19 +231,28 @@ std::cout << "break-point 20 reached" << std::endl;
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
 std::cout << "break-point 21 reached" << std::endl;
+  edmplugin::PluginManager::Config config;
+  edmplugin::PluginManager::configure(edmplugin::standard::config());
   edm::VParameterSet cfg_writers = cfg_produceNtuple.getParameterSetVector("writerPlugins");
   std::vector<WriterBase*> writers;
   for ( auto cfg_writer : cfg_writers )
   {
+std::cout << "break-point 21.1 reached" << std::endl;
     std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
+std::cout << "pluginType = " << pluginType << std::endl;
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
     cfg_writer.addParameter<std::string>("process", process);
     cfg_writer.addParameter<bool>("isMC", isMC);
+std::cout << "break-point 21.2 reached" << std::endl;
     WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer).get();
+std::cout << "break-point 21.3 reached" << std::endl;
     writer->registerReaders(inputTree);
+std::cout << "break-point 21.4 reached" << std::endl;
     writer->setBranches(outputTree);
+std::cout << "break-point 21.5 reached" << std::endl;
     writers.push_back(writer);
+std::cout << "break-point 21.6 reached" << std::endl;
   }
 std::cout << "break-point 22 reached" << std::endl;
   int analyzedEntries = 0;

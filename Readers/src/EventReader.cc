@@ -8,6 +8,29 @@
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getMET_option()
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
 
+namespace
+{
+  edm::ParameterSet
+  make_cfg(const edm::ParameterSet& cfg, const std::string & attr_branchName)
+  {
+    edm::ParameterSet cfg_modified(cfg);
+    std::string branchName = cfg.getParameter<std::string>(attr_branchName);
+    cfg_modified.addParameter<std::string>("branchName", branchName);
+    return cfg_modified;
+  }
+
+  edm::ParameterSet
+  make_cfg_jetsAK8(const edm::ParameterSet& cfg, const std::string & attr_branchName_jet, const std::string & attr_branchName_subjet)
+  {
+    edm::ParameterSet cfg_modified(cfg);
+    std::string branchName_jet = cfg.getParameter<std::string>(attr_branchName_jet);
+    cfg_modified.addParameter<std::string>("branchName_jet", branchName_jet);
+    std::string branchName_subjet = cfg.getParameter<std::string>(attr_branchName_subjet);
+    cfg_modified.addParameter<std::string>("branchName_subjet", branchName_subjet);
+    return cfg_modified;
+  }
+}
+
 EventReader::EventReader(const edm::ParameterSet& cfg)
   : ReaderBase(cfg)
   , numNominalLeptons_(0)
@@ -45,9 +68,9 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , electronGenMatcher_(nullptr)
   , hadTauGenMatcher_(nullptr)
   , jetGenMatcherAK4_(nullptr)
-  , jetReaderAK8_(nullptr)
+  , jetReaderAK8_Hbb_(nullptr)
+  , jetReaderAK8_Wjj_(nullptr)
   , jetCleanerAK8_dR08_(nullptr)
-  , jetSelectorAK8_(nullptr)
   , jetSelectorAK8_Hbb_(nullptr)
   , jetSelectorAK8_Wjj_(nullptr)
   , metReader_(nullptr)
@@ -55,13 +78,14 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , vertexReader_(nullptr)
   , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
 {
+std::cout << "break-point A.1 reached" << std::endl;
   numNominalLeptons_ = cfg.getParameter<unsigned>("numNominalLeptons");
   numNominalHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
-
+std::cout << "break-point A.2 reached" << std::endl;
   era_ = get_era(cfg.getParameter<std::string>("era"));
   isMC_ = cfg.getParameter<bool>("isMC");
   readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
-
+std::cout << "break-point A.3 reached" << std::endl;
   eventInfoReader_ = new EventInfoReader(cfg);
   const std::string apply_topPtReweighting_str = cfg.getParameter<std::string>("apply_topPtReweighting");
   const bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
@@ -69,25 +93,26 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   {
     eventInfoReader_->setTopPtRwgtBranchName(apply_topPtReweighting_str);
   }
-
-  triggerInfoReader_ = new TriggerInfoReader(cfg);
-
-  muonReader_ = new RecoMuonReader(cfg);
+std::cout << "break-point A.4 reached" << std::endl;
+  edm::ParameterSet cfg_triggers = cfg.getParameter<edm::ParameterSet>("triggers");
+  triggerInfoReader_ = new TriggerInfoReader(cfg_triggers);
+std::cout << "break-point A.5 reached" << std::endl;
+  muonReader_ = new RecoMuonReader(make_cfg(cfg, "branchName_muons"));
   const double lep_mva_cut_mu = cfg.getParameter<double>("lep_mva_cut_mu");
   muonReader_->set_mvaTTH_wp(lep_mva_cut_mu);
   looseMuonSelector_ = new RecoMuonCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableMuonSelector_ = new RecoMuonCollectionSelectorFakeable(era_, -1, isDEBUG_);
   tightMuonSelector_ = new RecoMuonCollectionSelectorTight(era_, -1, isDEBUG_);
-
-  electronReader_ = new RecoElectronReader(cfg);
+std::cout << "break-point A.6 reached" << std::endl;
+  electronReader_ = new RecoElectronReader(make_cfg(cfg, "branchName_electrons"));
   const double lep_mva_cut_e = cfg.getParameter<double>("lep_mva_cut_e");
   electronReader_->set_mvaTTH_wp(lep_mva_cut_e);
   electronCleaner_ = new RecoElectronCollectionCleaner(0.3, isDEBUG_);
   looseElectronSelector_ = new RecoElectronCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableElectronSelector_ = new RecoElectronCollectionSelectorFakeable(era_, -1, isDEBUG_);
   tightElectronSelector_ = new RecoElectronCollectionSelectorTight(era_, -1, isDEBUG_);
-
-  hadTauReader_ = new RecoHadTauReader(cfg);
+std::cout << "break-point A.7 reached" << std::endl;
+  hadTauReader_ = new RecoHadTauReader(make_cfg(cfg, "branchName_hadTaus"));
   hadTauCleaner_ = new RecoHadTauCollectionCleaner(0.3, isDEBUG_);
   looseHadTauSelector_ = new RecoHadTauCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableHadTauSelector_ = new RecoHadTauCollectionSelectorFakeable(era_, -1, isDEBUG_);
@@ -104,8 +129,8 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   int hadTauWP_againstMuons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstMuons"));
   fakeableHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
   tightHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
-
-  jetReaderAK4_ = new RecoJetReaderAK4(cfg);
+std::cout << "break-point A.8 reached" << std::endl;
+  jetReaderAK4_ = new RecoJetReaderAK4(make_cfg(cfg, "branchName_jets_ak4"));
   bool jetCleaningByIndex = cfg.getParameter<bool>("jetCleaningByIndex");
   if ( jetCleaningByIndex )
   {
@@ -119,29 +144,30 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   jetSelectorAK4_ = new RecoJetCollectionSelectorAK4(era_, -1, isDEBUG_);
   jetSelectorAK4_btagLoose_ = new RecoJetCollectionSelectorAK4_btagLoose(era_, -1, isDEBUG_);
   jetSelectorAK4_btagMedium_ = new RecoJetCollectionSelectorAK4_btagMedium(era_, -1, isDEBUG_);
-
+std::cout << "break-point A.9 reached" << std::endl;
   if ( readGenMatching_ )
   {
-    genLeptonReader_ = new GenLeptonReader(cfg);
-    genHadTauReader_ = new GenHadTauReader(cfg);
-    genPhotonReader_ = new GenPhotonReader(cfg);
-    genJetReader_ = new GenJetReader(cfg);
+    genLeptonReader_ = new GenLeptonReader(make_cfg(cfg, "branchName_genLeptons"));
+    genHadTauReader_ = new GenHadTauReader(make_cfg(cfg, "branchName_genHadTaus"));
+    genPhotonReader_ = new GenPhotonReader(make_cfg(cfg, "branchName_genPhotons"));
+    genJetReader_ = new GenJetReader(make_cfg(cfg, "branchName_genJets"));
     muonGenMatcher_ = new RecoMuonCollectionGenMatcher();
     electronGenMatcher_ = new RecoElectronCollectionGenMatcher();
     hadTauGenMatcher_ = new RecoHadTauCollectionGenMatcher();
     jetGenMatcherAK4_ = new RecoJetCollectionGenMatcherAK4();
   }
-
-  jetReaderAK8_ = new RecoJetReaderAK8(cfg);
+std::cout << "break-point A.10 reached" << std::endl;
+  jetReaderAK8_Hbb_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Hbb", "branchName_subjets_ak8_Hbb"));
+  jetReaderAK8_Wjj_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Wjj", "branchName_subjets_ak8_Wjj"));
   jetCleanerAK8_dR08_ = new RecoJetCollectionCleanerAK8(0.8, isDEBUG_);
-  jetSelectorAK8_ = new RecoJetCollectionSelectorAK8(era_, -1, isDEBUG_);
   jetSelectorAK8_Hbb_ = new RecoJetCollectionSelectorAK8_Hbb(era_, -1, isDEBUG_);
   jetSelectorAK8_Wjj_ = new RecoJetCollectionSelectorAK8_Wjj(era_, -1, isDEBUG_);
-
-  metReader_ = new RecoMEtReader(cfg);
+std::cout << "break-point A.11 reached" << std::endl;
+  metReader_ = new RecoMEtReader(make_cfg(cfg, "branchName_met"));
   metFilterReader_ = new MEtFilterReader(cfg);
-
-  vertexReader_ = new RecoVertexReader(cfg);
+std::cout << "break-point A.12 reached" << std::endl;
+  vertexReader_ = new RecoVertexReader(make_cfg(cfg, "branchName_vertex"));
+std::cout << "break-point A.13 reached" << std::endl;
 }
 
 EventReader::~EventReader()
@@ -174,9 +200,9 @@ EventReader::~EventReader()
   delete electronGenMatcher_;
   delete hadTauGenMatcher_;
   delete jetGenMatcherAK4_;
-  delete jetReaderAK8_;
+  delete jetReaderAK8_Hbb_;
+  delete jetReaderAK8_Wjj_;
   delete jetCleanerAK8_dR08_;
-  delete jetSelectorAK8_;
   delete jetSelectorAK8_Hbb_;
   delete jetSelectorAK8_Wjj_;
   delete metReader_;
@@ -207,10 +233,15 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
     jetReaderAK4_->setPtMass_central_or_shift(jetPt_option);
     jetReaderAK4_->read_btag_systematics(central_or_shift != "central" && isMC_);
   }
-  if ( contains(jetReaderAK8_->get_supported_systematics(), central_or_shift) )
+  if ( contains(jetReaderAK8_Hbb_->get_supported_systematics(), central_or_shift) )
   {
     const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-    jetReaderAK8_->set_central_or_shift(fatJetPt_option);
+    jetReaderAK8_Hbb_->set_central_or_shift(fatJetPt_option);
+  }
+  if ( contains(jetReaderAK8_Wjj_->get_supported_systematics(), central_or_shift) )
+  {
+    const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
+    jetReaderAK8_Wjj_->set_central_or_shift(fatJetPt_option);
   }
   if ( contains(metReader_->get_supported_systematics(), central_or_shift) )
   {
@@ -232,7 +263,8 @@ EventReader::setBranchAddresses(TTree * tree)
   genHadTauReader_->setBranchAddresses(tree);
   genPhotonReader_->setBranchAddresses(tree);
   genJetReader_->setBranchAddresses(tree);
-  jetReaderAK8_->setBranchAddresses(tree);
+  jetReaderAK8_Hbb_->setBranchAddresses(tree);
+  jetReaderAK8_Wjj_->setBranchAddresses(tree);
   metReader_->setBranchAddresses(tree);
   metFilterReader_->setBranchAddresses(tree);
   vertexReader_->setBranchAddresses(tree);
@@ -328,12 +360,13 @@ namespace
 Event
 EventReader::read() const
 {
+std::cout << "break-point B.1 reached" << std::endl;
   const EventInfo& eventInfo = eventInfoReader_->read();
-  
+std::cout << "break-point B.2 reached" << std::endl;
   const TriggerInfo& triggerInfo = triggerInfoReader_->read();
-
+std::cout << "break-point B.3 reached" << std::endl;
   Event event(eventInfo, triggerInfo);
-
+std::cout << "break-point B.4 reached" << std::endl;
   RecoMuonCollection muons = muonReader_->read();
   RecoMuonPtrCollection muon_ptrs = convert_to_ptrs(muons);
   RecoMuonPtrCollection cleanedMuons = muon_ptrs; // CV: no cleaning needed for muons, as they have the highest priority in the overlap removal
@@ -342,7 +375,7 @@ EventReader::read() const
   RecoMuonPtrCollection tightMuonsFull = tightMuonSelector_->operator()(fakeableMuonsFull, isHigherConePt<RecoMuon>);
   event.fakeableMuons_ = pickFirstNobjects(fakeableMuonsFull, numNominalLeptons_);
   event.tightMuons_ = getIntersection(event.fakeableMuons_, tightMuonsFull, isHigherConePt<RecoMuon>);
-
+std::cout << "break-point B.5 reached" << std::endl;
   RecoElectronCollection electrons = electronReader_->read();
   RecoElectronPtrCollection electron_ptrs = convert_to_ptrs(electrons);
   RecoElectronPtrCollection cleanedElectrons = electronCleaner_->operator()(electron_ptrs, event.looseMuons_);
@@ -351,13 +384,13 @@ EventReader::read() const
   RecoElectronPtrCollection tightElectronsFull = tightElectronSelector_->operator()(fakeableElectronsFull, isHigherConePt<RecoElectron>);
   event.fakeableElectrons_ = pickFirstNobjects(fakeableElectronsFull, numNominalLeptons_);
   event.tightElectrons_ = getIntersection(event.fakeableElectrons_, tightElectronsFull, isHigherConePt<RecoElectron>);
-
+std::cout << "break-point B.6 reached" << std::endl;
   event.looseLeptons_ = mergeLeptonCollections(event.looseElectrons_, event.looseMuons_, isHigherConePt<RecoLepton>);
   RecoLeptonPtrCollection fakeableLeptonsFull = mergeLeptonCollections(fakeableElectronsFull, fakeableMuonsFull, isHigherConePt<RecoLepton>);
   RecoLeptonPtrCollection tightLeptonsFull = mergeLeptonCollections(tightElectronsFull, tightMuonsFull, isHigherConePt<RecoLepton>);
   event.fakeableLeptons_ = pickFirstNobjects(fakeableLeptonsFull, numNominalLeptons_);
   event.tightLeptons_ = getIntersection(event.fakeableLeptons_, tightLeptonsFull, isHigherConePt<RecoLepton>);
-
+std::cout << "break-point B.7 reached" << std::endl;
   RecoHadTauCollection hadTaus = hadTauReader_->read();
   RecoHadTauPtrCollection hadTau_ptrs = convert_to_ptrs(hadTaus);
   RecoHadTauPtrCollection cleanedHadTaus = hadTauCleaner_->operator()(hadTau_ptrs, event.looseMuons_, event.looseElectrons_);
@@ -365,14 +398,14 @@ EventReader::read() const
   RecoHadTauPtrCollection tightHadTausFull = tightHadTauSelector_->operator()(fakeableHadTausFull, isHigherPt<RecoHadTau>);
   event.fakeableHadTaus_ = pickFirstNobjects(fakeableHadTausFull, numNominalHadTaus_);
   event.tightHadTaus_ = getIntersection(event.fakeableHadTaus_, tightHadTausFull, isHigherPt<RecoHadTau>);
-
+std::cout << "break-point B.8 reached" << std::endl;
   RecoJetCollectionAK4 jetsAK4 = jetReaderAK4_->read();
   RecoJetPtrCollectionAK4 jet_ptrsAK4 = convert_to_ptrs(jetsAK4);
   RecoJetPtrCollectionAK4 cleanedJetsAK4 = jetCleanerAK4_dR04_->operator()(jet_ptrsAK4, event.fakeableLeptons_, event.fakeableHadTaus_);
   event.selJetsAK4_ = jetSelectorAK4_->operator()(cleanedJetsAK4, isHigherPt<RecoJetAK4>);
   event.selJetsAK4_btagLoose_ = jetSelectorAK4_btagLoose_->operator()(cleanedJetsAK4, isHigherPt<RecoJetAK4>);
   event.selJetsAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(cleanedJetsAK4, isHigherPt<RecoJetAK4>);
-
+std::cout << "break-point B.9 reached" << std::endl;
   if ( readGenMatching_ )
   {
     std::vector<GenLepton> genLeptons = genLeptonReader_->read();
@@ -411,25 +444,25 @@ EventReader::read() const
     jetGenMatcherAK4_->addGenHadTauMatch(cleanedJetsAK4, genHadTaus);
     jetGenMatcherAK4_->addGenJetMatch(cleanedJetsAK4, genJets);
   }
-
-  RecoJetCollectionAK8 jetsAK8 = jetReaderAK8_->read();
-  RecoJetPtrCollectionAK8 jet_ptrsAK8 = convert_to_ptrs(jetsAK8);
-  RecoJetPtrCollectionAK8 cleanedJetsAK8 = jetCleanerAK8_dR08_->operator()(jet_ptrsAK8, event.fakeableLeptons_, event.fakeableHadTaus_);
-  event.selJetsAK8_ = jetSelectorAK8_->operator()(cleanedJetsAK8, isHigherPt<RecoJetAK8>);
+std::cout << "break-point B.10 reached" << std::endl;
+  RecoJetCollectionAK8 jetsAK8_Hbb = jetReaderAK8_Hbb_->read();
+  RecoJetPtrCollectionAK8 jet_ptrsAK8_Hbb = convert_to_ptrs(jetsAK8_Hbb);
   // CV: clean AK8_Hbb jets wrt leptons only (not wrt hadronic taus)
-  RecoJetPtrCollectionAK8 cleanedJetsAK8_Hbb = jetCleanerAK8_dR08_->operator()(jet_ptrsAK8, event.fakeableLeptons_);
+  RecoJetPtrCollectionAK8 cleanedJetsAK8_Hbb = jetCleanerAK8_dR08_->operator()(jet_ptrsAK8_Hbb, event.fakeableLeptons_);
   event.selJetsAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(cleanedJetsAK8_Hbb, isHigherPt<RecoJetAK8>);
+  RecoJetCollectionAK8 jetsAK8_Wjj = jetReaderAK8_Wjj_->read();
+  RecoJetPtrCollectionAK8 jet_ptrsAK8_Wjj = convert_to_ptrs(jetsAK8_Wjj);
   // CV: AK8_Wjj jets must NOT be cleaned wrt leptons,
   //     as the lepton produced in H->WW*->lnu qq decays often ends up near the two quarks in the detector (in dR)
   jetSelectorAK8_Wjj_->getSelector().set_leptons(event.fakeableLeptons_);
-  event.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(jet_ptrsAK8, isHigherPt<RecoJetAK8>);
-
+  event.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(jet_ptrsAK8_Wjj, isHigherPt<RecoJetAK8>);
+std::cout << "break-point B.11 reached" << std::endl;
   event.vertex_ = vertexReader_->read();
-
+std::cout << "break-point B.12 reached" << std::endl;
   metReader_->set_phiModulationCorrDetails(&eventInfo, &event.vertex_);
   event.met_ = metReader_->read();
   event.metFilters_ = metFilterReader_->read();
-
+std::cout << "break-point B.13 reached" << std::endl;
   return event;
 }
 

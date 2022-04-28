@@ -46,7 +46,6 @@ class Event
   const RecoJetPtrCollectionAK4& selJetsAK4_btagLoose() const;
   const RecoJetPtrCollectionAK4& selJetsAK4_btagMedium() const;
 
-  const RecoJetPtrCollectionAK8& selJetsAK8() const;
   const RecoJetPtrCollectionAK8& selJetsAK8_Hbb() const;
   const RecoJetPtrCollectionAK8& selJetsAK8_Wjj() const;
 
@@ -81,7 +80,6 @@ class Event
   RecoJetPtrCollectionAK4 selJetsAK4_btagLoose_;
   RecoJetPtrCollectionAK4 selJetsAK4_btagMedium_;
 
-  RecoJetPtrCollectionAK8 selJetsAK8_;
   RecoJetPtrCollectionAK8 selJetsAK8_Hbb_;
   RecoJetPtrCollectionAK8 selJetsAK8_Wjj_;
 

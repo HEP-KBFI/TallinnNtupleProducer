@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 from TallinnNtupleProducer.Framework.hhWeights_cfi import hhWeights as config_hhWeights
 from TallinnNtupleProducer.Framework.recommendedMEtFilters_cfi import recommendedMEtFilters_2016 as config_recommendedMEtFilters_2016, recommendedMEtFilters_2017 as config_recommendedMEtFilters_2017, recommendedMEtFilters_2018 as config_recommendedMEtFilters_2018
+from TallinnNtupleProducer.Framework.triggers_cfi import triggers_2016 as config_triggers_2016, triggers_2017 as config_triggers_2017, triggers_2018 as config_triggers_2018
 
 from TallinnNtupleProducer.Writers.GenPhotonFilterWriter_cfi import genPhotonFilter as writers_genPhotonFilter
 from TallinnNtupleProducer.Writers.LowMassLeptonPairVetoWriter_cfi import lowMassLeptonPairVeto as writers_lowMassLeptonPairVeto
@@ -12,6 +13,7 @@ from TallinnNtupleProducer.Writers.RecoJetWriterAK4_cfi import selJetsAK4 as wri
 from TallinnNtupleProducer.Writers.RecoLeptonWriter_cfi import fakeableLeptons as writers_fakeableLeptons
 from TallinnNtupleProducer.Writers.RecoMEtWriter_cfi import met as writers_met
 from TallinnNtupleProducer.Writers.RunLumiEventWriter_cfi import run_lumi_event as writers_run_lumi_event
+from TallinnNtupleProducer.Writers.TriggerInfoWriter_cfi import triggerInfo as writers_triggerInfo
 from TallinnNtupleProducer.Writers.ZbosonMassVetoWriter_cfi import ZbosonMassVeto as writers_ZbosonMassVeto
 
 process = cms.PSet()
@@ -40,7 +42,8 @@ process.produceNtuple = cms.PSet(
     lep_mva_cut_mu = cms.double(0.5),
     lep_mva_cut_e = cms.double(0.3),
     lep_mva_wp = cms.string('hh_multilepton'),
-    hadTauWP_againstJets = cms.string("deepVSjMedium"),
+    hadTauWP_againstJets_tight = cms.string("deepVSjMedium"),
+    hadTauWP_againstJets_fakeable = cms.string("deepVSjVVLoose"),
     hadTauWP_againstElectrons = cms.string(""),
     hadTauWP_againstMuons = cms.string(""),
 
@@ -71,6 +74,9 @@ process.produceNtuple = cms.PSet(
         )
     ),
  
+    # trigger information
+    triggers = cms.PSet(),
+    
     # different event weights
     isMC = cms.bool(True),
     lumiScale = cms.VPSet(),
@@ -86,6 +92,7 @@ process.produceNtuple = cms.PSet(
     #apply_hadTauFakeRateSF = cms.bool(False),
     #apply_genPhotonFilter = cms.string("disabled"),
     disable_ak8_corr = cms.vstring(['JMS', 'JMR', 'PUPPI']),
+    apply_chargeMisIdRate = cms.bool(True), # CV: set to True for 2lss and 2lss+1tau channels, and to False for all other channels 
 
     evtWeight = cms.PSet(
         apply = cms.bool(False),
@@ -141,7 +148,7 @@ process.produceNtuple = cms.PSet(
     genMatchingByIndex = cms.bool(True),
     jetCleaningByIndex = cms.bool(True),
 
-    writers = cms.VPSet(       
+    writerPlugins = cms.VPSet(       
         writers_fakeableHadTaus,
         writers_fakeableLeptons,
         writers_genPhotonFilter,
@@ -164,15 +171,18 @@ process.produceNtuple = cms.PSet(
     ),
     enable_blacklist = cms.bool(False),
 
+    selection = cms.string(""),
+
     isDEBUG = cms.bool(False)
 )
 
 process.fwliteInput.fileNames = cms.vstring(['/hdfs/local/karl/ttHNtupleProduction/2017/2021Mar05_wPresel_nom_all_hh_multilepton/ntuples/signal_ggf_nonresonant_node_sm_hh_4v/0000/tree_1.root'])
-process.fwliteOutput.fileName = cms.string('analyze_signal_ggf_nonresonant_node_sm_hh_4v_Tight_SS_central_1.root')
+process.fwliteOutput.fileName = cms.string('produceNtuple.root')
 process.produceNtuple.era                                            = cms.string('2017')
 process.produceNtuple.redoGenMatching                                = cms.bool(False)
 process.produceNtuple.isDEBUG                                        = cms.bool(False)
 writers_metFilters                                                   = config_recommendedMEtFilters_2017
+writers_metFilters.pluginType                                        = cms.string("MEtFilterWriter")
 process.produceNtuple.process                                        = cms.string('signal_ggf_nonresonant_hh')
 process.produceNtuple.process_hh                                     = cms.string('signal_ggf_nonresonant_hh_wwww')
 process.produceNtuple.isMC                                           = cms.bool(True)
@@ -191,20 +201,31 @@ process.produceNtuple.apply_genWeight                                = cms.bool(
 process.produceNtuple.apply_DYMCReweighting                          = cms.bool(False)
 process.produceNtuple.apply_DYMCNormScaleFactors                     = cms.bool(False)
 process.produceNtuple.apply_l1PreFireWeight                          = cms.bool(True)
-process.produceNtuple.leptonFakeRateWeight.inputFileName             = cms.string('hhAnalysis/multilepton/data/FR_lep_mva_hh_multilepton_wFullSyst_2017_KBFI_2020Dec21_wCERNUncs2_FRErrTheshold_0p01.root')
+process.produceNtuple.leptonFakeRateWeight.inputFileName             = cms.string('TallinnNtupleProducer/EvtWeightTools/data/FakeRate/FR_lep_mva_hh_multilepton_wFullSyst_2017_KBFI_2020Dec21_wCERNUncs2_FRErrTheshold_0p01.root')
 process.produceNtuple.leptonFakeRateWeight.histogramName_e           = cms.string('FR_mva030_el_data_comb')
 process.produceNtuple.leptonFakeRateWeight.histogramName_mu          = cms.string('FR_mva050_mu_data_comb')
 process.produceNtuple.leptonFakeRateWeight.applyNonClosureCorrection = cms.bool(True)
+process.produceNtuple.hadTauFakeRateWeight.inputFileName             = cms.string('TallinnNtupleProducer/EvtWeightTools/data/FakeRate/FR_deeptau_DYmumu_2017_v6.root')
+process.produceNtuple.hadTauFakeRateWeight.lead.fitFunctionName      = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/fitFunction_data_div_mc_hadTaus_pt')
+process.produceNtuple.hadTauFakeRateWeight.sublead.fitFunctionName   = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/fitFunction_data_div_mc_hadTaus_pt')
+process.produceNtuple.hadTauFakeRateWeight.lead.graphName            = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/jetToTauFakeRate_mc_hadTaus_pt')
+process.produceNtuple.hadTauFakeRateWeight.sublead.graphName         = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/jetToTauFakeRate_mc_hadTaus_pt')
+process.produceNtuple.triggers                                       = config_triggers_2017
+process.produceNtuple.triggers.type_2mu.use_it                       = cms.bool(True)
+process.produceNtuple.triggers.type_1e1mu.use_it                     = cms.bool(True)
+process.produceNtuple.triggers.type_2e.use_it                        = cms.bool(True)
+process.produceNtuple.triggers.type_1mu.use_it                       = cms.bool(True)
+process.produceNtuple.triggers.type_1e.use_it                        = cms.bool(True)
 process.produceNtuple.jetCleaningByIndex                             = cms.bool(True)
 process.produceNtuple.genMatchingByIndex                             = cms.bool(True)
-process.produceNtuple.hhWeights.denominator_file_lo                  = cms.string('hhAnalysis/multilepton/data/denom_2017.root')
-process.produceNtuple.hhWeights.denominator_file_nlo                 = cms.string('hhAnalysis/multilepton/data/denom_2017_nlo.root')
+process.produceNtuple.hhWeights.denominator_file_lo                  = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/denom_2017.root')
+process.produceNtuple.hhWeights.denominator_file_nlo                 = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/denom_2017_nlo.root')
 process.produceNtuple.hhWeights.histtitle                            = cms.string('signal_ggf_nonresonant_hh_wwww')
-process.produceNtuple.hhWeights.JHEP04Scan_file                      = cms.string('hhAnalysis/multilepton/data/jhep04_scan.dat')
-process.produceNtuple.hhWeights.JHEP03Scan_file                      = cms.string('hhAnalysis/multilepton/data/jhep03_scan.dat')
-process.produceNtuple.hhWeights.klScan_file                          = cms.string('hhAnalysis/multilepton/data/kl_scan.dat')
-process.produceNtuple.hhWeights.c2Scan_file                          = cms.string('hhAnalysis/multilepton/data/c2_scan.dat')
-process.produceNtuple.hhWeights.extraScan_file                       = cms.string('hhAnalysis/multilepton/data/extra_scan.dat')
+process.produceNtuple.hhWeights.JHEP04Scan_file                      = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/jhep04_scan.dat')
+process.produceNtuple.hhWeights.JHEP03Scan_file                      = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/jhep03_scan.dat')
+process.produceNtuple.hhWeights.klScan_file                          = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/kl_scan.dat')
+process.produceNtuple.hhWeights.c2Scan_file                          = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/c2_scan.dat')
+process.produceNtuple.hhWeights.extraScan_file                       = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/extra_scan.dat')
 process.produceNtuple.hhWeights.scanMode                             = cms.vstring(['JHEP04', 'JHEP03', 'kl', 'c2', 'extra'])
 process.produceNtuple.hhWeights.apply_rwgt_lo                        = cms.bool(False)
 process.produceNtuple.hhWeights.rwgt_nlo_mode                        = cms.string('v3')
@@ -212,14 +233,16 @@ process.produceNtuple.apply_topPtReweighting                         = cms.strin
 #process.produceNtuple.useAssocJetBtag                                = cms.bool(False)
 process.produceNtuple.apply_btagSFRatio                              = cms.bool(True)
 #process.produceNtuple.gen_mHH                                        = cms.vdouble([250.0, 260.0, 270.0, 280.0, 300.0, 320.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 750.0, 800.0, 850.0, 900.0, 1000.0])
+writers_triggerInfo.PD                                               = cms.string("MC")
 writers_genPhotonFilter.apply_genPhotonFilter                        = cms.string('disabled')
 #process.produceNtuple.nonRes_BMs                                     = cms.vstring(['SM', 'JHEP04BM1', 'JHEP04BM2', 'JHEP04BM3', 'JHEP04BM4', 'JHEP04BM5', 'JHEP04BM6', 'JHEP04BM7', 'JHEP04BM8', 'JHEP04BM9', 'JHEP04BM10', 'JHEP04BM11', 'JHEP04BM12', 'JHEP04BM8a', 'JHEP03BM1', 'JHEP03BM2', 'JHEP03BM3', 'JHEP03BM4', 'JHEP03BM5', 'JHEP03BM6', 'JHEP03BM7', 'kl_2p45_kt_1p00_c2_0p00_BM9', 'kl_1p00_kt_1p00_c2_0p00_BM9', 'kl_5p00_kt_1p00_c2_0p00_BM9', 'kl_2p45_kt_1p00_c2_0p00_BM7', 'kl_1p00_kt_1p00_c2_0p00_BM7', 'kl_5p00_kt_1p00_c2_0p00_BM7', 'kl_1p00_kt_1p00_c2_0p35_BM9', 'kl_1p00_kt_1p00_c2_3p00_BM9', 'kl_1p00_kt_1p00_c2_0p10_BM9', 'kl_1p00_kt_1p00_c2_m2p00_BM9', 'kl_1p00_kt_1p00_c2_0p35_BM7', 'kl_1p00_kt_1p00_c2_3p00_BM7', 'kl_1p00_kt_1p00_c2_0p10_BM7', 'kl_1p00_kt_1p00_c2_m2p00_BM7', 'kl_0p00_kt_1p00_c2_0p00_BM9', 'kl_0p00_kt_1p00_c2_1p00_BM9', 'kl_0p00_kt_1p00_c2_0p00_BM7', 'kl_0p00_kt_1p00_c2_1p00_BM7'])
 process.produceNtuple.enable_blacklist                               = cms.bool(True)
-process.produceNtuple.blacklist.inputFileNames                       = cms.vstring(['tthAnalysis/HiggsToTauTau/data/blacklist_postproc_2017.txt', 'tthAnalysis/HiggsToTauTau/data/blacklist_skimmed_multilepton_2017.txt'])
+process.produceNtuple.blacklist.inputFileNames                       = cms.vstring(['TallinnNtupleProducer/Framework/data/blacklist/blacklist_postproc_2017.txt', 'TallinnNtupleProducer/Framework/data/blacklist/blacklist_skimmed_multilepton_2017.txt'])
 process.produceNtuple.blacklist.sampleName                           = cms.string('signal_ggf_nonresonant_node_sm_hh_4v')
 process.produceNtuple.disable_ak8_corr                               = cms.vstring(['JMS', 'JMR', 'PUPPI'])
 process.produceNtuple.has_pdf_weights                                = cms.bool(False)
 process.produceNtuple.btagSFRatio                                    = cms.PSet(
   central = cms.vdouble(1.0, 0.983850754831, 0.970806608203, 0.95589515666, 0.941090355157, 0.919510668991, 0.896747198034, 0.869121413881, 0.843409507134, 0.788891130366),
 )
+process.produceNtuple.selection                                      = cms.string("nlep == 2 && ntau == 1")
 

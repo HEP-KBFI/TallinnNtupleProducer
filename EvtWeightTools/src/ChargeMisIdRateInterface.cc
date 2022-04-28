@@ -15,8 +15,8 @@ ChargeMisIdRateInterface::ChargeMisIdRateInterface(Era era,
   , isDEBUG_(isDEBUG)
 {
   const std::string path = ( lep_mva_wp == "hh_multilepton" ) ?
-    "TallinnNtupleProducer/EvtWeightTools/data/ChargeFlipR_e_mva_hh_multilepton_%s_KBFI_2020Oct27_w%sTightCharge.root" :
-    "TallinnNtupleProducer/EvtWeightTools/data/ChargeFlipR_e_ttH_%s_KBFI_2020Jan29_w%sTightCharge.root"
+    "TallinnNtupleProducer/EvtWeightTools/data/ChargeFlipRate/ChargeFlipR_e_mva_hh_multilepton_%s_KBFI_2020Oct27_w%sTightCharge.root" :
+    "TallinnNtupleProducer/EvtWeightTools/data/ChargeFlipRate/ChargeFlipR_e_ttH_%s_KBFI_2020Jan29_w%sTightCharge.root"
   ;
   chargeMisId_ = new lutWrapperTH2(
     inputFiles_,

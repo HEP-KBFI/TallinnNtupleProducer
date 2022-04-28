@@ -148,37 +148,37 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
       }
       effPileupJetID_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
         Form("h2_eff_mc%s_%s", era_string.data(), wp_string.data()),
         lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
       );
       sfPileupJetID_eff_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
         Form("h2_eff_sf%s_%s", era_string.data(), wp_string.data()),
         lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
       );
       sfPileupJetID_eff_errors_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
         Form("h2_eff_sf%s_%s_Systuncty", era_string.data(), wp_string.data()),
         lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
       );
       mistagPileupJetID_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
         Form("h2_mistag_mc%s_%s", era_string.data(), wp_string.data()),
         lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
       );
       sfPileupJetID_mistag_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
         Form("h2_mistag_sf%s_%s", era_string.data(), wp_string.data()),
         lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
       );
       sfPileupJetID_mistag_errors_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
         Form("h2_mistag_sf%s_%s_Systuncty", era_string.data(), wp_string.data()),
         lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
       );

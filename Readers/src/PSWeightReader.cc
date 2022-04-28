@@ -16,9 +16,9 @@ std::map<std::string, PSWeightReader*> PSWeightReader::instances_;
 PSWeightReader::PSWeightReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
   , max_nPSWeights_(4)
-  , branchName_nPSWeights_("")
-  , branchName_PSweights_("")
-  , branchName_LHE_nom_("")
+  , branchName_nPSWeights_("nPSWeight")
+  , branchName_PSweights_("PSWeight")
+  , branchName_LHE_nom_("LHEWeight_originalXWGTUP")
   , ps_nWeights_(0)
   , ps_weights_(nullptr)
   , LHE_nom_(1.)
@@ -31,9 +31,6 @@ PSWeightReader::PSWeightReader(const edm::ParameterSet & cfg)
   , has_PS_weights_(false)
   , apply_LHE_nom_(false)
 {
-  branchName_PSweights_ = cfg.getParameter<std::string>("branchName_PSweights"); // default = "PSWeight"
-  branchName_nPSWeights_ = Form("n%s", branchName_PSweights_.data());
-  branchName_LHE_nom_ = cfg.getParameter<std::string>("branchName_LHE_nom");   // default = "LHEWeight_originalXWGTUP"
   has_PS_weights_ = cfg.getParameter<bool>("has_PS_weights");
   apply_LHE_nom_ = cfg.getParameter<bool>("apply_LHE_nom");
   setBranchNames();

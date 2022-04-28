@@ -22,7 +22,7 @@ DYMCReweighting::DYMCReweighting(Era era,
     case Era::k2016:
       weights_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/zpt_weights_summer2016_v2.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/DYMCReweighting/zpt_weights_summer2016_v2.root",
         "zptmass_histo",
         lut::kXetaYpt, 50., 800., lut::kLimit, 0., 600., lut::kLimit
       );
@@ -30,7 +30,7 @@ DYMCReweighting::DYMCReweighting(Era era,
     case Era::k2017:
       weights_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/zpt_weights_2017.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/DYMCReweighting/zpt_weights_2017.root",
         "zptmass_histo",
         lut::kXetaYpt, 50., 1000., lut::kLimit, 0., 1000., lut::kLimit
       );
@@ -38,7 +38,7 @@ DYMCReweighting::DYMCReweighting(Era era,
     case Era::k2018:
       weights_ = new lutWrapperTH2(
         inputFiles_,
-        "tthAnalysis/HiggsToTauTau/data/zpt_weights_2018.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/DYMCReweighting/zpt_weights_2018.root",
         "zptmass_histo",
         lut::kXetaYpt, 50., 1000., lut::kLimit, 0., 1000., lut::kLimit
       );

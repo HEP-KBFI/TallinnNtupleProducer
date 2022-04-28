@@ -67,7 +67,7 @@ SubjetBtagSFInterface::SubjetBtagSFInterface(Era era,
   {
     effMaps_[kv.first] = new lutWrapperTH2(
       inputFiles_,
-      Form("tthAnalysis/HiggsToTauTau/data/subjetBtagEff/subjetCount_%s_ratio.root", get_era(era).data()),
+      Form("TallinnNtupleProducer/EvtWeightTools/data/subjetBtagEff/subjetCount_%s_ratio.root", get_era(era).data()),
       Form("coarse_%i_%c_ratio_%s", kv.first, wp_chr, procName.data()),
       lut::kXptYabsEta, 0., -1., lut::kLimit, 0., +2.5, lut::kLimit_and_Cut
     );

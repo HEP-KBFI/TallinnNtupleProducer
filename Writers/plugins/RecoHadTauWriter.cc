@@ -79,14 +79,18 @@ namespace
 void
 RecoHadTauWriter::setBranches(TTree * outputTree)
 {
+std::cout << "break-point B.1 reached" << std::endl;
   BranchAddressInitializer bai(outputTree);
+std::cout << "break-point B.2 reached" << std::endl;
   for ( auto central_or_shift : supported_systematics_ )
   {
+std::cout << "break-point B.3 reached" << std::endl;
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());
     bai.setBranch(it->second.nHadTaus_, get_branchName_num(branchName_num_, central_or_shift));
     for ( size_t idxHadTau = 0; idxHadTau < it->second.nHadTaus_; ++idxHadTau )
     {
+std::cout << "break-point B.4 reached" << std::endl;
       bai.setBranch(it->second.pt_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "pt", central_or_shift));
       bai.setBranch(it->second.eta_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "eta", central_or_shift));
       bai.setBranch(it->second.phi_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "phi", central_or_shift));
@@ -98,8 +102,11 @@ RecoHadTauWriter::setBranches(TTree * outputTree)
       bai.setBranch(it->second.genMatch_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "genMatch", central_or_shift));
       bai.setBranch(it->second.isFake_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "isFake", central_or_shift));  
       bai.setBranch(it->second.isFlip_[idxHadTau], get_branchName_obj(branchName_obj_, (int)idxHadTau, "isFlip", central_or_shift));  
+std::cout << "break-point B.5 reached" << std::endl;
     }
+std::cout << "break-point B.6 reached" << std::endl;
   }
+std::cout << "break-point B.7 reached" << std::endl;
 }
 
 void

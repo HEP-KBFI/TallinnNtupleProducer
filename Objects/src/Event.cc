@@ -109,12 +109,6 @@ Event::selJetsAK4_btagMedium() const
 }
 
 const RecoJetPtrCollectionAK8&
-Event::selJetsAK8() const
-{
-  return selJetsAK8_;
-}
-
-const RecoJetPtrCollectionAK8&
 Event::selJetsAK8_Hbb() const
 {
   return selJetsAK8_Hbb_;
@@ -184,7 +178,6 @@ operator << (std::ostream & stream, const Event & event)
   printCollection(stream, "selJet[s]AK4_btagLoose", event.selJetsAK4_btagLoose());
   printCollection(stream, "selJet[s]AK4_btagMedium", event.selJetsAK4_btagMedium());
 
-  printCollection(stream, "selJet[s]AK8", event.selJetsAK8());
   printCollection(stream, "selJet[s]AK8_Hbb", event.selJetsAK8_Hbb());
   printCollection(stream, "selJet[s]AK8_Wjj", event.selJetsAK8_Wjj());
 

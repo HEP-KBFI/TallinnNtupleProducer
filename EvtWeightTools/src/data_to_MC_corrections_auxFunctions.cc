@@ -218,14 +218,14 @@ namespace aux
       // https://github.com/CMS-HTT/LeptonEfficiencies/raw/master/Electron/Run2016_legacy/Electron_Run2016_legacy_Ele25.root
       effTrigger_1e_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Electron_Run2016_legacy_Ele25.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Electron_Run2016_legacy_Ele25.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         21., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1e_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Electron_Run2016_legacy_Ele25.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Electron_Run2016_legacy_Ele25.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         21., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -248,14 +248,14 @@ namespace aux
       const std::string etaBinLabel = aux::getEtaBinLabel(etaMin, etaMax);
       effTrigger_1e1tau_lepLeg_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Electron_Ele24_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Electron_Ele24_eff.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1e1tau_lepLeg_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Electron_Ele24_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Electron_Ele24_eff.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -279,14 +279,14 @@ namespace aux
       // https://github.com/CMS-HTT/LeptonEfficiencies/raw/master/Muon/Run2016_legacy/Muon_Run2016_legacy_IsoMu22.root
       effTrigger_1m_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Muon_Run2016_legacy_IsoMu22.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Muon_Run2016_legacy_IsoMu22.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         18., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1m_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Muon_Run2016_legacy_IsoMu22.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Muon_Run2016_legacy_IsoMu22.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         18., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -309,14 +309,14 @@ namespace aux
       const std::string etaBinLabel = aux::getEtaBinLabel(etaMin, etaMax);
       effTrigger_1m1tau_lepLeg_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Muon_Mu19leg_2016BtoH_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Muon_Mu19leg_2016BtoH_eff.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         15., 1000., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1m1tau_lepLeg_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2016/Muon_Mu19leg_2016BtoH_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2016/Muon_Mu19leg_2016BtoH_eff.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta, 
         15., 1000., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -341,14 +341,14 @@ namespace aux
 
       effTrigger_1e_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Electron_Ele32orEle35_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Electron_Ele32orEle35_eff.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta, 
         28., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1e_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Electron_Ele32orEle35_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Electron_Ele32orEle35_eff.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta, 
         28., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -373,14 +373,14 @@ namespace aux
 
       effTrigger_1e1tau_lepLeg_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Electron_EleTau_Ele24_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Electron_EleTau_Ele24_eff.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta, 
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1e1tau_lepLeg_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Electron_EleTau_Ele24_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Electron_EleTau_Ele24_eff.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta, 
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -405,14 +405,14 @@ namespace aux
 
       effTrigger_1m_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Muon_IsoMu24orIsoMu27_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Muon_IsoMu24orIsoMu27_eff.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1m_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Muon_IsoMu24orIsoMu27_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Muon_IsoMu24orIsoMu27_eff.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -437,14 +437,14 @@ namespace aux
 
       effTrigger_1m1tau_lepLeg_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Muon_MuTau_IsoMu20_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Muon_MuTau_IsoMu20_eff.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         16., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1m1tau_lepLeg_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2017/Muon_MuTau_IsoMu20_eff.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2017/Muon_MuTau_IsoMu20_eff.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         16., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -469,14 +469,14 @@ namespace aux
 
       effTrigger_1e_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Electron_Run2018_Ele32orEle35.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Electron_Run2018_Ele32orEle35.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         28., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1e_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Electron_Run2018_Ele32orEle35.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Electron_Run2018_Ele32orEle35.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         28., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -501,14 +501,14 @@ namespace aux
 
       effTrigger_1e1tau_lepLeg_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Electron_Run2018_Ele24.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Electron_Run2018_Ele24.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1e1tau_lepLeg_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Electron_Run2018_Ele24.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Electron_Run2018_Ele24.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -533,14 +533,14 @@ namespace aux
 
       effTrigger_1m_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Muon_Run2018_IsoMu24orIsoMu27.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Muon_Run2018_IsoMu24orIsoMu27.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1m_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Muon_Run2018_IsoMu24orIsoMu27.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Muon_Run2018_IsoMu24orIsoMu27.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         20., 100., lut::kLimit, etaMin, etaMax, lut::kCut
@@ -565,14 +565,14 @@ namespace aux
 
       effTrigger_1m1tau_lepLeg_data.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Muon_Run2018_IsoMu20.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Muon_Run2018_IsoMu20.root",
         Form("ZMassEta%s_Data", etaBinLabel.data()),
         lut::kXptYabsEta,
         16., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
       effTrigger_1m1tau_lepLeg_mc.push_back(new lutWrapperTGraph(
         inputFiles,
-        "tthAnalysis/HiggsToTauTau/data/triggerSF/2018/Muon_Run2018_IsoMu20.root",
+        "TallinnNtupleProducer/EvtWeightTools/data/triggerSF/2018/Muon_Run2018_IsoMu20.root",
         Form("ZMassEta%s_MC", etaBinLabel.data()),
         lut::kXptYabsEta,
         16., 100., lut::kLimit, etaMin, etaMax, lut::kCut
