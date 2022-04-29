@@ -74,13 +74,11 @@ GenParticleReader::setBranchNames()
   }
   else
   {
-    const GenParticleReader * const gInstance = instances_[branchName_obj_];
-    assert(gInstance);
-    if(branchName_obj_ != gInstance->branchName_num_)
+    if(branchName_num_ != instances_[branchName_obj_]->branchName_num_)
     {
       throw cmsException(this)
         << "Association between configuration parameters 'branchName_num' and 'branchName_obj' must be unique:"
-           " present association 'branchName_num' = " << branchName_num_ << " with 'branchName_obj' = " << branchName_obj_
+        << " present association 'branchName_num' = " << branchName_num_ << " with 'branchName_obj' = " << branchName_obj_
         << " does not match previous association 'branchName_num' = " << instances_[branchName_obj_]->branchName_num_
         << " with 'branchName_obj' = " << instances_[branchName_obj_]->branchName_obj_ << " !!\n";
     }
