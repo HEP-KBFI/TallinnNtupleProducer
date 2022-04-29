@@ -1,6 +1,5 @@
 #include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/AnalysisConfig.h"       // AnalysisConfig
 #include "TallinnNtupleProducer/CommonTools/interface/get_htxs_binning.h"     // get_htxs_binning()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_pileup()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                // EventInfo
@@ -15,7 +14,8 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
   , read_genHiggsDecayMode_(true)
   , read_puWeight_(true)
-  , info_(nullptr)
+  , analysisConfig_(new AnalysisConfig("produceNtuple", cfg))
+  , info_(new EventInfo(*analysisConfig_))
   , branchName_run("run")
   , branchName_lumi("luminosityBlock")
   , branchName_event("event")
@@ -28,16 +28,13 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   , branchName_htxs_pt("HTXS_Higgs_pt")
   , branchName_htxs_y("HTXS_Higgs_y")
 {
-  std::string analysis = "produceNtuple";
-  AnalysisConfig analysisConfig(analysis, cfg);
-  info_ = new EventInfo(analysisConfig);
   const bool isMC = cfg.getParameter<bool>("isMC");
   if ( isMC )
   {
     const double ref_genWeight = cfg.getParameter<double>("ref_genWeight");
     info_->set_refGetWeight(ref_genWeight);
   }
-  const bool isMC_ttH = analysisConfig.isMC_ttH();
+  const bool isMC_ttH = analysisConfig_->isMC_ttH();
   const std::vector<std::pair<std::string, int>> evt_htxs_binning = get_htxs_binning(isMC_ttH);
   info_->read_htxs(!evt_htxs_binning.empty());
 }

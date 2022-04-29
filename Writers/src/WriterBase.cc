@@ -15,14 +15,6 @@ WriterBase::registerReaders(TTreeWrapper * inputTree)
 {}
 
 void
-WriterBase::setBranches(TTree * outputTree)
-{
-  // CV: this function should never be called, 
-  //     as it is supposed to the overwritten by all derrived classes !!
-  assert(0);
-}
-
-void
 WriterBase::set_central_or_shift(const std::string & central_or_shift) const
 {
   current_central_or_shift_ = central_or_shift;
