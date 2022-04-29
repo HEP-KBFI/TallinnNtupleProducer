@@ -3,23 +3,21 @@
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"     // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h" // TTreeWrapper
 
+#include <TTree.h>                                                    // TTree
+
 WriterBase::WriterBase(const edm::ParameterSet & cfg)
   : current_central_or_shift_("central")
-{}
+{
+std::cout << "<WriterBase::WriterBase>:" << std::endl;
+}
 
 WriterBase::~WriterBase()
 {}
 
 void
 WriterBase::registerReaders(TTreeWrapper * inputTree)
-{}
-
-void
-WriterBase::setBranches(TTree * outputTree)
 {
-  // CV: this function should never be called, 
-  //     as it is supposed to the overwritten by all derrived classes !!
-  assert(0);
+std::cout << "<WriterBase::registerReaders>:" << std::endl;
 }
 
 void
