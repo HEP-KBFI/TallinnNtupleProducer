@@ -52,6 +52,8 @@
 #include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
 
+//#include "TallinnNtupleProducer/Writers/plugins/GenPhotonFilterWriter.h" // ONLY FOR TESTING !!
+
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
 #include <TString.h>                                                                            // TString, Form()
@@ -231,8 +233,10 @@ std::cout << "break-point 20 reached" << std::endl;
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
 std::cout << "break-point 21 reached" << std::endl;
-  edmplugin::PluginManager::Config config;
-  edmplugin::PluginManager::configure(edmplugin::standard::config());
+  if ( !edmplugin::PluginManager::isAvailable() )
+  {  
+    edmplugin::PluginManager::configure(edmplugin::standard::config());
+  }
   edm::VParameterSet cfg_writers = cfg_produceNtuple.getParameterSetVector("writerPlugins");
   std::vector<WriterBase*> writers;
   for ( auto cfg_writer : cfg_writers )
@@ -245,8 +249,9 @@ std::cout << "pluginType = " << pluginType << std::endl;
     cfg_writer.addParameter<std::string>("process", process);
     cfg_writer.addParameter<bool>("isMC", isMC);
 std::cout << "break-point 21.2 reached" << std::endl;
-    WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer).get();
+    WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer).release();
 std::cout << "break-point 21.3 reached" << std::endl;
+//if ( dynamic_cast<GenPhotonFilterWriter*>(writer) ) std::cout << "plugin is of type GenPhotonFilterWriter !!" << std::endl;
     writer->registerReaders(inputTree);
 std::cout << "break-point 21.4 reached" << std::endl;
     writer->setBranches(outputTree);
