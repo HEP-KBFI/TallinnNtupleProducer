@@ -4,6 +4,7 @@ from TallinnNtupleProducer.Framework.hhWeights_cfi import hhWeights as config_hh
 from TallinnNtupleProducer.Framework.recommendedMEtFilters_cfi import recommendedMEtFilters_2016 as config_recommendedMEtFilters_2016, recommendedMEtFilters_2017 as config_recommendedMEtFilters_2017, recommendedMEtFilters_2018 as config_recommendedMEtFilters_2018
 from TallinnNtupleProducer.Framework.triggers_cfi import triggers_2016 as config_triggers_2016, triggers_2017 as config_triggers_2017, triggers_2018 as config_triggers_2018
 
+from TallinnNtupleProducer.Writers.EvtWeightWriter_cfi import evtWeight as writers_evtWeight
 from TallinnNtupleProducer.Writers.GenPhotonFilterWriter_cfi import genPhotonFilter as writers_genPhotonFilter
 from TallinnNtupleProducer.Writers.LowMassLeptonPairVetoWriter_cfi import lowMassLeptonPairVeto as writers_lowMassLeptonPairVeto
 from TallinnNtupleProducer.Writers.MEtFilterWriter_cfi import metFilters as writers_metFilters
@@ -148,16 +149,19 @@ process.produceNtuple = cms.PSet(
     genMatchingByIndex = cms.bool(True),
     jetCleaningByIndex = cms.bool(True),
 
-    writerPlugins = cms.VPSet(       
-##        writers_fakeableHadTaus,
-##        writers_fakeableLeptons,
-##        writers_genPhotonFilter,
-##        writers_lowMassLeptonPairVeto,
+    writerPlugins = cms.VPSet(
+        writers_evtWeight,
+        writers_fakeableHadTaus,
+        writers_fakeableLeptons,
+        # CV: GenPhotonFilterWriter plugin can be run for some MC samples only,
+        #     because the collection "GenPhotonCandidate" does not exist in all MC samples !!
+        #writers_genPhotonFilter,
+        writers_lowMassLeptonPairVeto,
         writers_met,
 ##        writers_metFilters,
 ##        writers_process,
 ##        writers_run_lumi_event,
-##        writers_selJetsAK4,
+        writers_selJetsAK4,
 ##        writers_selJetsAK4_btagLoose,
 ##        writers_selJetsAK4_btagMedium,
 ##        writers_ZbosonMassVeto
@@ -262,5 +266,6 @@ process.produceNtuple.has_pdf_weights                                = cms.bool(
 process.produceNtuple.btagSFRatio                                    = cms.PSet(
   central = cms.vdouble(1.0, 0.983850754831, 0.970806608203, 0.95589515666, 0.941090355157, 0.919510668991, 0.896747198034, 0.869121413881, 0.843409507134, 0.788891130366),
 )
-process.produceNtuple.selection                                      = cms.string("nlep == 2 && ntau == 1")
+#process.produceNtuple.selection                                      = cms.string("nlep == 2 && ntau == 1")
+process.produceNtuple.selection                                      = cms.string("")
 

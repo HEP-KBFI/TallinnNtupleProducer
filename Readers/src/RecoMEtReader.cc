@@ -1,13 +1,14 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_jetMET(), kJetMET_*
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"         // METXYCorr_Met_MetPhi()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                     // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"        // getBranchName_jetMET(), kJetMET_*
+#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"    // BranchAddressInitializer
+#include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"            // METXYCorr_Met_MetPhi()
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                             // Form()
+#include "TTree.h"                                                               // TTree
 
 std::map<std::string, int> RecoMEtReader::numInstances_;
 std::map<std::string, RecoMEtReader *> RecoMEtReader::instances_;
@@ -21,6 +22,7 @@ RecoMEtReader::RecoMEtReader(const edm::ParameterSet & cfg)
   , eventInfo_(nullptr)
   , recoVertex_(nullptr)
   , enable_phiModulationCorr_(false)
+  , ptPhiOption_central_(-1)
   , ptPhiOption_(-1)
   , read_ptPhi_systematics_(false)
 {
@@ -36,7 +38,8 @@ RecoMEtReader::RecoMEtReader(const edm::ParameterSet & cfg)
     branchName_cov_ = branchName_obj_;
   }
   isMC_ = cfg.getParameter<bool>("isMC");
-  ptPhiOption_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
+  ptPhiOption_central_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
+  ptPhiOption_ = ptPhiOption_central_; 
   setBranchNames();
 }
 
@@ -55,16 +58,19 @@ RecoMEtReader::~RecoMEtReader()
 void
 RecoMEtReader::setMEt_central_or_shift(int central_or_shift)
 {
+std::cout << "<RecoMEtReader::setMEt_central_or_shift>:" << std::endl;
+std::cout << "central_or_shift = " << central_or_shift << std::endl;
   if(! isMC_ && central_or_shift != kJetMET_central_nonNominal)
   {
     throw cmsException(this, __func__, __LINE__) << "Nominal MET available only in MC";
   }
   if(! isValidJESsource(era_, central_or_shift))
   {
-    throw cmsException(this, __func__, __LINE__) << "Invalid option for the era = " << static_cast<int>(era_) << ": " << central_or_shift;
+    ptPhiOption_ = ptPhiOption_central_;
   }
   if(central_or_shift <= kJetMET_UnclusteredEnDown)
   {
+std::cout << "break-point E.1 reached" << std::endl;
     ptPhiOption_ = central_or_shift;
   }
   else
@@ -160,14 +166,34 @@ RecoMEtReader::set_phiModulationCorrDetails(const EventInfo * const eventInfo,
 RecoMEt
 RecoMEtReader::read() const
 {
+std::cout << "break-point D.1 reached" << std::endl;
   const RecoMEtReader * const gInstance = instances_[branchName_obj_];
+std::cout << "break-point D.2 reached" << std::endl;
   assert(gInstance);
   RecoMEt met = met_;
   if(enable_phiModulationCorr_)
   {
+std::cout << "break-point D.3 reached" << std::endl;
     const std::pair TheXYCorr_Met_MetPhi = METXYCorr_Met_MetPhi(eventInfo_, recoVertex_, era_);
+std::cout << "break-point D.4 reached" << std::endl;
     met.shift_PxPy(TheXYCorr_Met_MetPhi);
+std::cout << "break-point D.5 reached" << std::endl;
   }
-  met.set_default(ptPhiOption_);
+std::cout << "break-point D.6 reached" << std::endl;
+std::cout << "ptPhiOption_ = " << ptPhiOption_ << std::endl;
+  if(read_ptPhi_systematics_)
+  {
+    met.set_default(ptPhiOption_);
+  }
+std::cout << "break-point D.7 reached" << std::endl;
   return met;
+}
+
+std::vector<std::string>
+RecoMEtReader::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  std::vector<std::string> systematic_shifts;
+  merge_systematic_shifts(systematic_shifts, RecoJetReaderAK4::get_supported_systematics(cfg));
+  merge_systematic_shifts(systematic_shifts, { "CMS_ttHl_UnclusteredEnUp", "CMS_ttHl_UnclusteredEnDown" });
+  return systematic_shifts;
 }

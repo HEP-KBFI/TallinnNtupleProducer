@@ -63,3 +63,9 @@ TriggerInfoReader::get_available_branches(TTree * tree) const
   delete obj;
   return available_branches;
 }
+
+std::vector<std::string>
+TriggerInfoReader::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return {};
+}

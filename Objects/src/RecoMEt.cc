@@ -162,9 +162,18 @@ RecoMEt::genPhi() const
 void
 RecoMEt::set_default(int central_or_shift)
 {
+std::cout << "<RecoMEt::set_default>:" << std::endl;
+std::cout << "central_or_shift = " << central_or_shift << std::endl;
   default_systematics_ = central_or_shift;
+for ( const auto & systematic : systematics_ )
+{
+std::cout << "systematics_[" << systematic.first << "] = " << systematic.second << std::endl;
+}
+std::cout << "default_systematics_ = " << default_systematics_ << std::endl;
   default_ = systematics_.at(default_systematics_);
+std::cout << "break-point F.1 reached" << std::endl;
   update();
+std::cout << "break-point F.2 reached" << std::endl;
 }
 
 bool

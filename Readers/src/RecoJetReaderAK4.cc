@@ -1,8 +1,9 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_jetMET(), getBranchName_bTagWeight(), getBranchName_jetPtMass()
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"          // GenHadTauReader
@@ -28,6 +29,7 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , readGenMatching_(false)
   , btag_(Btag::kDeepJet)
   , btag_central_or_shift_(kBtag_central)
+  , ptMassOption_central_(-1)
   , ptMassOption_(-1)
   , read_ptMass_systematics_(false)
   , read_btag_systematics_(false)
@@ -49,7 +51,8 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Jet"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   isMC_ = cfg.getParameter<bool>("isMC");
-  ptMassOption_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
+  ptMassOption_central_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
+  ptMassOption_ = ptMassOption_central_;
   readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
   if(readGenMatching_)
   {
@@ -122,7 +125,7 @@ RecoJetReaderAK4::setPtMass_central_or_shift(int central_or_shift)
   }
   if(! isValidJESsource(era_, central_or_shift))
   {
-    throw cmsException(this, __func__, __LINE__) << "Invalid option for the era = " << static_cast<int>(era_) << ": " << central_or_shift;
+    ptMassOption_ = ptMassOption_central_;
   }
   ptMassOption_ = central_or_shift;
 }
@@ -463,4 +466,30 @@ RecoJetReaderAK4::readGenMatching(std::vector<RecoJetAK4> & jets) const
       if(matched_genJet.isValid()) jet.set_genJet(new GenJet(matched_genJet));
     }
   }
+}
+
+std::vector<std::string>
+RecoJetReaderAK4::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  std::vector<std::string> supported_systematics = {  
+    "CMS_ttHl_JESAbsoluteUp",           "CMS_ttHl_JESAbsoluteDown",
+    "CMS_ttHl_JESAbsolute_EraUp",       "CMS_ttHl_JESAbsolute_EraDown",
+    "CMS_ttHl_JESBBEC1Up",              "CMS_ttHl_JESBBEC1Down",
+    "CMS_ttHl_JESBBEC1_EraUp",          "CMS_ttHl_JESBBEC1_EraDown",
+    "CMS_ttHl_JESEC2Up",                "CMS_ttHl_JESEC2Down",
+    "CMS_ttHl_JESEC2_EraUp",            "CMS_ttHl_JESEC2_EraDown",
+    "CMS_ttHl_JESFlavorQCDUp",          "CMS_ttHl_JESFlavorQCDDown",
+    "CMS_ttHl_JESHFUp",                 "CMS_ttHl_JESHFDown",
+    "CMS_ttHl_JESHF_EraUp",             "CMS_ttHl_JESHF_EraDown",
+    "CMS_ttHl_JESRelativeBalUp",        "CMS_ttHl_JESRelativeBalDown",
+    "CMS_ttHl_JESRelativeSample_EraUp", "CMS_ttHl_JESRelativeSample_EraDown"
+  };
+  Era era = get_era(cfg.getParameter<std::string>("era"));
+  if ( era == Era::k2018 ) 
+  {
+    // KE: add systematic uncertainty on jet energy correction that addresses the HEM15/16 issue,
+    //     cf. https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
+    supported_systematics.push_back("CMS_ttHl_JESHEMDown");
+  }
+  return supported_systematics;
 }

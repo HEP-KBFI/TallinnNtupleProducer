@@ -36,17 +36,18 @@ class RecoElectronReader : public ReaderBase
   read() const;
 
   /**
+   * @brief Set threshold that an electron need to pass in order to qualify as tight lepton
+   *        cf. Table 6 in AN/2020-032 v14.pdf
+   */
+  void
+  set_mvaTTH_wp(double mvaTTH_wp);
+
+  /**
     * @brief Return list of systematic uncertainties supported by RecoElectronReader class
     */
   static
   std::vector<std::string>
-  get_supported_systematics()
-  {
-    return {};
-  }
-
-  void
-  set_mvaTTH_wp(double mvaTTH_wp);
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
  /**

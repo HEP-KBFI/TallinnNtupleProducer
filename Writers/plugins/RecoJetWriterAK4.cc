@@ -25,11 +25,11 @@ RecoJetWriterAK4::RecoJetWriterAK4(const edm::ParameterSet & cfg)
   else if ( jetCollection_string == "selJetsAK4_btagMedium()" ) jetCollection_ = JetCollection::kSelJetsAK4_btagMedium;
   else throw cmsException(__func__, __LINE__) 
     << "Invalid Configuration parameter 'jetCollection' = " << jetCollection_string;
-  branchName_obj_ = cfg.getParameter<unsigned>("branchName");
+  branchName_obj_ = cfg.getParameter<std::string>("branchName");
   branchName_num_ = Form("n%s", branchName_obj_.data());
   max_nJets_ = cfg.getParameter<unsigned>("max_numJets");
   assert(max_nJets_ >= 1);
-  merge_systematic_shifts(supported_systematics_, RecoJetWriterAK4::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics_, RecoJetWriterAK4::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
   for ( auto central_or_shift : supported_systematics_ )
   {    
@@ -117,8 +117,10 @@ RecoJetWriterAK4::set_central_or_shift(const std::string & central_or_shift) con
   {
     current_central_or_shiftEntry_ = const_cast<central_or_shiftEntry *>(&it->second);
   }
-  else throw cmsException(__func__, __LINE__) 
-    << "Invalid systematic shift = '" << central_or_shift << "' !!";
+  else
+  {
+    current_central_or_shiftEntry_ = nullptr;
+  }
 }
 
 namespace
@@ -146,50 +148,52 @@ namespace
 void
 RecoJetWriterAK4::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  assert(current_central_or_shiftEntry_);
-  const RecoJetPtrCollectionAK4* jets = nullptr;
-  if      ( jetCollection_ == JetCollection::kSelJetsAK4            ) jets = &event.selJetsAK4();
-  else if ( jetCollection_ == JetCollection::kSelJetsAK4_btagLoose  ) jets = &event.selJetsAK4_btagLoose();
-  else if ( jetCollection_ == JetCollection::kSelJetsAK4_btagMedium ) jets = &event.selJetsAK4_btagMedium();
-  else assert(0);
-  auto it = current_central_or_shiftEntry_;
-  it->nJets_ = jets->size();
-  for ( size_t idxJet = 0; idxJet < max_nJets_; ++idxJet )
+  if ( current_central_or_shiftEntry_ )
   {
-    if ( idxJet < it->nJets_ )
+    const RecoJetPtrCollectionAK4* jets = nullptr;
+    if      ( jetCollection_ == JetCollection::kSelJetsAK4            ) jets = &event.selJetsAK4();
+    else if ( jetCollection_ == JetCollection::kSelJetsAK4_btagLoose  ) jets = &event.selJetsAK4_btagLoose();
+    else if ( jetCollection_ == JetCollection::kSelJetsAK4_btagMedium ) jets = &event.selJetsAK4_btagMedium();
+    else assert(0);
+    auto it = current_central_or_shiftEntry_;
+    it->nJets_ = jets->size();
+    for ( size_t idxJet = 0; idxJet < max_nJets_; ++idxJet )
     {
-      const RecoJetAK4 * jet = (*jets)[idxJet];
-      it->pt_[idxJet] = jet->pt();
-      it->eta_[idxJet] = jet->eta();
-      it->phi_[idxJet] = jet->phi();
-      it->mass_[idxJet] = jet->mass();
-      it->charge_[idxJet] = jet->charge();
-      it->qgDiscr_[idxJet] = jet->QGDiscr();
-      it->bRegCorr_[idxJet] = jet->bRegCorr();
-      it->jetId_[idxJet] = jet->jetId();
-      it->puId_[idxJet] = jet->puId();
-      it->genMatch_[idxJet] = compGenMatch(jet);
-    }
-    else
-    {
-      it->pt_[idxJet] = 0.;
-      it->eta_[idxJet] = 0.;
-      it->phi_[idxJet] = 0.;
-      it->mass_[idxJet] = 0.;
-      it->charge_[idxJet] = 0;
-      it->qgDiscr_[idxJet] = 0.;
-      it->bRegCorr_[idxJet] = 0.;
-      it->jetId_[idxJet] = 0;
-      it->puId_[idxJet] = 0;
-      it->genMatch_[idxJet] = 0;
+      if ( idxJet < it->nJets_ )
+      {
+        const RecoJetAK4 * jet = (*jets)[idxJet];
+        it->pt_[idxJet] = jet->pt();
+        it->eta_[idxJet] = jet->eta();
+        it->phi_[idxJet] = jet->phi();
+        it->mass_[idxJet] = jet->mass();
+        it->charge_[idxJet] = jet->charge();
+        it->qgDiscr_[idxJet] = jet->QGDiscr();
+        it->bRegCorr_[idxJet] = jet->bRegCorr();
+        it->jetId_[idxJet] = jet->jetId();
+        it->puId_[idxJet] = jet->puId();
+        it->genMatch_[idxJet] = compGenMatch(jet);
+      }
+      else
+      {
+        it->pt_[idxJet] = 0.;
+        it->eta_[idxJet] = 0.;
+        it->phi_[idxJet] = 0.;
+        it->mass_[idxJet] = 0.;
+        it->charge_[idxJet] = 0;
+        it->qgDiscr_[idxJet] = 0.;
+        it->bRegCorr_[idxJet] = 0.;
+        it->jetId_[idxJet] = 0;
+        it->puId_[idxJet] = 0;
+        it->genMatch_[idxJet] = 0;
+      }
     }
   }
 }
 
 std::vector<std::string>
-RecoJetWriterAK4::get_supported_systematics()
+RecoJetWriterAK4::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return RecoJetReaderAK4::get_supported_systematics();
+  return RecoJetReaderAK4::get_supported_systematics(cfg);
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoJetWriterAK4, "RecoJetWriterAK4");

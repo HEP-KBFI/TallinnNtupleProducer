@@ -146,7 +146,7 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
 }
 
 std::vector<std::string>
-RecoLeptonWriter::get_supported_systematics()
+RecoLeptonWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   return std::vector<std::string>();
 }

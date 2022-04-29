@@ -2,6 +2,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
+#include "TallinnNtupleProducer/CommonTools/interface/get_ignore_ak8_sys.h"       // get_ignore_ak8_sys()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
@@ -33,6 +34,7 @@ namespace
 
 EventReader::EventReader(const edm::ParameterSet& cfg)
   : ReaderBase(cfg)
+  , cfg_(cfg)
   , numNominalLeptons_(0)
   , numNominalHadTaus_(0)
   , era_(Era::kUndefined)
@@ -131,6 +133,11 @@ std::cout << "break-point A.7 reached" << std::endl;
   tightHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
 std::cout << "break-point A.8 reached" << std::endl;
   jetReaderAK4_ = new RecoJetReaderAK4(make_cfg(cfg, "branchName_jets_ak4"));
+  //if ( isMC_ )
+  //{
+  //  jetReaderAK4_->read_ptMass_systematics(true);
+  //  jetReaderAK4_->read_btag_systematics(true);
+  //}
   bool jetCleaningByIndex = cfg.getParameter<bool>("jetCleaningByIndex");
   if ( jetCleaningByIndex )
   {
@@ -159,11 +166,24 @@ std::cout << "break-point A.9 reached" << std::endl;
 std::cout << "break-point A.10 reached" << std::endl;
   jetReaderAK8_Hbb_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Hbb", "branchName_subjets_ak8_Hbb"));
   jetReaderAK8_Wjj_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Wjj", "branchName_subjets_ak8_Wjj"));
+  //if ( isMC_ )
+  //{
+  //  jetReaderAK8_Hbb_->read_sys(true);
+  //  jetReaderAK8_Wjj_->read_sys(true);
+  //}
+  const std::vector<std::string> disable_ak8_corr = cfg.getParameter<std::vector<std::string>>("disable_ak8_corr");
+  const int ignore_ak8_sys = get_ignore_ak8_sys(disable_ak8_corr);
+  jetReaderAK8_Hbb_->ignoreSys(ignore_ak8_sys);
+  jetReaderAK8_Wjj_->ignoreSys(ignore_ak8_sys);
   jetCleanerAK8_dR08_ = new RecoJetCollectionCleanerAK8(0.8, isDEBUG_);
   jetSelectorAK8_Hbb_ = new RecoJetCollectionSelectorAK8_Hbb(era_, -1, isDEBUG_);
   jetSelectorAK8_Wjj_ = new RecoJetCollectionSelectorAK8_Wjj(era_, -1, isDEBUG_);
 std::cout << "break-point A.11 reached" << std::endl;
   metReader_ = new RecoMEtReader(make_cfg(cfg, "branchName_met"));
+  //if ( isMC_ )
+  //{
+  //  metReader_->read_ptPhi_systematics(true);
+  //}
   metFilterReader_ = new MEtFilterReader(cfg);
 std::cout << "break-point A.12 reached" << std::endl;
   vertexReader_ = new RecoVertexReader(make_cfg(cfg, "branchName_vertex"));
@@ -214,36 +234,36 @@ void
 EventReader::set_central_or_shift(const std::string& central_or_shift)
 {
   eventInfoReader_->set_central_or_shift(central_or_shift);
-  if ( contains(muonReader_->get_supported_systematics(), central_or_shift) )
+  if ( contains(muonReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     // CV: muon momentum scale uncertainty not implemented yet
   }
-  if ( contains(electronReader_->get_supported_systematics(), central_or_shift) )
+  if ( contains(electronReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     // CV: electron energy scale uncertainty not implemented yet 
   }
-  if ( contains(hadTauReader_->get_supported_systematics(), central_or_shift) )
+  if ( contains(hadTauReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int hadTauPt_option = getHadTauPt_option(central_or_shift);
     hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
   }
-  if ( contains(jetReaderAK4_->get_supported_systematics(), central_or_shift) )
+  if ( contains(jetReaderAK4_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int jetPt_option = getJet_option(central_or_shift, isMC_);
     jetReaderAK4_->setPtMass_central_or_shift(jetPt_option);
     jetReaderAK4_->read_btag_systematics(central_or_shift != "central" && isMC_);
   }
-  if ( contains(jetReaderAK8_Hbb_->get_supported_systematics(), central_or_shift) )
+  if ( contains(jetReaderAK8_Hbb_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
     jetReaderAK8_Hbb_->set_central_or_shift(fatJetPt_option);
   }
-  if ( contains(jetReaderAK8_Wjj_->get_supported_systematics(), central_or_shift) )
+  if ( contains(jetReaderAK8_Wjj_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
     jetReaderAK8_Wjj_->set_central_or_shift(fatJetPt_option);
   }
-  if ( contains(metReader_->get_supported_systematics(), central_or_shift) )
+  if ( contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int met_option = getMET_option(central_or_shift, isMC_);
     metReader_->setMEt_central_or_shift(met_option);
@@ -460,24 +480,26 @@ std::cout << "break-point B.11 reached" << std::endl;
   event.vertex_ = vertexReader_->read();
 std::cout << "break-point B.12 reached" << std::endl;
   metReader_->set_phiModulationCorrDetails(&eventInfo, &event.vertex_);
-  event.met_ = metReader_->read();
-  event.metFilters_ = metFilterReader_->read();
 std::cout << "break-point B.13 reached" << std::endl;
+  event.met_ = metReader_->read();
+std::cout << "break-point B.14 reached" << std::endl;
+  event.metFilters_ = metFilterReader_->read();
+std::cout << "break-point B.15 reached" << std::endl;
   return event;
 }
 
 std::vector<std::string>
-EventReader::get_supported_systematics()
+EventReader::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   std::vector<std::string> supported_systematics;
-  merge_systematic_shifts(supported_systematics, EventInfoReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoElectronReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoHadTauReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoJetReaderAK4::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoJetReaderAK8::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoMEtReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoMuonReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoVertexReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, TriggerInfoReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, EventInfoReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoElectronReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoHadTauReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoJetReaderAK4::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoJetReaderAK8::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoMEtReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoMuonReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoVertexReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, TriggerInfoReader::get_supported_systematics(cfg));
   return supported_systematics;
 }

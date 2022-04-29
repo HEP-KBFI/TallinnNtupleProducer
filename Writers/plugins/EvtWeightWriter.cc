@@ -13,7 +13,7 @@
 EvtWeightWriter::EvtWeightWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
 {
-  merge_systematic_shifts(supported_systematics_, EvtWeightWriter::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics_, EvtWeightWriter::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
   for ( auto central_or_shift : supported_systematics_ )
   {    
@@ -58,19 +58,23 @@ EvtWeightWriter::set_central_or_shift(const std::string & central_or_shift) cons
   {
     current_central_or_shiftEntry_ = const_cast<central_or_shiftEntry *>(&it->second);
   }
-  else throw cmsException(__func__, __LINE__) 
-    << "Invalid systematic shift = '" << central_or_shift << "' !!";
+  else
+  {
+    current_central_or_shiftEntry_ = nullptr;
+  }
 }
 
 void
 EvtWeightWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  assert(current_central_or_shiftEntry_);
-  current_central_or_shiftEntry_->evtWeight_ = evtWeightRecorder.get(current_central_or_shift_);
+  if ( current_central_or_shiftEntry_ )
+  {
+    current_central_or_shiftEntry_->evtWeight_ = evtWeightRecorder.get(current_central_or_shift_);
+  }
 }
 
 std::vector<std::string>
-EvtWeightWriter::get_supported_systematics()
+EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   return std::vector<std::string>(); // CV: to be implemented !!
 }

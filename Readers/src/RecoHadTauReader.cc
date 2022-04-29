@@ -315,3 +315,9 @@ RecoHadTauReader::readGenMatching(std::vector<RecoHadTau> & hadTaus) const
     }
   }
 }
+
+std::vector<std::string>
+RecoHadTauReader::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return { "CMS_ttHl_tauESUp", "CMS_ttHl_tauESDown" };
+}

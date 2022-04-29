@@ -34,17 +34,18 @@ class RecoMuonReader : public ReaderBase
   read() const;
 
   /**
+   * @brief Set threshold that a muon need to pass in order to qualify as tight lepton
+   *        cf. Table 7 in AN/2020-032 v14.pdf
+   */
+  void
+  set_mvaTTH_wp(double mvaTTH_wp);
+
+  /**
     * @brief Return list of systematic uncertainties supported by RecoMuonReader class
     */
   static
   std::vector<std::string>
-  get_supported_systematics()
-  {
-    return {};
-  }
-
-  void
-  set_mvaTTH_wp(double mvaTTH_wp);
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
  /**

@@ -47,14 +47,7 @@ class RecoJetReaderAK8 : public ReaderBase
     */
   static
   std::vector<std::string>
-  get_supported_systematics()
-  {
-    return {  
-      "CMS_ttHl_AK8JERUp", "CMS_ttHl_AK8JERDown",
-      "CMS_ttHl_AK8JMSUp", "CMS_ttHl_AK8JMSDown",
-      "CMS_ttHl_AK8JMRUp", "CMS_ttHl_AK8JMRDown"
-    };
-  }
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
  /**

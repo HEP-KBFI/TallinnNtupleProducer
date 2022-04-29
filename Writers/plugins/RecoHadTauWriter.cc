@@ -20,7 +20,7 @@ RecoHadTauWriter::RecoHadTauWriter(const edm::ParameterSet & cfg)
 {
   max_nHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
   assert(max_nHadTaus_ >= 1);
-  merge_systematic_shifts(supported_systematics_, RecoHadTauWriter::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics_, RecoHadTauWriter::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
   for ( auto central_or_shift : supported_systematics_ )
   {    
@@ -119,8 +119,10 @@ RecoHadTauWriter::set_central_or_shift(const std::string & central_or_shift) con
   {
     current_central_or_shiftEntry_ = const_cast<central_or_shiftEntry *>(&it->second);
   }
-  else throw cmsException(__func__, __LINE__) 
-    << "Invalid systematic shift = '" << central_or_shift << "' !!";
+  else
+  {
+    current_central_or_shiftEntry_ = nullptr;
+  }
 }
 
 namespace
@@ -155,48 +157,50 @@ namespace
 void
 RecoHadTauWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  assert(current_central_or_shiftEntry_);
-  const RecoHadTauPtrCollection& hadTaus = event.fakeableHadTaus();
-  auto it = current_central_or_shiftEntry_;
-  it->nHadTaus_ = hadTaus.size();
-  for ( size_t idxHadTau = 0; idxHadTau < max_nHadTaus_; ++idxHadTau )
+  if ( current_central_or_shiftEntry_ )
   {
-    if ( idxHadTau < it->nHadTaus_ )
+    const RecoHadTauPtrCollection& hadTaus = event.fakeableHadTaus();
+    auto it = current_central_or_shiftEntry_;
+    it->nHadTaus_ = hadTaus.size();
+    for ( size_t idxHadTau = 0; idxHadTau < max_nHadTaus_; ++idxHadTau )
     {
-      const RecoHadTau * hadTau = hadTaus[idxHadTau];
-      it->pt_[idxHadTau] = hadTau->pt();
-      it->eta_[idxHadTau] = hadTau->eta();
-      it->phi_[idxHadTau] = hadTau->phi();
-      it->mass_[idxHadTau] = hadTau->mass();
-      it->decayMode_[idxHadTau] = hadTau->decayMode();
-      it->charge_[idxHadTau] = hadTau->charge();
-      it->isFakeable_[idxHadTau] = hadTau->isFakeable();
-      it->isTight_[idxHadTau] = hadTau->isTight();
-      it->genMatch_[idxHadTau] = compGenMatch(hadTau);
-      it->isFake_[idxHadTau] = it->genMatch_[idxHadTau] == 64;
-      it->isFlip_[idxHadTau] = it->genMatch_[idxHadTau] == 2 || it->genMatch_[idxHadTau] == 8 || it->genMatch_[idxHadTau] == 32;
-    }
-    else
-    {
-      it->pt_[idxHadTau] = 0.;
-      it->eta_[idxHadTau] = 0.;
-      it->phi_[idxHadTau] = 0.;
-      it->mass_[idxHadTau] = 0.;
-      it->decayMode_[idxHadTau] = 0;
-      it->charge_[idxHadTau] = 0;
-      it->isFakeable_[idxHadTau] = false;
-      it->isTight_[idxHadTau] = false;
-      it->genMatch_[idxHadTau] = 0;
-      it->isFake_[idxHadTau] = false;
-      it->isFlip_[idxHadTau] = false;
+      if ( idxHadTau < it->nHadTaus_ )
+      {
+        const RecoHadTau * hadTau = hadTaus[idxHadTau];
+        it->pt_[idxHadTau] = hadTau->pt();
+        it->eta_[idxHadTau] = hadTau->eta();
+        it->phi_[idxHadTau] = hadTau->phi();
+        it->mass_[idxHadTau] = hadTau->mass();
+        it->decayMode_[idxHadTau] = hadTau->decayMode();
+        it->charge_[idxHadTau] = hadTau->charge();
+        it->isFakeable_[idxHadTau] = hadTau->isFakeable();
+        it->isTight_[idxHadTau] = hadTau->isTight();
+        it->genMatch_[idxHadTau] = compGenMatch(hadTau);
+        it->isFake_[idxHadTau] = it->genMatch_[idxHadTau] == 64;
+        it->isFlip_[idxHadTau] = it->genMatch_[idxHadTau] == 2 || it->genMatch_[idxHadTau] == 8 || it->genMatch_[idxHadTau] == 32;
+      }
+      else
+      {
+        it->pt_[idxHadTau] = 0.;
+        it->eta_[idxHadTau] = 0.;
+        it->phi_[idxHadTau] = 0.;
+        it->mass_[idxHadTau] = 0.;
+        it->decayMode_[idxHadTau] = 0;
+        it->charge_[idxHadTau] = 0;
+        it->isFakeable_[idxHadTau] = false;
+        it->isTight_[idxHadTau] = false;
+        it->genMatch_[idxHadTau] = 0;
+        it->isFake_[idxHadTau] = false;
+        it->isFlip_[idxHadTau] = false;
+      }
     }
   }
 }
 
 std::vector<std::string>
-RecoHadTauWriter::get_supported_systematics()
+RecoHadTauWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return RecoHadTauReader::get_supported_systematics();
+  return RecoHadTauReader::get_supported_systematics(cfg);
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoHadTauWriter, "RecoHadTauWriter");

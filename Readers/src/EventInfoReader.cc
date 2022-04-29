@@ -128,3 +128,9 @@ EventInfoReader::read() const
 {
   return *info_;
 }
+
+std::vector<std::string>
+EventInfoReader::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return {};
+}

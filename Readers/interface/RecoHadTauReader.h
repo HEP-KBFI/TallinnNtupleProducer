@@ -44,10 +44,7 @@ class RecoHadTauReader : public ReaderBase
     */
   static
   std::vector<std::string>
-  get_supported_systematics()
-  {
-    return { "CMS_ttHl_tauESUp", "CMS_ttHl_tauESDown" };
-  }
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
   /**

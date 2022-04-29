@@ -38,10 +38,7 @@ class EventInfoReader : public ReaderBase
     */
   static
   std::vector<std::string>
-  get_supported_systematics()
-  {
-    return {};
-  }
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
   bool read_genHiggsDecayMode_;

@@ -71,9 +71,11 @@ class EventReader : public ReaderBase
     */
   static
   std::vector<std::string>
-  get_supported_systematics();
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
+  edm::ParameterSet cfg_;
+
   unsigned numNominalLeptons_;
   unsigned numNominalHadTaus_;
 

@@ -24,7 +24,7 @@ RecoMEtWriter::RecoMEtWriter(const edm::ParameterSet & cfg)
   , branchName_stmet_("stmet")
   , current_central_or_shiftEntry_(nullptr)
 {
-  merge_systematic_shifts(supported_systematics_, RecoMEtWriter::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics_, RecoMEtWriter::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
   for ( auto central_or_shift : supported_systematics_ )
   {    
@@ -87,8 +87,10 @@ RecoMEtWriter::set_central_or_shift(const std::string & central_or_shift) const
   {
     current_central_or_shiftEntry_ = const_cast<central_or_shiftEntry *>(&it->second);
   }
-  else throw cmsException(__func__, __LINE__) 
-    << "Invalid systematic shift = '" << central_or_shift << "' !!";
+  else 
+  {
+    current_central_or_shiftEntry_ = nullptr;
+  }
 }
 
 namespace
@@ -165,27 +167,29 @@ namespace
 void
 RecoMEtWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  assert(current_central_or_shiftEntry_);
-  const RecoMEt& met = event.met();
-  auto it = current_central_or_shiftEntry_;
-  it->metPt_ = met.pt();
-  it->metPhi_ = met.phi();
-  const Particle::LorentzVector mhtP4 = compMHT(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4());
-  it->metLD_ = compMEt_LD(met.p4(), mhtP4);
-  it->htmiss_ = mhtP4.pt();
-  it->ht_ = compHT(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4());
-  it->stmet_ = compSTMEt(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4(), met.p4());
+  if ( current_central_or_shiftEntry_ )
+  {
+    const RecoMEt& met = event.met();
+    auto it = current_central_or_shiftEntry_;
+    it->metPt_ = met.pt();
+    it->metPhi_ = met.phi();
+    const Particle::LorentzVector mhtP4 = compMHT(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4());
+    it->metLD_ = compMEt_LD(met.p4(), mhtP4);
+    it->htmiss_ = mhtP4.pt();
+    it->ht_ = compHT(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4());
+    it->stmet_ = compSTMEt(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4(), met.p4());
+  }
 }
 
 std::vector<std::string>
-RecoMEtWriter::get_supported_systematics()
+RecoMEtWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   std::vector<std::string> supported_systematics;
-  merge_systematic_shifts(supported_systematics, RecoElectronReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoHadTauReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoJetReaderAK4::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoMEtReader::get_supported_systematics());
-  merge_systematic_shifts(supported_systematics, RecoMuonReader::get_supported_systematics());
+  merge_systematic_shifts(supported_systematics, RecoElectronReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoHadTauReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoJetReaderAK4::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoMEtReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoMuonReader::get_supported_systematics(cfg));
   return supported_systematics;
 }
 

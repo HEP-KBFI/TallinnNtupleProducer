@@ -70,3 +70,9 @@ RecoVertexReader::read() const
 {
   return recoVertex_;
 }
+
+std::vector<std::string>
+RecoVertexReader::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return {};
+}

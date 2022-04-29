@@ -37,7 +37,7 @@ class RecoJetWriterAK4 : public WriterBase
     */
   static
   std::vector<std::string>
-  get_supported_systematics();
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  private:
   /**

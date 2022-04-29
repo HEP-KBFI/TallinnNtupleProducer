@@ -1,8 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/get_ignore_ak8_sys.h"   // get_ignore_ak8_sys()
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_fatJet(), kFatJet_*
 #include "TallinnNtupleProducer/Objects/interface/RecoSubjetAK8.h"            // RecoSubjetAK8
 #include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
@@ -23,7 +25,7 @@ RecoJetReaderAK8::RecoJetReaderAK8(const edm::ParameterSet & cfg)
   , branchName_obj_("")
   , subjetReader_(nullptr)
   , sysOption_central_(-1)
-  , sysOption_(sysOption_central_)
+  , sysOption_(-1)
   , readSys_(false)
   , ignoreSys_(-1)
   , pt_str_("pt")
@@ -44,6 +46,7 @@ RecoJetReaderAK8::RecoJetReaderAK8(const edm::ParameterSet & cfg)
   branchName_num_ = Form("n%s", branchName_obj_.data());
   isMC_ = cfg.getParameter<bool>("isMC");
   sysOption_central_ = ( isMC_ ) ? kFatJet_central : kFatJet_central_nonNominal;
+  sysOption_ = sysOption_central_;
   ignoreSys_ = ( isMC_ ) ? kFatJetJMS + kFatJetJMR + kFatJetPUPPI : kFatJetNone;
   std::string branchName_subjet = cfg.getParameter<std::string>("branchName_subjet"); // default = "SubJet"
   subjetReader_ = new RecoSubjetReaderAK8(cfg);
@@ -101,7 +104,7 @@ RecoJetReaderAK8::set_central_or_shift(int central_or_shift)
   }
   if(! isValidJESsource(era_, central_or_shift, true))
   {
-    throw cmsException(this, __func__, __LINE__) << "Invalid option for the era = " << static_cast<int>(era_) << ": " << central_or_shift;
+    sysOption_ = sysOption_central_;
   }
   if(((ignoreSys_ & kFatJetJMS) && (central_or_shift == kFatJet_jmsUp || central_or_shift == kFatJet_jmsDown)) ||
      ((ignoreSys_ & kFatJetJMR) && (central_or_shift == kFatJet_jmrUp || central_or_shift == kFatJet_jmrDown))  )
@@ -431,4 +434,40 @@ RecoJetReaderAK8::read() const
   } // nJets > 0
 
   return jets;
+}
+
+std::vector<std::string>
+RecoJetReaderAK8::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  std::vector<std::string> supported_systematics = {  
+    "CMS_ttHl_JESAbsoluteUp",           "CMS_ttHl_JESAbsoluteDown",
+    "CMS_ttHl_JESAbsolute_EraUp",       "CMS_ttHl_JESAbsolute_EraDown",
+    "CMS_ttHl_JESBBEC1Up",              "CMS_ttHl_JESBBEC1Down",
+    "CMS_ttHl_JESBBEC1_EraUp",          "CMS_ttHl_JESBBEC1_EraDown",
+    "CMS_ttHl_JESEC2Up",                "CMS_ttHl_JESEC2Down",
+    "CMS_ttHl_JESEC2_EraUp",            "CMS_ttHl_JESEC2_EraDown",
+    "CMS_ttHl_JESFlavorQCDUp",          "CMS_ttHl_JESFlavorQCDDown",
+    "CMS_ttHl_JESHFUp",                 "CMS_ttHl_JESHFDown",
+    "CMS_ttHl_JESHF_EraUp",             "CMS_ttHl_JESHF_EraDown",
+    "CMS_ttHl_JESRelativeBalUp",        "CMS_ttHl_JESRelativeBalDown",
+    "CMS_ttHl_JESRelativeSample_EraUp", "CMS_ttHl_JESRelativeSample_EraDown"
+  };
+  Era era = get_era(cfg.getParameter<std::string>("era"));
+  if ( era == Era::k2018 ) 
+  {
+    // KE: add systematic uncertainty on jet energy correction that addresses the HEM15/16 issue,
+    //     cf. https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
+    supported_systematics.push_back("CMS_ttHl_JESHEMDown");
+  }
+  const std::vector<std::string> disable_ak8_corr = cfg.getParameter<std::vector<std::string>>("disable_ak8_corr");
+  const int ignore_ak8_sys = get_ignore_ak8_sys(disable_ak8_corr);
+  if ( !(ignore_ak8_sys & kFatJetJMS) )
+  {
+    merge_systematic_shifts(supported_systematics, { "CMS_ttHl_AK8JMSUp", "CMS_ttHl_AK8JMSDown" });
+  }
+  if ( !(ignore_ak8_sys & kFatJetJMR) )
+  {
+    merge_systematic_shifts(supported_systematics, { "CMS_ttHl_AK8JMRUp", "CMS_ttHl_AK8JMRDown" });
+  }
+  return supported_systematics;
 }

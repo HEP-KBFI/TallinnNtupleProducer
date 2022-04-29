@@ -178,3 +178,9 @@ RecoMuonReader::set_mvaTTH_wp(double mvaTTH_wp)
 {
   mvaTTH_wp_ = mvaTTH_wp;
 }
+
+std::vector<std::string>
+RecoMuonReader::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return {};
+}

@@ -574,15 +574,17 @@ std::cout << "break-point C.3 reached" << std::endl;
     lumiScale_[central_or_shift][bin] = nof_events;
   }
 std::cout << "break-point C.4 reached" << std::endl;
-std::cout << "central_or_shift_ = " << central_or_shift_ << std::endl;
-std::cout << "lumiScale_.count(central_or_shift_) = " << lumiScale_.count(central_or_shift_) << std::endl;
-  assert(lumiScale_.count(central_or_shift_));
   for(const std::string & central_or_shift: central_or_shifts_)
   {
-    if(! lumiScale_.count(central_or_shift))
+    if(!lumiScale_.count(central_or_shift))
     {
-      lumiScale_[central_or_shift] = lumiScale_.at(central_or_shift_);
+      assert(lumiScale_.count("central"));
+      lumiScale_[central_or_shift] = lumiScale_.at("central");
     }
+for ( const auto & bin : lumiScale_[central_or_shift] )
+{
+std::cout << "lumiScale[" << central_or_shift << "][" << bin.first << "] = " << lumiScale_[central_or_shift][bin.first] << std::endl;
+}
   }
 }
 

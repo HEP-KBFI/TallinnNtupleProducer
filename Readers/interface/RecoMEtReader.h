@@ -3,7 +3,6 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                          // edm::ParameterSet
 
-#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
 #include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"                     // RecoMEt
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                  // ReaderBase
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"            // RecoJetReaderAK4::get_supported_systematics()
@@ -53,13 +52,7 @@ class RecoMEtReader : public ReaderBase
     */
   static
   std::vector<std::string>
-  get_supported_systematics()
-  {
-    std::vector<std::string> systematic_shifts;
-    merge_systematic_shifts(systematic_shifts, RecoJetReaderAK4::get_supported_systematics());
-    merge_systematic_shifts(systematic_shifts, { "CMS_ttHl_UnclusteredEnUp", "CMS_ttHl_UnclusteredEnDown" });
-    return systematic_shifts;
-  }
+  get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
  /**
@@ -85,6 +78,7 @@ class RecoMEtReader : public ReaderBase
   const RecoVertex * recoVertex_;
   bool enable_phiModulationCorr_;
 
+  int ptPhiOption_central_;
   int ptPhiOption_;
   bool read_ptPhi_systematics_;
 

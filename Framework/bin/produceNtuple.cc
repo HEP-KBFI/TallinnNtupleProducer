@@ -136,7 +136,7 @@ std::cout << "break-point 7 reached" << std::endl;
   // CV: process all systematic uncertainties supported by EventReader class (only for MC)
   if ( isMC )
   {
-    merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics());
+    merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics(cfg_produceNtuple));
   }
   // CV: add central value (for data and MC)
   merge_systematic_shifts(systematic_shifts, { "central"});
@@ -247,6 +247,7 @@ std::cout << "pluginType = " << pluginType << std::endl;
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
     cfg_writer.addParameter<std::string>("process", process);
+    cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
 std::cout << "break-point 21.2 reached" << std::endl;
     std::unique_ptr<WriterBase> writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
@@ -447,15 +448,19 @@ std::cout << "break-point 32 reached" << std::endl;
         writer->set_central_or_shift(central_or_shift);
         writer->write(event, evtWeightRecorder);
       }
-    }
 std::cout << "break-point 33 reached" << std::endl;
-    outputTree->Fill();
+      outputTree->Fill();
+    }
   }
 std::cout << "break-point 34 reached" << std::endl;
-  TFileDirectory outputDir = fs.mkdir("events");
-  outputDir.cd();
+  TDirectory* dir = fs.getBareDirectory();
+  dir->cd();
 std::cout << "break-point 35 reached" << std::endl;
-  TTree* outputTree_selected = outputTree->CopyTree(selection.data());
+  TTree* outputTree_selected = nullptr;
+  if ( selection != "" )
+  {
+    outputTree_selected = outputTree->CopyTree(selection.data());
+  }
   Float_t evtWeight;
   outputTree_selected->SetBranchAddress("evtWeight", &evtWeight);
   int selectedEntries = 0;
@@ -498,7 +503,10 @@ std::cout << "break-point 40 reached" << std::endl;
 std::cout << "break-point 41 reached" << std::endl;
   delete inputTree;
   delete outputTree;
-  delete outputTree_selected;
+  if ( outputTree_selected != outputTree )
+  {
+    delete outputTree_selected;
+  }
 std::cout << "break-point 42 reached" << std::endl;
   clock.Show("produceNtuple");
 std::cout << "break-point 43 reached" << std::endl;
