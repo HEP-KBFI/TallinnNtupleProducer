@@ -238,7 +238,7 @@ std::cout << "break-point 21 reached" << std::endl;
     edmplugin::PluginManager::configure(edmplugin::standard::config());
   }
   edm::VParameterSet cfg_writers = cfg_produceNtuple.getParameterSetVector("writerPlugins");
-  std::vector<WriterBase*> writers;
+  std::vector<std::unique_ptr<WriterBase>> writers;
   for ( auto cfg_writer : cfg_writers )
   {
 std::cout << "break-point 21.1 reached" << std::endl;
@@ -249,21 +249,21 @@ std::cout << "pluginType = " << pluginType << std::endl;
     cfg_writer.addParameter<std::string>("process", process);
     cfg_writer.addParameter<bool>("isMC", isMC);
 std::cout << "break-point 21.2 reached" << std::endl;
-    WriterBase* writer = WriterPluginFactory::get()->create(pluginType, cfg_writer).release();
+    std::unique_ptr<WriterBase> writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
 std::cout << "break-point 21.3 reached" << std::endl;
-//if ( dynamic_cast<GenPhotonFilterWriter*>(writer) ) std::cout << "plugin is of type GenPhotonFilterWriter !!" << std::endl;
     writer->registerReaders(inputTree);
 std::cout << "break-point 21.4 reached" << std::endl;
     writer->setBranches(outputTree);
 std::cout << "break-point 21.5 reached" << std::endl;
-    writers.push_back(writer);
+    writers.push_back(std::move(writer));
 std::cout << "break-point 21.6 reached" << std::endl;
   }
 std::cout << "break-point 22 reached" << std::endl;
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
-  for ( auto central_or_shift : systematic_shifts )
+  for ( const auto & central_or_shift : systematic_shifts )
   {
+    std::cout << "central_or_shift = " << central_or_shift << '\n';
 std::cout << "break-point 23 reached" << std::endl;
     inputTree->reset();
 std::cout << "break-point 24 reached" << std::endl;
@@ -442,7 +442,7 @@ std::cout << "break-point 31 reached" << std::endl;
         }
       }
 std::cout << "break-point 32 reached" << std::endl;
-      for ( auto writer : writers )
+      for ( auto & writer : writers )
       {
         writer->set_central_or_shift(central_or_shift);
         writer->write(event, evtWeightRecorder);
@@ -491,9 +491,9 @@ std::cout << "break-point 39 reached" << std::endl;
   delete jetToHadTauFakeRateInterface;
   delete btagSFRatioInterface;
 std::cout << "break-point 40 reached" << std::endl;
-  for ( auto writer : writers )
+  for ( auto & writer : writers )
   {
-    delete writer;
+    writer.reset(nullptr);
   }
 std::cout << "break-point 41 reached" << std::endl;
   delete inputTree;

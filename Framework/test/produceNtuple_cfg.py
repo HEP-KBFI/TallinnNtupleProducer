@@ -20,7 +20,7 @@ process = cms.PSet()
 
 process.fwliteInput = cms.PSet(
     fileNames = cms.vstring(),
-    maxEvents = cms.int32(-1),
+    maxEvents = cms.int32(100),
     outputEvery = cms.uint32(100000)
 )
 
@@ -151,9 +151,9 @@ process.produceNtuple = cms.PSet(
     writerPlugins = cms.VPSet(       
 ##        writers_fakeableHadTaus,
 ##        writers_fakeableLeptons,
-        writers_genPhotonFilter,
+##        writers_genPhotonFilter,
 ##        writers_lowMassLeptonPairVeto,
-##        writers_met,
+        writers_met,
 ##        writers_metFilters,
 ##        writers_process,
 ##        writers_run_lumi_event,
@@ -194,6 +194,24 @@ process.produceNtuple.lep_mva_wp                                     = cms.strin
 process.produceNtuple.lumiScale                                      = cms.VPSet([cms.PSet(
     central_or_shift = cms.string('central'),
     lumi = cms.double(0.00018092350036)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_HHUp'),
+    lumi = cms.double(0.000141651207997)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_HHDown'),
+    lumi = cms.double(0.000227213083089)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_pileupUp'),
+    lumi = cms.double(0.000180930084191)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_pileupDown'),
+    lumi = cms.double(0.000180917254171)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_l1PreFireUp'),
+    lumi = cms.double(0.000182202670616)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_l1PreFireDown'),
+    lumi = cms.double(0.000179697637174)
 )])
 process.produceNtuple.ref_genWeight                                  = cms.double(1.0)
 #process.produceNtuple.applyFakeRateWeights                           = cms.string('disabled')

@@ -65,7 +65,7 @@ EventInfo::EventInfo()
 EventInfo::EventInfo(const AnalysisConfig & analysisConfig)
   : EventInfo()
 {
-  analysisConfig_ = &analysisConfig; 
+  analysisConfig_ = &analysisConfig;
   process_string_ = analysisConfig.process();
   std::cout << "<EventInfo::EventInfo()>: process = '" << process_string_ << "'\n";
   int checksum = 0;
@@ -75,8 +75,8 @@ EventInfo::EventInfo(const AnalysisConfig & analysisConfig)
   if ( !(checksum == 0 || (checksum == 1 && analysisConfig_->isMC())) )
     throw cmsException(this, __func__, __LINE__)
       << "Invalid combination of Configuration parameters:\n" 
-      << " isMC = " << analysisConfig_->isMC() << "\n" 
-      << " isMC_H = " << analysisConfig_->isMC_H() << "\n"  
+      << " isMC = " << analysisConfig_->isMC() << "\n"
+      << " isMC_H = " << analysisConfig_->isMC_H() << "\n"
       << " isMC_HH = " << analysisConfig_->isMC_HH() << "\n";
 }
 

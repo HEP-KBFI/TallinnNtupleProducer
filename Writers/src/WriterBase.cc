@@ -7,18 +7,14 @@
 
 WriterBase::WriterBase(const edm::ParameterSet & cfg)
   : current_central_or_shift_("central")
-{
-std::cout << "<WriterBase::WriterBase>:" << std::endl;
-}
+{}
 
 WriterBase::~WriterBase()
 {}
 
 void
 WriterBase::registerReaders(TTreeWrapper * inputTree)
-{
-std::cout << "<WriterBase::registerReaders>:" << std::endl;
-}
+{}
 
 void
 WriterBase::set_central_or_shift(const std::string & central_or_shift) const
