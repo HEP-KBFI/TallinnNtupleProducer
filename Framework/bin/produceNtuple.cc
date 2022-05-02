@@ -52,6 +52,8 @@
 #include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
 
+#include "TallinnNtupleProducer/CommonTools/interface/contains.h" // ONLY FOR TESTING !!
+
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
 #include <TString.h>                                                                            // TString, Form()
@@ -104,6 +106,7 @@ int main(int argc, char* argv[])
   std::string process = cfg_produceNtuple.getParameter<std::string>("process");
 
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
+std::cout << "treeName = " << treeName << std::endl;
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
   const Era era = get_era(era_string);
@@ -187,9 +190,18 @@ int main(int argc, char* argv[])
 
   EventReader* eventReader = new EventReader(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
+  
+  //-------
+  // ONLY FOR TESTING !!
+  //edm::ParameterSet cfg_metReader(cfg_produceNtuple); 
+  //cfg_metReader.addParameter<std::string>("branchName", "MET");
+  //RecoMEtReader* metReader = new RecoMEtReader(cfg_metReader);
+  //inputTree->registerReader(metReader);
+  //-------
 
-  TTree* outputTree = new TTree("events", "events");
-
+/*
+  TTree* outputTree = new TTree("Events", "Events");
+ */
   const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("evtWeight");
   const bool applyAdditionalEvtWeight = additionalEvtWeight.getParameter<bool>("apply");
   EvtWeightManager* eventWeightManager = nullptr;
@@ -223,7 +235,7 @@ int main(int argc, char* argv[])
     const edm::ParameterSet btagSFRatio = cfg_produceNtuple.getParameterSet("btagSFRatio");
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
-
+/*
   if ( !edmplugin::PluginManager::isAvailable() )
   {  
     edmplugin::PluginManager::configure(edmplugin::standard::config());
@@ -243,7 +255,7 @@ int main(int argc, char* argv[])
     writer->setBranches(outputTree);
     writers.push_back(std::move(writer));
   }
-
+ */
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
@@ -251,8 +263,17 @@ int main(int argc, char* argv[])
     for ( const auto & central_or_shift : systematic_shifts )
     {
       eventReader->set_central_or_shift(central_or_shift);
-      Event event = eventReader->read();
-
+      //Event event = eventReader->read();
+      eventReader->read();
+/*
+      if ( central_or_shift == "central" || contains(metReader->get_supported_systematics(cfg_produceNtuple), central_or_shift) )
+      {
+        const int met_option = getMET_option(central_or_shift, isMC);
+        metReader->setMEt_central_or_shift(met_option);
+      }
+      const RecoMEt met = metReader->read();
+ */
+/*
       if ( central_or_shift == "central" )
       {
         if ( inputTree->canReport(reportEvery) )
@@ -419,16 +440,20 @@ std::cout << "break-point 28 reached" << std::endl;
           }
         }
       }
-
+ */
+/*
       for ( auto & writer : writers )
       {
         writer->set_central_or_shift(central_or_shift);
         writer->write(event, evtWeightRecorder);
       }
+ */
     }
+/*
     outputTree->Fill();
+ */
   }
-
+/*
   TDirectory* dir = fs.getBareDirectory();
   dir->cd();
 
@@ -462,11 +487,12 @@ std::cout << "break-point 28 reached" << std::endl;
             << inputTree->getFileCount() << ")\n"
             << " analyzed = " << analyzedEntries << '\n'
             << " selected = " << selectedEntries << " (weighted = " << selectedEntries_weighted << ")" << std::endl;
-
+ */
 //--- memory clean-up
   delete run_lumi_eventSelector;
 
   delete eventReader;
+  //delete metReader;
   delete l1PreFiringWeightReader;
   delete lheInfoReader;
   delete psWeightReader;
@@ -475,19 +501,20 @@ std::cout << "break-point 28 reached" << std::endl;
   delete jetToLeptonFakeRateInterface;
   delete jetToHadTauFakeRateInterface;
   delete btagSFRatioInterface;
-
+/*
   for ( auto & writer : writers )
   {
     writer.reset(nullptr);
   }
-
+ */
   delete inputTree;
+/*
   delete outputTree;
   if ( outputTree_selected != outputTree )
   {
     delete outputTree_selected;
   }
-
+ */
   clock.Show("produceNtuple");
 
   return EXIT_SUCCESS;

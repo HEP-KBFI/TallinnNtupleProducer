@@ -57,7 +57,7 @@ class EventReader : public ReaderBase
    * @brief Call tree->SetBranchAddress for all particle-collection reader classes
    */
   std::vector<std::string>
-  setBranchAddresses(TTree * tree) override;
+  setBranchAddresses(TTree * inputTree) override;
 
   /**
    * @brief Read branches from tree and use information to fill Event object

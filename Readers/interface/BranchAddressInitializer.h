@@ -65,14 +65,23 @@ struct BranchAddressInitializer
   void
   setBranchAddress(T & value,
                    const std::string & branchName,
-                   U default_value = 0)
+                   //U default_value = 0)
+                   U default_value = 77)
   {
+std::cout << "<BranchAddressInitializer::setBranchAddress>:" << std::endl;
+std::cout << "branchName = '" << branchName << "'" << std::endl;
+std::cout << "ignoreErrors = " << ignoreErrors_ << std::endl;
+std::cout << "hasBranchName(branchName) = " << hasBranchName(branchName) << std::endl;
     value = static_cast<T>(default_value);
+std::cout << "break.point A.1 reached" << std::endl;
     if(! branchName.empty() && ! (ignoreErrors_ && ! hasBranchName(branchName)))
     {
+std::cout << "break.point A.2 reached" << std::endl;
+std::cout << "&value = " << &value << std::endl;
       tree_ -> SetBranchAddress(branchName.data(), &value);
       recordBoundBranchName(branchName);
     }
+std::cout << "break.point A.3 reached" << std::endl;
   }
 
   template<typename T,
@@ -81,18 +90,27 @@ struct BranchAddressInitializer
   void
   setBranchAddress(T * & address,
                    const std::string & branchName,
-                   U default_value = 0)
+                   //U default_value = 0)
+                   U default_value = 88)
   {
+std::cout << "<BranchAddressInitializer::setBranchAddress>:" << std::endl;
+std::cout << "branchName = '" << branchName << "'" << std::endl;
+std::cout << "ignoreErrors = " << ignoreErrors_ << std::endl;
+std::cout << "hasBranchName(branchName) = " << hasBranchName(branchName) << std::endl;
+std::cout << "break.point B.1 reached" << std::endl;
     if(lenVar_ > 0)
     {
+std::cout << "break.point B.2 reached" << std::endl;
       address = new T[lenVar_];
       std::fill_n(address, lenVar_, static_cast<T>(default_value));
     }
     if(! branchName.empty() && ! (ignoreErrors_ && ! hasBranchName(branchName)))
     {
+std::cout << "break.point B.3 reached" << std::endl;
       tree_ -> SetBranchAddress(branchName.data(), address);
       recordBoundBranchName(branchName);
     }
+std::cout << "break.point B.4 reached" << std::endl;
   }
 
   BranchAddressInitializer &

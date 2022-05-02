@@ -80,6 +80,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , vertexReader_(nullptr)
   , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
 {
+std::cout << "<EventReader::EventReader>:" << std::endl;
 std::cout << "break-point A.1 reached" << std::endl;
   numNominalLeptons_ = cfg.getParameter<unsigned>("numNominalLeptons");
   numNominalHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
@@ -88,6 +89,7 @@ std::cout << "break-point A.2 reached" << std::endl;
   isMC_ = cfg.getParameter<bool>("isMC");
   readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
 std::cout << "break-point A.3 reached" << std::endl;
+/*
   eventInfoReader_ = new EventInfoReader(cfg);
   const std::string apply_topPtReweighting_str = cfg.getParameter<std::string>("apply_topPtReweighting");
   const bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
@@ -178,20 +180,24 @@ std::cout << "break-point A.10 reached" << std::endl;
   jetCleanerAK8_dR08_ = new RecoJetCollectionCleanerAK8(0.8, isDEBUG_);
   jetSelectorAK8_Hbb_ = new RecoJetCollectionSelectorAK8_Hbb(era_, -1, isDEBUG_);
   jetSelectorAK8_Wjj_ = new RecoJetCollectionSelectorAK8_Wjj(era_, -1, isDEBUG_);
+ */
 std::cout << "break-point A.11 reached" << std::endl;
   metReader_ = new RecoMEtReader(make_cfg(cfg, "branchName_met"));
   //if ( isMC_ )
   //{
   //  metReader_->read_ptPhi_systematics(true);
   //}
+/*
   metFilterReader_ = new MEtFilterReader(cfg);
 std::cout << "break-point A.12 reached" << std::endl;
   vertexReader_ = new RecoVertexReader(make_cfg(cfg, "branchName_vertex"));
 std::cout << "break-point A.13 reached" << std::endl;
+ */
 }
 
 EventReader::~EventReader()
 {
+std::cout << "<EventReader::~EventReader>:" << std::endl;
   delete muonReader_;
   delete looseMuonSelector_;
   delete fakeableMuonSelector_;
@@ -233,12 +239,15 @@ EventReader::~EventReader()
 void
 EventReader::set_central_or_shift(const std::string& central_or_shift)
 {
+std::cout << "<EventReader::set_central_or_shift>:" << std::endl;
+std::cout << "central_or_shift = '" << central_or_shift << "'" << std::endl;
+/*
   eventInfoReader_->set_central_or_shift(central_or_shift);
-  if ( contains(muonReader_->get_supported_systematics(cfg_), central_or_shift) )
+  if ( central_or_shift == "central" || contains(muonReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     // CV: muon momentum scale uncertainty not implemented yet
   }
-  if ( contains(electronReader_->get_supported_systematics(cfg_), central_or_shift) )
+  if ( central_or_shift == "central" || contains(electronReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     // CV: electron energy scale uncertainty not implemented yet 
   }
@@ -247,48 +256,57 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
     const int hadTauPt_option = getHadTauPt_option(central_or_shift);
     hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
   }
-  if ( contains(jetReaderAK4_->get_supported_systematics(cfg_), central_or_shift) )
+  if ( central_or_shift == "central" || contains(jetReaderAK4_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int jetPt_option = getJet_option(central_or_shift, isMC_);
     jetReaderAK4_->setPtMass_central_or_shift(jetPt_option);
     const int btagWeight_option = ( isMC_ ) ? getBTagWeight_option(central_or_shift) : kBtag_central;
     jetReaderAK4_->setBtagWeight_central_or_shift(btagWeight_option);
   }
-  if ( contains(jetReaderAK8_Hbb_->get_supported_systematics(cfg_), central_or_shift) )
+  if ( central_or_shift == "central" || contains(jetReaderAK8_Hbb_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
     jetReaderAK8_Hbb_->set_central_or_shift(fatJetPt_option);
   }
-  if ( contains(jetReaderAK8_Wjj_->get_supported_systematics(cfg_), central_or_shift) )
+  if ( central_or_shift == "central" || contains(jetReaderAK8_Wjj_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
     jetReaderAK8_Wjj_->set_central_or_shift(fatJetPt_option);
   }
-  if ( contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
+ */
+/*
+  if ( central_or_shift == "central" || contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int met_option = getMET_option(central_or_shift, isMC_);
     metReader_->setMEt_central_or_shift(met_option);
   }
+ */
+  metReader_->setMEt_central_or_shift(1); // ONLY FOR TESTING !!
 }
 
 std::vector<std::string>
-EventReader::setBranchAddresses(TTree * tree)
+EventReader::setBranchAddresses(TTree * inputTree)
 {
-  eventInfoReader_->setBranchAddresses(tree);
-  triggerInfoReader_->setBranchAddresses(tree);
-  muonReader_->setBranchAddresses(tree);
-  electronReader_->setBranchAddresses(tree);
-  hadTauReader_->setBranchAddresses(tree);
-  jetReaderAK4_->setBranchAddresses(tree);
-  genLeptonReader_->setBranchAddresses(tree);
-  genHadTauReader_->setBranchAddresses(tree);
-  genPhotonReader_->setBranchAddresses(tree);
-  genJetReader_->setBranchAddresses(tree);
-  jetReaderAK8_Hbb_->setBranchAddresses(tree);
-  jetReaderAK8_Wjj_->setBranchAddresses(tree);
-  metReader_->setBranchAddresses(tree);
-  metFilterReader_->setBranchAddresses(tree);
-  vertexReader_->setBranchAddresses(tree);
+std::cout << "<EventReader::setBranchAddresses>:" << std::endl;
+/*
+  eventInfoReader_->setBranchAddresses(inputTree);
+  triggerInfoReader_->setBranchAddresses(inputTree);
+  muonReader_->setBranchAddresses(inputTree);
+  electronReader_->setBranchAddresses(inputTree);
+  hadTauReader_->setBranchAddresses(inputTree);
+  jetReaderAK4_->setBranchAddresses(inputTree);
+  genLeptonReader_->setBranchAddresses(inputTree);
+  genHadTauReader_->setBranchAddresses(inputTree);
+  genPhotonReader_->setBranchAddresses(inputTree);
+  genJetReader_->setBranchAddresses(inputTree);
+  jetReaderAK8_Hbb_->setBranchAddresses(inputTree);
+  jetReaderAK8_Wjj_->setBranchAddresses(inputTree);
+ */
+  metReader_->setBranchAddresses(inputTree);
+/*
+  metFilterReader_->setBranchAddresses(inputTree);
+  vertexReader_->setBranchAddresses(inputTree);
+ */
   return {};
 }
 
@@ -382,6 +400,7 @@ Event
 EventReader::read() const
 {
 std::cout << "break-point B.1 reached" << std::endl;
+/*
   const EventInfo& eventInfo = eventInfoReader_->read();
 std::cout << "break-point B.2 reached" << std::endl;
   const TriggerInfo& triggerInfo = triggerInfoReader_->read();
@@ -481,11 +500,20 @@ std::cout << "break-point B.11 reached" << std::endl;
   event.vertex_ = vertexReader_->read();
 std::cout << "break-point B.12 reached" << std::endl;
   metReader_->set_phiModulationCorrDetails(&eventInfo, &event.vertex_);
+ */
 std::cout << "break-point B.13 reached" << std::endl;
-  event.met_ = metReader_->read();
+  //event.met_ = metReader_->read();
+  //std:::cout << "met_pt(4) = " << event.met_.pt() << std::endl;
+  const RecoMEt met = metReader_->read();
+  std::cout << "met_pt(4) = " << met.pt() << std::endl;
 std::cout << "break-point B.14 reached" << std::endl;
+/*
   event.metFilters_ = metFilterReader_->read();
 std::cout << "break-point B.15 reached" << std::endl;
+ */
+  const EventInfo* eventInfo = new EventInfo(); // ONLY FOR TESTING !!
+  const TriggerInfo* triggerInfo = new TriggerInfo(cfg_); // ONLY FOR TESTING !!
+  Event event(*eventInfo, *triggerInfo); // ONLY FOR TESTING !!
   return event;
 }
 

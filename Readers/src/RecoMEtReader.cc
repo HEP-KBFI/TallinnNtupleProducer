@@ -93,6 +93,7 @@ std::cout << "break-point E.1 reached" << std::endl;
 void
 RecoMEtReader::setBranchNames()
 {
+std::cout << "<RecoMEtReader::setBranchNames>:" << std::endl;
   if(numInstances_[branchName_obj_] == 0)
   {
     for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_UnclusteredEnDown; ++idxShift)
@@ -116,6 +117,8 @@ std::vector<std::string>
 RecoMEtReader::setBranchAddresses(TTree * inputTree)
 {
 std::cout << "<RecoMEtReader::setBranchAddresses>:" << std::endl;
+std::cout << "numInstances_[branchName_obj_] = " << numInstances_[branchName_obj_] << std::endl;
+std::cout << "this = " << this << std::endl;
   if(instances_[branchName_obj_] == this)
   {
     BranchAddressInitializer bai(inputTree);
@@ -124,7 +127,9 @@ std::cout << "<RecoMEtReader::setBranchAddresses>:" << std::endl;
       if( (idxShift == ptPhiOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
       {
 std::cout << "idxShift = " << idxShift << ": setting branch address for branch = '" << branchName_pt_[idxShift] << "'" << std::endl;
+        met_pt_systematics_[idxShift] = 0.11; // ONLY FOR TESTING !!
         bai.setBranchAddress(met_pt_systematics_[idxShift], branchName_pt_[idxShift]);
+        met_phi_systematics_[idxShift] = 0.11; // ONLY FOR TESTING !!
         bai.setBranchAddress(met_phi_systematics_[idxShift], branchName_phi_[idxShift]);
       }
     }
@@ -160,11 +165,14 @@ RecoMEt
 RecoMEtReader::read() const
 {
 std::cout << "<RecoMEtReader::read>:" << std::endl;
+std::cout << "numInstances_[branchName_obj_] = " << numInstances_[branchName_obj_] << std::endl;
 std::cout << "break-point D.1 reached" << std::endl;
   const RecoMEtReader * const gInstance = instances_[branchName_obj_];
 std::cout << "break-point D.2 reached" << std::endl;
   assert(gInstance);
-
+std::cout << "gInstance = " << gInstance << std::endl;
+std::cout << "&gInstance->met_pt_systematics_.find(ptPhiOption_)->second = " << &gInstance->met_pt_systematics_.find(ptPhiOption_)->second << std::endl;
+std::cout << "gInstance->met_pt_systematics_.find(ptPhiOption_)->second = " << gInstance->met_pt_systematics_.find(ptPhiOption_)->second << std::endl;
   double met_pt = gInstance->met_pt_systematics_.at(ptPhiOption_);
 std::cout << "ptPhiOption = " << 0 << ": met_pt(1) = " << gInstance->met_pt_systematics_.at(0) << std::endl;
 std::cout << "ptPhiOption = " << ptPhiOption_ << ": met_pt(1) = " << met_pt << std::endl;
