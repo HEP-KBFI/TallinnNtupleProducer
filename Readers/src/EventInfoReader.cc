@@ -49,10 +49,10 @@ EventInfoReader::~EventInfoReader()
 }
 
 std::vector<std::string>
-EventInfoReader::setBranchAddresses(TTree * tree)
+EventInfoReader::setBranchAddresses(TTree * inputTree)
 {
   std::vector<std::string> bound_branches;
-  BranchAddressInitializer bai(tree);
+  BranchAddressInitializer bai(inputTree);
   bai.setBranchAddress(info_->run, branchName_run);
   bai.setBranchAddress(info_->lumi, branchName_lumi);
   bai.setBranchAddress(info_->event, branchName_event);
@@ -87,7 +87,7 @@ EventInfoReader::setBranchAddresses(TTree * tree)
   }
   if(info_->analysisConfig().isMC() && ! info_->tH_sf.empty())
   {
-    BranchAddressInitializer bai_LHEReweight(tree, info_->LHEReweightingWeight_max);
+    BranchAddressInitializer bai_LHEReweight(inputTree, info_->LHEReweightingWeight_max);
     bai_LHEReweight.setBranchAddress(info_->nLHEReweightingWeight, branchName_nLHEReweightingWeight);
     bai_LHEReweight.setBranchAddress(info_->LHEReweightingWeight, branchName_LHEReweightingWeight);
 

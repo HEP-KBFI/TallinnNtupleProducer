@@ -20,7 +20,7 @@ class PSWeightReader : public ReaderBase
    * @brief Call tree->SetBranchAddress for all branches containing parton shower (ISR and FSR) information
    */
   std::vector<std::string>
-  setBranchAddresses(TTree * tree) override;
+  setBranchAddresses(TTree * inputTree) override;
 
   /**
    * @brief Read branches from tree and return values

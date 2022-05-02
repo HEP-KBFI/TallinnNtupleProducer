@@ -34,7 +34,6 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
   , puId_(puId)
   , genMatchIdx_(genMatchIdx)
   , btag_(btag)
-  , default_systematics_(central_or_shift)
   , isBJet_loose_(false)
   , isBJet_medium_(false)
 {}
@@ -69,13 +68,13 @@ RecoJetAK4::BtagCSV() const
 Double_t
 RecoJetAK4::BtagCSV(Btag btag) const
 {
-  if(! BtagCSVs_.count(btag))
+  if(! BtagCSV_systematics_.count(btag))
   {
     throw cmsException(this, __func__, __LINE__)
       << "No such b-tagging score available: " << as_integer(btag)
     ;
   }
-  return BtagCSVs_.at(btag);
+  return BtagCSV_systematics_.at(btag);
 }
 
 Double_t
@@ -86,7 +85,7 @@ RecoJetAK4::BtagWeight() const
 
 Double_t
 RecoJetAK4::BtagWeight(Btag btag,
-                       int central_or_shift) const
+                    int central_or_shift) const
 {
   return BtagWeight_systematics_.at(btag).at(central_or_shift);
 }
@@ -160,26 +159,6 @@ RecoJetAK4::genMatchIdx() const
   return genMatchIdx_;
 }
 
-Double_t
-RecoJetAK4::maxPt() const
-{
-  double max_Pt = this->pt();
-  for(const auto & kv: pt_systematics_)
-  {
-    if(kv.second > max_Pt)
-    {
-      max_Pt = kv.second;
-    }
-  }
-  return max_Pt;
-}
-
-bool
-RecoJetAK4::hasBtag(Btag btag) const
-{
-  return BtagCSVs_.count(btag);
-}
-
 bool
 RecoJetAK4::passesPUID(pileupJetID puIdWP) const
 {
@@ -192,22 +171,6 @@ RecoJetAK4::is_PUID_taggable() const
   // PU jet ID is applicable only to jets that have pT < 50. GeV
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
   return this->pt() < 50.;
-}
-
-int
-RecoJetAK4::get_default_systematics() const
-{
-  return default_systematics_;
-}
-
-const Particle::LorentzVector
-RecoJetAK4::get_systematics_p4(int central_or_shift) const
-{
-  if(! pt_systematics_.count(central_or_shift) && ! mass_systematics_.count(central_or_shift))
-  {
-    throw cmsException(this, __func__, __LINE__) << "No such systematics available: " << central_or_shift;
-  }
-  return { pt_systematics_.at(central_or_shift), eta_, phi_, mass_systematics_.at(central_or_shift) };
 }
 
 bool
@@ -231,8 +194,7 @@ operator<<(std::ostream & stream,
             " jet ID = "          << jet.jetId()                             << ","
             " PU ID = "           << jet.puId()                              << ","
             " QGL = "             << jet.QGDiscr()                           << ","
-            " bReg corr (res) = " << jet.bRegCorr() << " (" << jet.bRegRes() << "),"
-            " sysunc = "          << jet.get_default_systematics()           << '\n'
+            " bReg corr (res) = " << jet.bRegCorr() << " (" << jet.bRegRes() << ")\n"
   ;
   return stream;
 }

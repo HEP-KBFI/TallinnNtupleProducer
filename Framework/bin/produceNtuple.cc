@@ -52,8 +52,6 @@
 #include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
 
-//#include "TallinnNtupleProducer/Writers/plugins/GenPhotonFilterWriter.h" // ONLY FOR TESTING !!
-
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
 #include <TString.h>                                                                            // TString, Form()
@@ -94,17 +92,17 @@ int main(int argc, char* argv[])
 //--- keep track of time it takes the macro to execute
   TBenchmark clock;
   clock.Start("produceNtuple");
-std::cout << "break-point 1 reached" << std::endl;
+
 //--- read python configuration parameters
   if ( !edm::readPSetsFrom(argv[1])->existsAs<edm::ParameterSet>("process") )
     throw cmsException("produceNtuple", __LINE__) << "No ParameterSet 'process' found in configuration file = " << argv[1] << " !!";
-std::cout << "break-point 2 reached" << std::endl;
+
   edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("process");
-std::cout << "break-point 3 reached" << std::endl;
+
   edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
   AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
   std::string process = cfg_produceNtuple.getParameter<std::string>("process");
-std::cout << "break-point 4 reached" << std::endl;
+
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
@@ -117,7 +115,7 @@ std::cout << "break-point 4 reached" << std::endl;
   bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
   bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
   bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");
-std::cout << "break-point 5 reached" << std::endl;
+
   unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
 
@@ -125,13 +123,13 @@ std::cout << "break-point 5 reached" << std::endl;
   std::string hadTauWP_againstElectrons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstElectrons");
   std::string hadTauWP_againstMuons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstMuons");
   std::string lep_mva_wp = cfg_produceNtuple.getParameter<std::string>("lep_mva_wp");
-std::cout << "break-point 6 reached" << std::endl;
+
   bool apply_chargeMisIdRate = cfg_produceNtuple.getParameter<bool>("apply_chargeMisIdRate");
 
   std::string selection = cfg_produceNtuple.getParameter<std::string>("selection");
 
   bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
-std::cout << "break-point 7 reached" << std::endl;
+
   std::vector<std::string> systematic_shifts;
   // CV: process all systematic uncertainties supported by EventReader class (only for MC)
   if ( isMC )
@@ -140,20 +138,13 @@ std::cout << "break-point 7 reached" << std::endl;
   }
   // CV: add central value (for data and MC)
   merge_systematic_shifts(systematic_shifts, { "central"});
-std::cout << "break-point 8 reached" << std::endl;
+
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("era", era_string);
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("hadTauSelection_againstJets", hadTauWP_againstJets);
-std::cout << "break-point 8.1 reached" << std::endl;
-std::cout << "hadTauWP_againstJets = " << hadTauWP_againstJets << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstElectrons", get_tau_id_wp_int(hadTauWP_againstElectrons));
-std::cout << "break-point 8.2 reached" << std::endl;
-std::cout << "hadTauWP_againstElectrons = " << get_tau_id_wp_int(hadTauWP_againstElectrons) << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstMuons", get_tau_id_wp_int(hadTauWP_againstMuons));
-std::cout << "break-point 8.3 reached" << std::endl;
-std::cout << "hadTauWP_againstMuons = " << get_tau_id_wp_int(hadTauWP_againstMuons) << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("lep_mva_wp", lep_mva_wp);
-std::cout << "lep_mva_wp = " << lep_mva_wp << std::endl;
   cfg_dataToMCcorrectionInterface.addParameter<bool>("isDEBUG", isDEBUG);
   Data_to_MC_CorrectionInterface_Base * dataToMCcorrectionInterface = nullptr;
   switch ( era )
@@ -164,15 +155,15 @@ std::cout << "lep_mva_wp = " << lep_mva_wp << std::endl;
     default: throw cmsException("produceNtuple", __LINE__) << "Invalid era = " << static_cast<int>(era);
   }
   const ChargeMisIdRateInterface chargeMisIdRateInterface(era);
-std::cout << "break-point 9 reached" << std::endl;
+
   edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("leptonFakeRateWeight");
   cfg_leptonFakeRateWeight.addParameter<std::string>("era", era_string);
   LeptonFakeRateInterface* jetToLeptonFakeRateInterface = new LeptonFakeRateInterface(cfg_leptonFakeRateWeight);
-std::cout << "break-point 10 reached" << std::endl;
+
   edm::ParameterSet cfg_hadTauFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("hadTauFakeRateWeight");
   cfg_hadTauFakeRateWeight.addParameter<std::string>("hadTauSelection", hadTauWP_againstJets);
   HadTauFakeRateInterface* jetToHadTauFakeRateInterface = new HadTauFakeRateInterface(cfg_hadTauFakeRateWeight);
-std::cout << "break-point 11 reached" << std::endl;
+
   std::string selEventsFileName = cfg_produceNtuple.getParameter<std::string>("selEventsFileName");
   std::cout << "selEventsFileName = " << selEventsFileName << std::endl;
   RunLumiEventSelector* run_lumi_eventSelector = 0;
@@ -182,23 +173,23 @@ std::cout << "break-point 11 reached" << std::endl;
     cfg_run_lumi_eventSelector.addParameter<std::string>("separator", ":");
     run_lumi_eventSelector = new RunLumiEventSelector(cfg_run_lumi_eventSelector);
   }
-std::cout << "break-point 12 reached" << std::endl;
+
   fwlite::InputSource inputFiles(cfg);
   int maxEvents = inputFiles.maxEvents();
   std::cout << " maxEvents = " << maxEvents << std::endl;
   unsigned reportEvery = inputFiles.reportAfter();
-std::cout << "break-point 13 reached" << std::endl;
+
   fwlite::OutputFiles outputFile(cfg);
   fwlite::TFileService fs = fwlite::TFileService(outputFile.file().data());
-std::cout << "break-point 14 reached" << std::endl;
+
   TTreeWrapper* inputTree = new TTreeWrapper(treeName.data(), inputFiles.files(), maxEvents);
   std::cout << "Loaded " << inputTree->getFileCount() << " file(s).\n";
-std::cout << "break-point 15 reached" << std::endl;
+
   EventReader* eventReader = new EventReader(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
-std::cout << "break-point 16 reached" << std::endl;
+
   TTree* outputTree = new TTree("events", "events");
-std::cout << "break-point 17 reached" << std::endl;
+
   const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("evtWeight");
   const bool applyAdditionalEvtWeight = additionalEvtWeight.getParameter<bool>("apply");
   EvtWeightManager* eventWeightManager = nullptr;
@@ -208,14 +199,14 @@ std::cout << "break-point 17 reached" << std::endl;
     eventWeightManager->set_central_or_shift("central");
     inputTree->registerReader(eventWeightManager);
   }
-std::cout << "break-point 18 reached" << std::endl;
+
   L1PreFiringWeightReader* l1PreFiringWeightReader = nullptr;
   if ( apply_l1PreFireWeight )
   {
     l1PreFiringWeightReader = new L1PreFiringWeightReader(cfg_produceNtuple);
     inputTree->registerReader(l1PreFiringWeightReader);
   }
-std::cout << "break-point 19 reached" << std::endl;
+
   LHEInfoReader* lheInfoReader = nullptr;
   PSWeightReader* psWeightReader = nullptr;
   if ( isMC )
@@ -225,14 +216,14 @@ std::cout << "break-point 19 reached" << std::endl;
     psWeightReader = new PSWeightReader(cfg_produceNtuple);
     inputTree->registerReader(psWeightReader);
   }
-std::cout << "break-point 20 reached" << std::endl;
+
   BtagSFRatioInterface* btagSFRatioInterface = nullptr;
   if ( apply_btagSFRatio )
   {
     const edm::ParameterSet btagSFRatio = cfg_produceNtuple.getParameterSet("btagSFRatio");
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
-std::cout << "break-point 21 reached" << std::endl;
+
   if ( !edmplugin::PluginManager::isAvailable() )
   {  
     edmplugin::PluginManager::configure(edmplugin::standard::config());
@@ -241,38 +232,27 @@ std::cout << "break-point 21 reached" << std::endl;
   std::vector<std::unique_ptr<WriterBase>> writers;
   for ( auto cfg_writer : cfg_writers )
   {
-std::cout << "break-point 21.1 reached" << std::endl;
     std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
-std::cout << "pluginType = " << pluginType << std::endl;
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
     cfg_writer.addParameter<std::string>("process", process);
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
-std::cout << "break-point 21.2 reached" << std::endl;
     std::unique_ptr<WriterBase> writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
-std::cout << "break-point 21.3 reached" << std::endl;
     writer->registerReaders(inputTree);
-std::cout << "break-point 21.4 reached" << std::endl;
     writer->setBranches(outputTree);
-std::cout << "break-point 21.5 reached" << std::endl;
     writers.push_back(std::move(writer));
-std::cout << "break-point 21.6 reached" << std::endl;
   }
-std::cout << "break-point 22 reached" << std::endl;
+
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
-  for ( const auto & central_or_shift : systematic_shifts )
+  while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
-    std::cout << "central_or_shift = " << central_or_shift << '\n';
-std::cout << "break-point 23 reached" << std::endl;
-    inputTree->reset();
-std::cout << "break-point 24 reached" << std::endl;
-    while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
+    for ( const auto & central_or_shift : systematic_shifts )
     {
-std::cout << "break-point 25 reached" << std::endl;
       eventReader->set_central_or_shift(central_or_shift);
       Event event = eventReader->read();
+
       if ( central_or_shift == "central" )
       {
         if ( inputTree->canReport(reportEvery) )
@@ -285,27 +265,24 @@ std::cout << "break-point 25 reached" << std::endl;
         }
         ++analyzedEntries;
         histogram_analyzedEntries->Fill(0.);
-      }
-std::cout << "break-point 26 reached" << std::endl;
-      if ( run_lumi_eventSelector )
-      { 
-        if ( !(*run_lumi_eventSelector)(event.eventInfo()) )
-        {
-          continue;
-        }
-        if ( central_or_shift == "central" )
-        {
+
+        if ( run_lumi_eventSelector )
+        { 
+          if ( !(*run_lumi_eventSelector)(event.eventInfo()) )
+          {
+            continue;
+          }
           std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << event.eventInfo() << '\n';
           if ( inputTree->isOpen() )
           {
             std::cout << "input File = " << inputTree->getCurrentFileName() << '\n';
           }
         }
-      }
-std::cout << "break-point 27 reached" << std::endl;
-      if ( central_or_shift == "central"  && isDEBUG )
-      {
-        std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << ' ' << event.eventInfo() << '\n';
+
+        if ( isDEBUG )
+        {
+          std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << ' ' << event.eventInfo() << '\n';
+        }
       }
 
       EvtWeightRecorder evtWeightRecorder({ central_or_shift }, central_or_shift, isMC);
@@ -335,13 +312,13 @@ std::cout << "break-point 28 reached" << std::endl;
         {
           evtWeightRecorder.record_btagSFRatio(btagSFRatioInterface, event.selJetsAK4().size());
         }
-std::cout << "break-point 29 reached" << std::endl;
+
         if ( analysisConfig.isMC_EWK() )
         {
           evtWeightRecorder.record_ewk_jet(event.selJetsAK4());
           evtWeightRecorder.record_ewk_bjet(event.selJetsAK4_btagMedium());
         }
-std::cout << "break-point 30 reached" << std::endl;
+
         dataToMCcorrectionInterface->setLeptons(event.fakeableLeptons(), true);
 
 //--- apply data/MC corrections for trigger efficiency
@@ -364,7 +341,7 @@ std::cout << "break-point 30 reached" << std::endl;
         evtWeightRecorder.record_jetToLeptonFakeRate(jetToLeptonFakeRateInterface, event.fakeableLeptons());
         evtWeightRecorder.record_jetToTauFakeRate(jetToHadTauFakeRateInterface, event.fakeableHadTaus());
         evtWeightRecorder.compute_FR();
-std::cout << "break-point 31 reached" << std::endl;
+
         if ( apply_chargeMisIdRate )
         {
           if ( numNominalLeptons == 2 && numNominalHadTaus == 0 )
@@ -442,24 +419,27 @@ std::cout << "break-point 31 reached" << std::endl;
           }
         }
       }
-std::cout << "break-point 32 reached" << std::endl;
+
       for ( auto & writer : writers )
       {
         writer->set_central_or_shift(central_or_shift);
         writer->write(event, evtWeightRecorder);
       }
-std::cout << "break-point 33 reached" << std::endl;
-      outputTree->Fill();
     }
+    outputTree->Fill();
   }
-std::cout << "break-point 34 reached" << std::endl;
+
   TDirectory* dir = fs.getBareDirectory();
   dir->cd();
-std::cout << "break-point 35 reached" << std::endl;
+
   TTree* outputTree_selected = nullptr;
   if ( selection != "" )
   {
     outputTree_selected = outputTree->CopyTree(selection.data());
+  }
+  else
+  {
+    outputTree_selected = outputTree;
   }
   Float_t evtWeight;
   outputTree_selected->SetBranchAddress("evtWeight", &evtWeight);
@@ -475,40 +455,40 @@ std::cout << "break-point 35 reached" << std::endl;
     histogram_selectedEntries->Fill(0.);
   }
   outputTree_selected->Write();
-std::cout << "break-point 36 reached" << std::endl;
+
   std::cout << "max num. Entries = " << inputTree->getCumulativeMaxEventCount()
             << " (limited by " << maxEvents << ") processed in "
             << inputTree->getProcessedFileCount() << " file(s) (out of "
             << inputTree->getFileCount() << ")\n"
             << " analyzed = " << analyzedEntries << '\n'
             << " selected = " << selectedEntries << " (weighted = " << selectedEntries_weighted << ")" << std::endl;
-std::cout << "break-point 37 reached" << std::endl;
+
 //--- memory clean-up
   delete run_lumi_eventSelector;
-std::cout << "break-point 38 reached" << std::endl;
+
   delete eventReader;
   delete l1PreFiringWeightReader;
   delete lheInfoReader;
   delete psWeightReader;
-std::cout << "break-point 39 reached" << std::endl;
+
   delete dataToMCcorrectionInterface;
   delete jetToLeptonFakeRateInterface;
   delete jetToHadTauFakeRateInterface;
   delete btagSFRatioInterface;
-std::cout << "break-point 40 reached" << std::endl;
+
   for ( auto & writer : writers )
   {
     writer.reset(nullptr);
   }
-std::cout << "break-point 41 reached" << std::endl;
+
   delete inputTree;
   delete outputTree;
   if ( outputTree_selected != outputTree )
   {
     delete outputTree_selected;
   }
-std::cout << "break-point 42 reached" << std::endl;
+
   clock.Show("produceNtuple");
-std::cout << "break-point 43 reached" << std::endl;
+
   return EXIT_SUCCESS;
 }

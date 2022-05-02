@@ -26,14 +26,11 @@ class RecoMEtReader : public ReaderBase
   void
   setMEt_central_or_shift(int met_option);
 
-  void
-  read_ptPhi_systematics(bool flag);
-
   /**
    * @brief Call tree->SetBranchAddress for all RecoMEt branches
    */
   std::vector<std::string>
-  setBranchAddresses(TTree * tree) override;
+  setBranchAddresses(TTree * inputTree) override;
 
   void
   set_phiModulationCorrDetails(const EventInfo * const eventInfo,
@@ -73,14 +70,20 @@ class RecoMEtReader : public ReaderBase
   std::string branchName_covXY_;
   std::string branchName_covYY_;
 
-  RecoMEt met_;
-  const EventInfo * eventInfo_;
-  const RecoVertex * recoVertex_;
-  bool enable_phiModulationCorr_;
-
   int ptPhiOption_central_;
   int ptPhiOption_;
-  bool read_ptPhi_systematics_;
+
+  Float_t met_sumEt_;
+  Float_t met_covXX_;
+  Float_t met_covXY_;
+  Float_t met_covYY_;
+
+  std::map<int, Float_t> met_pt_systematics_;
+  std::map<int, Float_t> met_phi_systematics_;
+
+  const EventInfo * eventInfo_;
+  const RecoVertex * recoVertex_;
+  mutable bool enable_phiModulationCorr_;
 
   // CV: make sure that only one RecoMEtReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

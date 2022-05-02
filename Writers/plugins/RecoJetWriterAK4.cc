@@ -20,9 +20,9 @@ RecoJetWriterAK4::RecoJetWriterAK4(const edm::ParameterSet & cfg)
   , current_central_or_shiftEntry_(nullptr)
 {
   std::string jetCollection_string = cfg.getParameter<std::string>("jetCollection");
-  if      ( jetCollection_string == "selJetsAK4"              ) jetCollection_ = JetCollection::kSelJetsAK4;
-  else if ( jetCollection_string == "selJetsAK4_btagLoose()"  ) jetCollection_ = JetCollection::kSelJetsAK4_btagLoose;
-  else if ( jetCollection_string == "selJetsAK4_btagMedium()" ) jetCollection_ = JetCollection::kSelJetsAK4_btagMedium;
+  if      ( jetCollection_string == "selJetsAK4"            ) jetCollection_ = JetCollection::kSelJetsAK4;
+  else if ( jetCollection_string == "selJetsAK4_btagLoose"  ) jetCollection_ = JetCollection::kSelJetsAK4_btagLoose;
+  else if ( jetCollection_string == "selJetsAK4_btagMedium" ) jetCollection_ = JetCollection::kSelJetsAK4_btagMedium;
   else throw cmsException(__func__, __LINE__) 
     << "Invalid Configuration parameter 'jetCollection' = " << jetCollection_string;
   branchName_obj_ = cfg.getParameter<std::string>("branchName");

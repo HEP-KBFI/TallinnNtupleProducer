@@ -212,6 +212,7 @@ TTreeWrapper::hasNextEvent(bool getEntry)
     if(getEntry)
     {
       // we still have some events to be read here
+std::cout << "getting entry #" << currentEventIdx_ << " from TTree = '" << currentTreePtr_->GetName() << "'" << std::endl;
       currentTreePtr_ -> GetEntry(currentEventIdx_);
       ++currentEventIdx_;
       ++currentMaxEventIdx_;

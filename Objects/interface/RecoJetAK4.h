@@ -67,21 +67,15 @@ class RecoJetAK4 : public RecoJetBase
   Int_t puId() const;
   Int_t genMatchIdx() const;
 
-  Double_t maxPt() const;
-
-  bool hasBtag(Btag btag) const;
   bool passesPUID(pileupJetID puIdWP) const;
   bool is_PUID_taggable() const;
-
-  int get_default_systematics() const;
-  const Particle::LorentzVector get_systematics_p4(int central_or_shift) const;
 
   bool isBJet_loose() const;
   bool isBJet_medium() const;
 
   friend class RecoJetReaderAK4;
 
-protected:
+ protected:
   Double_t jetCharge_;  ///< jet charge, computed according to JME-13-006
   Double_t BtagCSV_;    ///< CSV b-tagging discriminator value
   Double_t BtagWeight_; ///< weight for data/MC correction of b-tagging efficiency and mistag rate
@@ -96,14 +90,8 @@ protected:
   Int_t genMatchIdx_;   ///< index to gen jet
   Btag btag_;           ///< default b-tagging discriminant
 
-  //---------------------------------------------------------
-  // CV: needed by RecoJetWriter
   std::map<Btag, std::map<int, Double_t>> BtagWeight_systematics_;
-  std::map<Btag, Double_t> BtagCSVs_;
-  std::map<int, Double_t> pt_systematics_;
-  std::map<int, Double_t> mass_systematics_;
-  int default_systematics_;
-  //---------------------------------------------------------
+  std::map<Btag, Double_t> BtagCSV_systematics_;
 
 //--- flags indicating whether or not jet passes loose and medium b-jet selection criteria
   mutable bool isBJet_loose_;

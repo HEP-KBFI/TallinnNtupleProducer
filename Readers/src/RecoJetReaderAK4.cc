@@ -31,8 +31,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , btag_central_or_shift_(kBtag_central)
   , ptMassOption_central_(-1)
   , ptMassOption_(-1)
-  , read_ptMass_systematics_(false)
-  , read_btag_systematics_(false)
   , jet_eta_(nullptr)
   , jet_phi_(nullptr)
   , jet_charge_(nullptr)
@@ -101,7 +99,7 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     {
       delete[] kv.second;
     }
-    for(auto & kv: gInstance->jet_BtagCSVs_)
+    for(auto & kv: gInstance->jet_BtagCSV_systematics_)
     {
       delete[] kv.second;
     }
@@ -131,7 +129,7 @@ RecoJetReaderAK4::setPtMass_central_or_shift(int central_or_shift)
 }
 
 void
-RecoJetReaderAK4::setBranchName_BtagWeight(int central_or_shift)
+RecoJetReaderAK4::setBtagWeight_central_or_shift(int central_or_shift)
 {
   if(! isMC_ && central_or_shift != kBtag_central)
   {
@@ -150,18 +148,6 @@ RecoJetReaderAK4::read_Btag(Btag btag)
 }
 
 void
-RecoJetReaderAK4::read_ptMass_systematics(bool flag)
-{
-  read_ptMass_systematics_ = flag;
-}
-
-void
-RecoJetReaderAK4::read_btag_systematics(bool flag)
-{
-  read_btag_systematics_ = flag;
-}
-
-void
 RecoJetReaderAK4::setBranchNames()
 {
   if(numInstances_[branchName_obj_] == 0)
@@ -170,12 +156,11 @@ RecoJetReaderAK4::setBranchNames()
     branchName_phi_ = Form("%s_%s", branchName_obj_.data(), "phi");
     for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_jerForwardHighPtDown; ++idxShift)
     {
-      if(! isValidJESsource(era_, idxShift))
+      if( (idxShift == ptMassOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
       {
-        continue;
+        branchNames_pt_systematics_[idxShift]   = getBranchName_jetMET(branchName_obj_, era_, idxShift, true);
+        branchNames_mass_systematics_[idxShift] = getBranchName_jetMET(branchName_obj_, era_, idxShift, false);
       }
-      branchNames_pt_systematics_[idxShift]   = getBranchName_jetMET(branchName_obj_, era_, idxShift, true);
-      branchNames_mass_systematics_[idxShift] = getBranchName_jetMET(branchName_obj_, era_, idxShift, false);
     }
     branchName_jetCharge_ = Form("%s_%s", branchName_obj_.data(), "jetCharge");
 
@@ -250,20 +235,10 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
       bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
       bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
     }
-    bai.setBranchAddress(jet_pt_systematics_[ptMassOption_],   branchNames_pt_systematics_[ptMassOption_]);
-    bai.setBranchAddress(jet_mass_systematics_[ptMassOption_], branchNames_mass_systematics_[ptMassOption_]);
-    if(isMC_ && read_ptMass_systematics_)
+    for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_jerForwardHighPtDown; ++idxShift)
     {
-      for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_jerForwardHighPtDown; ++idxShift)
+      if( (idxShift == ptMassOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
       {
-        if(! isValidJESsource(era_, idxShift))
-        {
-          continue;
-        }
-        if(idxShift == ptMassOption_)
-        {
-          continue; // do not bind the same branch twice
-        }
         bai.setBranchAddress(jet_pt_systematics_[idxShift],   branchNames_pt_systematics_[idxShift]);
         bai.setBranchAddress(jet_mass_systematics_[idxShift], branchNames_mass_systematics_[idxShift]);
       }
@@ -274,14 +249,14 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_charge_, branchName_jetCharge_);
     for(const auto & kv: branchNames_btag_)
     {
-      bai.setBranchAddress(jet_BtagCSVs_[kv.first], kv.second, -3.);
+      bai.setBranchAddress(jet_BtagCSV_systematics_[kv.first], kv.second, -3.);
     }
 
     for(const auto & kv: branchNames_BtagWeight_systematics_)
     {
       for(int idxShift = kBtag_central; idxShift <= kBtag_jesRelativeSample_EraDown; ++idxShift)
       {
-        if(read_btag_systematics_ || (! read_btag_systematics_ && idxShift == btag_central_or_shift_))
+        if( idxShift == btag_central_or_shift_ || isMC_ )
         {
           bai.setBranchAddress(
             jet_BtagWeights_systematics_[kv.first][idxShift], isMC_ ? branchNames_BtagWeight_systematics_[kv.first][idxShift] : "", 1.
@@ -341,7 +316,7 @@ RecoJetReaderAK4::read() const
       // b-tagging discriminator. In the past we've seen similar issues with DeepCSV score as well. Will set the value
       // of b-tagging discriminant to -2. in case the score is nan (as we already did with lepton-to-jet variables).
       // Not sure how nan values affect the b-tagging scale factors, though.
-      double btagCSV = gInstance->jet_BtagCSVs_.at(btag_)[idxJet];
+      double btagCSV = gInstance->jet_BtagCSV_systematics_.at(btag_)[idxJet];
       if(std::isnan(btagCSV))
       {
         btagCSV = -2.;
@@ -378,56 +353,29 @@ RecoJetReaderAK4::read() const
       });
 
       RecoJetAK4 & jet = jets.back();
-
       if(isMC_)
       {
         for(const auto & kv: gInstance->jet_BtagWeights_systematics_)
         {
           for(int idxShift = kBtag_central; idxShift <= kBtag_jesRelativeSample_EraDown; ++idxShift)
           {
-            if(! read_btag_systematics_ && idxShift != btag_central_or_shift_)
-            {
-              continue;
-            }
             if(gInstance->jet_BtagWeights_systematics_.at(kv.first).count(idxShift))
             {
               jet.BtagWeight_systematics_[kv.first][idxShift] = gInstance->jet_BtagWeights_systematics_.at(kv.first).at(idxShift)[idxJet];
             }
           } // idxShift
         } // jet_BtagWeights_systematics_
-      } // isMC_
 
-      for(const auto & kv: gInstance->jet_BtagCSVs_)
-      {
-        double btagCSV_tmp = gInstance->jet_BtagCSVs_.at(kv.first)[idxJet];
-        if(std::isnan(btagCSV_tmp))
+        for(const auto & kv: gInstance->jet_BtagCSV_systematics_)
         {
-          btagCSV_tmp = -2;
-        }
-        jet.BtagCSVs_[kv.first] = btagCSV_tmp;
-      }
-
-      if(isMC_ && read_ptMass_systematics_)
-      {
-        for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_jerForwardHighPtDown; ++idxShift)
-        {
-          if(! isValidJESsource(era_, idxShift))
+          double btagCSV_tmp = gInstance->jet_BtagCSV_systematics_.at(kv.first)[idxJet];
+          if(std::isnan(btagCSV_tmp))
           {
-            continue;
+            btagCSV_tmp = -2;
           }
-          // we want to save all pT-s and masses that have been shifted by systematic uncertainties to the maps,
-          // including the central nominal and central non-nominal values; crucial for RecoJetWriter
-          jet.pt_systematics_[idxShift]   = gInstance->jet_pt_systematics_.at(idxShift)[idxJet];
-          jet.mass_systematics_[idxShift] = gInstance->jet_mass_systematics_.at(idxShift)[idxJet];
-        } // idxShift
-      }
-      else
-      {
-        // fill the maps with only the central values (either nominal or non-nominal if data)
-        jet.pt_systematics_[ptMassOption_]   = gInstance->jet_pt_systematics_.at(ptMassOption_)[idxJet];
-        jet.mass_systematics_[ptMassOption_] = gInstance->jet_mass_systematics_.at(ptMassOption_)[idxJet];
+          jet.BtagCSV_systematics_[kv.first] = btagCSV_tmp;
+        } // jet_BtagCSV_systematics_
       } // isMC_
-
     } // idxJet
 
     readGenMatching(jets);

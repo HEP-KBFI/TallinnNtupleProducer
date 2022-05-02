@@ -21,7 +21,7 @@ process = cms.PSet()
 
 process.fwliteInput = cms.PSet(
     fileNames = cms.vstring(),
-    maxEvents = cms.int32(100),
+    maxEvents = cms.int32(1),
     outputEvery = cms.uint32(100000)
 )
 
@@ -151,20 +151,20 @@ process.produceNtuple = cms.PSet(
 
     writerPlugins = cms.VPSet(
         writers_evtWeight,
-        writers_fakeableHadTaus,
-        writers_fakeableLeptons,
+#        writers_fakeableHadTaus,
+#        writers_fakeableLeptons,
         # CV: GenPhotonFilterWriter plugin can be run for some MC samples only,
         #     because the collection "GenPhotonCandidate" does not exist in all MC samples !!
         #writers_genPhotonFilter,
-        writers_lowMassLeptonPairVeto,
+#        writers_lowMassLeptonPairVeto,
         writers_met,
-##        writers_metFilters,
-##        writers_process,
-##        writers_run_lumi_event,
-        writers_selJetsAK4,
-##        writers_selJetsAK4_btagLoose,
-##        writers_selJetsAK4_btagMedium,
-##        writers_ZbosonMassVeto
+#        writers_metFilters,
+#        writers_process,
+        writers_run_lumi_event,
+#        writers_selJetsAK4,
+#        writers_selJetsAK4_btagLoose,
+#        writers_selJetsAK4_btagMedium,
+#        writers_ZbosonMassVeto
     ),
 
     selEventsFileName = cms.string(''),
@@ -266,6 +266,6 @@ process.produceNtuple.has_pdf_weights                                = cms.bool(
 process.produceNtuple.btagSFRatio                                    = cms.PSet(
   central = cms.vdouble(1.0, 0.983850754831, 0.970806608203, 0.95589515666, 0.941090355157, 0.919510668991, 0.896747198034, 0.869121413881, 0.843409507134, 0.788891130366),
 )
-#process.produceNtuple.selection                                      = cms.string("nlep == 2 && ntau == 1")
+#process.produceNtuple.selection                                      = cms.string("nlep == 2 & ntau == 1")
 process.produceNtuple.selection                                      = cms.string("")
 

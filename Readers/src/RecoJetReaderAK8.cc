@@ -26,7 +26,6 @@ RecoJetReaderAK8::RecoJetReaderAK8(const edm::ParameterSet & cfg)
   , subjetReader_(nullptr)
   , sysOption_central_(-1)
   , sysOption_(-1)
-  , readSys_(false)
   , ignoreSys_(-1)
   , pt_str_("pt")
   , mass_str_("mass")
@@ -114,16 +113,6 @@ RecoJetReaderAK8::set_central_or_shift(int central_or_shift)
     ;
   }
   sysOption_ = central_or_shift;
-  if(! readSys_)
-  {
-    read_sys(sysOption_ != sysOption_central_);
-  }
-}
-
-void
-RecoJetReaderAK8::read_sys(bool flag)
-{
-  readSys_ = flag;
 }
 
 void
@@ -254,30 +243,27 @@ RecoJetReaderAK8::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_msoftdrop_systematics_[sysOption_central_], branchNames_msoftdrop_systematics_.at(sysOption_central_));
     if(isMC_)
     {
-      if(readSys_)
+      for(int idxShift = kFatJet_central_nonNominal; idxShift <= kFatJet_jmrDown; ++idxShift)
       {
-        for(int idxShift = kFatJet_central_nonNominal; idxShift <= kFatJet_jmrDown; ++idxShift)
+        if(! isValidJESsource(era_, idxShift, true))
         {
-          if(! isValidJESsource(era_, idxShift, true))
-          {
-            continue;
-          }
-          if(idxShift == sysOption_central_)
-          {
-            continue; // do not bind the same branch twice
-          }
-          if(branchNames_pt_systematics_.count(idxShift))
-          {
-            bai.setBranchAddress(jet_pt_systematics_[idxShift], branchNames_pt_systematics_.at(idxShift));
-          }
-          if(branchNames_mass_systematics_.count(idxShift))
-          {
-            bai.setBranchAddress(jet_mass_systematics_[idxShift], branchNames_mass_systematics_.at(idxShift));
-          }
-          if(branchNames_msoftdrop_systematics_.count(idxShift))
-          {
-            bai.setBranchAddress(jet_msoftdrop_systematics_[idxShift], branchNames_msoftdrop_systematics_.at(idxShift));
-          }
+          continue;
+        }
+        if(idxShift == sysOption_central_)
+        {
+          continue; // do not bind the same branch twice
+        }
+        if(branchNames_pt_systematics_.count(idxShift))
+        {
+          bai.setBranchAddress(jet_pt_systematics_[idxShift], branchNames_pt_systematics_.at(idxShift));
+        }
+        if(branchNames_mass_systematics_.count(idxShift))
+        {
+          bai.setBranchAddress(jet_mass_systematics_[idxShift], branchNames_mass_systematics_.at(idxShift));
+        }
+        if(branchNames_msoftdrop_systematics_.count(idxShift))
+        {
+          bai.setBranchAddress(jet_msoftdrop_systematics_[idxShift], branchNames_msoftdrop_systematics_.at(idxShift));
         }
       }
 
@@ -404,31 +390,21 @@ RecoJetReaderAK8::read() const
         jet.mass_corrections_ = jet_mass_corr;
         jet.sd_corrections_ = jet_sd_corr;
 
-        if(readSys_)
+        for(int idxShift = kFatJet_central_nonNominal; idxShift <= kFatJet_jmrDown; ++idxShift)
         {
-          for(int idxShift = kFatJet_central_nonNominal; idxShift <= kFatJet_jmrDown; ++idxShift)
+          if(! isValidJESsource(era_, idxShift, true))
           {
-            if(! isValidJESsource(era_, idxShift, true))
-            {
-              continue;
-            }
-            // we want to save all pT-s and masses that have been shifted by systematic uncertainties to the maps,
-            // including the central nominal and central non-nominal values; crucial for RecoJetWriter
-            const int jet_pt_sys_local        = gInstance->jet_pt_systematics_.count(idxShift)        ? idxShift : sysOption_central_;
-            const int jet_mass_sys_local      = gInstance->jet_mass_systematics_.count(idxShift)      ? idxShift : sysOption_central_;
-            const int jet_msoftdrop_sys_local = gInstance->jet_msoftdrop_systematics_.count(idxShift) ? idxShift : sysOption_central_;
-            jet.pt_systematics_[idxShift]        = gInstance->jet_pt_systematics_.at(jet_pt_sys_local)[idxJet];
-            jet.mass_systematics_[idxShift]      = gInstance->jet_mass_systematics_.at(jet_mass_sys_local)[idxJet];
-            jet.msoftdrop_systematics_[idxShift] = gInstance->jet_msoftdrop_systematics_.at(jet_msoftdrop_sys_local)[idxJet];
-          } // idxShift
-        } // readSys_
-      }
-      else if(! readSys_)
-      {
-        // fill the maps with only the central values (either nominal or non-nominal if data)
-        jet.pt_systematics_[sysOption_]   = gInstance->jet_pt_systematics_.at(jet_pt_sys)[idxJet];
-        jet.mass_systematics_[sysOption_] = gInstance->jet_mass_systematics_.at(jet_mass_sys)[idxJet];
-        jet.msoftdrop_systematics_[sysOption_] = gInstance->jet_msoftdrop_systematics_.at(jet_msoftdrop_sys)[idxJet];
+            continue;
+          }
+          // we want to save all pT-s and masses that have been shifted by systematic uncertainties to the maps,
+          // including the central nominal and central non-nominal values; crucial for RecoJetWriter
+          const int jet_pt_sys_local        = gInstance->jet_pt_systematics_.count(idxShift)        ? idxShift : sysOption_central_;
+          const int jet_mass_sys_local      = gInstance->jet_mass_systematics_.count(idxShift)      ? idxShift : sysOption_central_;
+          const int jet_msoftdrop_sys_local = gInstance->jet_msoftdrop_systematics_.count(idxShift) ? idxShift : sysOption_central_;
+          jet.pt_systematics_[idxShift]        = gInstance->jet_pt_systematics_.at(jet_pt_sys_local)[idxJet];
+          jet.mass_systematics_[idxShift]      = gInstance->jet_mass_systematics_.at(jet_mass_sys_local)[idxJet];
+          jet.msoftdrop_systematics_[idxShift] = gInstance->jet_msoftdrop_systematics_.at(jet_msoftdrop_sys_local)[idxJet];
+        } // idxShift
       } // isMC_
     } // idxJet
   } // nJets > 0

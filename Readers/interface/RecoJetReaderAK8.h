@@ -66,7 +66,6 @@ class RecoJetReaderAK8 : public ReaderBase
 
   int sysOption_central_;
   int sysOption_;
-  bool readSys_;
   int ignoreSys_;
 
   std::string branchName_eta_;

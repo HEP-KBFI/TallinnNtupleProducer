@@ -27,7 +27,7 @@ class L1PreFiringWeightReader : public ReaderBase
    * @brief Call tree->SetBranchAddress for all branches containing LHE (scale and PDF) information
    */
   std::vector<std::string>
-  setBranchAddresses(TTree * tree) override;
+  setBranchAddresses(TTree * inputTree) override;
 
   double
   getWeight(L1PreFiringWeightSys option) const;

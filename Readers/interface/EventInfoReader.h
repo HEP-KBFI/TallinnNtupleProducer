@@ -15,7 +15,7 @@ class EventInfoReader : public ReaderBase
   ~EventInfoReader() override;
 
   std::vector<std::string>
-  setBranchAddresses(TTree * tree) override;
+  setBranchAddresses(TTree * inputTree) override;
 
   void
   set_central_or_shift(const std::string& central_or_shift);

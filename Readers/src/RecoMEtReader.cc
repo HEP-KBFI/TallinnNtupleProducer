@@ -10,6 +10,10 @@
 #include "TString.h"                                                             // Form()
 #include "TTree.h"                                                               // TTree
 
+#include <cmath>                                                                 // std::atan(), std::cos(), std::sin()
+
+#define _USE_MATH_DEFINES // M_PI
+
 std::map<std::string, int> RecoMEtReader::numInstances_;
 std::map<std::string, RecoMEtReader *> RecoMEtReader::instances_;
 
@@ -19,12 +23,11 @@ RecoMEtReader::RecoMEtReader(const edm::ParameterSet & cfg)
   , isMC_(false)
   , branchName_obj_("")
   , branchName_cov_("")
+  , ptPhiOption_central_(-1)
+  , ptPhiOption_(-1)
   , eventInfo_(nullptr)
   , recoVertex_(nullptr)
   , enable_phiModulationCorr_(false)
-  , ptPhiOption_central_(-1)
-  , ptPhiOption_(-1)
-  , read_ptPhi_systematics_(false)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   if ( cfg.exists("branchName_met") && cfg.exists("branchName_metCov") )
@@ -84,30 +87,17 @@ std::cout << "break-point E.1 reached" << std::endl;
 }
 
 void
-RecoMEtReader::read_ptPhi_systematics(bool flag)
-{
-  if(! isMC_ && flag)
-  {
-    throw cmsException(this, __func__, __LINE__)
-      << "Cannot read MET systematics from data"
-    ;
-  }
-  read_ptPhi_systematics_ = flag;
-}
-
-void
 RecoMEtReader::setBranchNames()
 {
   if(numInstances_[branchName_obj_] == 0)
   {
-    for(int met_option = kJetMET_central_nonNominal; met_option <= kJetMET_UnclusteredEnDown; ++met_option)
+    for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_UnclusteredEnDown; ++idxShift)
     {
-      if(! isValidJESsource(era_, met_option))
+      if( (idxShift == ptPhiOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
       {
-        continue;
+        branchName_pt_[idxShift]  = getBranchName_jetMET(branchName_obj_, era_, idxShift, true);
+        branchName_phi_[idxShift] = getBranchName_jetMET(branchName_obj_, era_, idxShift, false);
       }
-      branchName_pt_[met_option]  = getBranchName_jetMET(branchName_obj_, era_, met_option, true);
-      branchName_phi_[met_option] = getBranchName_jetMET(branchName_obj_, era_, met_option, false);
     }
     branchName_sumEt_ = Form("%s_%s", branchName_obj_.data(), "sumEt");
     branchName_covXX_ = Form("%s_%s", branchName_cov_.data(), "covXX");
@@ -119,34 +109,25 @@ RecoMEtReader::setBranchNames()
 }
 
 std::vector<std::string>
-RecoMEtReader::setBranchAddresses(TTree * tree)
+RecoMEtReader::setBranchAddresses(TTree * inputTree)
 {
+std::cout << "<RecoMEtReader::setBranchAddresses>:" << std::endl;
   if(instances_[branchName_obj_] == this)
   {
-    BranchAddressInitializer bai(tree);
-    bai.setBranchAddress(met_.systematics_[ptPhiOption_].pt_,  branchName_pt_[ptPhiOption_]);
-    bai.setBranchAddress(met_.systematics_[ptPhiOption_].phi_, branchName_phi_[ptPhiOption_]);
-    if(read_ptPhi_systematics_)
+    BranchAddressInitializer bai(inputTree);
+    for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_UnclusteredEnDown; ++idxShift)
     {
-      for(int met_option = kJetMET_central_nonNominal; met_option <= kJetMET_UnclusteredEnDown; ++met_option)
+      if( (idxShift == ptPhiOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
       {
-        if(! isValidJESsource(era_, met_option))
-        {
-          continue;
-        }
-        if(met_option == ptPhiOption_)
-        {
-          continue; // do not bind the same branch twice
-        }
-        met_.systematics_[met_option] = {0., 0.};
-        bai.setBranchAddress(met_.systematics_[met_option].pt_,  branchName_pt_[met_option]);
-        bai.setBranchAddress(met_.systematics_[met_option].phi_, branchName_phi_[met_option]);
+std::cout << "idxShift = " << idxShift << ": setting branch address for branch = '" << branchName_pt_[idxShift] << "'" << std::endl;
+        bai.setBranchAddress(met_pt_systematics_[idxShift], branchName_pt_[idxShift]);
+        bai.setBranchAddress(met_phi_systematics_[idxShift], branchName_phi_[idxShift]);
       }
     }
-    bai.setBranchAddress(met_.sumEt_, branchName_sumEt_);
-    bai.setBranchAddress(met_.covXX_, branchName_covXX_);
-    bai.setBranchAddress(met_.covXY_, branchName_covXY_);
-    bai.setBranchAddress(met_.covYY_, branchName_covYY_);
+    bai.setBranchAddress(met_sumEt_, branchName_sumEt_);
+    bai.setBranchAddress(met_covXX_, branchName_covXX_);
+    bai.setBranchAddress(met_covXY_, branchName_covXY_);
+    bai.setBranchAddress(met_covYY_, branchName_covYY_);
 
     return bai.getBoundBranchNames();
   }
@@ -163,29 +144,51 @@ RecoMEtReader::set_phiModulationCorrDetails(const EventInfo * const eventInfo,
   enable_phiModulationCorr_ = enable_phiModulationCorr;
 }
 
+namespace
+{
+  double square(double x)
+  {
+    return x*x;
+  }
+}
+
 RecoMEt
 RecoMEtReader::read() const
 {
+std::cout << "<RecoMEtReader::read>:" << std::endl;
 std::cout << "break-point D.1 reached" << std::endl;
   const RecoMEtReader * const gInstance = instances_[branchName_obj_];
 std::cout << "break-point D.2 reached" << std::endl;
   assert(gInstance);
-  RecoMEt met = met_;
+
+  double met_pt = gInstance->met_pt_systematics_.at(ptPhiOption_);
+std::cout << "ptPhiOption = " << 0 << ": met_pt(1) = " << gInstance->met_pt_systematics_.at(0) << std::endl;
+std::cout << "ptPhiOption = " << ptPhiOption_ << ": met_pt(1) = " << met_pt << std::endl;
+  double met_phi = gInstance->met_phi_systematics_.at(ptPhiOption_);
   if(enable_phiModulationCorr_)
   {
-std::cout << "break-point D.3 reached" << std::endl;
-    const std::pair TheXYCorr_Met_MetPhi = METXYCorr_Met_MetPhi(eventInfo_, recoVertex_, era_);
-std::cout << "break-point D.4 reached" << std::endl;
-    met.shift_PxPy(TheXYCorr_Met_MetPhi);
-std::cout << "break-point D.5 reached" << std::endl;
+    const std::pair<double, double> met_pxpyCorr = METXYCorr_Met_MetPhi(eventInfo_, recoVertex_, era_);
+    double met_px = met_pt*std::cos(met_phi) + met_pxpyCorr.first;
+    double met_py = met_pt*std::sin(met_phi) + met_pxpyCorr.second;
+    met_pt = std::sqrt(square(met_px) + square(met_py));
+    met_phi = 0.;
+    if     (met_px > 0) { met_phi = std::atan(met_py / met_px); }
+    else if(met_px < 0) { met_phi = std::atan(met_py / met_px) + ((met_py > 0. ? +1. : -1.) * M_PI);  }
+    else                { met_phi = (met_py > 0. ? +1. : -1.) * M_PI; }
+    // CV: force another call to set_phiModulationCorrDetails() 
+    //     before applying MEt x/y shift correction to next event
+    enable_phiModulationCorr_ = false;
   }
-std::cout << "break-point D.6 reached" << std::endl;
-std::cout << "ptPhiOption_ = " << ptPhiOption_ << std::endl;
-  if(read_ptPhi_systematics_)
-  {
-    met.set_default(ptPhiOption_);
-  }
-std::cout << "break-point D.7 reached" << std::endl;
+std::cout << "ptPhiOption = " << ptPhiOption_ << ": met_pt(2) = " << met_pt << std::endl;
+  RecoMEt met(
+    met_pt,
+    met_phi,
+    met_sumEt_,
+    met_covXX_,
+    met_covXY_,
+    met_covYY_
+  );
+std::cout << "ptPhiOption = " << ptPhiOption_ << ": met_pt(3) = " << met.pt() << std::endl;
   return met;
 }
 

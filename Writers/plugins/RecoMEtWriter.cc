@@ -167,6 +167,8 @@ namespace
 void
 RecoMEtWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
+std::cout << "<RecoMEtWriter::writeImp>:" << std::endl;
+std::cout << " metPt = " << event.met().pt() << std::endl;
   if ( current_central_or_shiftEntry_ )
   {
     const RecoMEt& met = event.met();

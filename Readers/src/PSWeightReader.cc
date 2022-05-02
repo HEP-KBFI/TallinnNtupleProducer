@@ -75,11 +75,11 @@ PSWeightReader::setBranchNames()
 }
 
 std::vector<std::string>
-PSWeightReader::setBranchAddresses(TTree * tree)
+PSWeightReader::setBranchAddresses(TTree * inputTree)
 {
   if(instances_[branchName_PSweights_] == this)
   {
-    BranchAddressInitializer bai(tree);
+    BranchAddressInitializer bai(inputTree);
     if(has_PS_weights_)
     {
       bai.setBranchAddress(ps_nWeights_, branchName_nPSWeights_);
