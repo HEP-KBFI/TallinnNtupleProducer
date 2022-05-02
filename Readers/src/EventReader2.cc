@@ -66,8 +66,7 @@ std::vector<std::string>
 EventReader2::setBranchAddresses(TTree * inputTree)
 {
 std::cout << "<EventReader2::setBranchAddresses>:" << std::endl;
-  metReader_->setBranchAddresses(inputTree);
-  return {};
+  return metReader_->setBranchAddresses(inputTree);
 }
 
 void
