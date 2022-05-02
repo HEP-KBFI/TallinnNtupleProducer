@@ -44,6 +44,8 @@
 // forward declarations
 class TTree;
 
+enum class Era;
+
 class EventReader : public ReaderBase
 {
  public:

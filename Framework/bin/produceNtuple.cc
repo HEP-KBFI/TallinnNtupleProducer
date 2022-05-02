@@ -53,6 +53,7 @@
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
 
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h" // ONLY FOR TESTING !!
+#include "TallinnNtupleProducer/Readers/interface/EventReader2.h" // ONLY FOR TESTING !!
 
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
@@ -137,7 +138,8 @@ std::cout << "treeName = " << treeName << std::endl;
   // CV: process all systematic uncertainties supported by EventReader class (only for MC)
   if ( isMC )
   {
-    merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics(cfg_produceNtuple));
+    //merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics(cfg_produceNtuple));
+    merge_systematic_shifts(systematic_shifts, EventReader2::get_supported_systematics(cfg_produceNtuple));
   }
   // CV: add central value (for data and MC)
   merge_systematic_shifts(systematic_shifts, { "central"});
@@ -188,7 +190,8 @@ std::cout << "treeName = " << treeName << std::endl;
   TTreeWrapper* inputTree = new TTreeWrapper(treeName.data(), inputFiles.files(), maxEvents);
   std::cout << "Loaded " << inputTree->getFileCount() << " file(s).\n";
 
-  EventReader* eventReader = new EventReader(cfg_produceNtuple);
+  //EventReader* eventReader = new EventReader(cfg_produceNtuple);
+  EventReader2* eventReader = new EventReader2(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
   
   //-------
@@ -262,8 +265,9 @@ std::cout << "treeName = " << treeName << std::endl;
   {
     for ( const auto & central_or_shift : systematic_shifts )
     {
-      eventReader->set_central_or_shift(central_or_shift);
+      //eventReader->set_central_or_shift(central_or_shift);
       //Event event = eventReader->read();
+      eventReader->set_central_or_shift("central"); 
       eventReader->read();
 /*
       if ( central_or_shift == "central" || contains(metReader->get_supported_systematics(cfg_produceNtuple), central_or_shift) )
@@ -271,8 +275,9 @@ std::cout << "treeName = " << treeName << std::endl;
         const int met_option = getMET_option(central_or_shift, isMC);
         metReader->setMEt_central_or_shift(met_option);
       }
-      const RecoMEt met = metReader->read();
  */
+      //metReader->setMEt_central_or_shift(kJetMET_central);
+      //metReader->read();
 /*
       if ( central_or_shift == "central" )
       {

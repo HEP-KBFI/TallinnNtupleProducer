@@ -2,6 +2,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/get_ignore_ak8_sys.h"       // get_ignore_ak8_sys()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
