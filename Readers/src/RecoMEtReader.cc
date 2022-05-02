@@ -29,6 +29,7 @@ RecoMEtReader::RecoMEtReader(const edm::ParameterSet & cfg)
   , recoVertex_(nullptr)
   , enable_phiModulationCorr_(false)
 {
+std::cout << "<RecoMEtReader::RecoMEtReader>:" << std::endl;
   era_ = get_era(cfg.getParameter<std::string>("era"));
   if ( cfg.exists("branchName_met") && cfg.exists("branchName_metCov") )
   {
@@ -40,6 +41,7 @@ RecoMEtReader::RecoMEtReader(const edm::ParameterSet & cfg)
     branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "MET"
     branchName_cov_ = branchName_obj_;
   }
+std::cout << "branchName_obj = " << branchName_obj_ << std::endl;
   isMC_ = cfg.getParameter<bool>("isMC");
   ptPhiOption_central_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
   ptPhiOption_ = ptPhiOption_central_; 
@@ -48,6 +50,8 @@ RecoMEtReader::RecoMEtReader(const edm::ParameterSet & cfg)
 
 RecoMEtReader::~RecoMEtReader()
 {
+std::cout << "<RecoMEtReader::~RecoMEtReader>:" << std::endl;
+std::cout << "branchName_obj = " << branchName_obj_ << std::endl;
   --numInstances_[branchName_obj_];
   assert(numInstances_[branchName_obj_] >= 0);
   if(numInstances_[branchName_obj_] == 0)
@@ -180,6 +184,7 @@ std::cout << "ptPhiOption = " << ptPhiOption_ << ": met_pt(1) = " << met_pt << s
     enable_phiModulationCorr_ = false;
   }
 std::cout << "ptPhiOption = " << ptPhiOption_ << ": met_pt(2) = " << met_pt << std::endl;
+std::cout << "met_sumEt = " << met_sumEt_ << std::endl;
   RecoMEt met(
     met_pt,
     met_phi,
