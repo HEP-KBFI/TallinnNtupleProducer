@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
 std::map<std::string, int> GenPhotonReader::numInstances_;
 std::map<std::string, GenPhotonReader *> GenPhotonReader::instances_;
@@ -103,7 +103,7 @@ GenPhotonReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(photon_status_, branchName_status_);
     bai.setBranchAddress(photon_statusFlags_, branchName_statusFlags_);
     bai.setBranchAddress(photon_genPartFlav_, readGenPartFlav_ ? branchName_genPartFlav_ : "");
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

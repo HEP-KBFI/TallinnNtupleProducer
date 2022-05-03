@@ -127,6 +127,9 @@ class GenParticle : public ChargedParticle
   bool isMatchedToReco_; ///< true, if the gen object is already matched to a reco object
 };
 
+typedef std::vector<GenParticle> GenParticleCollection;
+typedef std::vector<const GenParticle*> GenParticlePtrCollection;
+
 std::ostream &
 operator<<(std::ostream & stream,
            const GenParticle & particle);

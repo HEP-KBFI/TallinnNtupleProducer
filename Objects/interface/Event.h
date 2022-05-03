@@ -2,15 +2,19 @@
 #define TallinnNtupleProducer_Objects_Event_h
 
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"    // EventInfo
+#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"    // GenHadTauCollection
+#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"    // GenLeptonCollection
+#include "TallinnNtupleProducer/Objects/interface/GenJet.h"       // GenJetCollection
+#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"    // GenPhotonCollection
 #include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"    // MEtFilter
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"  // TriggerInfo
-#include "TallinnNtupleProducer/Objects/interface/RecoElectron.h" // RecoElectronPtrCollection
-#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"   // RecoHadTauPtrCollection
-#include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"   // RecoJetPtrCollectionAK4
-#include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"   // RecoJetPtrCollectionAK8
+#include "TallinnNtupleProducer/Objects/interface/RecoElectron.h" // RecoElectronCollection, RecoElectronPtrCollection
+#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"   // RecoHadTauCollection, RecoHadTauPtrCollection
+#include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"   // RecoJetCollectionAK4, RecoJetPtrCollectionAK4
+#include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"   // RecoJetCollectionAK8, RecoJetPtrCollectionAK8
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"   // RecoLeptonPtrCollection
 #include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"      // RecoMEt
-#include "TallinnNtupleProducer/Objects/interface/RecoMuon.h"     // RecoMuonPtrCollection
+#include "TallinnNtupleProducer/Objects/interface/RecoMuon.h"     // RecoMuonCollection, RecoMuonPtrCollection
 #include "TallinnNtupleProducer/Objects/interface/RecoVertex.h"   // RecoVertex
 
 class Event
@@ -61,10 +65,16 @@ class Event
 
   const TriggerInfo & triggerInfo_;
 
+  // CV: non-Ptr collections of RecoMuons, RecoElectrons, RecoHadTaus, RecoJetsAK4, RecoJetsAK8
+  //     and of GenLeptons, GenHadTaus, GenPhotons, and GenJets need to be stored in the Event,
+  //     so that these objects don get out of scope and the Ptr collections become invalid !!
+
+  RecoMuonCollection muons_;
   RecoMuonPtrCollection looseMuons_;
   RecoMuonPtrCollection fakeableMuons_;
   RecoMuonPtrCollection tightMuons_;
 
+  RecoElectronCollection electrons_;
   RecoElectronPtrCollection looseElectrons_;
   RecoElectronPtrCollection fakeableElectrons_;
   RecoElectronPtrCollection tightElectrons_;
@@ -73,14 +83,25 @@ class Event
   RecoLeptonPtrCollection fakeableLeptons_;
   RecoLeptonPtrCollection tightLeptons_;
 
+  RecoHadTauCollection hadTaus_;
   RecoHadTauPtrCollection fakeableHadTaus_;
   RecoHadTauPtrCollection tightHadTaus_;
 
+  RecoJetCollectionAK4 jetsAK4_;
   RecoJetPtrCollectionAK4 selJetsAK4_;
   RecoJetPtrCollectionAK4 selJetsAK4_btagLoose_;
   RecoJetPtrCollectionAK4 selJetsAK4_btagMedium_;
 
+  GenLeptonCollection genLeptons_;
+  GenLeptonCollection genElectrons_;
+  GenLeptonCollection genMuons_;
+  GenHadTauCollection genHadTaus_;
+  GenPhotonCollection genPhotons_;
+  GenJetCollection genJets_;
+
+  RecoJetCollectionAK8 jetsAK8_Hbb_;
   RecoJetPtrCollectionAK8 selJetsAK8_Hbb_;
+  RecoJetCollectionAK8 jetsAK8_Wjj_;
   RecoJetPtrCollectionAK8 selJetsAK8_Wjj_;
 
   RecoMEt met_;

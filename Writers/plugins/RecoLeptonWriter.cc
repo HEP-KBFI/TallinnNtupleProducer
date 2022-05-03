@@ -1,15 +1,15 @@
 #include "TallinnNtupleProducer/Writers/plugins/RecoLeptonWriter.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                // GenHadTau
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                // GenPhoton
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                    // GenHadTau
+#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                    // GenLepton
+#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                    // GenPhoton
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                               // assert()
 
 RecoLeptonWriter::RecoLeptonWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
@@ -18,6 +18,7 @@ RecoLeptonWriter::RecoLeptonWriter(const edm::ParameterSet & cfg)
 {
   max_nLeptons_ = cfg.getParameter<unsigned>("numNominalLeptons");
   assert(max_nLeptons_ >= 1);
+  nLeptons_ = 0;
   pt_ = new Float_t[max_nLeptons_];
   eta_ = new Float_t[max_nLeptons_];
   phi_ = new Float_t[max_nLeptons_];
@@ -55,7 +56,7 @@ RecoLeptonWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
   bai.setBranch(nLeptons_, branchName_num_);
-  for ( size_t idxLepton = 0; idxLepton < nLeptons_; ++idxLepton )
+  for ( size_t idxLepton = 0; idxLepton < max_nLeptons_; ++idxLepton )
   {
     bai.setBranch(pt_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "pt"));
     bai.setBranch(eta_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "eta"));
@@ -107,6 +108,7 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
   //          for which the number of fakeable leptons is equal to the number of "nominal" leptons 
   //         (where the number of "nominal" leptons is specific to a given channel)
   const RecoLeptonPtrCollection& leptons = event.fakeableLeptons();
+  nLeptons_ = leptons.size();
   for ( size_t idxLepton = 0; idxLepton < max_nLeptons_; ++idxLepton )
   {
     if ( idxLepton < nLeptons_ )

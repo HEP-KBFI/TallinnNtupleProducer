@@ -1,9 +1,9 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/LHEVpt_LOtoNLO.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"           // as_integer()
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // LHEVptSys::
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"               // as_integer()
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // LHEVptSys::
 
 inline constexpr unsigned char
 operator "" _uchar(unsigned long long arg) noexcept
@@ -85,7 +85,7 @@ LHEVpt_LOtoNLO::setBranchAddresses(TTree * tree)
   BranchAddressInitializer bai(tree);
   bai.setBranchAddress(lhe_nb_, branchName_lhe_nb_);
   bai.setBranchAddress(lhe_vpt_, branchName_lhe_vpt_);
-  return bai.getBoundBranchNames();
+  return bai.getBoundBranchNames_read();
 }
 
 double

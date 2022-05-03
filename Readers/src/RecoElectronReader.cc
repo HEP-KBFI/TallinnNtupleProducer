@@ -1,13 +1,13 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/electronDefinitions.h"  // EGammaID, EGammaWP
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"         // RecoLeptonReader
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/electronDefinitions.h"      // EGammaID, EGammaWP
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
+#include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"             // RecoLeptonReader
 
-#include "TTree.h"                                                            // TTree
-#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                                // TTree
+#include "TString.h"                                                              // Form()
 
 std::map<std::string, int> RecoElectronReader::numInstances_;
 std::map<std::string, RecoElectronReader *> RecoElectronReader::instances_;
@@ -154,7 +154,7 @@ RecoElectronReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(conversionVeto_, branchName_conversionVeto_);
     bai.setBranchAddress(cutbasedID_HLT_, era_ == Era::k2016 ? branchName_cutbasedID_HLT_ : "");
 
-    const std::vector<std::string> recoElectronBranches = bai.getBoundBranchNames();
+    const std::vector<std::string> recoElectronBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoElectronBranches.begin(), recoElectronBranches.end());
   }
   return bound_branches;

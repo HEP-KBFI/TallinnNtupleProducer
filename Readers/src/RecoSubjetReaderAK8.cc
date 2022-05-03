@@ -1,12 +1,12 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoSubjetReaderAK8.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
 
-#include "TTree.h"                                                            // TTree
-#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                                // TTree
+#include "TString.h"                                                              // Form()
 
 std::map<std::string, int> RecoSubjetReaderAK8::numInstances_;
 std::map<std::string, RecoSubjetReaderAK8 *> RecoSubjetReaderAK8::instances_;
@@ -92,7 +92,7 @@ RecoSubjetReaderAK8::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_phi_, branchName_phi_);
     bai.setBranchAddress(jet_mass_, branchName_mass_);
     bai.setBranchAddress(jet_BtagCSV_, branchName_BtagCSV_);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

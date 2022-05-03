@@ -1,14 +1,14 @@
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // L1PreFiringWeightSys
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // L1PreFiringWeightSys
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                               // assert()
 
 std::map<std::string, int> L1PreFiringWeightReader::numInstances_;
 std::map<std::string, L1PreFiringWeightReader*> L1PreFiringWeightReader::instances_;
@@ -55,7 +55,7 @@ L1PreFiringWeightReader::setBranchAddresses(TTree * inputTree)
     bai.setBranchAddress(l1PreFiringWeight_nominal_, Form("%s_Nom", branchName_.data()), 1.);
     bai.setBranchAddress(l1PreFiringWeight_up_,      Form("%s_Up",  branchName_.data()), 1.);
     bai.setBranchAddress(l1PreFiringWeight_down_,    Form("%s_Dn",  branchName_.data()), 1.);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

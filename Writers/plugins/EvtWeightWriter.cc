@@ -1,14 +1,14 @@
 #include "TallinnNtupleProducer/Writers/plugins/EvtWeightWriter.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts.()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"    // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts.()
 
-#include "TString.h"                                                             // Form()
-#include "TTree.h"                                                               // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
-#include <assert.h>                                                              // assert()
-#include <cstdlib>                                                               // std::abs()
+#include <assert.h>                                                               // assert()
+#include <cstdlib>                                                                // std::abs()
 
 EvtWeightWriter::EvtWeightWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)

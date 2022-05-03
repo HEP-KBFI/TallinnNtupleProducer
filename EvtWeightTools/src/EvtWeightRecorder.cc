@@ -554,26 +554,20 @@ EvtWeightRecorder::record_toppt_rwgt(double sf)
 void
 EvtWeightRecorder::record_lumiScale(const edm::VParameterSet & lumiScales)
 {
-std::cout << "<EvtWeightRecorder::record_lumiScale>:" << std::endl;
   assert(isMC_);
   lumiScale_.clear();
   for(const edm::ParameterSet & lumiScale: lumiScales)
   {
-std::cout << "break-point C.1 reached" << std::endl;
     const std::string central_or_shift = lumiScale.getParameter<std::string>("central_or_shift");
     const std::string bin = lumiScale.exists("bin") ? lumiScale.getParameter<std::string>("bin") : "";
     const double nof_events = lumiScale.getParameter<double>("lumi");
-std::cout << "central_or_shift = " << central_or_shift << ", bin = " << bin << ", nof_events = " << nof_events << std::endl;
     if(! lumiScale_.count(central_or_shift))
     {
-std::cout << "break-point C.2 reached" << std::endl;
       lumiScale_[central_or_shift] = {};
     }
-std::cout << "break-point C.3 reached" << std::endl;
     assert(! lumiScale_.at(central_or_shift).count(bin));
     lumiScale_[central_or_shift][bin] = nof_events;
   }
-std::cout << "break-point C.4 reached" << std::endl;
   for(const std::string & central_or_shift: central_or_shifts_)
   {
     if(!lumiScale_.count(central_or_shift))
@@ -581,10 +575,6 @@ std::cout << "break-point C.4 reached" << std::endl;
       assert(lumiScale_.count("central"));
       lumiScale_[central_or_shift] = lumiScale_.at("central");
     }
-for ( const auto & bin : lumiScale_[central_or_shift] )
-{
-std::cout << "lumiScale[" << central_or_shift << "][" << bin.first << "] = " << lumiScale_[central_or_shift][bin.first] << std::endl;
-}
   }
 }
 

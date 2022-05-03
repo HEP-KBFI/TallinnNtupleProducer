@@ -17,6 +17,9 @@ class GenHadTau : public GenParticle
   virtual ~GenHadTau() {}
 };
 
+typedef std::vector<GenHadTau> GenHadTauCollection;
+typedef std::vector<const GenHadTau*> GenHadTauPtrCollection;
+
 std::ostream &
 operator<<(std::ostream & stream,
            const GenHadTau & hadTau);

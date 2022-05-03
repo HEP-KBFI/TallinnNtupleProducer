@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include "TTree.h"                                                            // TTree
-#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                                // TTree
+#include "TString.h"                                                              // Form()
 
 std::map<std::string, int> RecoVertexReader::numInstances_;
 std::map<std::string, RecoVertexReader *> RecoVertexReader::instances_;
@@ -60,7 +60,7 @@ RecoVertexReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(recoVertex_.score_, branchName_score_);
     bai.setBranchAddress(recoVertex_.npvs_, branchName_npvs_);
     bai.setBranchAddress(recoVertex_.npvsGood_, branchName_npvsGood_);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

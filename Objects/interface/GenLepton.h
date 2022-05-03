@@ -48,6 +48,9 @@ class GenLepton : public GenParticle
   is_muon() const;
 };
 
+typedef std::vector<GenLepton> GenLeptonCollection;
+typedef std::vector<const GenLepton*> GenLeptonPtrCollection;
+
 std::ostream &
 operator<<(std::ostream & stream,
            const GenLepton & lepton);

@@ -1,14 +1,14 @@
 #include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/get_htxs_binning.h"     // get_htxs_binning()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_pileup()
-#include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                // EventInfo
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/get_htxs_binning.h"         // get_htxs_binning()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_pileup()
+#include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                    // EventInfo
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                               // assert()
 
 EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
@@ -91,7 +91,7 @@ EventInfoReader::setBranchAddresses(TTree * inputTree)
     bai_LHEReweight.setBranchAddress(info_->nLHEReweightingWeight, branchName_nLHEReweightingWeight);
     bai_LHEReweight.setBranchAddress(info_->LHEReweightingWeight, branchName_LHEReweightingWeight);
 
-    const std::vector<std::string> lhe_branches = bai_LHEReweight.getBoundBranchNames();
+    const std::vector<std::string> lhe_branches = bai_LHEReweight.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), lhe_branches.begin(), lhe_branches.end());
   }
   // Siddhesh: Read gen_mHH for HH LO and NLO samples to make LOvsNLO HHreweighting comparison plots without much code editing
@@ -100,7 +100,7 @@ EventInfoReader::setBranchAddresses(TTree * inputTree)
     bai.setBranchAddress(info_->gen_mHH, branchName_gen_mHH);
     bai.setBranchAddress(info_->gen_cosThetaStar, branchName_gen_cosThetaStar);
   }
-  const std::vector<std::string> evt_branches = bai.getBoundBranchNames();
+  const std::vector<std::string> evt_branches = bai.getBoundBranchNames_read();
   bound_branches.insert(bound_branches.end(), evt_branches.begin(), evt_branches.end());
   return bound_branches;
 }

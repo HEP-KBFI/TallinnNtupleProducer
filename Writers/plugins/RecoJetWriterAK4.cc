@@ -1,16 +1,16 @@
 #include "TallinnNtupleProducer/Writers/plugins/RecoJetWriterAK4.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
-#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                   // GenHadTau
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                   // GenLepton
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"    // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"            // RecoJetReaderAK4::get_supported_systematics()
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
+#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                    // GenHadTau
+#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                    // GenLepton
+#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"             // RecoJetReaderAK4::get_supported_systematics()
 
-#include "TString.h"                                                             // Form()
-#include "TTree.h"                                                               // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
-#include <assert.h>                                                              // assert()
+#include <assert.h>                                                               // assert()
 
 RecoJetWriterAK4::RecoJetWriterAK4(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
@@ -92,7 +92,7 @@ RecoJetWriterAK4::setBranches(TTree * outputTree)
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());
     bai.setBranch(it->second.nJets_, get_branchName_num(branchName_num_, central_or_shift));
-    for ( size_t idxJet = 0; idxJet < it->second.nJets_; ++idxJet )
+    for ( size_t idxJet = 0; idxJet < max_nJets_; ++idxJet )
     {
       bai.setBranch(it->second.pt_[idxJet], get_branchName_obj(branchName_obj_, (int)idxJet, "pt", central_or_shift));
       bai.setBranch(it->second.eta_[idxJet], get_branchName_obj(branchName_obj_, (int)idxJet, "eta", central_or_shift));

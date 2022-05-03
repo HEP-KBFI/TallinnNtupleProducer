@@ -1,9 +1,9 @@
 #include "TallinnNtupleProducer/Writers/plugins/TriggerInfoWriter.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include "TTree.h"                                                            // TTree
+#include "TTree.h"                                                                // TTree
 
 typedef std::vector<std::string> vstring;
 

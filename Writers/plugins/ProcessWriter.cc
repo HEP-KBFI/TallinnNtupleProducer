@@ -1,8 +1,8 @@
 #include "TallinnNtupleProducer/Writers/plugins/ProcessWriter.h"
 
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 
-#include "TTree.h"                                                            // TTree
+#include "TTree.h"                                                                // TTree
 
 ProcessWriter::ProcessWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
@@ -17,6 +17,7 @@ ProcessWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
   bai.setBranch(process_, "process");
+  //outputTree->Branch("process", &process_);
 }
 
 void

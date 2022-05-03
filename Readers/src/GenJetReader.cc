@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
 std::map<std::string, int> GenJetReader::numInstances_;
 std::map<std::string, GenJetReader *> GenJetReader::instances_;
@@ -91,7 +91,7 @@ GenJetReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_phi_, branchName_phi_);
     bai.setBranchAddress(jet_mass_, branchName_mass_);
     bai.setBranchAddress(jet_pdgId_, branchName_pdgId_);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

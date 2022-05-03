@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/GenMEtReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include "TTree.h"                                                            // TTree
-#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                                // TTree
+#include "TString.h"                                                              // Form()
 
 std::map<std::string, int> GenMEtReader::numInstances_;
 std::map<std::string, GenMEtReader *> GenMEtReader::instances_;
@@ -48,7 +48,7 @@ GenMEtReader::setBranchAddresses(TTree * tree)
     BranchAddressInitializer bai(tree);
     bai.setBranchAddress(met_.pt_,  branchName_pt_);
     bai.setBranchAddress(met_.phi_, branchName_phi_);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

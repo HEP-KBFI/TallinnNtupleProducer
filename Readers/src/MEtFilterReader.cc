@@ -1,13 +1,13 @@
 #include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
-#include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"                // MEtFilter
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
+#include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"                    // MEtFilter
 
-#include <TString.h>                                                          // Form
-#include <TTree.h>                                                            // TTree
+#include <TString.h>                                                              // Form
+#include <TTree.h>                                                                // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                               // assert()
 
 int MEtFilterReader::numInstances_ = 0;
 MEtFilterReader * MEtFilterReader::instance_ = nullptr;
@@ -68,7 +68,7 @@ MEtFilterReader::setBranchAddresses(TTree * tree)
       }
       bai.setBranchAddress(metFilter_.getFlagRef(flag_enum), metFilterFlagString);
     }
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

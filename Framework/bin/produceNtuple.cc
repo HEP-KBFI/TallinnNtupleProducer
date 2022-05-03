@@ -15,6 +15,7 @@
 #include "FWCore/PluginManager/interface/standard.h"                                            // edmplugin::standard::config()
 #include "PhysicsTools/FWLite/interface/TFileService.h"                                         // fwlite::TFileService
 
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h"               // BranchAddressInitializer::print()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
@@ -51,9 +52,6 @@
 #include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                             // PSWeightReader
 #include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
-
-#include "TallinnNtupleProducer/CommonTools/interface/contains.h" // ONLY FOR TESTING !!
-#include "TallinnNtupleProducer/Readers/interface/EventReader2.h" // ONLY FOR TESTING !!
 
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
@@ -138,8 +136,7 @@ std::cout << "treeName = " << treeName << std::endl;
   // CV: process all systematic uncertainties supported by EventReader class (only for MC)
   if ( isMC )
   {
-    //merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics(cfg_produceNtuple));
-    merge_systematic_shifts(systematic_shifts, EventReader2::get_supported_systematics(cfg_produceNtuple));
+    merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics(cfg_produceNtuple));
   }
   // CV: add central value (for data and MC)
   merge_systematic_shifts(systematic_shifts, { "central"});
@@ -190,21 +187,11 @@ std::cout << "treeName = " << treeName << std::endl;
   TTreeWrapper* inputTree = new TTreeWrapper(treeName.data(), inputFiles.files(), maxEvents);
   std::cout << "Loaded " << inputTree->getFileCount() << " file(s).\n";
 
-  //EventReader* eventReader = new EventReader(cfg_produceNtuple);
-  EventReader2* eventReader = new EventReader2(cfg_produceNtuple);
+  EventReader* eventReader = new EventReader(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
-  
-  //-------
-  // ONLY FOR TESTING !!
-  //edm::ParameterSet cfg_metReader(cfg_produceNtuple); 
-  //cfg_metReader.addParameter<std::string>("branchName", "MET");
-  //RecoMEtReader* metReader = new RecoMEtReader(cfg_metReader);
-  //inputTree->registerReader(metReader);
-  //-------
 
-/*
   TTree* outputTree = new TTree("Events", "Events");
- */
+
   const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("evtWeight");
   const bool applyAdditionalEvtWeight = additionalEvtWeight.getParameter<bool>("apply");
   EvtWeightManager* eventWeightManager = nullptr;
@@ -238,7 +225,7 @@ std::cout << "treeName = " << treeName << std::endl;
     const edm::ParameterSet btagSFRatio = cfg_produceNtuple.getParameterSet("btagSFRatio");
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
-/*
+
   if ( !edmplugin::PluginManager::isAvailable() )
   {  
     edmplugin::PluginManager::configure(edmplugin::standard::config());
@@ -258,27 +245,16 @@ std::cout << "treeName = " << treeName << std::endl;
     writer->setBranches(outputTree);
     writers.push_back(std::move(writer));
   }
- */
+
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
     for ( const auto & central_or_shift : systematic_shifts )
     {
-      //eventReader->set_central_or_shift(central_or_shift);
-      //Event event = eventReader->read();
-      eventReader->set_central_or_shift("central"); 
-      eventReader->read();
-/*
-      if ( central_or_shift == "central" || contains(metReader->get_supported_systematics(cfg_produceNtuple), central_or_shift) )
-      {
-        const int met_option = getMET_option(central_or_shift, isMC);
-        metReader->setMEt_central_or_shift(met_option);
-      }
- */
-      //metReader->setMEt_central_or_shift(kJetMET_central);
-      //metReader->read();
-/*
+      eventReader->set_central_or_shift(central_or_shift);
+      Event event = eventReader->read();
+
       if ( central_or_shift == "central" )
       {
         if ( inputTree->canReport(reportEvery) )
@@ -329,7 +305,7 @@ std::cout << "treeName = " << treeName << std::endl;
         evtWeightRecorder.record_puWeight(&event.eventInfo());
         evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
-std::cout << "break-point 28 reached" << std::endl;
+
 //--- compute event-level weight for data/MC correction of b-tagging efficiency and mistag rate
 //   (using the method "Event reweighting using scale factors calculated with a tag and probe method",
 //    described on the BTV POG twiki https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration )
@@ -445,20 +421,16 @@ std::cout << "break-point 28 reached" << std::endl;
           }
         }
       }
- */
-/*
+
       for ( auto & writer : writers )
       {
         writer->set_central_or_shift(central_or_shift);
         writer->write(event, evtWeightRecorder);
       }
- */
     }
-/*
     outputTree->Fill();
- */
   }
-/*
+
   TDirectory* dir = fs.getBareDirectory();
   dir->cd();
 
@@ -492,12 +464,14 @@ std::cout << "break-point 28 reached" << std::endl;
             << inputTree->getFileCount() << ")\n"
             << " analyzed = " << analyzedEntries << '\n'
             << " selected = " << selectedEntries << " (weighted = " << selectedEntries_weighted << ")" << std::endl;
- */
+  //std::cout << std::endl;
+
+  //BranchAddressInitializer::print(std::cout);
+
 //--- memory clean-up
   delete run_lumi_eventSelector;
 
   delete eventReader;
-  //delete metReader;
   delete l1PreFiringWeightReader;
   delete lheInfoReader;
   delete psWeightReader;
@@ -506,20 +480,20 @@ std::cout << "break-point 28 reached" << std::endl;
   delete jetToLeptonFakeRateInterface;
   delete jetToHadTauFakeRateInterface;
   delete btagSFRatioInterface;
-/*
+
   for ( auto & writer : writers )
   {
     writer.reset(nullptr);
   }
- */
+
   delete inputTree;
-/*
+
   delete outputTree;
   if ( outputTree_selected != outputTree )
   {
     delete outputTree_selected;
   }
- */
+
   clock.Show("produceNtuple");
 
   return EXIT_SUCCESS;

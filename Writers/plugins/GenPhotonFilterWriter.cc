@@ -1,18 +1,18 @@
 #include "TallinnNtupleProducer/Writers/plugins/GenPhotonFilterWriter.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"         // TTreeWrapper
-#include "TallinnNtupleProducer/Objects/interface/GenParticle.h"              // GenParticle
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                // GenPhoton
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"        // GenParticleReader
-#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"          // GenPhotonReader
-#include "TallinnNtupleProducer/Writers/interface/GenPhotonFilter.h"          // GenPhotonFilter
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"             // TTreeWrapper
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h"                  // GenParticle
+#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                    // GenPhoton
+#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"            // GenParticleReader
+#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"              // GenPhotonReader
+#include "TallinnNtupleProducer/Writers/interface/GenPhotonFilter.h"              // GenPhotonFilter
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                               // assert()
 
 namespace
 {

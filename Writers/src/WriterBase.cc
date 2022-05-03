@@ -25,7 +25,7 @@ WriterBase::set_central_or_shift(const std::string & central_or_shift) const
 void
 WriterBase::write(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  if ( contains(supported_systematics_, current_central_or_shift_) )
+  if ( current_central_or_shift_ == "central" || contains(supported_systematics_, current_central_or_shift_) )
   {
     writeImp(event, evtWeightRecorder);
   }

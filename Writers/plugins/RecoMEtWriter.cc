@@ -1,20 +1,20 @@
 #include "TallinnNtupleProducer/Writers/plugins/RecoMEtWriter.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/constants.h"               // met_coef, mht_coef
-#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
-#include "TallinnNtupleProducer/Objects/interface/Particle.h"                    // Particle::LorentzVector
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"    // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"          // RecoElectronReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"            // RecoHadTauReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"            // RecoJetReaderAK4::get_supported_systematics()
-#include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"               // RecoMEtReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"              // RecoMuonReader::get_supported_systematics()
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/constants.h"                // met_coef, mht_coef
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
+#include "TallinnNtupleProducer/Objects/interface/Particle.h"                     // Particle::LorentzVector
+#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"           // RecoElectronReader::get_supported_systematics()
+#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"             // RecoHadTauReader::get_supported_systematics()
+#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"             // RecoJetReaderAK4::get_supported_systematics()
+#include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                // RecoMEtReader::get_supported_systematics()
+#include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"               // RecoMuonReader::get_supported_systematics()
 
-#include "TString.h"                                                             // Form()
-#include "TTree.h"                                                               // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
-#include <assert.h>                                                              // assert()
+#include <assert.h>                                                               // assert()
 
 RecoMEtWriter::RecoMEtWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
@@ -167,8 +167,6 @@ namespace
 void
 RecoMEtWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-std::cout << "<RecoMEtWriter::writeImp>:" << std::endl;
-std::cout << " metPt = " << event.met().pt() << std::endl;
   if ( current_central_or_shiftEntry_ )
   {
     const RecoMEt& met = event.met();

@@ -1,12 +1,12 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag
 
-#include <TString.h>                                                          // Form
-#include <TTree.h>                                                            // TTree
+#include <TString.h>                                                              // Form
+#include <TTree.h>                                                                // TTree
 
 std::map<std::string, int> RecoLeptonReader::numInstances_;
 std::map<std::string, RecoLeptonReader *> RecoLeptonReader::instances_;
@@ -228,7 +228,7 @@ RecoLeptonReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
     bai.setBranchAddress(genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
 
-    const std::vector<std::string> recoLeptonBranches = bai.getBoundBranchNames();
+    const std::vector<std::string> recoLeptonBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoLeptonBranches.begin(), recoLeptonBranches.end());
   }
   return bound_branches;

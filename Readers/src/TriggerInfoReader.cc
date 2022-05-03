@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/TriggerInfoReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include <set>                                                                // std::set
-#include <string>                                                             // std::string
+#include <set>                                                                    // std::set
+#include <string>                                                                 // std::string
 
 TriggerInfoReader::TriggerInfoReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
@@ -40,7 +40,7 @@ TriggerInfoReader::setBranchAddresses(TTree * tree)
       }
     }
   }
-  return bai.getBoundBranchNames();
+  return bai.getBoundBranchNames_read();
 }
 
 const TriggerInfo &

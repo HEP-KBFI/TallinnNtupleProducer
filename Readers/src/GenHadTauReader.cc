@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include "TString.h"                                                          // Form()
-#include "TTree.h"                                                            // TTree
+#include "TString.h"                                                              // Form()
+#include "TTree.h"                                                                // TTree
 
 std::map<std::string, int> GenHadTauReader::numInstances_;
 std::map<std::string, GenHadTauReader *> GenHadTauReader::instances_;
@@ -88,7 +88,7 @@ GenHadTauReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(hadTau_mass_, branchName_mass_);
     bai.setBranchAddress(hadTau_charge_, branchName_charge_);
     bai.setBranchAddress(hadTau_status_, branchName_status_);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

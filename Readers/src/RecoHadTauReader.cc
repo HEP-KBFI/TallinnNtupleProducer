@@ -1,16 +1,16 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h" // RecoHadTauReader
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"    // TauID
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"          // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"          // GenLeptonReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"             // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                // TauESTool
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // TauID
+#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"              // GenHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"              // GenLeptonReader
+#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                 // GenJetReader
+#include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                    // TauESTool
 
-#include "TTree.h"                                                            // TTree
-#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                                // TTree
+#include "TString.h"                                                              // Form()
 
 std::map<std::string, int> RecoHadTauReader::numInstances_;
 std::map<std::string, RecoHadTauReader *> RecoHadTauReader::instances_;
@@ -209,7 +209,7 @@ RecoHadTauReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(hadTau_genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
     bai.setBranchAddress(hadTau_genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
 
-    const std::vector<std::string> recoHadTauBranches = bai.getBoundBranchNames();
+    const std::vector<std::string> recoHadTauBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoHadTauBranches.begin(), recoHadTauBranches.end());
   }
   return bound_branches;

@@ -1,10 +1,10 @@
 #include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h" // GenParticleReader
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
-#include "TTree.h"                                                            // TTree
-#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                                // TTree
+#include "TString.h"                                                              // Form()
 
 std::map<std::string, int> GenParticleReader::numInstances_;
 std::map<std::string, GenParticleReader *> GenParticleReader::instances_;
@@ -102,7 +102,7 @@ GenParticleReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(particle_status_, branchName_status_);
     bai.setBranchAddress(particle_genPartFlav_, readGenPartFlav_ ? branchName_genPartFlav_ : "");
     bai.setBranchAddress(particle_statusFlags_, branchName_statusFlags_);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

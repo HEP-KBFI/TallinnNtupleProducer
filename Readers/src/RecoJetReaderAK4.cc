@@ -1,17 +1,17 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                  // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag, kBtag_*
-#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // getBranchName_jetMET(), getBranchName_bTagWeight(), getBranchName_jetPtMass()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"          // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"          // GenLeptonReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"             // GenJetReader
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_jetMET(), getBranchName_bTagWeight(), getBranchName_jetPtMass()
+#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"              // GenHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"              // GenLeptonReader
+#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                 // GenJetReader
 
-#include "TTree.h"                                                            // TTree
-#include "TString.h"                                                          // Form()
+#include "TTree.h"                                                                // TTree
+#include "TString.h"                                                              // Form()
 
 std::map<std::string, int> RecoJetReaderAK4::numInstances_;
 std::map<std::string, RecoJetReaderAK4 *> RecoJetReaderAK4::instances_;
@@ -276,7 +276,7 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(jet_genMatchIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genMatchIdx_ : "", -1);
 
-    const std::vector<std::string> recoJetBranches = bai.getBoundBranchNames();
+    const std::vector<std::string> recoJetBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoJetBranches.begin(), recoJetBranches.end());
   }
   return bound_branches;

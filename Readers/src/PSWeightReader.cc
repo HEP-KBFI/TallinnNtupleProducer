@@ -1,14 +1,14 @@
 #include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // kPartonShower_*
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/clip.h"                     // clip()
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // kPartonShower_*
+#include "TallinnNtupleProducer/Readers/interface/clip.h"                         // clip()
 
-#include <TString.h>                                                          // Form
-#include <TTree.h>                                                            // TTree
+#include <TString.h>                                                              // Form
+#include <TTree.h>                                                                // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                               // assert()
 
 std::map<std::string, int> PSWeightReader::numInstances_;
 std::map<std::string, PSWeightReader*> PSWeightReader::instances_;
@@ -89,7 +89,7 @@ PSWeightReader::setBranchAddresses(TTree * inputTree)
     {
       bai.setBranchAddress(LHE_nom_, branchName_LHE_nom_, 1.);
     }
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

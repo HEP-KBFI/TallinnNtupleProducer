@@ -1,12 +1,12 @@
 #include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
 
-#include <TString.h>                                                          // Form
-#include <TTree.h>                                                            // TTree
+#include <TString.h>                                                              // Form
+#include <TTree.h>                                                                // TTree
 
-#include <assert.h>                                                           // assert()
+#include <assert.h>                                                               // assert()
 
 std::map<std::string, int> LHEParticleReader::numInstances_;
 std::map<std::string, LHEParticleReader *> LHEParticleReader::instances_;
@@ -92,7 +92,7 @@ LHEParticleReader::setBranchAddresses(TTree * tree)
     bai.ignoreErrors(true);
     bai.setBranchAddress(particle_status_, branchName_particle_status_);
     bai.ignoreErrors(false);
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

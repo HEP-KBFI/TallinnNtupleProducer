@@ -21,6 +21,9 @@ class GenJet : public GenParticle
   virtual ~GenJet() {}
 };
 
+typedef std::vector<GenJet> GenJetCollection;
+typedef std::vector<const GenJet*> GenJetPtrCollection;
+
 std::ostream &
 operator<<(std::ostream & stream,
            const GenJet & genJet);

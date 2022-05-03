@@ -1,4 +1,4 @@
-#include "TallinnNtupleProducer/Readers/interface/TypeTraits.h"
+#include "TallinnNtupleProducer/CommonTools/interface/TypeTraits.h"
 
 #include <Rtypes.h> // *_t
 
@@ -28,4 +28,4 @@ DEFINE_TYPE_TRAIT(ULong64_t,   "l");
 DEFINE_TYPE_TRAIT(ULong64_t *, "l");
 DEFINE_TYPE_TRAIT(Bool_t,      "O");
 DEFINE_TYPE_TRAIT(Bool_t *,    "O");
-DEFINE_TYPE_TRAIT(std::string, "C");
+DEFINE_TYPE_TRAIT(std::string, "");

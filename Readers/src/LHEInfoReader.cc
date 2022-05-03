@@ -1,16 +1,16 @@
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"       // Btag
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"     // kLHE_scale_*, PDFSys
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/Readers/interface/clip.h"                     // clip()
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // kLHE_scale_*, PDFSys
+#include "TallinnNtupleProducer/Readers/interface/clip.h"                         // clip()
 
-#include <TString.h>                                                          // Form
-#include <TTree.h>                                                            // TTree
+#include <TString.h>                                                              // Form
+#include <TTree.h>                                                                // TTree
 
-#include <assert.h>                                                           // assert()
-#include <iostream>                                                           // std::cerr
+#include <assert.h>                                                               // assert()
+#include <iostream>                                                               // std::cerr
 
 std::map<std::string, int> LHEInfoReader::numInstances_;
 std::map<std::string, LHEInfoReader*> LHEInfoReader::instances_;
@@ -120,7 +120,7 @@ LHEInfoReader::setBranchAddresses(TTree * tree)
       bai.setBranchAddress(pdf_nWeights_, branchName_pdf_nWeights_);
       bai.setLenVar(max_pdf_nWeights_).setBranchAddress(pdf_weights_, branchName_pdf_weights_);
     }
-    return bai.getBoundBranchNames();
+    return bai.getBoundBranchNames_read();
   }
   return {};
 }

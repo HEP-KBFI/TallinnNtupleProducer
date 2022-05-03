@@ -20,6 +20,9 @@ class GenPhoton : public GenParticle
   virtual ~GenPhoton() {}
 };
 
+typedef std::vector<GenPhoton> GenPhotonCollection;
+typedef std::vector<const GenPhoton*> GenPhotonPtrCollection;
+
 std::ostream &
 operator<<(std::ostream & stream,
            const GenPhoton & genPhoton);

@@ -1,16 +1,16 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"         // cmsException()
-#include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"   // openFile(), loadTH1(), loadTH2()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"       // openFile(), loadTH1(), loadTH2()
 
-#include <TFile.h>                                                            // TFile
-#include <TH1.h>                                                              // TH1
-#include <TH2.h>                                                              // TH2
-#include <TTree.h>                                                            // TTree
+#include <TFile.h>                                                                // TFile
+#include <TH1.h>                                                                  // TH1
+#include <TH2.h>                                                                  // TH2
+#include <TTree.h>                                                                // TTree
 
-#include <assert.h>                                                           // assert()
-#include <iostream>                                                           // std::cout
+#include <assert.h>                                                               // assert()
+#include <iostream>                                                               // std::cout
 
 EvtWeightManager::EvtWeightManager(const edm::ParameterSet & cfg, bool isDebug)
   : ReaderBase(cfg)
@@ -90,7 +90,7 @@ EvtWeightManager::setBranchAddresses(TTree * tree)
       bai.setBranchAddress(var_y_float_, binnedHistogram_varName_y_);
     }
   }
-  return bai.getBoundBranchNames();
+  return bai.getBoundBranchNames_read();
 }
 
 int

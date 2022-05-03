@@ -1,12 +1,12 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h"
 
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                // format_vstring()
 #include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"             // get_fullpath()
 #include "TallinnNtupleProducer/CommonTools/interface/TFileOpenWrapper.h"         // TFileOpenWrapper
 #include "TallinnNtupleProducer/CommonTools/interface/to_string_with_precision.h" // to_string_with_precision()
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h"     // BranchAddressInitializer
 
 #include <TFile.h>                                                                // TFile
 #include <TH2.h>                                                                  // TH2

@@ -1,8 +1,8 @@
 #include "TallinnNtupleProducer/Writers/plugins/RunLumiEventWriter.h"
 
-#include "TallinnNtupleProducer/Readers/interface/BranchAddressInitializer.h" // BranchAddressInitializer
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 
-#include "TTree.h"                                                            // TTree
+#include "TTree.h"                                                                // TTree
 
 RunLumiEventWriter::RunLumiEventWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
