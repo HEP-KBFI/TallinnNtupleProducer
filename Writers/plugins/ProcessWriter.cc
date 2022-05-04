@@ -17,11 +17,16 @@ ProcessWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
   bai.setBranch(process_, "process");
-  //outputTree->Branch("process", &process_);
 }
 
 void
 ProcessWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {}
+
+std::vector<std::string>
+ProcessWriter::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return std::vector<std::string>();
+}
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, ProcessWriter, "ProcessWriter");

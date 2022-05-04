@@ -52,7 +52,7 @@ ZbosonMassVetoWriter::writeImp(const Event & event, const EvtWeightRecorder & ev
 }
 
 std::vector<std::string>
-ZbosonMassVetoWriter::get_supported_systematics()
+ZbosonMassVetoWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   return std::vector<std::string>();
 }

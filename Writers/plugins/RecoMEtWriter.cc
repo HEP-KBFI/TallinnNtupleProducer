@@ -5,11 +5,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/constants.h"                // met_coef, mht_coef
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/Objects/interface/Particle.h"                     // Particle::LorentzVector
-#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"           // RecoElectronReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"             // RecoHadTauReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"             // RecoJetReaderAK4::get_supported_systematics()
 #include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                // RecoMEtReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"               // RecoMuonReader::get_supported_systematics()
 
 #include "TString.h"                                                              // Form()
 #include "TTree.h"                                                                // TTree
@@ -184,13 +180,7 @@ RecoMEtWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeight
 std::vector<std::string>
 RecoMEtWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  std::vector<std::string> supported_systematics;
-  merge_systematic_shifts(supported_systematics, RecoElectronReader::get_supported_systematics(cfg));
-  merge_systematic_shifts(supported_systematics, RecoHadTauReader::get_supported_systematics(cfg));
-  merge_systematic_shifts(supported_systematics, RecoJetReaderAK4::get_supported_systematics(cfg));
-  merge_systematic_shifts(supported_systematics, RecoMEtReader::get_supported_systematics(cfg));
-  merge_systematic_shifts(supported_systematics, RecoMuonReader::get_supported_systematics(cfg));
-  return supported_systematics;
+  return supported_systematics_;
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoMEtWriter, "RecoMEtWriter");

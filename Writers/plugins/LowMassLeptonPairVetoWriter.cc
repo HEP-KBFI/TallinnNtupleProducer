@@ -51,7 +51,7 @@ LowMassLeptonPairVetoWriter::writeImp(const Event & event, const EvtWeightRecord
 }
 
 std::vector<std::string>
-LowMassLeptonPairVetoWriter::get_supported_systematics()
+LowMassLeptonPairVetoWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   return std::vector<std::string>();
 }

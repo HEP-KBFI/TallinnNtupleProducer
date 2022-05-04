@@ -154,7 +154,7 @@ TriggerInfoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWe
 }
 
 std::vector<std::string>
-TriggerInfoWriter::get_supported_systematics()
+TriggerInfoWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   return std::vector<std::string>();
 }

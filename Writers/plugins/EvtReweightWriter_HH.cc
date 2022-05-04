@@ -84,7 +84,7 @@ EvtReweightWriter_HH::writeImp(const Event & event, const EvtWeightRecorder & ev
 }
 
 std::vector<std::string>
-EvtReweightWriter_HH::get_supported_systematics()
+EvtReweightWriter_HH::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   return std::vector<std::string>();
 }

@@ -193,7 +193,7 @@ RecoJetWriterAK4::writeImp(const Event & event, const EvtWeightRecorder & evtWei
 std::vector<std::string>
 RecoJetWriterAK4::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return RecoJetReaderAK4::get_supported_systematics(cfg);
+  return supported_systematics_;
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoJetWriterAK4, "RecoJetWriterAK4");

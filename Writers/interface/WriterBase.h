@@ -49,6 +49,13 @@ class WriterBase
   void
   write(const Event & event, const EvtWeightRecorder & evtWeightRecorder);
 
+  /**
+    * @brief Return list of systematic uncertainties supported by this plugin
+    */
+  virtual
+  std::vector<std::string>
+  get_supported_systematics(const edm::ParameterSet & cfg) = 0;
+
  protected:
   virtual
   void

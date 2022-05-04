@@ -192,7 +192,7 @@ RecoHadTauWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
 std::vector<std::string>
 RecoHadTauWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return RecoHadTauReader::get_supported_systematics(cfg);
+  return supported_systematics_;
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoHadTauWriter, "RecoHadTauWriter");

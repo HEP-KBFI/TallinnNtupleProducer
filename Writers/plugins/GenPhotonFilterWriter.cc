@@ -82,6 +82,12 @@ GenPhotonFilterWriter::writeImp(const Event & event, const EvtWeightRecorder & e
   passesGenPhotonFilter_ = (*genPhotonFilter_)(genPhotons, genProxyPhotons, genParticlesFromHardProcess);
 }
 
+std::vector<std::string>
+GenPhotonFilterWriter::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return std::vector<std::string>();
+}
+
 DEFINE_EDM_PLUGIN(WriterPluginFactory, GenPhotonFilterWriter, "GenPhotonFilterWriter");
 
 

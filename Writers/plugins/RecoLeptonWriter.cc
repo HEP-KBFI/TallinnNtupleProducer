@@ -2,9 +2,12 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                    // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                    // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                    // GenPhoton
+#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"           // RecoElectronReader::get_supported_systematics()
+#include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"               // RecoMuonReader::get_supported_systematics()
 
 #include "TString.h"                                                              // Form()
 #include "TTree.h"                                                                // TTree
@@ -150,7 +153,10 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
 std::vector<std::string>
 RecoLeptonWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return std::vector<std::string>();
+  std::vector<std::string> supported_systematics;
+  merge_systematic_shifts(supported_systematics, RecoElectronReader::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics, RecoMuonReader::get_supported_systematics(cfg));
+  return supported_systematics;
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoLeptonWriter, "RecoLeptonWriter");

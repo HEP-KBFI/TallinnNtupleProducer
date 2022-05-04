@@ -36,4 +36,10 @@ MEtFilterWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeig
   passesMEtFilters_ = (*metFilterSelector_)(event.metFilters());
 }
 
+std::vector<std::string>
+MEtFilterWriter::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return std::vector<std::string>();
+}
+
 DEFINE_EDM_PLUGIN(WriterPluginFactory, MEtFilterWriter, "MEtFilterWriter");

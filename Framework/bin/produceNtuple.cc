@@ -132,15 +132,6 @@ std::cout << "treeName = " << treeName << std::endl;
 
   bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
 
-  std::vector<std::string> systematic_shifts;
-  // CV: process all systematic uncertainties supported by EventReader class (only for MC)
-  if ( isMC )
-  {
-    merge_systematic_shifts(systematic_shifts, EventReader::get_supported_systematics(cfg_produceNtuple));
-  }
-  // CV: add central value (for data and MC)
-  merge_systematic_shifts(systematic_shifts, { "central"});
-
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("era", era_string);
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("hadTauSelection_againstJets", hadTauWP_againstJets);
@@ -226,6 +217,7 @@ std::cout << "treeName = " << treeName << std::endl;
     btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
   }
 
+  // CV: create plugins that write branches to "plain" Ntuple
   if ( !edmplugin::PluginManager::isAvailable() )
   {  
     edmplugin::PluginManager::configure(edmplugin::standard::config());
@@ -245,6 +237,18 @@ std::cout << "treeName = " << treeName << std::endl;
     writer->setBranches(outputTree);
     writers.push_back(std::move(writer));
   }
+
+  std::vector<std::string> systematic_shifts;
+  // CV: process all systematic uncertainties supported by any plugin that writes branches to "plain" Ntuple (only for MC)
+  if ( isMC )
+  {
+    for ( auto & writer : writers )
+    {
+       merge_systematic_shifts(systematic_shifts, writer->get_supported_systematics(cfg_produceNtuple));
+    }
+  }
+  // CV: add central value (for data and MC)
+  merge_systematic_shifts(systematic_shifts, { "central"});
 
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);

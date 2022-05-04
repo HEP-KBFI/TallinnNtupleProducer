@@ -24,6 +24,12 @@ class RunLumiEventWriter : public WriterBase
   void
   setBranches(TTree * outputTree);
  
+  /**
+    * @brief Return list of systematic uncertainties supported by this plugin
+    */
+  std::vector<std::string>
+  get_supported_systematics(const edm::ParameterSet & cfg);
+
  private:
   /**
    * @brief Write relevant information to tree

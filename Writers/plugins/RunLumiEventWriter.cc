@@ -28,4 +28,10 @@ RunLumiEventWriter::writeImp(const Event & event, const EvtWeightRecorder & evtW
   event_ = event.eventInfo().event;
 }
 
+std::vector<std::string>
+RunLumiEventWriter::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return std::vector<std::string>();
+}
+
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RunLumiEventWriter, "RunLumiEventWriter");

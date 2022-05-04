@@ -75,7 +75,7 @@ EvtReweightWriter_tH::writeImp(const Event & event, const EvtWeightRecorder & ev
 }
 
 std::vector<std::string>
-EvtReweightWriter_tH::get_supported_systematics()
+EvtReweightWriter_tH::get_supported_systematics(const edm::ParameterSet & cfg)
 {
   return std::vector<std::string>(); // CV: to be implemented !!
 }
