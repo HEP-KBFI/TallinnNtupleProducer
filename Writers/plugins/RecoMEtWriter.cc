@@ -180,7 +180,7 @@ RecoMEtWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeight
 std::vector<std::string>
 RecoMEtWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return supported_systematics_;
+  return RecoMEtReader::get_supported_systematics(cfg);
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoMEtWriter, "RecoMEtWriter");

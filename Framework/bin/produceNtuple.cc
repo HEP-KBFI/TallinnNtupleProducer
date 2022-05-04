@@ -18,6 +18,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h"               // BranchAddressInitializer::print()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                              // format_vstring()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h"                        // get_tH_SM_str()
@@ -103,9 +104,9 @@ int main(int argc, char* argv[])
   edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
   AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
   std::string process = cfg_produceNtuple.getParameter<std::string>("process");
+  std::cout << "Processing process = '" << process << "'" << std::endl;
 
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
-std::cout << "treeName = " << treeName << std::endl;
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
   const Era era = get_era(era_string);
@@ -120,6 +121,7 @@ std::cout << "treeName = " << treeName << std::endl;
 
   unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
+  std::cout << "Setting nominal multiplicity of leptons and taus to: #leptons = " << numNominalLeptons << ", #taus = " << numNominalHadTaus << std::endl;
 
   std::string hadTauWP_againstJets = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstJets_tight");
   std::string hadTauWP_againstElectrons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstElectrons");
@@ -129,6 +131,7 @@ std::cout << "treeName = " << treeName << std::endl;
   bool apply_chargeMisIdRate = cfg_produceNtuple.getParameter<bool>("apply_chargeMisIdRate");
 
   std::string selection = cfg_produceNtuple.getParameter<std::string>("selection");
+  std::cout << "Applying selection = '" << selection << "'" << std::endl;
 
   bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
 
@@ -181,7 +184,7 @@ std::cout << "treeName = " << treeName << std::endl;
   EventReader* eventReader = new EventReader(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
 
-  TTree* outputTree = new TTree("Events", "Events");
+  TTree* outputTree = fs.make<TTree>("Events", "Events");
 
   const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("evtWeight");
   const bool applyAdditionalEvtWeight = additionalEvtWeight.getParameter<bool>("apply");
@@ -249,6 +252,7 @@ std::cout << "treeName = " << treeName << std::endl;
   }
   // CV: add central value (for data and MC)
   merge_systematic_shifts(systematic_shifts, { "central"});
+  std::cout << "Processing systematic uncertainties = " << format_vstring(systematic_shifts) << std::endl;
 
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
@@ -447,8 +451,11 @@ std::cout << "treeName = " << treeName << std::endl;
   {
     outputTree_selected = outputTree;
   }
-  Float_t evtWeight;
-  outputTree_selected->SetBranchAddress("evtWeight", &evtWeight);
+  Float_t evtWeight = 1.;
+  if ( outputTree_selected->GetBranch("evtWeight") )
+  {
+    outputTree_selected->SetBranchAddress("evtWeight", &evtWeight);
+  }
   int selectedEntries = 0;
   double selectedEntries_weighted = 0.;
   TH1* histogram_selectedEntries = fs.make<TH1D>("selectedEntries", "selectedEntries", 1, -0.5, +0.5);

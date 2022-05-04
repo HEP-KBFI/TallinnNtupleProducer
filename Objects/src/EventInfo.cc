@@ -67,7 +67,6 @@ EventInfo::EventInfo(const AnalysisConfig & analysisConfig)
 {
   analysisConfig_ = &analysisConfig;
   process_string_ = analysisConfig.process();
-  std::cout << "<EventInfo::EventInfo()>: process = '" << process_string_ << "'\n";
   int checksum = 0;
   assert(analysisConfig_);
   if ( analysisConfig_->isMC_H()  ) ++checksum;

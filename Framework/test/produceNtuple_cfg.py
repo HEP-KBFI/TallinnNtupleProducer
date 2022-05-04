@@ -21,8 +21,8 @@ process = cms.PSet()
 
 process.fwliteInput = cms.PSet(
     fileNames = cms.vstring(),
-    maxEvents = cms.int32(1000),
-    outputEvery = cms.uint32(100000)
+    maxEvents = cms.int32(10000),
+    outputEvery = cms.uint32(1000)
 )
 
 process.fwliteOutput = cms.PSet(
@@ -150,21 +150,21 @@ process.produceNtuple = cms.PSet(
     jetCleaningByIndex = cms.bool(True),
 
     writerPlugins = cms.VPSet(
-#        writers_evtWeight,
+        writers_evtWeight,
         writers_fakeableHadTaus,
         writers_fakeableLeptons,
         # CV: GenPhotonFilterWriter plugin can be run for some MC samples only,
         #     because the collection "GenPhotonCandidate" does not exist in all MC samples !!
         #writers_genPhotonFilter,
-#        writers_lowMassLeptonPairVeto,
-#        writers_met,
-#        writers_metFilters,
-#        writers_process,
-#        writers_run_lumi_event,
-#        writers_selJetsAK4,
-#        writers_selJetsAK4_btagLoose,
-#        writers_selJetsAK4_btagMedium,
-#        writers_ZbosonMassVeto
+        writers_lowMassLeptonPairVeto,
+        writers_met,
+        writers_metFilters,
+        writers_process,
+        writers_run_lumi_event,
+        writers_selJetsAK4,
+        writers_selJetsAK4_btagLoose,
+        writers_selJetsAK4_btagMedium,
+        writers_ZbosonMassVeto
     ),
 
     selEventsFileName = cms.string(''),
