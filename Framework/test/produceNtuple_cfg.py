@@ -6,6 +6,7 @@ from TallinnNtupleProducer.Framework.triggers_cfi import triggers_2016 as config
 
 from TallinnNtupleProducer.Writers.EvtWeightWriter_cfi import evtWeight as writers_evtWeight
 from TallinnNtupleProducer.Writers.GenPhotonFilterWriter_cfi import genPhotonFilter as writers_genPhotonFilter
+from TallinnNtupleProducer.Writers.HtoZZto4lVetoWriter_cfi import HtoZZto4lVeto as writers_HtoZZto4lVeto
 from TallinnNtupleProducer.Writers.LowMassLeptonPairVetoWriter_cfi import lowMassLeptonPairVeto as writers_lowMassLeptonPairVeto
 from TallinnNtupleProducer.Writers.MEtFilterWriter_cfi import metFilters as writers_metFilters
 from TallinnNtupleProducer.Writers.ProcessWriter_cfi import process as writers_process
@@ -164,7 +165,8 @@ process.produceNtuple = cms.PSet(
         writers_selJetsAK4,
         writers_selJetsAK4_btagLoose,
         writers_selJetsAK4_btagMedium,
-        writers_ZbosonMassVeto
+        writers_ZbosonMassVeto,
+        writers_HtoZZto4lVeto
     ),
 
     selEventsFileName = cms.string(''),
