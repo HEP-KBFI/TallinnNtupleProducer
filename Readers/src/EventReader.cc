@@ -42,6 +42,17 @@ namespace
     retVal.addParameter<std::string>("branchName_subjet", branchName_subjet);
     return retVal;
   }
+
+  void
+  printWarning(unsigned numNominalParticles, const std::string & particleType)
+  {
+    std::cerr << "Warning in <EventReader>: Will skip processing of events" 
+              << " that don't contain " << numNominalParticles << " " << particleType << "." 
+              << " This will make the job run faster, but will cause inconsistent event information"
+              << " for events containing fewer than " << numNominalParticles << " " << particleType << "." << std::endl;
+    std::cerr << "You can ignore this warning if the 'selection' string in your produceNtuple_cfg.py file cuts events" 
+              << " with fewer than " << numNominalParticles << " " << particleType << " anyway." << std::endl;
+  }
 }
 
 EventReader::EventReader(const edm::ParameterSet& cfg)
@@ -59,25 +70,30 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , runLumiEventReader_(nullptr)
   , eventInfoReader_(nullptr)
   , eventInfo_supported_systematics_(make_supported_systematics(EventInfoReader::get_supported_systematics(cfg)))
+  , eventInfo_isInvalid_(false)
   , triggerInfoReader_(nullptr)
   , triggerInfo_supported_systematics_(make_supported_systematics(TriggerInfoReader::get_supported_systematics(cfg)))
+  , triggerInfo_isInvalid_(false)
   , muonReader_(nullptr)
   , looseMuonSelector_(nullptr)
   , fakeableMuonSelector_(nullptr)
   , tightMuonSelector_(nullptr)
   , muon_supported_systematics_(make_supported_systematics(RecoMuonReader::get_supported_systematics(cfg)))
+  , muons_areInvalid_(false)
   , electronReader_(nullptr)
   , electronCleaner_(nullptr)
   , looseElectronSelector_(nullptr)
   , fakeableElectronSelector_(nullptr)
   , tightElectronSelector_(nullptr)
   , electron_supported_systematics_(make_supported_systematics(RecoElectronReader::get_supported_systematics(cfg)))
+  , electrons_areInvalid_(false)
   , hadTauReader_(nullptr)
   , hadTauCleaner_(nullptr)
   , looseHadTauSelector_(nullptr)
   , fakeableHadTauSelector_(nullptr)
   , tightHadTauSelector_(nullptr)
   , hadTau_supported_systematics_(make_supported_systematics(RecoHadTauReader::get_supported_systematics(cfg)))
+  , hadTaus_areInvalid_(false)
   , jetReaderAK4_(nullptr)
   , jetCleanerAK4_dR04_(nullptr)
   , jetCleanerAK4_dR12_(nullptr)
@@ -85,6 +101,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , jetSelectorAK4_btagLoose_(nullptr)
   , jetSelectorAK4_btagMedium_(nullptr)
   , jetsAK4_supported_systematics_(make_supported_systematics(RecoJetReaderAK4::get_supported_systematics(cfg)))
+  , jetsAK4_areInvalid_(false)
   , genLeptonReader_(nullptr)
   , genHadTauReader_(nullptr)
   , genPhotonReader_(nullptr)
@@ -93,6 +110,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , electronGenMatcher_(nullptr)
   , hadTauGenMatcher_(nullptr)
   , jetGenMatcherAK4_(nullptr)
+  , genParticles_areInvalid_(false)
   , jetReaderAK8_Hbb_(nullptr)
   , jetReaderAK8_Wjj_(nullptr)
   , jetCleanerAK8_dR08_(nullptr)
@@ -100,16 +118,31 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , jetSelectorAK8_Wjj_(nullptr)
   , jetsAK8_Hbb_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg)))
   , jetsAK8_Wjj_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg)))
+  , jetsAK8_Hbb_areInvalid_(false)
+  , jetsAK8_Wjj_areInvalid_(false)
   , metReader_(nullptr)
   , met_supported_systematics_(make_supported_systematics(RecoMEtReader::get_supported_systematics(cfg)))
+  , met_isInvalid_(false)
   , metFilterReader_(nullptr)
   , metFilter_supported_systematics_(make_supported_systematics(MEtFilterReader::get_supported_systematics(cfg)))
+  , metFilters_areInvalid_(false)
   , vertexReader_(nullptr)
   , vertex_supported_systematics_(make_supported_systematics(RecoVertexReader::get_supported_systematics(cfg)))
+  , vertex_isInvalid_(false)
   , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
 {
   numNominalLeptons_ = cfg.getParameter<unsigned>("numNominalLeptons");
+  requireNominalLeptons_ = true;
+  if ( requireNominalLeptons_ )
+  {
+    printWarning(numNominalLeptons_, "fakeable leptons");
+  }
   numNominalHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
+  requireNominalHadTaus_ = true;
+  if ( requireNominalHadTaus_ )
+  {
+    printWarning(numNominalHadTaus_, "fakeable taus");
+  }
 
   era_ = get_era(cfg.getParameter<std::string>("era"));
   isMC_ = cfg.getParameter<bool>("isMC");
@@ -480,18 +513,37 @@ EventReader::read() const
     event_.tightLeptons_ = getIntersection(event_.fakeableLeptons_, event_.tightLeptonsFull_, isHigherConePt<RecoLepton>);
     isUpdatedLeptons = true;
   }
+  if ( requireNominalLeptons_ && event_.fakeableLeptons_.size() < numNominalLeptons_ )
+  {
+    event_.fakeableHadTaus_.clear();
+    event_.tightHadTaus_.clear();
+    hadTaus_areInvalid_ = true;
+    event_.selJetsAK4_.clear();
+    event_.selJetsAK4_btagLoose_.clear();
+    event_.selJetsAK4_btagMedium_.clear();
+    jetsAK4_areInvalid_ = true;
+    genParticles_areInvalid_ = true;
+    event_.selJetsAK8_Hbb_.clear();
+    jetsAK8_Hbb_areInvalid_ = true;
+    event_.selJetsAK8_Wjj_.clear();
+    jetsAK8_Wjj_areInvalid_ = true;
+    met_isInvalid_ = true;
+    metFilters_areInvalid_ = true;
+    vertex_isInvalid_ = true;
+    return event_;
+  }
 
   bool isHadTauSystematic = contains(hadTau_supported_systematics_, current_central_or_shift_);
   bool isUpdatedHadTaus = false;
-  if ( isHadTauSystematic || isNewEvent )
+  if ( isHadTauSystematic || isNewEvent || hadTaus_areInvalid_ )
   {
     event_.hadTaus_ = hadTauReader_->read();
     event_.hadTau_ptrs_ = convert_to_ptrs(event_.hadTaus_);
     event_.fakeableHadTausUncleaned_ = fakeableHadTauSelector_->operator()(event_.hadTau_ptrs_, isHigherPt<RecoHadTau>);
-    event_.tightHadTausUncleaned_ = tightHadTauSelector_->operator()(event_.fakeableHadTausFull_, isHigherPt<RecoHadTau>);
+    event_.tightHadTausUncleaned_ = tightHadTauSelector_->operator()(event_.fakeableHadTausUncleaned_, isHigherPt<RecoHadTau>);
     isUpdatedHadTaus = true;
   }
-  if ( isHadTauSystematic || isUpdatedLeptons || isNewEvent )
+  if ( isHadTauSystematic || isUpdatedLeptons || isNewEvent || hadTaus_areInvalid_ )
   {
     event_.fakeableHadTausFull_ = hadTauCleaner_->operator()(event_.fakeableHadTausUncleaned_, event_.looseMuonsFull_, event_.looseElectronsFull_);
     event_.tightHadTausFull_ = getIntersection(event_.fakeableHadTausFull_, event_.tightHadTausUncleaned_, isHigherPt<RecoHadTau>);
@@ -499,10 +551,27 @@ EventReader::read() const
     event_.tightHadTaus_ = getIntersection(event_.fakeableHadTaus_, event_.tightHadTausFull_, isHigherPt<RecoHadTau>);
     isUpdatedHadTaus = true;
   }
+  hadTaus_areInvalid_ = false;
+  if ( requireNominalHadTaus_ && event_.fakeableHadTaus_.size() < numNominalHadTaus_ )
+  {
+    event_.selJetsAK4_.clear();
+    event_.selJetsAK4_btagLoose_.clear();
+    event_.selJetsAK4_btagMedium_.clear();
+    jetsAK4_areInvalid_ = true;
+    genParticles_areInvalid_ = true;
+    event_.selJetsAK8_Hbb_.clear();
+    jetsAK8_Hbb_areInvalid_ = true;
+    event_.selJetsAK8_Wjj_.clear();
+    jetsAK8_Wjj_areInvalid_ = true;
+    met_isInvalid_ = true;
+    metFilters_areInvalid_ = true;
+    vertex_isInvalid_ = true;
+    return event_;
+  }
 
   bool isJetSystematicAK4 = contains(jetsAK4_supported_systematics_, current_central_or_shift_);
   bool isUpdatedJetsAK4 = false;
-  if ( isJetSystematicAK4 || isNewEvent )
+  if ( isJetSystematicAK4 || isNewEvent || jetsAK4_areInvalid_ )
   {
     event_.jetsAK4_ = jetReaderAK4_->read();
     event_.jet_ptrsAK4_ = convert_to_ptrs(event_.jetsAK4_);
@@ -511,17 +580,18 @@ EventReader::read() const
     event_.selJetsUncleanedAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
     isUpdatedJetsAK4 = true;
   }
-  if ( isJetSystematicAK4 || isUpdatedLeptons || isUpdatedHadTaus || isNewEvent )
+  if ( isJetSystematicAK4 || isUpdatedLeptons || isUpdatedHadTaus || isNewEvent || jetsAK4_areInvalid_ )
   {
     event_.selJetsAK4_ = jetCleanerAK4_dR04_->operator()(event_.selJetsUncleanedAK4_, event_.fakeableLeptons_, event_.fakeableHadTaus_);
     event_.selJetsAK4_btagLoose_ = jetCleanerAK4_dR04_->operator()(event_.selJetsUncleanedAK4_btagLoose_, event_.fakeableLeptons_, event_.fakeableHadTaus_);
     event_.selJetsAK4_btagMedium_ = jetCleanerAK4_dR04_->operator()(event_.selJetsUncleanedAK4_btagMedium_, event_.fakeableLeptons_, event_.fakeableHadTaus_);
     isUpdatedJetsAK4 = true;
   }
+  jetsAK4_areInvalid_ = false;
 
   if ( readGenMatching_ )
   {
-    if ( isNewEvent )
+    if ( isNewEvent || genParticles_areInvalid_ )
     {
       event_.genLeptons_ = genLeptonReader_->read();
       event_.genElectrons_.clear();
@@ -539,6 +609,7 @@ EventReader::read() const
       event_.genHadTaus_ = genHadTauReader_->read();
       event_.genPhotons_ = genPhotonReader_->read();
       event_.genJets_ = genJetReader_->read();
+      genParticles_areInvalid_ = false;
     }
 
     // CV: performing the gen-matching on the muon_ptrs, electron_ptrs, and hadTau_ptrs collections
@@ -576,25 +647,26 @@ EventReader::read() const
   }
 
   bool isJetSystematicAK8_Hbb = contains(jetsAK8_Hbb_supported_systematics_, current_central_or_shift_);
-  if ( isJetSystematicAK8_Hbb || isNewEvent )
+  if ( isJetSystematicAK8_Hbb || isNewEvent || jetsAK8_Hbb_areInvalid_ )
   {
     event_.jetsAK8_Hbb_ = jetReaderAK8_Hbb_->read();
     event_.jet_ptrsAK8_Hbb_ = convert_to_ptrs(event_.jetsAK8_Hbb_);
     event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_Hbb_, isHigherPt<RecoJetAK8>);
   }
-  if ( isJetSystematicAK8_Hbb || isUpdatedLeptons || isNewEvent )
+  if ( isJetSystematicAK8_Hbb || isUpdatedLeptons || isNewEvent || jetsAK8_Hbb_areInvalid_ )
   {
     // CV: clean AK8_Hbb jets wrt leptons only (not wrt hadronic taus)
     event_.selJetsAK8_Hbb_ = jetCleanerAK8_dR08_->operator()(event_.selJetsUncleanedAK8_Hbb_, event_.fakeableLeptons_);
   }
+  jetsAK8_Hbb_areInvalid_ = false;
 
   bool isJetSystematicAK8_Wjj = contains(jetsAK8_Wjj_supported_systematics_, current_central_or_shift_);
-  if ( isJetSystematicAK8_Wjj || isNewEvent )
+  if ( isJetSystematicAK8_Wjj || isNewEvent || jetsAK8_Wjj_areInvalid_ )
   {
     event_.jetsAK8_Wjj_ = jetReaderAK8_Wjj_->read();
     event_.jet_ptrsAK8_Wjj_ = convert_to_ptrs(event_.jetsAK8_Wjj_);
   }
-  if ( isJetSystematicAK8_Wjj || isUpdatedLeptons || isNewEvent )
+  if ( isJetSystematicAK8_Wjj || isUpdatedLeptons || isNewEvent || jetsAK8_Wjj_areInvalid_ )
   {
     // CV: AK8_Wjj jets must NOT be cleaned wrt leptons,
     //     as the lepton produced in H->WW*->lnu qq decays often ends up near the two quarks in the detector (in dR)
@@ -608,27 +680,31 @@ EventReader::read() const
       event_.selJetsAK8_Wjj_.clear();
     }
   }
+  jetsAK8_Wjj_areInvalid_ = false;
 
   bool isVertexSystematic = contains(vertex_supported_systematics_, current_central_or_shift_);
   bool isUpdatedVertex = false;
-  if ( isVertexSystematic || isNewEvent )
+  if ( isVertexSystematic || isNewEvent || vertex_isInvalid_ )
   {
     event_.vertex_ = vertexReader_->read();
     isUpdatedVertex = true;
   }
+  vertex_isInvalid_ = false;
 
   bool isMEtSystematic = contains(met_supported_systematics_, current_central_or_shift_);
-  if ( isMEtSystematic || isUpdatedVertex || isNewEvent )
+  if ( isMEtSystematic || isUpdatedVertex || isNewEvent || met_isInvalid_ )
   {
     metReader_->set_phiModulationCorrDetails(event_.eventInfo_, &event_.vertex_);
     event_.met_ = metReader_->read();
   }
+  met_isInvalid_ = false;
 
   bool isMEtFilterSystematic = contains(metFilter_supported_systematics_, current_central_or_shift_);
-  if ( isMEtFilterSystematic || isNewEvent )
+  if ( isMEtFilterSystematic || isNewEvent || metFilters_areInvalid_ )
   {
     event_.metFilters_ = metFilterReader_->read();
   }
+  metFilters_areInvalid_ = false;
 
   return event_;
 }

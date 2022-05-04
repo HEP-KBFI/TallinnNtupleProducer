@@ -80,7 +80,9 @@ class EventReader : public ReaderBase
   edm::ParameterSet cfg_;
 
   unsigned numNominalLeptons_;
+  bool requireNominalLeptons_;
   unsigned numNominalHadTaus_;
+  bool requireNominalHadTaus_;
 
   Era era_;
   bool isMC_;
@@ -97,15 +99,18 @@ class EventReader : public ReaderBase
 
   EventInfoReader * eventInfoReader_;
   std::set<std::string> eventInfo_supported_systematics_;
+  mutable bool eventInfo_isInvalid_;
 
   TriggerInfoReader * triggerInfoReader_;
   std::set<std::string> triggerInfo_supported_systematics_;
+  mutable bool triggerInfo_isInvalid_;
 
   RecoMuonReader * muonReader_;
   RecoMuonCollectionSelectorLoose * looseMuonSelector_;
   RecoMuonCollectionSelectorFakeable * fakeableMuonSelector_;
   RecoMuonCollectionSelectorTight * tightMuonSelector_;
   std::set<std::string> muon_supported_systematics_;
+  mutable bool muons_areInvalid_;
 
   RecoElectronReader * electronReader_;
   RecoElectronCollectionCleaner * electronCleaner_;
@@ -113,6 +118,7 @@ class EventReader : public ReaderBase
   RecoElectronCollectionSelectorFakeable * fakeableElectronSelector_;
   RecoElectronCollectionSelectorTight * tightElectronSelector_;
   std::set<std::string> electron_supported_systematics_;
+  mutable bool electrons_areInvalid_;
 
   RecoHadTauReader * hadTauReader_;
   RecoHadTauCollectionCleaner * hadTauCleaner_;
@@ -120,6 +126,7 @@ class EventReader : public ReaderBase
   RecoHadTauCollectionSelectorFakeable * fakeableHadTauSelector_;
   RecoHadTauCollectionSelectorTight * tightHadTauSelector_;
   std::set<std::string> hadTau_supported_systematics_;
+  mutable bool hadTaus_areInvalid_;
 
   RecoJetReaderAK4 * jetReaderAK4_;
   RecoJetCollectionCleanerAK4 * jetCleanerAK4_dR04_; // used for cleaning AK4 jets wrt electrons, muons, and tauh
@@ -128,6 +135,7 @@ class EventReader : public ReaderBase
   RecoJetCollectionSelectorAK4_btagLoose * jetSelectorAK4_btagLoose_;
   RecoJetCollectionSelectorAK4_btagMedium * jetSelectorAK4_btagMedium_;
   std::set<std::string> jetsAK4_supported_systematics_;
+  mutable bool jetsAK4_areInvalid_;
 
   GenLeptonReader * genLeptonReader_;
   GenHadTauReader * genHadTauReader_;
@@ -137,6 +145,7 @@ class EventReader : public ReaderBase
   RecoElectronCollectionGenMatcher * electronGenMatcher_;
   RecoHadTauCollectionGenMatcher * hadTauGenMatcher_;
   RecoJetCollectionGenMatcherAK4 * jetGenMatcherAK4_;
+  mutable bool genParticles_areInvalid_;
 
   RecoJetReaderAK8 * jetReaderAK8_Hbb_;
   RecoJetReaderAK8 * jetReaderAK8_Wjj_;
@@ -145,15 +154,20 @@ class EventReader : public ReaderBase
   RecoJetCollectionSelectorAK8_Wjj * jetSelectorAK8_Wjj_;
   std::set<std::string> jetsAK8_Hbb_supported_systematics_;
   std::set<std::string> jetsAK8_Wjj_supported_systematics_;
-  
+  mutable bool jetsAK8_Hbb_areInvalid_;
+  mutable bool jetsAK8_Wjj_areInvalid_;
+
   RecoMEtReader * metReader_;
   std::set<std::string> met_supported_systematics_;
+  mutable bool met_isInvalid_;
 
   MEtFilterReader * metFilterReader_;
   std::set<std::string> metFilter_supported_systematics_;
+  mutable bool metFilters_areInvalid_;
 
   RecoVertexReader * vertexReader_;
   std::set<std::string> vertex_supported_systematics_;
+  mutable bool vertex_isInvalid_;
 
   bool isDEBUG_;
 };
