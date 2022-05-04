@@ -8,28 +8,39 @@
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getBTagWeight_option(), getMET_option()
+#include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
 
 namespace
 {
+  std::set<std::string>
+  make_supported_systematics(const std::vector<std::string> & systematic_shifts)
+  {
+    std::vector<std::string> supported_systematics = systematic_shifts;
+    // CV: add central value
+    merge_systematic_shifts(supported_systematics, { "central" });
+    std::set<std::string> retVal(supported_systematics.begin(), supported_systematics.end());
+    return retVal;
+  }
+
   edm::ParameterSet
   make_cfg(const edm::ParameterSet& cfg, const std::string & attr_branchName)
   {
-    edm::ParameterSet cfg_modified(cfg);
+    edm::ParameterSet retVal(cfg);
     std::string branchName = cfg.getParameter<std::string>(attr_branchName);
-    cfg_modified.addParameter<std::string>("branchName", branchName);
-    return cfg_modified;
+    retVal.addParameter<std::string>("branchName", branchName);
+    return retVal;
   }
 
   edm::ParameterSet
   make_cfg_jetsAK8(const edm::ParameterSet& cfg, const std::string & attr_branchName_jet, const std::string & attr_branchName_subjet)
   {
-    edm::ParameterSet cfg_modified(cfg);
+    edm::ParameterSet retVal(cfg);
     std::string branchName_jet = cfg.getParameter<std::string>(attr_branchName_jet);
-    cfg_modified.addParameter<std::string>("branchName_jet", branchName_jet);
+    retVal.addParameter<std::string>("branchName_jet", branchName_jet);
     std::string branchName_subjet = cfg.getParameter<std::string>(attr_branchName_subjet);
-    cfg_modified.addParameter<std::string>("branchName_subjet", branchName_subjet);
-    return cfg_modified;
+    retVal.addParameter<std::string>("branchName_subjet", branchName_subjet);
+    return retVal;
   }
 }
 
@@ -41,28 +52,39 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , era_(Era::kUndefined)
   , isMC_(false)
   , readGenMatching_(false)
+  , lastRun_(0)
+  , lastLumi_(0)
+  , lastEvent_(0)
+  , current_central_or_shift_("central")
+  , runLumiEventReader_(nullptr)
   , eventInfoReader_(nullptr)
+  , eventInfo_supported_systematics_(make_supported_systematics(EventInfoReader::get_supported_systematics(cfg)))
   , triggerInfoReader_(nullptr)
+  , triggerInfo_supported_systematics_(make_supported_systematics(TriggerInfoReader::get_supported_systematics(cfg)))
   , muonReader_(nullptr)
   , looseMuonSelector_(nullptr)
   , fakeableMuonSelector_(nullptr)
   , tightMuonSelector_(nullptr)
+  , muon_supported_systematics_(make_supported_systematics(RecoMuonReader::get_supported_systematics(cfg)))
   , electronReader_(nullptr)
   , electronCleaner_(nullptr)
   , looseElectronSelector_(nullptr)
   , fakeableElectronSelector_(nullptr)
   , tightElectronSelector_(nullptr)
+  , electron_supported_systematics_(make_supported_systematics(RecoElectronReader::get_supported_systematics(cfg)))
   , hadTauReader_(nullptr)
   , hadTauCleaner_(nullptr)
   , looseHadTauSelector_(nullptr)
   , fakeableHadTauSelector_(nullptr)
   , tightHadTauSelector_(nullptr)
+  , hadTau_supported_systematics_(make_supported_systematics(RecoHadTauReader::get_supported_systematics(cfg)))
   , jetReaderAK4_(nullptr)
   , jetCleanerAK4_dR04_(nullptr)
   , jetCleanerAK4_dR12_(nullptr)
   , jetSelectorAK4_(nullptr)
   , jetSelectorAK4_btagLoose_(nullptr)
   , jetSelectorAK4_btagMedium_(nullptr)
+  , jetsAK4_supported_systematics_(make_supported_systematics(RecoJetReaderAK4::get_supported_systematics(cfg)))
   , genLeptonReader_(nullptr)
   , genHadTauReader_(nullptr)
   , genPhotonReader_(nullptr)
@@ -76,9 +98,14 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , jetCleanerAK8_dR08_(nullptr)
   , jetSelectorAK8_Hbb_(nullptr)
   , jetSelectorAK8_Wjj_(nullptr)
+  , jetsAK8_Hbb_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg)))
+  , jetsAK8_Wjj_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg)))
   , metReader_(nullptr)
+  , met_supported_systematics_(make_supported_systematics(RecoMEtReader::get_supported_systematics(cfg)))
   , metFilterReader_(nullptr)
+  , metFilter_supported_systematics_(make_supported_systematics(MEtFilterReader::get_supported_systematics(cfg)))
   , vertexReader_(nullptr)
+  , vertex_supported_systematics_(make_supported_systematics(RecoVertexReader::get_supported_systematics(cfg)))
   , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
 {
   numNominalLeptons_ = cfg.getParameter<unsigned>("numNominalLeptons");
@@ -87,6 +114,8 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   era_ = get_era(cfg.getParameter<std::string>("era"));
   isMC_ = cfg.getParameter<bool>("isMC");
   readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
+
+  runLumiEventReader_ = new RunLumiEventReader(cfg);
 
   eventInfoReader_ = new EventInfoReader(cfg);
   const std::string apply_topPtReweighting_str = cfg.getParameter<std::string>("apply_topPtReweighting");
@@ -254,6 +283,7 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
     const int met_option = getMET_option(central_or_shift, isMC_);
     metReader_->setMEt_central_or_shift(met_option);
   }
+  current_central_or_shift_ = central_or_shift;
 }
 
 std::vector<std::string>
@@ -380,120 +410,231 @@ namespace
   }
 }
 
-Event
+const Event &
 EventReader::read() const
 {
-  const EventInfo& eventInfo = eventInfoReader_->read();
+  const RunLumiEvent & runLumiEvent = runLumiEventReader_->read();
+  UInt_t run = runLumiEvent.run();
+  UInt_t lumi = runLumiEvent.lumi();
+  ULong64_t event = runLumiEvent.event();
 
-  const TriggerInfo& triggerInfo = triggerInfoReader_->read();
+  bool isNewEvent = run != lastRun_ || lumi != lastLumi_ || event != lastEvent_;
+  lastRun_ = run;
+  lastLumi_ = lumi;
+  lastEvent_ = event;
 
-  Event event(eventInfo, triggerInfo);
+  bool isEventInfoSystematic = contains(eventInfo_supported_systematics_, current_central_or_shift_);
+  if ( isEventInfoSystematic || isNewEvent )
+  {
+    EventInfo * eventInfo_nonconst = const_cast<EventInfo *>(&eventInfoReader_->read());
+    eventInfo_nonconst->run_ = run;
+    eventInfo_nonconst->lumi_ = lumi;
+    eventInfo_nonconst->event_ = event;
+    event_.eventInfo_ = eventInfo_nonconst;
+  }
 
-  event.muons_ = muonReader_->read();
-  RecoMuonPtrCollection muon_ptrs = convert_to_ptrs(event.muons_);
-  RecoMuonPtrCollection cleanedMuons = muon_ptrs; // CV: no cleaning needed for muons, as they have the highest priority in the overlap removal
-  event.looseMuons_ = looseMuonSelector_->operator()(cleanedMuons, isHigherConePt<RecoMuon>);
-  RecoMuonPtrCollection fakeableMuonsFull = fakeableMuonSelector_->operator()(event.looseMuons_, isHigherConePt<RecoMuon>);
-  RecoMuonPtrCollection tightMuonsFull = tightMuonSelector_->operator()(fakeableMuonsFull, isHigherConePt<RecoMuon>);
-  event.fakeableMuons_ = pickFirstNobjects(fakeableMuonsFull, numNominalLeptons_);
-  event.tightMuons_ = getIntersection(event.fakeableMuons_, tightMuonsFull, isHigherConePt<RecoMuon>);
+  bool isTriggerInfoSystematic = contains(triggerInfo_supported_systematics_, current_central_or_shift_);
+  if ( isTriggerInfoSystematic || isNewEvent )
+  {
+    event_.triggerInfo_ = &triggerInfoReader_->read();
+  }
 
-  event.electrons_ = electronReader_->read();
-  RecoElectronPtrCollection electron_ptrs = convert_to_ptrs(event.electrons_);
-  RecoElectronPtrCollection cleanedElectrons = electronCleaner_->operator()(electron_ptrs, event.looseMuons_);
-  event.looseElectrons_ = looseElectronSelector_->operator()(cleanedElectrons, isHigherConePt<RecoElectron>);
-  RecoElectronPtrCollection fakeableElectronsFull = fakeableElectronSelector_->operator()(event.looseElectrons_, isHigherConePt<RecoElectron>);
-  RecoElectronPtrCollection tightElectronsFull = tightElectronSelector_->operator()(fakeableElectronsFull, isHigherConePt<RecoElectron>);
-  event.fakeableElectrons_ = pickFirstNobjects(fakeableElectronsFull, numNominalLeptons_);
-  event.tightElectrons_ = getIntersection(event.fakeableElectrons_, tightElectronsFull, isHigherConePt<RecoElectron>);
+  bool isMuonSystematic = contains(muon_supported_systematics_, current_central_or_shift_);
+  bool isUpdatedMuons = false;
+  if ( isMuonSystematic || isNewEvent )
+  {
+    event_.muons_ = muonReader_->read();
+    event_.muon_ptrs_ = convert_to_ptrs(event_.muons_);
+    event_.looseMuonsFull_ = looseMuonSelector_->operator()(event_.muon_ptrs_, isHigherConePt<RecoMuon>);
+    event_.fakeableMuonsFull_ = fakeableMuonSelector_->operator()(event_.looseMuonsFull_, isHigherConePt<RecoMuon>);
+    event_.tightMuonsFull_ = tightMuonSelector_->operator()(event_.fakeableMuonsFull_, isHigherConePt<RecoMuon>);
+    event_.fakeableMuons_ = pickFirstNobjects(event_.fakeableMuonsFull_, numNominalLeptons_);
+    event_.tightMuons_ = getIntersection(event_.fakeableMuons_, event_.tightMuonsFull_, isHigherConePt<RecoMuon>);
+    isUpdatedMuons = true;
+  }
 
-  event.looseLeptons_ = mergeLeptonCollections(event.looseElectrons_, event.looseMuons_, isHigherConePt<RecoLepton>);
-  RecoLeptonPtrCollection fakeableLeptonsFull = mergeLeptonCollections(fakeableElectronsFull, fakeableMuonsFull, isHigherConePt<RecoLepton>);
-  RecoLeptonPtrCollection tightLeptonsFull = mergeLeptonCollections(tightElectronsFull, tightMuonsFull, isHigherConePt<RecoLepton>);
-  event.fakeableLeptons_ = pickFirstNobjects(fakeableLeptonsFull, numNominalLeptons_);
-  event.tightLeptons_ = getIntersection(event.fakeableLeptons_, tightLeptonsFull, isHigherConePt<RecoLepton>);
+  bool isElectronSystematic = contains(electron_supported_systematics_, current_central_or_shift_);
+  bool isUpdatedElectrons = false;
+  if ( isElectronSystematic || isNewEvent )
+  {
+    event_.electrons_ = electronReader_->read();
+    event_.electron_ptrs_ = convert_to_ptrs(event_.electrons_);
+    event_.looseElectronsUncleaned_ = looseElectronSelector_->operator()(event_.electron_ptrs_, isHigherConePt<RecoElectron>);
+    event_.fakeableElectronsUncleaned_ = fakeableElectronSelector_->operator()(event_.looseElectronsUncleaned_, isHigherConePt<RecoElectron>);
+    event_.tightElectronsUncleaned_ = tightElectronSelector_->operator()(event_.fakeableElectronsUncleaned_, isHigherConePt<RecoElectron>);
+    isUpdatedElectrons = true;
+  }
+  if ( isElectronSystematic || isMuonSystematic || isNewEvent )
+  {
+    event_.looseElectronsFull_ = electronCleaner_->operator()(event_.looseElectronsUncleaned_, event_.looseMuonsFull_);
+    event_.fakeableElectronsFull_ = electronCleaner_->operator()(event_.fakeableElectronsUncleaned_, event_.looseMuonsFull_);
+    event_.tightElectronsFull_ = getIntersection(event_.fakeableElectronsFull_, event_.tightElectronsUncleaned_, isHigherConePt<RecoElectron>);
+    event_.fakeableElectrons_ = pickFirstNobjects(event_.fakeableElectronsFull_, numNominalLeptons_);
+    event_.tightElectrons_ = getIntersection(event_.fakeableElectrons_, event_.tightElectronsFull_, isHigherConePt<RecoElectron>);
+    isUpdatedElectrons = true;
+  }
 
-  event.hadTaus_ = hadTauReader_->read();
-  RecoHadTauPtrCollection hadTau_ptrs = convert_to_ptrs(event.hadTaus_);
-  RecoHadTauPtrCollection cleanedHadTaus = hadTauCleaner_->operator()(hadTau_ptrs, event.looseMuons_, event.looseElectrons_);
-  RecoHadTauPtrCollection fakeableHadTausFull = fakeableHadTauSelector_->operator()(cleanedHadTaus, isHigherPt<RecoHadTau>);
-  RecoHadTauPtrCollection tightHadTausFull = tightHadTauSelector_->operator()(fakeableHadTausFull, isHigherPt<RecoHadTau>);
-  event.fakeableHadTaus_ = pickFirstNobjects(fakeableHadTausFull, numNominalHadTaus_);
-  event.tightHadTaus_ = getIntersection(event.fakeableHadTaus_, tightHadTausFull, isHigherPt<RecoHadTau>);
+  bool isUpdatedLeptons = false;
+  if ( isUpdatedMuons || isUpdatedElectrons )
+  {
+    event_.looseLeptonsFull_ = mergeLeptonCollections(event_.looseElectronsFull_, event_.looseMuonsFull_, isHigherConePt<RecoLepton>);
+    event_.fakeableLeptonsFull_ = mergeLeptonCollections(event_.fakeableElectronsFull_, event_.fakeableMuonsFull_, isHigherConePt<RecoLepton>);
+    event_.tightLeptonsFull_ = mergeLeptonCollections(event_.tightElectronsFull_, event_.tightMuonsFull_, isHigherConePt<RecoLepton>);
+    event_.fakeableLeptons_ = pickFirstNobjects(event_.fakeableLeptonsFull_, numNominalLeptons_);
+    event_.tightLeptons_ = getIntersection(event_.fakeableLeptons_, event_.tightLeptonsFull_, isHigherConePt<RecoLepton>);
+    isUpdatedLeptons = true;
+  }
 
-  event.jetsAK4_ = jetReaderAK4_->read();
-  RecoJetPtrCollectionAK4 jet_ptrsAK4 = convert_to_ptrs(event.jetsAK4_);
-  RecoJetPtrCollectionAK4 cleanedJetsAK4 = jetCleanerAK4_dR04_->operator()(jet_ptrsAK4, event.fakeableLeptons_, event.fakeableHadTaus_);
-  event.selJetsAK4_ = jetSelectorAK4_->operator()(cleanedJetsAK4, isHigherPt<RecoJetAK4>);
-  event.selJetsAK4_btagLoose_ = jetSelectorAK4_btagLoose_->operator()(cleanedJetsAK4, isHigherPt<RecoJetAK4>);
-  event.selJetsAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(cleanedJetsAK4, isHigherPt<RecoJetAK4>);
+  bool isHadTauSystematic = contains(hadTau_supported_systematics_, current_central_or_shift_);
+  bool isUpdatedHadTaus = false;
+  if ( isHadTauSystematic || isNewEvent )
+  {
+    event_.hadTaus_ = hadTauReader_->read();
+    event_.hadTau_ptrs_ = convert_to_ptrs(event_.hadTaus_);
+    event_.fakeableHadTausUncleaned_ = fakeableHadTauSelector_->operator()(event_.hadTau_ptrs_, isHigherPt<RecoHadTau>);
+    event_.tightHadTausUncleaned_ = tightHadTauSelector_->operator()(event_.fakeableHadTausFull_, isHigherPt<RecoHadTau>);
+    isUpdatedHadTaus = true;
+  }
+  if ( isHadTauSystematic || isUpdatedLeptons || isNewEvent )
+  {
+    event_.fakeableHadTausFull_ = hadTauCleaner_->operator()(event_.fakeableHadTausUncleaned_, event_.looseMuonsFull_, event_.looseElectronsFull_);
+    event_.tightHadTausFull_ = getIntersection(event_.fakeableHadTausFull_, event_.tightHadTausUncleaned_, isHigherPt<RecoHadTau>);
+    event_.fakeableHadTaus_ = pickFirstNobjects(event_.fakeableHadTausFull_, numNominalHadTaus_);
+    event_.tightHadTaus_ = getIntersection(event_.fakeableHadTaus_, event_.tightHadTausFull_, isHigherPt<RecoHadTau>);
+    isUpdatedHadTaus = true;
+  }
+
+  bool isJetSystematicAK4 = contains(jetsAK4_supported_systematics_, current_central_or_shift_);
+  bool isUpdatedJetsAK4 = false;
+  if ( isJetSystematicAK4 || isNewEvent )
+  {
+    event_.jetsAK4_ = jetReaderAK4_->read();
+    event_.jet_ptrsAK4_ = convert_to_ptrs(event_.jetsAK4_);
+    event_.selJetsUncleanedAK4_ = jetSelectorAK4_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
+    event_.selJetsUncleanedAK4_btagLoose_ = jetSelectorAK4_btagLoose_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
+    event_.selJetsUncleanedAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
+    isUpdatedJetsAK4 = true;
+  }
+  if ( isJetSystematicAK4 || isUpdatedLeptons || isUpdatedHadTaus || isNewEvent )
+  {
+    event_.selJetsAK4_ = jetCleanerAK4_dR04_->operator()(event_.selJetsUncleanedAK4_, event_.fakeableLeptons_, event_.fakeableHadTaus_);
+    event_.selJetsAK4_btagLoose_ = jetCleanerAK4_dR04_->operator()(event_.selJetsUncleanedAK4_btagLoose_, event_.fakeableLeptons_, event_.fakeableHadTaus_);
+    event_.selJetsAK4_btagMedium_ = jetCleanerAK4_dR04_->operator()(event_.selJetsUncleanedAK4_btagMedium_, event_.fakeableLeptons_, event_.fakeableHadTaus_);
+    isUpdatedJetsAK4 = true;
+  }
 
   if ( readGenMatching_ )
   {
-    event.genLeptons_ = genLeptonReader_->read();
-    event.genElectrons_.clear();
-    event.genMuons_.clear();
-    for ( auto genLepton : event.genLeptons_ )
+    if ( isNewEvent )
     {
-      const int abs_pdgId = std::abs(genLepton.pdgId());
-      switch ( abs_pdgId )
+      event_.genLeptons_ = genLeptonReader_->read();
+      event_.genElectrons_.clear();
+      event_.genMuons_.clear();
+      for ( auto genLepton : event_.genLeptons_ )
       {
-        case 11: event.genElectrons_.push_back(genLepton); break;
-        case 13: event.genMuons_.push_back(genLepton);     break;
-        default: assert(0);
+        const int abs_pdgId = std::abs(genLepton.pdgId());
+        switch ( abs_pdgId )
+        {
+          case 11: event_.genElectrons_.push_back(genLepton); break;
+          case 13: event_.genMuons_.push_back(genLepton);     break;
+          default: assert(0);
+        }
       }
+      event_.genHadTaus_ = genHadTauReader_->read();
+      event_.genPhotons_ = genPhotonReader_->read();
+      event_.genJets_ = genJetReader_->read();
     }
-    event.genHadTaus_ = genHadTauReader_->read();
-    event.genPhotons_ = genPhotonReader_->read();
-    event.genJets_ = genJetReader_->read();
 
-    muonGenMatcher_->addGenLeptonMatch(event.looseMuons_, event.genMuons_);
-    muonGenMatcher_->addGenHadTauMatch(event.looseMuons_, event.genHadTaus_);
-    muonGenMatcher_->addGenJetMatch(event.looseMuons_, event.genJets_);
+    // CV: performing the gen-matching on the muon_ptrs, electron_ptrs, and hadTau_ptrs collections
+    //     adds gen-matching information to all loose, fakeable, and tight collections of muons, electrons and hadronic taus
+    if ( isUpdatedMuons )
+    {
+      muonGenMatcher_->addGenLeptonMatch(event_.muon_ptrs_, event_.genMuons_);
+      muonGenMatcher_->addGenHadTauMatch(event_.muon_ptrs_, event_.genHadTaus_);
+      muonGenMatcher_->addGenJetMatch(event_.muon_ptrs_, event_.genJets_);
+    }
 
-    electronGenMatcher_->addGenLeptonMatch(event.looseElectrons_ , event.genElectrons_);
-    electronGenMatcher_->addGenPhotonMatch(event.looseElectrons_ , event.genPhotons_);
-    electronGenMatcher_->addGenHadTauMatch(event.looseElectrons_ , event.genHadTaus_);
-    electronGenMatcher_->addGenJetMatch(event.looseElectrons_ , event.genJets_);
+    if ( isUpdatedElectrons )
+    {
+      electronGenMatcher_->addGenLeptonMatch(event_.electron_ptrs_, event_.genElectrons_);
+      electronGenMatcher_->addGenPhotonMatch(event_.electron_ptrs_, event_.genPhotons_);
+      electronGenMatcher_->addGenHadTauMatch(event_.electron_ptrs_, event_.genHadTaus_);
+      electronGenMatcher_->addGenJetMatch(event_.electron_ptrs_, event_.genJets_);
+    }
 
-    hadTauGenMatcher_->addGenLeptonMatch(event.fakeableHadTaus_, event.genLeptons_);
-    hadTauGenMatcher_->addGenHadTauMatch(event.fakeableHadTaus_, event.genHadTaus_);
-    hadTauGenMatcher_->addGenJetMatch(event.fakeableHadTaus_, event.genJets_);
-
-    // CV: performing the gen-matching on the cleanedJetsAK4 collection
+    if ( isUpdatedHadTaus )
+    {
+      hadTauGenMatcher_->addGenLeptonMatch(event_.hadTau_ptrs_, event_.genLeptons_);
+      hadTauGenMatcher_->addGenHadTauMatch(event_.hadTau_ptrs_, event_.genHadTaus_);
+      hadTauGenMatcher_->addGenJetMatch(event_.hadTau_ptrs_, event_.genJets_);
+    }
+    
+    // CV: performing the gen-matching on the jet_ptrsAK4 collection
     //     adds gen-matching information to three collections of AK4 jets at once (selJetsAK4, selJetsAK4_btagLoose, selJetsAK4_btagMedium)
-    jetGenMatcherAK4_->addGenLeptonMatch(cleanedJetsAK4, event.genLeptons_);
-    jetGenMatcherAK4_->addGenHadTauMatch(cleanedJetsAK4, event.genHadTaus_);
-    jetGenMatcherAK4_->addGenJetMatch(cleanedJetsAK4, event.genJets_);
+    if ( isUpdatedJetsAK4 )
+    {
+      jetGenMatcherAK4_->addGenLeptonMatch(event_.jet_ptrsAK4_, event_.genLeptons_);
+      jetGenMatcherAK4_->addGenHadTauMatch(event_.jet_ptrsAK4_, event_.genHadTaus_);
+      jetGenMatcherAK4_->addGenJetMatch(event_.jet_ptrsAK4_, event_.genJets_);
+    }
   }
 
-  event.jetsAK8_Hbb_ = jetReaderAK8_Hbb_->read();
-  RecoJetPtrCollectionAK8 jet_ptrsAK8_Hbb = convert_to_ptrs(event.jetsAK8_Hbb_);
-  // CV: clean AK8_Hbb jets wrt leptons only (not wrt hadronic taus)
-  RecoJetPtrCollectionAK8 cleanedJetsAK8_Hbb = jetCleanerAK8_dR08_->operator()(jet_ptrsAK8_Hbb, event.fakeableLeptons_);
-  event.selJetsAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(cleanedJetsAK8_Hbb, isHigherPt<RecoJetAK8>);
-  event.jetsAK8_Wjj_ = jetReaderAK8_Wjj_->read();
-  RecoJetPtrCollectionAK8 jet_ptrsAK8_Wjj = convert_to_ptrs(event.jetsAK8_Wjj_);
-  // CV: AK8_Wjj jets must NOT be cleaned wrt leptons,
-  //     as the lepton produced in H->WW*->lnu qq decays often ends up near the two quarks in the detector (in dR)
-  if ( event.fakeableLeptons_.size() > 0 )
+  bool isJetSystematicAK8_Hbb = contains(jetsAK8_Hbb_supported_systematics_, current_central_or_shift_);
+  if ( isJetSystematicAK8_Hbb || isNewEvent )
   {
-    jetSelectorAK8_Wjj_->getSelector().set_leptons(event.fakeableLeptons_);
-    event.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(jet_ptrsAK8_Wjj, isHigherPt<RecoJetAK8>);
+    event_.jetsAK8_Hbb_ = jetReaderAK8_Hbb_->read();
+    event_.jet_ptrsAK8_Hbb_ = convert_to_ptrs(event_.jetsAK8_Hbb_);
+    event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_Hbb_, isHigherPt<RecoJetAK8>);
   }
-  else
+  if ( isJetSystematicAK8_Hbb || isUpdatedLeptons || isNewEvent )
   {
-    event.selJetsAK8_Wjj_.clear();
+    // CV: clean AK8_Hbb jets wrt leptons only (not wrt hadronic taus)
+    event_.selJetsAK8_Hbb_ = jetCleanerAK8_dR08_->operator()(event_.selJetsUncleanedAK8_Hbb_, event_.fakeableLeptons_);
   }
 
-  event.vertex_ = vertexReader_->read();
+  bool isJetSystematicAK8_Wjj = contains(jetsAK8_Wjj_supported_systematics_, current_central_or_shift_);
+  if ( isJetSystematicAK8_Wjj || isNewEvent )
+  {
+    event_.jetsAK8_Wjj_ = jetReaderAK8_Wjj_->read();
+    event_.jet_ptrsAK8_Wjj_ = convert_to_ptrs(event_.jetsAK8_Wjj_);
+  }
+  if ( isJetSystematicAK8_Wjj || isUpdatedLeptons || isNewEvent )
+  {
+    // CV: AK8_Wjj jets must NOT be cleaned wrt leptons,
+    //     as the lepton produced in H->WW*->lnu qq decays often ends up near the two quarks in the detector (in dR)
+    if ( event_.fakeableLeptons_.size() > 0 )
+    {
+      jetSelectorAK8_Wjj_->getSelector().set_leptons(event_.fakeableLeptons_);
+      event_.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(event_.jet_ptrsAK8_Wjj_, isHigherPt<RecoJetAK8>);
+    }
+    else
+    {
+      event_.selJetsAK8_Wjj_.clear();
+    }
+  }
 
-  metReader_->set_phiModulationCorrDetails(&eventInfo, &event.vertex_);
-  event.met_ = metReader_->read();
+  bool isVertexSystematic = contains(vertex_supported_systematics_, current_central_or_shift_);
+  bool isUpdatedVertex = false;
+  if ( isVertexSystematic || isNewEvent )
+  {
+    event_.vertex_ = vertexReader_->read();
+    isUpdatedVertex = true;
+  }
 
-  event.metFilters_ = metFilterReader_->read();
+  bool isMEtSystematic = contains(met_supported_systematics_, current_central_or_shift_);
+  if ( isMEtSystematic || isUpdatedVertex || isNewEvent )
+  {
+    metReader_->set_phiModulationCorrDetails(event_.eventInfo_, &event_.vertex_);
+    event_.met_ = metReader_->read();
+  }
 
-  return event;
+  bool isMEtFilterSystematic = contains(metFilter_supported_systematics_, current_central_or_shift_);
+  if ( isMEtFilterSystematic || isNewEvent )
+  {
+    event_.metFilters_ = metFilterReader_->read();
+  }
+
+  return event_;
 }
 
 std::vector<std::string>

@@ -21,6 +21,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                            // RecoMEtReader
 #include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"                           // RecoMuonReader
 #include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"                         // RecoVertexReader
+#include "TallinnNtupleProducer/Readers/interface/RunLumiEventReader.h"                       // RunLumiEventReader
 #include "TallinnNtupleProducer/Readers/interface/TriggerInfoReader.h"                        // TriggerInfoReader
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorFakeable.h" // RecoElectronCollectionSelectorFakeable
 #include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorLoose.h"    // RecoElectronCollectionSelectorLoose
@@ -65,7 +66,7 @@ class EventReader : public ReaderBase
    * @brief Read branches from tree and use information to fill Event object
    * @return Event object
    */
-  Event
+  const Event &
   read() const;
 
   /**
@@ -85,26 +86,40 @@ class EventReader : public ReaderBase
   bool isMC_;
   bool readGenMatching_;
 
+  mutable UInt_t lastRun_;
+  mutable UInt_t lastLumi_;
+  mutable ULong64_t lastEvent_;
+  std::string current_central_or_shift_;
+
+  mutable Event event_;
+
+  RunLumiEventReader * runLumiEventReader_;
+
   EventInfoReader * eventInfoReader_;
+  std::set<std::string> eventInfo_supported_systematics_;
 
   TriggerInfoReader * triggerInfoReader_;
+  std::set<std::string> triggerInfo_supported_systematics_;
 
   RecoMuonReader * muonReader_;
   RecoMuonCollectionSelectorLoose * looseMuonSelector_;
   RecoMuonCollectionSelectorFakeable * fakeableMuonSelector_;
   RecoMuonCollectionSelectorTight * tightMuonSelector_;
+  std::set<std::string> muon_supported_systematics_;
 
   RecoElectronReader * electronReader_;
   RecoElectronCollectionCleaner * electronCleaner_;
   RecoElectronCollectionSelectorLoose * looseElectronSelector_;
   RecoElectronCollectionSelectorFakeable * fakeableElectronSelector_;
   RecoElectronCollectionSelectorTight * tightElectronSelector_;
+  std::set<std::string> electron_supported_systematics_;
 
   RecoHadTauReader * hadTauReader_;
   RecoHadTauCollectionCleaner * hadTauCleaner_;
   RecoHadTauCollectionSelectorLoose * looseHadTauSelector_;
   RecoHadTauCollectionSelectorFakeable * fakeableHadTauSelector_;
   RecoHadTauCollectionSelectorTight * tightHadTauSelector_;
+  std::set<std::string> hadTau_supported_systematics_;
 
   RecoJetReaderAK4 * jetReaderAK4_;
   RecoJetCollectionCleanerAK4 * jetCleanerAK4_dR04_; // used for cleaning AK4 jets wrt electrons, muons, and tauh
@@ -112,6 +127,7 @@ class EventReader : public ReaderBase
   RecoJetCollectionSelectorAK4 * jetSelectorAK4_;
   RecoJetCollectionSelectorAK4_btagLoose * jetSelectorAK4_btagLoose_;
   RecoJetCollectionSelectorAK4_btagMedium * jetSelectorAK4_btagMedium_;
+  std::set<std::string> jetsAK4_supported_systematics_;
 
   GenLeptonReader * genLeptonReader_;
   GenHadTauReader * genHadTauReader_;
@@ -127,11 +143,17 @@ class EventReader : public ReaderBase
   RecoJetCollectionCleanerAK8 * jetCleanerAK8_dR08_;  // used for cleaning AK8 jets wrt electrons, muons, and tauh
   RecoJetCollectionSelectorAK8_Hbb * jetSelectorAK8_Hbb_;
   RecoJetCollectionSelectorAK8_Wjj * jetSelectorAK8_Wjj_;
+  std::set<std::string> jetsAK8_Hbb_supported_systematics_;
+  std::set<std::string> jetsAK8_Wjj_supported_systematics_;
   
   RecoMEtReader * metReader_;
+  std::set<std::string> met_supported_systematics_;
+
   MEtFilterReader * metFilterReader_;
+  std::set<std::string> metFilter_supported_systematics_;
 
   RecoVertexReader * vertexReader_;
+  std::set<std::string> vertex_supported_systematics_;
 
   bool isDEBUG_;
 };

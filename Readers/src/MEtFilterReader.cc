@@ -78,3 +78,9 @@ MEtFilterReader::read() const
 {
   return metFilter_;
 }
+
+std::vector<std::string>
+MEtFilterReader::get_supported_systematics(const edm::ParameterSet & cfg)
+{
+  return {};
+}

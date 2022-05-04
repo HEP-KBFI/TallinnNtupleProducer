@@ -12,6 +12,7 @@ class GenLeptonReader;
 class GenHadTauReader;
 class GenJetReader;
 class TauESTool;
+
 enum class Era;
 
 class RecoHadTauReader : public ReaderBase

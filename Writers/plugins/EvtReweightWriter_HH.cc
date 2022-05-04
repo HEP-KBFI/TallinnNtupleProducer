@@ -71,12 +71,12 @@ EvtReweightWriter_HH::writeImp(const Event & event, const EvtWeightRecorder & ev
       if ( apply_HH_rwgt_lo_ )
       {
         assert(hhWeightInterfaceLO_);
-        hhReweight = hhWeightInterfaceLO_->getRelativeWeight(bmName, eventInfo.gen_mHH, eventInfo.gen_cosThetaStar);
+        hhReweight = hhWeightInterfaceLO_->getRelativeWeight(bmName, eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar());
       }
       if ( apply_HH_rwgt_nlo_ )
       {
         assert(hhWeightInterfaceNLO_);
-        hhReweight *= hhWeightInterfaceNLO_->getRelativeWeight_LOtoNLO(bmName, eventInfo.gen_mHH, eventInfo.gen_cosThetaStar);
+        hhReweight *= hhWeightInterfaceNLO_->getRelativeWeight_LOtoNLO(bmName, eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar());
       }
       hhReweights_[bmName] = hhReweight;
     }

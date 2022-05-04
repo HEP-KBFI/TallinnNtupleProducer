@@ -37,7 +37,7 @@ METXYCorr_Met_MetPhi(const EventInfo * const eventInfo,
 
   const int npv = std::min(recoVertex->npvs(), 100);
   const bool isMC = eventInfo->analysisConfig().isMC();
-  const unsigned runnb = eventInfo->run;
+  const unsigned runnb = eventInfo->run();
 
   TheRunEra runera = TheRunEra::yUnknown;
   bool usemetv2 = false;

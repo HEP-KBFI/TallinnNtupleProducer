@@ -21,18 +21,36 @@ class EventInfo
 
   ~EventInfo();
 
-  UInt_t    run;                 ///< run number
-  UInt_t    lumi;                ///< luminosity
-  ULong64_t event;               ///< event number
-  Int_t     genHiggsDecayMode;   ///< Higgs decay mode (only if ttH signal MC)
-  Float_t   genWeight;           ///< generator-level weight (only if MC)
-  Float_t   pileupWeight;        ///< pile-up weight (only if MC)
-  Float_t   pileupWeightUp;      ///< pile-up weight up-shifted (only if MC)
-  Float_t   pileupWeightDown;    ///< pile-up weight down-shifted (only if MC)
-  Int_t     genDiHiggsDecayMode; ///< Decay mode of both Higgs bosons (only if HH signal MC)
-  Float_t   gen_mHH;             ///< LHE parton-level di-Higgs mass
-  Float_t   gen_cosThetaStar;    ///< LHE parton-level cos(theta*) variable
-  Float_t   topPtRwgtSF;         ///< SF correct ttbar samples in top quark pT distribution (only if MC)
+  UInt_t
+  run() const;
+  UInt_t
+  lumi() const;
+  ULong64_t
+  event() const;
+
+  Int_t
+  genHiggsDecayMode() const;
+
+  Float_t
+  genWeight() const;
+
+  Float_t
+  pileupWeight() const;
+  Float_t
+  pileupWeightUp() const;
+  Float_t
+  pileupWeightDown() const;
+
+  Int_t
+  genDiHiggsDecayMode() const;
+
+  Float_t
+  gen_mHH() const;
+  Float_t
+  gen_cosThetaStar() const;
+
+  Float_t
+  topPtRwgtSF() const;
 
   const AnalysisConfig &
   analysisConfig() const;
@@ -115,7 +133,7 @@ class EventInfo
              const EventInfo & info);
 
   friend class EventInfoReader;
-  friend class EventInfoWriter;
+  friend class EventReader;
 
  protected:
   const AnalysisConfig * analysisConfig_;
@@ -123,19 +141,32 @@ class EventInfo
   mutable std::string central_or_shift_;
   std::string process_string_;
 
-  UInt_t nLHEReweightingWeight;
-  Float_t * LHEReweightingWeight;
+  UInt_t    run_;                 ///< run number
+  UInt_t    lumi_;                ///< luminosity
+  ULong64_t event_;               ///< event number
+  Int_t     genHiggsDecayMode_;   ///< Higgs decay mode (only if ttH signal MC)
+  Float_t   genWeight_;           ///< generator-level weight (only if MC)
+  Float_t   pileupWeight_;        ///< pile-up weight (only if MC)
+  Float_t   pileupWeightUp_;      ///< pile-up weight up-shifted (only if MC)
+  Float_t   pileupWeightDown_;    ///< pile-up weight down-shifted (only if MC)
+  Int_t     genDiHiggsDecayMode_; ///< Decay mode of both Higgs bosons (only if HH signal MC)
+  Float_t   gen_mHH_;             ///< LHE parton-level di-Higgs mass
+  Float_t   gen_cosThetaStar_;    ///< LHE parton-level cos(theta*) variable
+  Float_t   topPtRwgtSF_;         ///< SF correct ttbar samples in top quark pT distribution (only if MC)
 
-  const unsigned int LHEReweightingWeight_max;
-  bool is_owner;
+  UInt_t nLHEReweightingWeight_;
+  Float_t * LHEReweightingWeight_;
+
+  const unsigned int LHEReweightingWeight_max_;
+  bool is_owner_;
 
   HTXS htxs_;
   bool read_htxs_;
 
-  std::map<std::string, std::map<std::string, std::pair<int, double>>> tH_sf;
-  static const std::map<std::string, Int_t> decayMode_idString_singleHiggs;
-  static const std::map<std::string, Int_t> decayMode_idString_diHiggs;
-  static const std::map<Int_t, std::string> productionMode_idString_singleHiggs;
+  std::map<std::string, std::map<std::string, std::pair<int, double>>> tH_sf_;
+  static const std::map<std::string, Int_t> gDecayMode_idString_singleHiggs;
+  static const std::map<std::string, Int_t> gDecayMode_idString_diHiggs;
+  static const std::map<Int_t, std::string> gProductionMode_idString_singleHiggs;
 
   double refGenWeight_;
   int productionMode_;

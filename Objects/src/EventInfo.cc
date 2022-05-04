@@ -6,13 +6,14 @@
 #include <boost/range/adaptor/map.hpp>                                   // boost::adaptors::map_keys
 #include <boost/range/algorithm/copy.hpp>                                // boost::copy()
 
+#include <assert.h>                                                      // assert()
 #include <cmath>                                                         // std::fabs()
 #include <cstring>                                                       // std::memcpy()
-#include <assert.h>                                                      // assert()
+#include <sstream>                                                       // std::stringstream
 
 #define EPS 1E-2
 
-const std::map<std::string, Int_t> EventInfo::decayMode_idString_singleHiggs =
+const std::map<std::string, Int_t> EventInfo::gDecayMode_idString_singleHiggs =
 {
   { "hww",     24 },
   { "hzz",     23 },
@@ -22,7 +23,7 @@ const std::map<std::string, Int_t> EventInfo::decayMode_idString_singleHiggs =
   { "hbb",      5 },
 };
 
-const std::map<std::string, Int_t> EventInfo::decayMode_idString_diHiggs =
+const std::map<std::string, Int_t> EventInfo::gDecayMode_idString_diHiggs =
 {
   { "tttt",       15 },
   { "zzzz",       23 },
@@ -35,28 +36,29 @@ const std::map<std::string, Int_t> EventInfo::decayMode_idString_diHiggs =
   { "zzww", 23000024 },
 };
 
-const std::map<Int_t, std::string> EventInfo::productionMode_idString_singleHiggs = {
+const std::map<Int_t, std::string> EventInfo::gProductionMode_idString_singleHiggs = {
   { 23000025, "ZH" },
   { 24000025, "WH" },
 };
 
 EventInfo::EventInfo()
-  : run(0)
-  , lumi(0)
-  , event(0)
-  , genHiggsDecayMode(-1)
-  , genWeight(1.)
-  , pileupWeight(1.)
-  , genDiHiggsDecayMode(-1)
-  , gen_mHH(0.)
-  , gen_cosThetaStar(-2.)
-  , topPtRwgtSF(-1.)
-  , analysisConfig_(nullptr)
+  : analysisConfig_(nullptr)
   , central_or_shift_("central")
-  , nLHEReweightingWeight(0)
-  , LHEReweightingWeight(nullptr)
-  , LHEReweightingWeight_max(69)
-  , is_owner(false)
+  , process_string_("")
+  , run_(0)
+  , lumi_(0)
+  , event_(0)
+  , genHiggsDecayMode_(-1)
+  , genWeight_(1.)
+  , pileupWeight_(1.)
+  , genDiHiggsDecayMode_(-1)
+  , gen_mHH_(0.)
+  , gen_cosThetaStar_(-2.)
+  , topPtRwgtSF_(-1.)
+  , nLHEReweightingWeight_(0)
+  , LHEReweightingWeight_(nullptr)
+  , LHEReweightingWeight_max_(69)
+  , is_owner_(false)
   , read_htxs_(false)
   , refGenWeight_(0.)
   , productionMode_(-1)
@@ -96,24 +98,24 @@ void
 EventInfo::copy(const EventInfo & eventInfo)
 {
   analysisConfig_ = eventInfo.analysisConfig_;
-  run = eventInfo.run;
-  lumi = eventInfo.lumi;
-  event = eventInfo.event;
-  genHiggsDecayMode = eventInfo.genHiggsDecayMode;
-  genWeight = eventInfo.genWeight;
-  genDiHiggsDecayMode = eventInfo.genDiHiggsDecayMode;
-  gen_mHH = eventInfo.gen_mHH;
-  gen_cosThetaStar = eventInfo.gen_cosThetaStar;
-  topPtRwgtSF = eventInfo.topPtRwgtSF;
-  nLHEReweightingWeight = eventInfo.nLHEReweightingWeight;
-  if(eventInfo.LHEReweightingWeight)
+  run_ = eventInfo.run_;
+  lumi_ = eventInfo.lumi_;
+  event_ = eventInfo.event_;
+  genHiggsDecayMode_ = eventInfo.genHiggsDecayMode_;
+  genWeight_ = eventInfo.genWeight_;
+  genDiHiggsDecayMode_ = eventInfo.genDiHiggsDecayMode_;
+  gen_mHH_ = eventInfo.gen_mHH_;
+  gen_cosThetaStar_ = eventInfo.gen_cosThetaStar_;
+  topPtRwgtSF_ = eventInfo.topPtRwgtSF_;
+  nLHEReweightingWeight_ = eventInfo.nLHEReweightingWeight_;
+  if(eventInfo.LHEReweightingWeight_)
   {
-    if(LHEReweightingWeight)
+    if(LHEReweightingWeight_)
     {
-      if(is_owner)
+      if(is_owner_)
       {
-        delete[] LHEReweightingWeight;
-        LHEReweightingWeight = nullptr;
+        delete[] LHEReweightingWeight_;
+        LHEReweightingWeight_ = nullptr;
       }
       else
       {
@@ -122,9 +124,9 @@ EventInfo::copy(const EventInfo & eventInfo)
         ;
       }
     }
-    LHEReweightingWeight = new Float_t[LHEReweightingWeight_max];
-    is_owner = true;
-    std::memcpy(LHEReweightingWeight, eventInfo.LHEReweightingWeight, nLHEReweightingWeight);
+    LHEReweightingWeight_ = new Float_t[LHEReweightingWeight_max_];
+    is_owner_ = true;
+    std::memcpy(LHEReweightingWeight_, eventInfo.LHEReweightingWeight_, nLHEReweightingWeight_);
   }
   htxs_ = eventInfo.htxs_;
 }
@@ -132,9 +134,82 @@ EventInfo::copy(const EventInfo & eventInfo)
 EventInfo::~EventInfo()
 {}
 
+UInt_t
+EventInfo::run() const
+{
+  return run_;
+}
+
+UInt_t
+EventInfo::lumi() const
+{
+  return lumi_;
+}
+
+ULong64_t
+EventInfo::event() const
+{
+  return event_;
+}
+
+Int_t
+EventInfo::genHiggsDecayMode() const
+{
+  return genHiggsDecayMode_;
+}
+
+Float_t
+EventInfo::genWeight() const
+{
+  return genWeight_;
+}
+
+Float_t
+EventInfo::pileupWeight() const
+{
+  return pileupWeight_;
+}
+
+Float_t
+EventInfo::pileupWeightUp() const
+{
+  return pileupWeightUp_;
+}
+
+Float_t
+EventInfo::pileupWeightDown() const
+{
+  return pileupWeightDown_;
+}
+
+Int_t
+EventInfo::genDiHiggsDecayMode() const
+{
+  return genDiHiggsDecayMode_;
+}
+
+Float_t
+EventInfo::gen_mHH() const
+{
+  return gen_mHH_;
+}
+
+Float_t
+EventInfo::gen_cosThetaStar() const
+{
+  return gen_cosThetaStar_;
+}
+
+Float_t
+EventInfo::topPtRwgtSF() const
+{
+  return topPtRwgtSF_;
+}
+
 const AnalysisConfig &
 EventInfo::analysisConfig() const
 {
+  assert(analysisConfig_);
   return *analysisConfig_;
 }
 
@@ -162,24 +237,24 @@ double
 EventInfo::genWeight_tH(const std::string & central_or_shfit,
                         const std::string & name) const
 {
-  if(tH_sf.empty())
+  if(tH_sf_.empty())
   {
     return 1.;
   }
-  if(! tH_sf.count(central_or_shfit))
+  if(! tH_sf_.count(central_or_shfit))
   {
     throw cmsException(this, __func__, __LINE__) << "No such central or shift option: " << central_or_shfit;
   }
-  if(! tH_sf.at(central_or_shfit).count(name))
+  if(! tH_sf_.at(central_or_shfit).count(name))
   {
     throw cmsException(this, __func__, __LINE__)
       << "Invalid coupling requested for central or shift option " << central_or_shfit << ": " << name
     ;
   }
-  const std::pair<int, double> & settings = tH_sf.at(central_or_shfit).at(name);
-  assert(settings.first < static_cast<int>(nLHEReweightingWeight));
+  const std::pair<int, double> & settings = tH_sf_.at(central_or_shfit).at(name);
+  assert(settings.first < static_cast<int>(nLHEReweightingWeight_));
 
-  return (settings.first >= 0 ? LHEReweightingWeight[settings.first] : 1.) * settings.second;
+  return (settings.first >= 0 ? LHEReweightingWeight_[settings.first] : 1.) * settings.second;
 }
 
 void
@@ -209,11 +284,11 @@ EventInfo::loadWeight_tH(const std::vector<edm::ParameterSet> & cfg)
     }
     if(! has_central_or_shift(central_or_shift))
     {
-      tH_sf[central_or_shift] = {};
+      tH_sf_[central_or_shift] = {};
     }
 
-    assert(! tH_sf.at(central_or_shift).count(name));
-    tH_sf[central_or_shift][name] = std::pair<int, double>(idx, weight);
+    assert(! tH_sf_.at(central_or_shift).count(name));
+    tH_sf_[central_or_shift][name] = std::pair<int, double>(idx, weight);
     std::cout
       << "Loaded weight '" << name << "': kt = " << kt << " & kv = " << kv << " & cosa = " << cosa
       << " for systematic option " << central_or_shift
@@ -238,7 +313,7 @@ EventInfo::getWeight_tH_str(const std::string & central_or_shift,
   {
     throw cmsException(this, __func__, __LINE__) << "No such central or shift option: " << central_or_shift;
   }
-  for(const auto & kv: tH_sf.at(central_or_shift))
+  for(const auto & kv: tH_sf_.at(central_or_shift))
   {
     if(! include_sm && kv.first == sm_str)
     {
@@ -270,7 +345,7 @@ EventInfo::set_central_or_shift(const std::string & central_or_shift) const
 bool
 EventInfo::has_central_or_shift(const std::string & central_or_shift) const
 {
-  return tH_sf.count(central_or_shift);
+  return tH_sf_.count(central_or_shift);
 }
 
 bool
@@ -294,7 +369,7 @@ EventInfo::get_htxs_category() const
 bool
 EventInfo::is_initialized() const
 {
-  return run != 0 && lumi != 0 && event != 0;
+  return run_ != 0 && lumi_ != 0 && event_ != 0;
 }
 
 std::string
@@ -308,7 +383,7 @@ EventInfo::getDecayModeString() const
          "for a decay mode as a string is not applicable\n"
     ;
   }
-  return EventInfo::getDecayModeString(decayMode_idString_singleHiggs);
+  return EventInfo::getDecayModeString(gDecayMode_idString_singleHiggs);
 }
 
 std::string
@@ -322,7 +397,7 @@ EventInfo::getDiHiggsDecayModeString() const
          "for a decay mode as a string is not applicable\n"
     ;
   }
-  return EventInfo::getDecayModeString(decayMode_idString_diHiggs);
+  return EventInfo::getDecayModeString(gDecayMode_idString_diHiggs);
 }
 
 std::string
@@ -337,8 +412,8 @@ EventInfo::getProductionModeString() const
     ;
   }
   return
-    productionMode_idString_singleHiggs.count(productionMode_) ?
-    productionMode_idString_singleHiggs.at(productionMode_)    :
+    gProductionMode_idString_singleHiggs.count(productionMode_) ?
+    gProductionMode_idString_singleHiggs.at(productionMode_)    :
     ""
   ;
 }
@@ -348,7 +423,7 @@ EventInfo::getDecayModeString(const std::map<std::string, Int_t> & decayMode_idS
 {
   for(const auto & kv: decayMode_idString)
   {
-    if(genHiggsDecayMode == kv.second)
+    if(genHiggsDecayMode_ == kv.second)
     {
       return kv.first;
     }
@@ -359,13 +434,13 @@ EventInfo::getDecayModeString(const std::map<std::string, Int_t> & decayMode_idS
 std::vector<std::string>
 EventInfo::getDecayModes()
 {
-  return getDecayModes(decayMode_idString_singleHiggs);
+  return getDecayModes(gDecayMode_idString_singleHiggs);
 }
 
 std::vector<std::string>
 EventInfo::getDiHiggsDecayModes()
 {
-  return getDecayModes(decayMode_idString_diHiggs);
+  return getDecayModes(gDecayMode_idString_diHiggs);
 }
 
 std::vector<std::string>
@@ -393,7 +468,7 @@ std::string
 EventInfo::str() const
 {
   std::stringstream ss;
-  ss << run << ':' << lumi << ':' << event;
+  ss << run_ << ':' << lumi_ << ':' << event_;
   return ss.str();
 }
 
@@ -401,6 +476,6 @@ std::ostream &
 operator<<(std::ostream & os,
            const EventInfo & info)
 {
-  os << "run = " << info.run << ", ls = " << info.lumi << ", event = " << info.event;
+  os << "run = " << info.run() << ", ls = " << info.lumi() << ", event = " << info.event();
   return os;
 }

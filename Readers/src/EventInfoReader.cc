@@ -4,6 +4,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/get_htxs_binning.h"         // get_htxs_binning()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_pileup()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                    // EventInfo
+#include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 
 #include "TString.h"                                                              // Form()
 #include "TTree.h"                                                                // TTree
@@ -16,17 +17,15 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   , read_puWeight_(true)
   , analysisConfig_(new AnalysisConfig("produceNtuple", cfg))
   , info_(new EventInfo(*analysisConfig_))
-  , branchName_run("run")
-  , branchName_lumi("luminosityBlock")
-  , branchName_event("event")
-  , branchName_genHiggsDecayMode("genHiggsDecayMode")
-  , branchName_genWeight("genWeight")
-  , branchName_LHEReweightingWeight("LHEReweightingWeight")
-  , branchName_nLHEReweightingWeight(Form("n%s", branchName_LHEReweightingWeight.data()))
-  , branchName_gen_mHH("mHH_lhe")
-  , branchName_gen_cosThetaStar("cosThetaStar_lhe")
-  , branchName_htxs_pt("HTXS_Higgs_pt")
-  , branchName_htxs_y("HTXS_Higgs_y")
+  , runLumiEventReader_(new RunLumiEventReader(cfg))
+  , branchName_genHiggsDecayMode_("genHiggsDecayMode")
+  , branchName_genWeight_("genWeight")
+  , branchName_LHEReweightingWeight_("LHEReweightingWeight")
+  , branchName_nLHEReweightingWeight_(Form("n%s", branchName_LHEReweightingWeight_.data()))
+  , branchName_gen_mHH_("mHH_lhe")
+  , branchName_gen_cosThetaStar_("cosThetaStar_lhe")
+  , branchName_htxs_pt_("HTXS_Higgs_pt")
+  , branchName_htxs_y_("HTXS_Higgs_y")
 {
   const bool isMC = cfg.getParameter<bool>("isMC");
   if ( isMC )
@@ -43,7 +42,7 @@ EventInfoReader::~EventInfoReader()
 {
   if(info_ && info_->analysisConfig().isMC())
   {
-    delete[] info_->LHEReweightingWeight;
+    delete[] info_->LHEReweightingWeight_;
   }
   delete info_;
 }
@@ -52,56 +51,60 @@ std::vector<std::string>
 EventInfoReader::setBranchAddresses(TTree * inputTree)
 {
   std::vector<std::string> bound_branches;
+
+  const std::vector<std::string> runLumiEventBranches = runLumiEventReader_->setBranchAddresses(inputTree);
+  bound_branches.insert(bound_branches.end(), runLumiEventBranches.begin(), runLumiEventBranches.end());
+
   BranchAddressInitializer bai(inputTree);
-  bai.setBranchAddress(info_->run, branchName_run);
-  bai.setBranchAddress(info_->lumi, branchName_lumi);
-  bai.setBranchAddress(info_->event, branchName_event);
   if(info_->analysisConfig().isMC_H())
   {
     if(info_->read_htxs())
     {
-      bai.setBranchAddress(info_->htxs_.pt_, branchName_htxs_pt);
-      bai.setBranchAddress(info_->htxs_.y_, branchName_htxs_y);
+      bai.setBranchAddress(info_->htxs_.pt_, branchName_htxs_pt_);
+      bai.setBranchAddress(info_->htxs_.y_, branchName_htxs_y_);
     }
   }
   if(info_->analysisConfig().isMC_H() || info_->analysisConfig().isMC_HH())
   {
     if(read_genHiggsDecayMode_)
     {
-      bai.setBranchAddress(info_->genHiggsDecayMode, branchName_genHiggsDecayMode);
+      bai.setBranchAddress(info_->genHiggsDecayMode_, branchName_genHiggsDecayMode_);
     }
   }
   if(info_->analysisConfig().isMC())
   {
-    bai.setBranchAddress(info_->genWeight, branchName_genWeight);
+    bai.setBranchAddress(info_->genWeight_, branchName_genWeight_);
     if(read_puWeight_)
     {
-      bai.setBranchAddress(info_->pileupWeight, getBranchName_pileup(PUsys::central));
-      bai.setBranchAddress(info_->pileupWeightUp, getBranchName_pileup(PUsys::up));
-      bai.setBranchAddress(info_->pileupWeightDown, getBranchName_pileup(PUsys::down));
+      bai.setBranchAddress(info_->pileupWeight_, getBranchName_pileup(PUsys::central));
+      bai.setBranchAddress(info_->pileupWeightUp_, getBranchName_pileup(PUsys::up));
+      bai.setBranchAddress(info_->pileupWeightDown_, getBranchName_pileup(PUsys::down));
     }
     if(info_->analysisConfig().apply_topPtReweighting())
     {
-      bai.setBranchAddress(info_->topPtRwgtSF, branchName_topPtRwgt);
+      bai.setBranchAddress(info_->topPtRwgtSF_, branchName_topPtRwgt_);
     }
   }
-  if(info_->analysisConfig().isMC() && ! info_->tH_sf.empty())
+  if(info_->analysisConfig().isMC() && ! info_->tH_sf_.empty())
   {
-    BranchAddressInitializer bai_LHEReweight(inputTree, info_->LHEReweightingWeight_max);
-    bai_LHEReweight.setBranchAddress(info_->nLHEReweightingWeight, branchName_nLHEReweightingWeight);
-    bai_LHEReweight.setBranchAddress(info_->LHEReweightingWeight, branchName_LHEReweightingWeight);
+    BranchAddressInitializer bai_LHEReweight(inputTree, info_->LHEReweightingWeight_max_);
+    bai_LHEReweight.setBranchAddress(info_->nLHEReweightingWeight_, branchName_nLHEReweightingWeight_);
+    bai_LHEReweight.setBranchAddress(info_->LHEReweightingWeight_, branchName_LHEReweightingWeight_);
 
     const std::vector<std::string> lhe_branches = bai_LHEReweight.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), lhe_branches.begin(), lhe_branches.end());
   }
+
   // Siddhesh: Read gen_mHH for HH LO and NLO samples to make LOvsNLO HHreweighting comparison plots without much code editing
   if(info_->analysisConfig().isMC_HH() && (info_->analysisConfig().isHH_rwgt_allowed() || info_->analysisConfig().isMC_HH_nonresonant()))
   {
-    bai.setBranchAddress(info_->gen_mHH, branchName_gen_mHH);
-    bai.setBranchAddress(info_->gen_cosThetaStar, branchName_gen_cosThetaStar);
+    bai.setBranchAddress(info_->gen_mHH_, branchName_gen_mHH_);
+    bai.setBranchAddress(info_->gen_cosThetaStar_, branchName_gen_cosThetaStar_);
   }
-  const std::vector<std::string> evt_branches = bai.getBoundBranchNames_read();
-  bound_branches.insert(bound_branches.end(), evt_branches.begin(), evt_branches.end());
+
+  const std::vector<std::string> eventInfoBranches = bai.getBoundBranchNames_read();
+  bound_branches.insert(bound_branches.end(), eventInfoBranches.begin(), eventInfoBranches.end());
+
   return bound_branches;
 }
 
@@ -114,18 +117,22 @@ EventInfoReader::set_central_or_shift(const std::string& central_or_shift)
 void
 EventInfoReader::setTopPtRwgtBranchName(const std::string & branchName)
 {
-  branchName_topPtRwgt = Form("topPtRwgt_%s", branchName.data());
+  branchName_topPtRwgt_ = Form("topPtRwgt_%s", branchName.data());
 }
 
 std::string
 EventInfoReader::getTopPtRwgtBranchName() const
 {
-  return branchName_topPtRwgt;
+  return branchName_topPtRwgt_;
 }
 
 const EventInfo &
 EventInfoReader::read() const
 {
+  RunLumiEvent runLumiEvent = runLumiEventReader_->read();
+  info_->run_ = runLumiEvent.run();
+  info_->lumi_ = runLumiEvent.lumi();
+  info_->event_ = runLumiEvent.event();
   return *info_;
 }
 

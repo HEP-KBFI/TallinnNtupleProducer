@@ -81,9 +81,6 @@ class RecoMEtReader : public ReaderBase
   std::map<int, Float_t> met_pt_systematics_;
   std::map<int, Float_t> met_phi_systematics_;
 
-  //Float_t met_pt_systematic0_; // ONLY FOR TESTING !!
-  //Float_t met_pt_systematic1_; // ONLY FOR TESTING !!
-
   const EventInfo * eventInfo_;
   const RecoVertex * recoVertex_;
   mutable bool enable_phiModulationCorr_;

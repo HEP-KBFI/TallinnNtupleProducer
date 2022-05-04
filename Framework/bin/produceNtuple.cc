@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     }
   }
   // CV: add central value (for data and MC)
-  merge_systematic_shifts(systematic_shifts, { "central"});
+  merge_systematic_shifts(systematic_shifts, { "central" });
   std::cout << "Processing systematic uncertainties = " << format_vstring(systematic_shifts) << std::endl;
 
   int analyzedEntries = 0;
@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
     for ( const auto & central_or_shift : systematic_shifts )
     {
       eventReader->set_central_or_shift(central_or_shift);
-      Event event = eventReader->read();
+      const Event& event = eventReader->read();
 
       if ( central_or_shift == "central" )
       {
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
           evtWeightRecorder.record_auxWeight(eventWeightManager);
         }
         if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
-        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.eventInfo().topPtRwgtSF);
+        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.eventInfo().topPtRwgtSF());
         lheInfoReader->read();
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);

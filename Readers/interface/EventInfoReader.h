@@ -1,7 +1,8 @@
 #ifndef TallinnNtupleProducer_Readers_EventInfoReader_h
 #define TallinnNtupleProducer_Readers_EventInfoReader_h
 
-#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h" // ReaderBase
+#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"         // ReaderBase
+#include "TallinnNtupleProducer/Readers/interface/RunLumiEventReader.h" // RunLumiEventReader
 
 // forward declarations
 class TTree;
@@ -47,20 +48,18 @@ class EventInfoReader : public ReaderBase
   const AnalysisConfig * analysisConfig_;
   EventInfo * info_;
 
-  std::string branchName_topPtRwgt;
+  std::string branchName_topPtRwgt_;
 
- public:
-  const std::string branchName_run;
-  const std::string branchName_lumi;
-  const std::string branchName_event;
-  const std::string branchName_genHiggsDecayMode;
-  const std::string branchName_genWeight;
-  const std::string branchName_LHEReweightingWeight;
-  const std::string branchName_nLHEReweightingWeight;
-  const std::string branchName_gen_mHH;
-  const std::string branchName_gen_cosThetaStar;
-  const std::string branchName_htxs_pt;
-  const std::string branchName_htxs_y;
+  RunLumiEventReader * runLumiEventReader_;
+
+  const std::string branchName_genHiggsDecayMode_;
+  const std::string branchName_genWeight_;
+  const std::string branchName_LHEReweightingWeight_;
+  const std::string branchName_nLHEReweightingWeight_;
+  const std::string branchName_gen_mHH_;
+  const std::string branchName_gen_cosThetaStar_;
+  const std::string branchName_htxs_pt_;
+  const std::string branchName_htxs_y_;
 };
 
 #endif // TallinnNtupleProducer_Readers_EventInfoReader_h

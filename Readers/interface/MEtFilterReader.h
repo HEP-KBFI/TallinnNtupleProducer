@@ -22,6 +22,13 @@ class MEtFilterReader : public ReaderBase
   const MEtFilter &
   read() const;
 
+  /**
+    * @brief Return list of systematic uncertainties supported by EventInfoReader class
+    */
+  static
+  std::vector<std::string>
+  get_supported_systematics(const edm::ParameterSet & cfg);
+
  protected:
  /**
    * @brief Initialize names of branches to be read from tree

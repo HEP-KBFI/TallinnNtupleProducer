@@ -464,10 +464,10 @@ EvtWeightRecorder::record_genWeight(const EventInfo & eventInfo,
                                     bool use_sign_only)
 {
   assert(isMC_);
-  genWeight_ = boost::math::sign(eventInfo.genWeight);
+  genWeight_ = boost::math::sign(eventInfo.genWeight());
   if(! use_sign_only)
   {
-    const double genWeight_abs = std::fabs(eventInfo.genWeight);
+    const double genWeight_abs = std::fabs(eventInfo.genWeight());
     const double ref_genWeight = eventInfo.get_refGenWeight();
     if(std::fpclassify(ref_genWeight) == FP_ZERO)
     {
@@ -725,7 +725,7 @@ EvtWeightRecorder::record_hhWeight_lo(const HHWeightInterfaceLO * const HHWeight
                                       bool isDEBUG)
 {
   assert(HHWeightLO_calc);
-  return record_hhWeight_lo(HHWeightLO_calc->getWeight("SM", eventInfo.gen_mHH, eventInfo.gen_cosThetaStar, isDEBUG));
+  return record_hhWeight_lo(HHWeightLO_calc->getWeight("SM", eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar(), isDEBUG));
 }
 
 void
@@ -741,7 +741,7 @@ EvtWeightRecorder::record_hhWeight_nlo(const HHWeightInterfaceNLO * const HHWeig
                                        bool isDEBUG)
 {
   assert(HHWeightNLO_calc);
-  return record_hhWeight_nlo(HHWeightNLO_calc->getWeight_LOtoNLO("SM", eventInfo.gen_mHH, eventInfo.gen_cosThetaStar, isDEBUG));
+  return record_hhWeight_nlo(HHWeightNLO_calc->getWeight_LOtoNLO("SM", eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar(), isDEBUG));
 }
 
 void
@@ -834,9 +834,9 @@ EvtWeightRecorder::record_puWeight(const EventInfo * const eventInfo)
     }
     switch(puSys_option)
     {
-      case PUsys::central: weights_pu_[puSys_option] = eventInfo->pileupWeight;     break;
-      case PUsys::up:      weights_pu_[puSys_option] = eventInfo->pileupWeightUp;   break;
-      case PUsys::down:    weights_pu_[puSys_option] = eventInfo->pileupWeightDown; break;
+      case PUsys::central: weights_pu_[puSys_option] = eventInfo->pileupWeight();     break;
+      case PUsys::up:      weights_pu_[puSys_option] = eventInfo->pileupWeightUp();   break;
+      case PUsys::down:    weights_pu_[puSys_option] = eventInfo->pileupWeightDown(); break;
       default: assert(0);
     }
   }

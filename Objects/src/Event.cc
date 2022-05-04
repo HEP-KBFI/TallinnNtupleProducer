@@ -4,9 +4,14 @@
 
 #include <string>    // std::string
 
+Event::Event()
+  : eventInfo_(nullptr)
+  , triggerInfo_(nullptr)
+{}
+
 Event::Event(const EventInfo& eventInfo, const TriggerInfo& triggerInfo)
-  : eventInfo_(eventInfo)
-  , triggerInfo_(triggerInfo)
+  : eventInfo_(&eventInfo)
+  , triggerInfo_(&triggerInfo)
 {}
 
 Event::~Event()
@@ -15,19 +20,21 @@ Event::~Event()
 const EventInfo&
 Event::eventInfo() const
 {
-  return eventInfo_;
+  assert(eventInfo_);
+  return *eventInfo_;
 }
 
 const TriggerInfo&
 Event::triggerInfo() const
 {
-  return triggerInfo_;
+  assert(triggerInfo_);
+  return *triggerInfo_;
 }
 
 const RecoMuonPtrCollection&
 Event::looseMuons() const
 {
-  return looseMuons_;
+  return looseMuonsFull_;
 }
 
 const RecoMuonPtrCollection&
@@ -45,7 +52,7 @@ Event::tightMuons()const
 const RecoElectronPtrCollection&
 Event::looseElectrons() const
 {
-  return looseElectrons_;
+  return looseElectronsFull_;
 }
 
 const RecoElectronPtrCollection&
@@ -63,7 +70,7 @@ Event::tightElectrons() const
 const RecoLeptonPtrCollection&
 Event::looseLeptons() const
 {
-  return looseLeptons_;
+  return looseLeptonsFull_;
 }
 
 const RecoLeptonPtrCollection&

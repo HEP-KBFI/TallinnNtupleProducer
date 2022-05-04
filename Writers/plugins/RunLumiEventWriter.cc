@@ -15,17 +15,17 @@ void
 RunLumiEventWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  bai.setBranch(run_,   "run");
-  bai.setBranch(lumi_,  "lumi");
+  bai.setBranch(run_, "run");
+  bai.setBranch(lumi_, "lumi");
   bai.setBranch(event_, "event");  
 }
 
 void
 RunLumiEventWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  run_   = event.eventInfo().run;
-  lumi_  = event.eventInfo().lumi;
-  event_ = event.eventInfo().event;
+  run_ = event.eventInfo().run();
+  lumi_ = event.eventInfo().lumi();
+  event_ = event.eventInfo().event();
 }
 
 std::vector<std::string>

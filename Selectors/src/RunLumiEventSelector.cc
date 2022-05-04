@@ -207,5 +207,5 @@ RunLumiEventSelector::areWeDone() const
 bool
 RunLumiEventSelector::operator()(const EventInfo & info) const
 {
-  return RunLumiEventSelector::operator()(info.run, info.lumi, info.event);
+  return RunLumiEventSelector::operator()(info.run(), info.lumi(), info.event());
 }
