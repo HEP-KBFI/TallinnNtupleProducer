@@ -426,11 +426,7 @@ EventReader::read() const
   bool isEventInfoSystematic = contains(eventInfo_supported_systematics_, current_central_or_shift_);
   if ( isEventInfoSystematic || isNewEvent )
   {
-    EventInfo * eventInfo_nonconst = const_cast<EventInfo *>(&eventInfoReader_->read());
-    eventInfo_nonconst->run_ = run;
-    eventInfo_nonconst->lumi_ = lumi;
-    eventInfo_nonconst->event_ = event;
-    event_.eventInfo_ = eventInfo_nonconst;
+    event_.eventInfo_ = &eventInfoReader_->read();
   }
 
   bool isTriggerInfoSystematic = contains(triggerInfo_supported_systematics_, current_central_or_shift_);

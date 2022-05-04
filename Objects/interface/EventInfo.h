@@ -133,7 +133,6 @@ class EventInfo
              const EventInfo & info);
 
   friend class EventInfoReader;
-  friend class EventReader;
 
  protected:
   const AnalysisConfig * analysisConfig_;
