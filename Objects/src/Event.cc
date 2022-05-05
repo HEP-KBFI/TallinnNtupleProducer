@@ -7,11 +7,13 @@
 Event::Event()
   : eventInfo_(nullptr)
   , triggerInfo_(nullptr)
+  , isValid_(false)
 {}
 
 Event::Event(const EventInfo& eventInfo, const TriggerInfo& triggerInfo)
   : eventInfo_(&eventInfo)
   , triggerInfo_(&triggerInfo)
+  , isValid_(false)
 {}
 
 Event::~Event()
@@ -161,6 +163,12 @@ namespace
       stream << objectName << " #" << idxObject << ": " << *object;
     }
   }
+}
+
+bool 
+Event::isInvalid() const
+{
+  return !isValid_;
 }
 
 std::ostream &

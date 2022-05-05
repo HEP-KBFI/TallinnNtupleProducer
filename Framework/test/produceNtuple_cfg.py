@@ -38,7 +38,9 @@ process.produceNtuple = cms.PSet(
 
     # number of "nominal" leptons (electrons and muons) and hadronic taus
     numNominalLeptons = cms.uint32(2),
+    applyNumNominalLeptonsCut = cms.bool(False),
     numNominalHadTaus = cms.uint32(1),
+    applyNumNominalHadTausCut = cms.bool(False),
 
     # selection of electrons, muons, and hadronic taus
     lep_mva_cut_mu = cms.double(0.5),
@@ -270,4 +272,4 @@ process.produceNtuple.btagSFRatio                                    = cms.PSet(
 )
 process.produceNtuple.selection                                      = cms.string("nlep == 2 & ntau == 1")
 #process.produceNtuple.selection                                      = cms.string("")
-
+#process.produceNtuple.selEventsFileName                              = cms.string('selEvents_DEBUG.txt')

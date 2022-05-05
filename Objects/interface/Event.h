@@ -60,6 +60,8 @@ class Event
 
   const RecoVertex& vertex() const;
 
+  bool isInvalid() const;
+
   friend class EventReader;
 
  protected:
@@ -133,6 +135,8 @@ class Event
   MEtFilter metFilters_;
 
   RecoVertex vertex_;
+
+  bool isValid_;
 };
 
 std::ostream &

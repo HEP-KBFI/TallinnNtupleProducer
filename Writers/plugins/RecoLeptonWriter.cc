@@ -107,9 +107,6 @@ namespace
 void
 RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  // Warning: The following code assumes that only those events get written to the "plain" Ntuple
-  //          for which the number of fakeable leptons is equal to the number of "nominal" leptons 
-  //         (where the number of "nominal" leptons is specific to a given channel)
   const RecoLeptonPtrCollection& leptons = event.fakeableLeptons();
   nLeptons_ = leptons.size();
   for ( size_t idxLepton = 0; idxLepton < max_nLeptons_; ++idxLepton )

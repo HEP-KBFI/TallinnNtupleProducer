@@ -96,8 +96,9 @@ int main(int argc, char* argv[])
   clock.Start("produceNtuple");
 
 //--- read python configuration parameters
+  std::cout << "Reading config file " << argv[1] << std::endl;
   if ( !edm::readPSetsFrom(argv[1])->existsAs<edm::ParameterSet>("process") )
-    throw cmsException("produceNtuple", __LINE__) << "No ParameterSet 'process' found in configuration file = " << argv[1] << " !!";
+    throw cmsException("produceNtuple", __LINE__) << "No ParameterSet 'process' found in config file !!";
 
   edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("process");
 
@@ -110,6 +111,7 @@ int main(int argc, char* argv[])
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
   const Era era = get_era(era_string);
+  std::cout << "Setting era to: " << get_era(era) << std::endl;
 
   bool isMC = cfg_produceNtuple.getParameter<bool>("isMC");
   edm::VParameterSet lumiScale = cfg_produceNtuple.getParameter<edm::VParameterSet>("lumiScale");
@@ -120,7 +122,9 @@ int main(int argc, char* argv[])
   bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");
 
   unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
+  bool applyNumNominalLeptonsCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalLeptonsCut");
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
+  bool applyNumNominalHadTausCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalHadTausCut");
   std::cout << "Setting nominal multiplicity of leptons and taus to: #leptons = " << numNominalLeptons << ", #taus = " << numNominalHadTaus << std::endl;
 
   std::string hadTauWP_againstJets = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstJets_tight");
@@ -131,8 +135,23 @@ int main(int argc, char* argv[])
   bool apply_chargeMisIdRate = cfg_produceNtuple.getParameter<bool>("apply_chargeMisIdRate");
 
   std::string selection = cfg_produceNtuple.getParameter<std::string>("selection");
+  std::cout << "Selection set in config file = '" << selection << "'" << std::endl;
+  if ( applyNumNominalLeptonsCut )
+  {
+    const std::string numNominalLeptonsCut = Form("nlep == %u", numNominalLeptons);
+    std::cout << "Adding the condition '" << numNominalLeptonsCut << "' to selection, because the flag applyNumNominalLeptonsCut is enabled." << std::endl;
+    if ( selection != "" ) selection.append(" & ");
+    selection.append(numNominalLeptonsCut);
+  }
+  if ( applyNumNominalHadTausCut )
+  {
+    const std::string numNominalHadTausCut = Form("ntau == %u", numNominalHadTaus);
+    std::cout << "Adding the condition '" << numNominalHadTausCut << "' to selection, because the flag applyNumNominalHadTausCut is enabled." << std::endl;
+    if ( selection != "" ) selection.append(" & ");
+    selection.append(numNominalHadTausCut);
+  }
   std::cout << "Applying selection = '" << selection << "'" << std::endl;
-
+  
   bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
 
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
@@ -258,11 +277,12 @@ int main(int argc, char* argv[])
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
+    bool skipEvent = false;
     for ( const auto & central_or_shift : systematic_shifts )
     {
       eventReader->set_central_or_shift(central_or_shift);
       const Event& event = eventReader->read();
-
+      
       if ( central_or_shift == "central" )
       {
         if ( inputTree->canReport(reportEvery) )
@@ -280,6 +300,7 @@ int main(int argc, char* argv[])
         { 
           if ( !(*run_lumi_eventSelector)(event.eventInfo()) )
           {
+            skipEvent = true;
             continue;
           }
           std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << event.eventInfo() << '\n';
@@ -293,6 +314,14 @@ int main(int argc, char* argv[])
         {
           std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << ' ' << event.eventInfo() << '\n';
         }
+      }
+
+      // CV: skip processing events that don't contain the nominal number of leptons and hadronic taus,
+      //     if the flags applyNumNominalLeptonsCut and applyNumNominalHadTausCut are enabled in the config file
+      if ( event.isInvalid() )
+      {
+        skipEvent = true;
+        continue;
       }
 
       EvtWeightRecorder evtWeightRecorder({ central_or_shift }, central_or_shift, isMC);
@@ -375,6 +404,7 @@ int main(int argc, char* argv[])
                             << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << "; "
                             << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ")\n";
                 }
+                skipEvent = true;
                 continue;
               }
             }
@@ -416,6 +446,7 @@ int main(int argc, char* argv[])
                             << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ";" 
                             << " hadTau: charge = " << fakeableHadTau->charge() << ")\n";
                 }
+                skipEvent = true;
                 continue;
               }
             }
@@ -436,7 +467,10 @@ int main(int argc, char* argv[])
         writer->write(event, evtWeightRecorder);
       }
     }
-    outputTree->Fill();
+    if ( !skipEvent )
+    {
+      outputTree->Fill();
+    }
   }
 
   TDirectory* dir = fs.getBareDirectory();
