@@ -45,6 +45,7 @@ class RecoLeptonWriter : public WriterBase
 
   UInt_t nLeptons_;
   Float_t * pt_;
+  Float_t * conePt_;
   Float_t * eta_;
   Float_t * phi_;
   Float_t * mass_;

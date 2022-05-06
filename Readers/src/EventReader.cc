@@ -7,6 +7,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/pickFirstNobjects.h"        // pickFirstNobjects()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getBTagWeight_option(), getMET_option()
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
@@ -347,21 +348,6 @@ namespace
   isHigherConePt(const T * particle1, const T * particle2)
   {
     return particle1->cone_pt() > particle2->cone_pt();
-  }
-
-  /**
-   * @brief Return first N objects from collection given as function argument. In case the input
-   *        collection contains fewer than N objects, the whole input collection is returned
-   */
-  template <typename T>
-  std::vector<T>
-  pickFirstNobjects(const std::vector<T> & objects_input,
-                    std::size_t N)
-  {
-    const std::size_t N_input = std::min(objects_input.size(), N);
-    std::vector<T> objects_output;
-    std::copy_n(objects_input.begin(), N_input, std::back_inserter(objects_output));
-    return objects_output;
   }
 
   /**

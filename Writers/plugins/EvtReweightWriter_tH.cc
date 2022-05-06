@@ -7,7 +7,6 @@
 #include "TTree.h"                                                                // TTree
 
 #include <assert.h>                                                               // assert()
-#include <cstdlib>                                                                // std::abs()
 
 EvtReweightWriter_tH::EvtReweightWriter_tH(const edm::ParameterSet & cfg)
   : WriterBase(cfg)

@@ -4,7 +4,11 @@ from TallinnNtupleProducer.Framework.hhWeights_cfi import hhWeights as config_hh
 from TallinnNtupleProducer.Framework.recommendedMEtFilters_cfi import recommendedMEtFilters_2016 as config_recommendedMEtFilters_2016, recommendedMEtFilters_2017 as config_recommendedMEtFilters_2017, recommendedMEtFilters_2018 as config_recommendedMEtFilters_2018
 from TallinnNtupleProducer.Framework.triggers_cfi import triggers_2016 as config_triggers_2016, triggers_2017 as config_triggers_2017, triggers_2018 as config_triggers_2018
 
+from TallinnNtupleProducer.Writers.BDTVarWriter_HH_2lss_cfi import bdtVariables_HH_2lss as writers_bdtVariables_HH_2lss
+from TallinnNtupleProducer.Writers.EvtReweightWriter_HH_cfi import evtReweight_HH as writers_evtReweight_HH
+from TallinnNtupleProducer.Writers.EvtReweightWriter_tH_cfi import evtReweight_tH as writers_evtReweight_tH
 from TallinnNtupleProducer.Writers.EvtWeightWriter_cfi import evtWeight as writers_evtWeight
+from TallinnNtupleProducer.Writers.GenHHKinematicsWriter_cfi import genHHKinematics as writers_genHHKinematics
 from TallinnNtupleProducer.Writers.GenPhotonFilterWriter_cfi import genPhotonFilter as writers_genPhotonFilter
 from TallinnNtupleProducer.Writers.HtoZZto4lVetoWriter_cfi import HtoZZto4lVeto as writers_HtoZZto4lVeto
 from TallinnNtupleProducer.Writers.LowMassLeptonPairVetoWriter_cfi import lowMassLeptonPairVeto as writers_lowMassLeptonPairVeto
@@ -153,9 +157,16 @@ process.produceNtuple = cms.PSet(
     jetCleaningByIndex = cms.bool(True),
 
     writerPlugins = cms.VPSet(
+        writers_bdtVariables_HH_2lss,
+        # CV: use EvtReweightWriter_HH plugin only when processing non-resonant HH MC samples
+        writers_evtReweight_HH,
+        # CV: use EvtReweightWriter_tH plugin only when processing tH MC samples
+        #writers_evtReweight_tH,
         writers_evtWeight,
         writers_fakeableHadTaus,
         writers_fakeableLeptons,
+        # CV: use GenHHKinematicsWriter plugin only when processing HH MC samples (resonant and non-resonant)
+        writers_genHHKinematics,
         # CV: GenPhotonFilterWriter plugin can be run for some MC samples only,
         #     because the collection "GenPhotonCandidate" does not exist in all MC samples !!
         #writers_genPhotonFilter,

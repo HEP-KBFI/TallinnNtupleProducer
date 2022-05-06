@@ -23,6 +23,7 @@ RecoLeptonWriter::RecoLeptonWriter(const edm::ParameterSet & cfg)
   assert(max_nLeptons_ >= 1);
   nLeptons_ = 0;
   pt_ = new Float_t[max_nLeptons_];
+  conePt_ = new Float_t[max_nLeptons_];
   eta_ = new Float_t[max_nLeptons_];
   phi_ = new Float_t[max_nLeptons_];
   mass_ = new Float_t[max_nLeptons_];
@@ -40,6 +41,7 @@ RecoLeptonWriter::RecoLeptonWriter(const edm::ParameterSet & cfg)
 RecoLeptonWriter::~RecoLeptonWriter()
 {
   delete[] pt_;
+  delete[] conePt_;
   delete[] eta_;
   delete[] phi_;
   delete[] mass_;
@@ -62,6 +64,7 @@ RecoLeptonWriter::setBranches(TTree * outputTree)
   for ( size_t idxLepton = 0; idxLepton < max_nLeptons_; ++idxLepton )
   {
     bai.setBranch(pt_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "pt"));
+    bai.setBranch(conePt_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "conePt"));
     bai.setBranch(eta_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "eta"));
     bai.setBranch(phi_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "phi"));
     bai.setBranch(mass_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "mass"));
@@ -114,7 +117,8 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
     if ( idxLepton < nLeptons_ )
     {
       const RecoLepton * lepton = leptons[idxLepton];
-      pt_[idxLepton] = lepton->cone_pt();
+      pt_[idxLepton] = lepton->pt();
+      conePt_[idxLepton] = lepton->cone_pt();
       eta_[idxLepton] = lepton->eta();
       phi_[idxLepton] = lepton->phi();
       mass_[idxLepton] = lepton->mass();
@@ -131,6 +135,7 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
     else
     {
       pt_[idxLepton] = 0.;
+      conePt_[idxLepton] = 0.;
       eta_[idxLepton] = 0.;
       phi_[idxLepton] = 0.;
       mass_[idxLepton] = 0.;
