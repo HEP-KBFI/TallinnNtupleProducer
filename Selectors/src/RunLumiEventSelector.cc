@@ -127,8 +127,8 @@ RunLumiEventSelector::readInputFile()
                        "ls = " << lumi << ", "
                        "event = " << event << '\n';
 
-          runLumiSectionEventNumbers_[runNumber][lumiSectionNumber].insert(eventNumber);
-          matchedRunLumiSectionEventNumbers_[runNumber][lumiSectionNumber][eventNumber] = 0;
+          runLumiSectionEventNumbers_[run][lumi].insert(event);
+          matchedRunLumiSectionEventNumbers_[run][lumi][event] = 0;
           ++numEventsToBeSelected_;
         }
         else

@@ -175,7 +175,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   if ( applyNumNominalHadTausCut_ )
   {
     // CV: relax tau pT cut from 20 to 19 GeV, to allow for tau energy scale shifts
-    std::cout << "Relaxing tau pT cut to 19 GeV, as applyNumNominalHadTausCut is enabled."
+    std::cout << "Relaxing tau pT cut to 19 GeV, as applyNumNominalHadTausCut is enabled." << std::endl;
     fakeableHadTauSelector_->set_min_pt(19.);
     tightHadTauSelector_->set_min_pt(19.);
   }
