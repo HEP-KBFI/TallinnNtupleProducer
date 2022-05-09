@@ -42,6 +42,8 @@ class BDTVarWriter_HH_2lss : public WriterBase
   resetBranches();
 
   Float_t m_ll_;
+  Float_t dPhi_ll_;
+  Float_t dEta_ll_;
   Float_t dR_ll_;
   Float_t mT_lep1_;
   Float_t mT_lep2_;

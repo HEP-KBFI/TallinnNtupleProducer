@@ -1,5 +1,6 @@
 #include "TallinnNtupleProducer/Writers/plugins/BDTVarWriter_HH_2lss.h"
 
+#include "DataFormats/Math/interface/deltaPhi.h"                                  // deltaPhi()
 #include "DataFormats/Math/interface/deltaR.h"                                    // deltaR()
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
@@ -19,6 +20,7 @@
 #include "TTree.h"                                                                // TTree
 
 #include <algorithm>                                                              // std::sort
+#include <cmath>                                                                  // std::fabs()
 #include <vector>                                                                 // std::vector
 
 BDTVarWriter_HH_2lss::BDTVarWriter_HH_2lss(const edm::ParameterSet & cfg)
@@ -33,6 +35,8 @@ BDTVarWriter_HH_2lss::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
   bai.setBranch(m_ll_, "m_ll");
+  bai.setBranch(dPhi_ll_, "dPhi_ll");
+  bai.setBranch(dEta_ll_, "dEta_ll");
   bai.setBranch(dR_ll_, "dR_ll");
   bai.setBranch(mT_lep1_, "mT_lep1");
   bai.setBranch(mT_lep2_, "mT_lep2");
@@ -53,6 +57,8 @@ void
 BDTVarWriter_HH_2lss::resetBranches()
 {
   m_ll_ = -1.;
+  dPhi_ll_ = -1.;
+  dEta_ll_ = -1.;
   dR_ll_ = -1.;
   mT_lep1_ = -1.;
   mT_lep2_ = -1.;
@@ -81,6 +87,8 @@ BDTVarWriter_HH_2lss::writeImp(const Event & event, const EvtWeightRecorder & ev
     const RecoLepton * lepton_sublead = leptons.at(1);
 
     m_ll_ = comp_sumP4(std::vector<const RecoLepton *>({ lepton_lead, lepton_sublead })).mass();
+    dPhi_ll_ = std::fabs(deltaPhi(lepton_lead->phi(), lepton_sublead->phi()));
+    dEta_ll_ = std::fabs(lepton_lead->eta() - lepton_sublead->eta());
     dR_ll_ = deltaR(lepton_lead->p4(), lepton_sublead->p4());
 
     const RecoMEt & met = event.met();
