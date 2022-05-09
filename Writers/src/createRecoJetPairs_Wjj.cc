@@ -37,7 +37,7 @@ namespace
     { 
       return true;
     }
-    else if ( jetPair2.type() == RecoJetPair_Wjj::Type::kResolved && jetPair2.type() == RecoJetPair_Wjj::Type::kBoosted )
+    else if ( jetPair1.type() == RecoJetPair_Wjj::Type::kResolved && jetPair2.type() == RecoJetPair_Wjj::Type::kBoosted )
     {
       return false;
     }
