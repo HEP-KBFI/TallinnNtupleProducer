@@ -50,7 +50,6 @@ EvtReweightWriter_HH::~EvtReweightWriter_HH()
 void
 EvtReweightWriter_HH::setBranches(TTree * outputTree)
 {
-std::cout << "<EvtReweightWriter_HH::setBranches>:" << std::endl;
   BranchAddressInitializer bai(outputTree);
   for ( auto bmName : bmNames_ )
   {
