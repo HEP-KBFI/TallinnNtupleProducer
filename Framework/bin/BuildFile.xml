@@ -14,5 +14,4 @@
   <use   name="TallinnNtupleProducer/Selectors"/>
   <use   name="TallinnNtupleProducer/Writers"/>
   <use   name="root"/>
-  <use   name="boost"/>
 </bin>

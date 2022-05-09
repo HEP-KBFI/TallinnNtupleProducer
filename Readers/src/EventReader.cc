@@ -172,6 +172,13 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   int hadTauWP_againstMuons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstMuons"));
   fakeableHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
   tightHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
+  if ( applyNumNominalHadTausCut_ )
+  {
+    // CV: relax tau pT cut from 20 to 19 GeV, to allow for tau energy scale shifts
+    std::cout << "Relaxing tau pT cut to 19 GeV, as applyNumNominalHadTausCut is enabled."
+    fakeableHadTauSelector_->set_min_pt(19.);
+    tightHadTauSelector_->set_min_pt(19.);
+  }
 
   jetReaderAK4_ = new RecoJetReaderAK4(make_cfg(cfg, "branchName_jets_ak4"));
   bool jetCleaningByIndex = cfg.getParameter<bool>("jetCleaningByIndex");

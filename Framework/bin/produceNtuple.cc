@@ -58,11 +58,8 @@
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
 #include <TString.h>                                                                            // TString, Form()
 #include <TTree.h>                                                                              // TTree
-     
-#include <boost/algorithm/string/replace.hpp>                                                   // boost::replace_all_copy()
-#include <boost/algorithm/string/predicate.hpp>                                                 // boost::starts_with()
 
-#include <assert.h>                                                                             // assert
+#include <assert.h>                                                                             // assert()
 #include <cstdlib>                                                                              // EXIT_SUCCESS, EXIT_FAILURE
 #include <fstream>                                                                              // std::ofstream
 #include <iostream>                                                                             // std::cerr, std::fixed
@@ -72,9 +69,6 @@
 
 typedef std::vector<std::string> vstring;
 
-/**
- * @brief Produce "plain" Ntuple, which is used for final event selection & histogram filling.
- */
 int main(int argc, char* argv[])
 {
 //--- throw an exception in case ROOT encounters an error
@@ -104,10 +98,11 @@ int main(int argc, char* argv[])
 
   edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
   AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
+  
+  std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
+
   std::string process = cfg_produceNtuple.getParameter<std::string>("process");
   std::cout << "Processing process = '" << process << "'" << std::endl;
-
-  std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
   const Era era = get_era(era_string);
@@ -312,7 +307,7 @@ int main(int argc, char* argv[])
 
         if ( isDEBUG )
         {
-          std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << ' ' << event.eventInfo() << '\n';
+          std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << " " << event.eventInfo() << '\n';
         }
       }
 

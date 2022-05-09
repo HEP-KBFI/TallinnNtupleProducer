@@ -42,9 +42,9 @@ RunLumiEventSelector::~RunLumiEventSelector()
   int numRunLumiSectionEventNumbersUnmatched = 0;
   for(const auto & run: matchedRunLumiSectionEventNumbers_)
   {
-    for(const auto & lumiSection: run.second)
+    for(const auto & lumi: run.second)
     {
-      for(const auto & event: lumiSection.second)
+      for(const auto & event: lumi.second)
       {
         if(event.second < 1)
         {
@@ -52,13 +52,13 @@ RunLumiEventSelector::~RunLumiEventSelector()
           {
             std::cout << "Events not found:\n";
           }
-          std::cout << " run# = " << run.first << ","
-                       " ls# "    << lumiSection.first << ","
-                       " event# " << event.first << '\n';
+          std::cout << " run = " << run.first << ","
+                       " ls = " << lumi.first << ","
+                       " event = " << event.first << '\n';
           ++numRunLumiSectionEventNumbersUnmatched;
         } // if(event.second < 1)
       } // event
-    } // lumiSection
+    } // lumi
   } // run
 
   if(numRunLumiSectionEventNumbersUnmatched > 0)
@@ -72,9 +72,9 @@ RunLumiEventSelector::~RunLumiEventSelector()
   int numRunLumiSectionEventNumbersAmbiguousMatch = 0;
   for(const auto & run: matchedRunLumiSectionEventNumbers_)
   {
-    for(const auto & lumiSection: run.second)
+    for(const auto & lumi: run.second)
     {
-      for(const auto & event: lumiSection.second)
+      for(const auto & event: lumi.second)
       {
         if(event.second > 1)
         {
@@ -82,13 +82,13 @@ RunLumiEventSelector::~RunLumiEventSelector()
           {
             std::cout << "Events found more than once:\n";
           }
-          std::cout << " run# = " << run.first << ","
-                       " ls# "    << lumiSection.first << ","
-                       " event# " << event.first << '\n';
+          std::cout << " run = " << run.first << ","
+                       " ls = " << lumi.first << ","
+                       " event = " << event.first << '\n';
           ++numRunLumiSectionEventNumbersAmbiguousMatch;
         } // if(event.second > 1)
       } // event
-    } // lumiSection
+    } // lumi
   } // run
 
   if(numRunLumiSectionEventNumbersAmbiguousMatch > 0)
@@ -119,13 +119,13 @@ RunLumiEventSelector::readInputFile()
       {
         if(std::regex_search(line, match, pattern))
         {
-          const RunType         runNumber         = boost::lexical_cast<RunType>        (match[1]);
-          const LumiSectionType lumiSectionNumber = boost::lexical_cast<LumiSectionType>(match[2]);
-          const EventType       eventNumber       = boost::lexical_cast<EventType>      (match[3]);
+          const RunType run = boost::lexical_cast<RunType>(match[1]);
+          const LumiSectionType lumi = boost::lexical_cast<LumiSectionType>(match[2]);
+          const EventType event= boost::lexical_cast<EventType>(match[3]);
           std::cout << "--> adding "
-                       "run# = " << runNumber         << ", "
-                       "ls# "    << lumiSectionNumber << ", "
-                       "event# " << eventNumber       << '\n';
+                       "run = " << run << ", "
+                       "ls = " << lumi << ", "
+                       "event = " << event << '\n';
 
           runLumiSectionEventNumbers_[runNumber][lumiSectionNumber].insert(eventNumber);
           matchedRunLumiSectionEventNumbers_[runNumber][lumiSectionNumber][eventNumber] = 0;
@@ -161,8 +161,8 @@ RunLumiEventSelector::readInputFile()
 }
 
 bool
-RunLumiEventSelector::operator()(ULong_t run,
-                                 ULong_t ls,
+RunLumiEventSelector::operator()(UInt_t run,
+                                 UInt_t lumi,
                                  ULong_t event) const
 {
 //--- check if run number matches any of the runs containing events to be selected
@@ -170,9 +170,9 @@ RunLumiEventSelector::operator()(ULong_t run,
   if(runLumiSectionEventNumbers_.count(run))
   {
     const lumiSectionEventNumberMap & lumiSectionEventNumbers = runLumiSectionEventNumbers_.at(run);
-    if(lumiSectionEventNumbers.count(ls))
+    if(lumiSectionEventNumbers.count(lumi))
     {
-      const eventNumberSet & eventNumbers = lumiSectionEventNumbers.at(ls);
+      const eventNumberSet & eventNumbers = lumiSectionEventNumbers.at(lumi);
       if(eventNumbers.count(event))
       {
         isSelected = true;
@@ -184,10 +184,10 @@ RunLumiEventSelector::operator()(ULong_t run,
   if(isSelected)
   {
     std::cout << "<RunLumiEventSelector::operator>: selecting "
-                 "run# = " << run << ", ls# " << ls << ", event# " << event << '\n';
+                 "run = " << run << ", ls = " << lumi << ", event = " << event << '\n';
 
-    ++matchedRunLumiSectionEventNumbers_[run][ls][event];
-    if ( matchedRunLumiSectionEventNumbers_[run][ls][event] == 1 ) { // CV: select only first match
+    ++matchedRunLumiSectionEventNumbers_[run][lumi][event];
+    if ( matchedRunLumiSectionEventNumbers_[run][lumi][event] == 1 ) { // CV: select only first match
       ++numEventsSelected_;
       return true;
     } else {

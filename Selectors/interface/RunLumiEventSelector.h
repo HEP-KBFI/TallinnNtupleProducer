@@ -25,8 +25,8 @@ class RunLumiEventSelector
   virtual ~RunLumiEventSelector();
 
   bool
-  operator()(ULong_t run,
-             ULong_t ls,
+  operator()(UInt_t run,
+             UInt_t lumi,
              ULong_t event) const;
 
   bool
@@ -42,8 +42,8 @@ class RunLumiEventSelector
   std::string inputFileName_;
   std::string separator_;
 
-  typedef ULong_t   RunType;
-  typedef ULong_t   LumiSectionType;
+  typedef UInt_t RunType;
+  typedef UInt_t LumiSectionType;
   typedef ULong64_t EventType;
 
   typedef std::set<EventType> eventNumberSet;
