@@ -21,7 +21,8 @@ EvtReweightWriter_HH::EvtReweightWriter_HH(const edm::ParameterSet & cfg)
 {
   if ( apply_HH_rwgt_lo_ || apply_HH_rwgt_nlo_ )
   {
-    hhWeightInterface_couplings_ = new HHWeightInterfaceCouplings(cfg);
+    edm::ParameterSet cfg_hhCoupling = cfg.getParameterSet("hhCoupling");
+    hhWeightInterface_couplings_ = new HHWeightInterfaceCouplings(cfg_hhCoupling);
     bmNames_ = hhWeightInterface_couplings_->get_bm_names();
     if ( apply_HH_rwgt_lo_ )
     {

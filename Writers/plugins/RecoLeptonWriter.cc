@@ -13,6 +13,7 @@
 #include "TTree.h"                                                                // TTree
 
 #include <assert.h>                                                               // assert()
+#include <cmath>                                                                  // std::abs()
 
 RecoLeptonWriter::RecoLeptonWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
@@ -122,7 +123,7 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
       eta_[idxLepton] = lepton->eta();
       phi_[idxLepton] = lepton->phi();
       mass_[idxLepton] = lepton->mass();
-      pdgId_[idxLepton] = lepton->pdgId();
+      pdgId_[idxLepton] = std::abs(lepton->pdgId());
       charge_[idxLepton] = lepton->charge();
       mvaRawTTH_[idxLepton] = lepton->mvaRawTTH();
       isFakeable_[idxLepton] = lepton->isFakeable();

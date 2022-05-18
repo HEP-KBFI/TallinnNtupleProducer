@@ -53,10 +53,10 @@ class BDTVarWriter_HH_2lss : public WriterBase
   Float_t max_dR_lep_Wjets_;
   Float_t min_dR_lep_leadWjet_;
   Float_t max_dR_lep_leadWjet_;
-  Float_t dR_Wjj1_;
-  Float_t m_Wjj1_;
-  Float_t dR_Wjj2_;
-  Float_t m_Wjj2_;
+  Float_t dR_jj_W1_;
+  Float_t m_jj_W1_;
+  Float_t dR_jj_W2_;
+  Float_t m_jj_W2_;
   Float_t mHH_vis_;
 };
 

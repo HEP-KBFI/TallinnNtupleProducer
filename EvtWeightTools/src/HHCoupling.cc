@@ -1,6 +1,8 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHCoupling.h"
 
-#include <iostream> // std::ostream
+#include <TString.h> // Form
+
+#include <iostream>  // std::ostream
 
 HHCoupling::HHCoupling(double kl,
                        double kt,
@@ -15,6 +17,7 @@ HHCoupling::HHCoupling(double kl,
   , cg_(cg)
   , c2g_(c2g)
   , name_(name)
+  , weightName_(Form("Weight_%s", name.data()))
   , training_(training)
 {}
 
@@ -60,19 +63,19 @@ HHCoupling::c2g() const
   return c2g_;
 }
 
-std::string
+const std::string &
 HHCoupling::name() const
 {
   return name_;
 }
 
-std::string
+const std::string &
 HHCoupling::weightName() const
 {
-  return "Weight_" + name_;
+  return weightName_;
 }
 
-std::string
+const std::string &
 HHCoupling::training() const
 {
   return training_;

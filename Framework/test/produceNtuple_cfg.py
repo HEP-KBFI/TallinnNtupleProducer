@@ -281,6 +281,6 @@ process.produceNtuple.has_pdf_weights                                = cms.bool(
 process.produceNtuple.btagSFRatio                                    = cms.PSet(
   central = cms.vdouble(1.0, 0.983850754831, 0.970806608203, 0.95589515666, 0.941090355157, 0.919510668991, 0.896747198034, 0.869121413881, 0.843409507134, 0.788891130366),
 )
-process.produceNtuple.selection                                      = cms.string("nlep == 2 & ntau == 1")
-#process.produceNtuple.selection                                      = cms.string("")
+#process.produceNtuple.selection                                      = cms.string("nlep == 2 & ntau == 1")
+process.produceNtuple.selection                                      = cms.string("")
 #process.produceNtuple.selEventsFileName                              = cms.string('selEvents_DEBUG.txt')

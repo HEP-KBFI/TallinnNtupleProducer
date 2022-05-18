@@ -5,7 +5,7 @@
 void
 merge_systematic_shifts(std::vector<std::string>& systematic_shifts, const std::vector<std::string>& to_add)
 {
-  for ( auto systematic_shift : to_add ) 
+  for ( const std::string & systematic_shift : to_add ) 
   {
     if ( !contains(systematic_shifts, systematic_shift) )
     {

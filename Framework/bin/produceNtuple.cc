@@ -61,9 +61,7 @@
 
 #include <assert.h>                                                                             // assert()
 #include <cstdlib>                                                                              // EXIT_SUCCESS, EXIT_FAILURE
-#include <fstream>                                                                              // std::ofstream
-#include <iostream>                                                                             // std::cerr, std::fixed
-#include <iomanip>                                                                              // std::setprecision(), std::setw()
+#include <iostream>                                                                             // std::cout
 #include <string>                                                                               // std::string
 #include <vector>                                                                               // std::vector
 
@@ -94,9 +92,9 @@ int main(int argc, char* argv[])
   if ( !edm::readPSetsFrom(argv[1])->existsAs<edm::ParameterSet>("process") )
     throw cmsException("produceNtuple", __LINE__) << "No ParameterSet 'process' found in config file !!";
 
-  edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("process");
+  edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameterSet("process");
 
-  edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
+  edm::ParameterSet cfg_produceNtuple = cfg.getParameterSet("produceNtuple");
   AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
   
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
@@ -109,7 +107,7 @@ int main(int argc, char* argv[])
   std::cout << "Setting era to: " << get_era(era) << std::endl;
 
   bool isMC = cfg_produceNtuple.getParameter<bool>("isMC");
-  edm::VParameterSet lumiScale = cfg_produceNtuple.getParameter<edm::VParameterSet>("lumiScale");
+  edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
   bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
   std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
   bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
@@ -166,11 +164,11 @@ int main(int argc, char* argv[])
   }
   const ChargeMisIdRateInterface chargeMisIdRateInterface(era);
 
-  edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("leptonFakeRateWeight");
+  edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameterSet("leptonFakeRateWeight");
   cfg_leptonFakeRateWeight.addParameter<std::string>("era", era_string);
   LeptonFakeRateInterface* jetToLeptonFakeRateInterface = new LeptonFakeRateInterface(cfg_leptonFakeRateWeight);
 
-  edm::ParameterSet cfg_hadTauFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("hadTauFakeRateWeight");
+  edm::ParameterSet cfg_hadTauFakeRateWeight = cfg_produceNtuple.getParameterSet("hadTauFakeRateWeight");
   cfg_hadTauFakeRateWeight.addParameter<std::string>("hadTauSelection", hadTauWP_againstJets);
   HadTauFakeRateInterface* jetToHadTauFakeRateInterface = new HadTauFakeRateInterface(cfg_hadTauFakeRateWeight);
 
