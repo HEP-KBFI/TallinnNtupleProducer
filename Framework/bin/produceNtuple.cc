@@ -434,9 +434,6 @@ int main(int argc, char* argv[])
         }
       }
 
-      std::cout << "evtWeightRecorder:" << std::endl;
-      std::cout << evtWeightRecorder;
-
       for ( auto & writer : writers )
       {
         writer->set_central_or_shift(central_or_shift);

@@ -130,24 +130,19 @@ namespace
          const std::vector<const RecoHadTau *> & hadTaus,
          const std::vector<const RecoJetAK4 *> & jets)
   {
-    std::cout << "<compHT>:" << std::endl;
     double ht = 0.;
     for ( auto lepton : leptons )
     {
-      std::cout << "adding lepton of pT = " << lepton->pt() << std::endl;
       ht += lepton->pt();
     }
     for ( auto hadTau : hadTaus)
     {
-      std::cout << "adding tau of pT = " << hadTau->pt() << std::endl;
       ht += hadTau->pt();
     }
     for ( auto jet : jets)
     {
-      std::cout << "adding jet of pT = " << jet->pt() << std::endl;
       ht += jet->pt();
     }
-    std::cout << "--> returning ht = " << ht << std::endl;
     return ht;
   }
 
