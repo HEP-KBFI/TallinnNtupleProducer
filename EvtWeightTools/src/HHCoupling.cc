@@ -86,13 +86,13 @@ operator<<(std::ostream & os,
             const HHCoupling & coupling)
 {
   os <<
-    "name = "     << coupling.name_     << ": "
-    "kl = "       << coupling.kl_       << ", "
-    "kt = "       << coupling.kt_       << ", "
-    "c2 = "       << coupling.c2_       << ", "
-    "cg = "       << coupling.cg_       << ", "
-    "c2g = "      << coupling.c2g_      << "; "
-    "training = " << coupling.training_
+    "name = '"     << coupling.name_     << "': "
+    "kl = "        << coupling.kl_       << ", "
+    "kt = "        << coupling.kt_       << ", "
+    "c2 = "        << coupling.c2_       << ", "
+    "cg = "        << coupling.cg_       << ", "
+    "c2g = "       << coupling.c2g_      << "; "
+    "training = '" << coupling.training_ << "'"
   ;
   return os;
 }

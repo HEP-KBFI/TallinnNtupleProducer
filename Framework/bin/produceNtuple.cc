@@ -67,6 +67,13 @@
 
 typedef std::vector<std::string> vstring;
 
+template <typename T>
+void
+copyParameter(const edm::ParameterSet& cfg_source, edm::ParameterSet& cfg_target, const std::string& attr)
+{
+  cfg_target.addParameter<T>(attr, cfg_source.getParameter<T>(attr));
+} 
+
 int main(int argc, char* argv[])
 {
 //--- throw an exception in case ROOT encounters an error
@@ -198,7 +205,7 @@ int main(int argc, char* argv[])
 
   TTree* outputTree = fs.make<TTree>("Events", "Events");
 
-  const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("evtWeight");
+  const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameterSet("evtWeight");
   const bool applyAdditionalEvtWeight = additionalEvtWeight.getParameter<bool>("apply");
   EvtWeightManager* eventWeightManager = nullptr;
   if ( applyAdditionalEvtWeight )
@@ -244,9 +251,10 @@ int main(int argc, char* argv[])
     std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
-    cfg_writer.addParameter<std::string>("process", process);
+    copyParameter<vstring>(cfg_produceNtuple, cfg_writer, "disable_ak8_corr");
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
+    cfg_writer.addParameter<std::string>("process", process);
     std::unique_ptr<WriterBase> writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
     writer->registerReaders(inputTree);
     writer->setBranches(outputTree);
@@ -387,19 +395,6 @@ int main(int argc, char* argv[])
               {
                 prob_chargeMisId_sum = chargeMisIdRateInterface.get(fakeableLepton_lead, fakeableLepton_sublead);
               }
-              // Karl: reject the event, if the applied probability of charge misidentification is 0;
-              //       note that this can happen only if both selected leptons are muons (their misId prob is 0).
-              if ( prob_chargeMisId_sum == 0. )
-              {
-                if ( run_lumi_eventSelector )
-                {
-                  std::cout << "event " << event.eventInfo().str() << " FAILS charge flip selection\n"
-                            << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << "; "
-                            << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ")\n";
-                }
-                skipEvent = true;
-                continue;
-              }
             }
             evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId_sum);
           }
@@ -427,21 +422,6 @@ int main(int argc, char* argv[])
                 if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    < 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_lead);
                 if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() < 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_sublead);
               } else assert(0);
-              // Karl: reject the event, if the applied probability of charge misidentification is 0. This can happen only if
-              //       1) both selected leptons are muons (their misId prob is 0).
-              //       2) one lepton is a muon and the other is an electron, and the muon has the same sign as the selected tau.
-              if ( prob_chargeMisId == 0. )
-              {
-                if ( run_lumi_eventSelector )
-                {
-                  std::cout << "event " << event.eventInfo().str() << " FAILS charge flip selection\n"
-                            << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << ";"
-                            << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ";" 
-                            << " hadTau: charge = " << fakeableHadTau->charge() << ")\n";
-                }
-                skipEvent = true;
-                continue;
-              }
             }
             evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId);
           }
@@ -453,6 +433,9 @@ int main(int argc, char* argv[])
           }
         }
       }
+
+      std::cout << "evtWeightRecorder:" << std::endl;
+      std::cout << evtWeightRecorder;
 
       for ( auto & writer : writers )
       {

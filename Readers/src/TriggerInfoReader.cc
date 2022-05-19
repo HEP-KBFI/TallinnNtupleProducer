@@ -20,9 +20,9 @@ TriggerInfoReader::setBranchAddresses(TTree * tree)
   const std::vector<std::string> available_branches = this->get_available_branches(tree);
   std::set<std::string> used_branches;
   BranchAddressInitializer bai(tree);
-  for ( auto entry : triggerInfo_.entries_ )
+  for ( trigger::Entry & entry : triggerInfo_.entries_ )
   {
-    for ( auto hltPath : entry.hltPaths_ )
+    for ( trigger::HLTPath & hltPath : entry.hltPaths_ )
     {
       if ( std::find(available_branches.cbegin(), available_branches.cend(), hltPath.branchName()) != available_branches.cend() )
       {

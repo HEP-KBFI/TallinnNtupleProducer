@@ -12,7 +12,7 @@
 
 ZbosonMassVetoWriter::ZbosonMassVetoWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
-  , branchName_("passesZbosonMass")
+  , branchName_("passesZbosonVeto")
 {
   z_mass_ = cfg.getParameter<double>("z_mass");
   z_window_ = cfg.getParameter<double>("z_window");

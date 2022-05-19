@@ -23,7 +23,7 @@ namespace
   const RecoJetBase *
   get_jet(const std::vector<const RecoJetBase *> & jets, size_t idx)
   {
-    if ( jets.size() > idx )
+    if ( idx < jets.size() )
     {
       return jets.at(idx);
     }
@@ -73,11 +73,11 @@ RecoJetPair_Wjj::update()
   p4_ = Particle::LorentzVector(0., 0., 0., 0.);
   if ( jet_lead_ )
   {
-    p4_ = jet_lead_->p4();
+    p4_ += jet_lead_->p4();
   }
   if ( jet_sublead_ )
   {
-    p4_ = jet_sublead_->p4();
+    p4_ += jet_sublead_->p4();
   }
 }
 

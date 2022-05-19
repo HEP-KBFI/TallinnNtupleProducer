@@ -16,6 +16,7 @@ from TallinnNtupleProducer.Writers.MEtFilterWriter_cfi import metFilters as writ
 from TallinnNtupleProducer.Writers.ProcessWriter_cfi import process as writers_process
 from TallinnNtupleProducer.Writers.RecoHadTauWriter_cfi import fakeableHadTaus as writers_fakeableHadTaus
 from TallinnNtupleProducer.Writers.RecoJetWriterAK4_cfi import selJetsAK4 as writers_selJetsAK4, selJetsAK4_btagLoose as writers_selJetsAK4_btagLoose, selJetsAK4_btagMedium as writers_selJetsAK4_btagMedium
+from TallinnNtupleProducer.Writers.RecoJetWriterAK8_Wjj_cfi import selJetsAK8_Wjj as writers_selJetsAK8_Wjj
 from TallinnNtupleProducer.Writers.RecoLeptonWriter_cfi import fakeableLeptons as writers_fakeableLeptons
 from TallinnNtupleProducer.Writers.RecoMEtWriter_cfi import met as writers_met
 from TallinnNtupleProducer.Writers.RunLumiEventWriter_cfi import run_lumi_event as writers_run_lumi_event
@@ -178,6 +179,8 @@ process.produceNtuple = cms.PSet(
         writers_selJetsAK4,
         writers_selJetsAK4_btagLoose,
         writers_selJetsAK4_btagMedium,
+        writers_selJetsAK8_Wjj,
+        writers_triggerInfo,
         writers_ZbosonMassVeto,
         writers_HtoZZto4lVeto
     ),

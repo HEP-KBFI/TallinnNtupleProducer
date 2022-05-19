@@ -22,7 +22,7 @@ Particle::LorentzVector
 comp_sumP4(const std::vector<const T *> & particles)
 {
   Particle::LorentzVector sumP4;
-  for ( auto particle : particles )
+  for ( const T * particle : particles )
   {
     sumP4 += particle->p4();
   }
