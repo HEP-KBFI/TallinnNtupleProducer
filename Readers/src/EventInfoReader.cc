@@ -98,8 +98,9 @@ EventInfoReader::setBranchAddresses(TTree * inputTree)
   // Siddhesh: Read gen_mHH for HH LO and NLO samples to make LOvsNLO HHreweighting comparison plots without much code editing
   if(info_->analysisConfig().isMC_HH() && (info_->analysisConfig().isHH_rwgt_allowed() || info_->analysisConfig().isMC_HH_nonresonant()))
   {
-    bai.setBranchAddress(info_->gen_mHH_, branchName_gen_mHH_);
-    bai.setBranchAddress(info_->gen_cosThetaStar_, branchName_gen_cosThetaStar_);
+    //SN: May be we can read LHE branches here and calculate following variables here instead of in pps
+    //    bai.setBranchAddress(info_->gen_mHH_, branchName_gen_mHH_);
+    //bai.setBranchAddress(info_->gen_cosThetaStar_, branchName_gen_cosThetaStar_);
   }
 
   const std::vector<std::string> eventInfoBranches = bai.getBoundBranchNames_read();

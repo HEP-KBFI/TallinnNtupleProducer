@@ -11,7 +11,7 @@ RecoElectron::RecoElectron(const RecoLepton & lepton,
                            Double_t sigmaEtaEta,
                            Double_t HoE,
                            Double_t deltaEta,
-                           Double_t deltaPhi,
+                           //Double_t deltaPhi,
                            Double_t OoEminusOoP,
                            Int_t    nLostHits,
                            Bool_t   passesConversionVeto,
@@ -21,7 +21,7 @@ RecoElectron::RecoElectron(const RecoLepton & lepton,
   , sigmaEtaEta_(sigmaEtaEta)
   , HoE_(HoE)
   , deltaEta_(deltaEta) 
-  , deltaPhi_(deltaPhi) 
+  //, deltaPhi_(deltaPhi)
   , OoEminusOoP_(OoEminusOoP)
   , nLostHits_(nLostHits)
   , passesConversionVeto_(passesConversionVeto)

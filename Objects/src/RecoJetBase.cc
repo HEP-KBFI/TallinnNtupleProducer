@@ -3,10 +3,8 @@
 #include "TallinnNtupleProducer/Objects/interface/GenLepton.h" // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h" // GenHadTau
 
-RecoJetBase::RecoJetBase(const GenJet & jet,
-                         Int_t idx)
+RecoJetBase::RecoJetBase(const GenJet & jet)
   : GenJet(jet)
-  , idx_(idx)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
   , genJet_(nullptr)

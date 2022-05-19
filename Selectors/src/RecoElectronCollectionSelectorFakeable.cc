@@ -32,7 +32,7 @@ RecoElectronSelectorFakeable::RecoElectronSelectorFakeable(Era era,
   , invert_nLostHits_(false)
   , min_nLostHits_fornLostHitsInversion_(1)
   , invert_conversionVeto_(false)
-  , useAssocJetBtag_(false)
+  , useAssocJetBtag_(true)
 {
   // L -- inherited from the preselection (loose cut)
   // F -- additional fakeable cut not applied in the preselection

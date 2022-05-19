@@ -314,10 +314,16 @@ EventReader::setBranchAddresses(TTree * inputTree)
   const std::vector<std::string> electronBranches = electronReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> hadTauBranches = hadTauReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> jetBranchesAK4 = jetReaderAK4_->setBranchAddresses(inputTree);
-  const std::vector<std::string> genLeptonBranches = genLeptonReader_->setBranchAddresses(inputTree);
-  const std::vector<std::string> genHadTauBranches = genHadTauReader_->setBranchAddresses(inputTree);
-  const std::vector<std::string> genPhotonBranches = genPhotonReader_->setBranchAddresses(inputTree);
-  const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(inputTree);
+  std::vector<std::string> genLeptonBranches;
+  std::vector<std::string> genHadTauBranches;
+  std::vector<std::string> genPhotonBranches;
+  std::vector<std::string> genJetBranches;
+  if ( readGenMatching_ ) {
+    genLeptonBranches = genLeptonReader_->setBranchAddresses(inputTree);
+    genHadTauBranches = genHadTauReader_->setBranchAddresses(inputTree);
+    genPhotonBranches = genPhotonReader_->setBranchAddresses(inputTree);
+    genJetBranches = genJetReader_->setBranchAddresses(inputTree);
+  }
   const std::vector<std::string> jetBranchesAK8_Hbb = jetReaderAK8_Hbb_->setBranchAddresses(inputTree);
   const std::vector<std::string> jetBranchesAK8_Wjj = jetReaderAK8_Wjj_->setBranchAddresses(inputTree);
   const std::vector<std::string> metBranches = metReader_->setBranchAddresses(inputTree);
@@ -331,10 +337,12 @@ EventReader::setBranchAddresses(TTree * inputTree)
   bound_branches.insert(bound_branches.end(), electronBranches.begin(), electronBranches.end());
   bound_branches.insert(bound_branches.end(), hadTauBranches.begin(), hadTauBranches.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK4.begin(), jetBranchesAK4.end());
-  bound_branches.insert(bound_branches.end(), genLeptonBranches.begin(), genLeptonBranches.end());
-  bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
-  bound_branches.insert(bound_branches.end(), genPhotonBranches.begin(), genPhotonBranches.end());
-  bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
+  if (readGenMatching_ ){
+    bound_branches.insert(bound_branches.end(), genLeptonBranches.begin(), genLeptonBranches.end());
+    bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
+    bound_branches.insert(bound_branches.end(), genPhotonBranches.begin(), genPhotonBranches.end());
+    bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
+  }
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Hbb.begin(), jetBranchesAK8_Hbb.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Wjj.begin(), jetBranchesAK8_Wjj.end());
   bound_branches.insert(bound_branches.end(), metBranches.begin(), metBranches.end());
@@ -437,13 +445,11 @@ EventReader::read() const
   {
     return event_;
   }
-
   bool isTriggerInfoSystematic = contains(triggerInfo_supported_systematics_, current_central_or_shift_);
   if ( isTriggerInfoSystematic || isNewEvent )
   {
     event_.triggerInfo_ = &triggerInfoReader_->read();
   }
-
   bool isMuonSystematic = contains(muon_supported_systematics_, current_central_or_shift_);
   bool isUpdatedMuons = false;
   bool muon_needsUpdate = isMuonSystematic || isNewEvent || (muon_lastSystematic_ != "central" && !isMuonSystematic);
@@ -459,7 +465,6 @@ EventReader::read() const
     isUpdatedMuons = true;
     muon_lastSystematic_ = ( isMuonSystematic ) ? current_central_or_shift_ : "central";
   }
-
   bool isElectronSystematic = contains(electron_supported_systematics_, current_central_or_shift_);
   bool isUpdatedElectrons = false;
   bool electron_needsUpdate = isElectronSystematic || isNewEvent || (electron_lastSystematic_ != "central" && !isElectronSystematic);
@@ -482,7 +487,6 @@ EventReader::read() const
     isUpdatedElectrons = true;
     electron_lastSystematic_ = ( isElectronSystematic ) ? current_central_or_shift_ : "central";
   }
-
   bool isUpdatedLeptons = false;
   if ( isUpdatedMuons || isUpdatedElectrons )
   {
@@ -498,7 +502,6 @@ EventReader::read() const
     clearEvent(Level::kLepton);
     return event_;
   }
-
   bool isHadTauSystematic = contains(hadTau_supported_systematics_, current_central_or_shift_);
   bool isUpdatedHadTaus = false;
   bool hadTau_needsUpdate = isHadTauSystematic || isNewEvent || hadTau_isInvalid_ || (hadTau_lastSystematic_ != "central" && !isHadTauSystematic);
@@ -525,7 +528,6 @@ EventReader::read() const
     clearEvent(Level::kHadTau);
     return event_;
   }
-
   bool isJetSystematicAK4 = contains(jetsAK4_supported_systematics_, current_central_or_shift_);
   bool isUpdatedJetsAK4 = false;
   bool jetAK4_needsUpdate = isJetSystematicAK4 || isNewEvent || jetAK4_isInvalid_ || (jetAK4_lastSystematic_ != "central" && !isJetSystematicAK4);
@@ -547,7 +549,6 @@ EventReader::read() const
     jetAK4_lastSystematic_ = ( isJetSystematicAK4 ) ? current_central_or_shift_ : "central";
   }
   jetAK4_isInvalid_ = false;
-
   if ( readGenMatching_ )
   {
     if ( isNewEvent )

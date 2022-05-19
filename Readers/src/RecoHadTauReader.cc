@@ -42,7 +42,6 @@ RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   , hadTau_filterBits_(nullptr)
   , hadTau_jetIdx_(nullptr)
   , hadTau_genPartFlav_(nullptr)
-  , hadTau_genMatchIdx_(nullptr)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Tau"
@@ -94,7 +93,6 @@ RecoHadTauReader::~RecoHadTauReader()
     delete[] gInstance->hadTau_filterBits_;
     delete[] gInstance->hadTau_jetIdx_;
     delete[] gInstance->hadTau_genPartFlav_;
-    delete[] gInstance->hadTau_genMatchIdx_;
 
     for(auto & kv: gInstance->hadTau_idMVAs_)
     {
@@ -145,12 +143,11 @@ RecoHadTauReader::setBranchNames()
     for(const auto & kv: TauID_levels)
     {
       const std::string & mvaString = TauID_names.at(kv.first);
-      branchNames_idMVA_[kv.first]  = Form("%s_%s", branchName_obj_.data(), Form("id%s_log", mvaString.data()));
+      branchNames_idMVA_[kv.first]  = Form("%s_%s", branchName_obj_.data(), Form("id%s", mvaString.data()));
       branchNames_rawMVA_[kv.first] = Form("%s_%s", branchName_obj_.data(), Form("raw%s", mvaString.data()));
     }
-    branchName_idAgainstElec_ = Form("%s_%s", branchName_obj_.data(), "idAntiEle_log");
-    branchName_idAgainstMu_ = Form("%s_%s", branchName_obj_.data(), "idAntiMu_log");
-    branchName_filterBits_ = Form("%s_%s", branchName_obj_.data(), "filterBits");
+    branchName_idAgainstElec_ = Form("%s_%s", branchName_obj_.data(), "idAntiEle");
+    branchName_idAgainstMu_ = Form("%s_%s", branchName_obj_.data(), "idAntiMu");
     branchName_jetIdx_ = Form("%s_%s", branchName_obj_.data(), "jetIdx");
     branchName_genPartFlav_ = Form("%s_%s", branchName_obj_.data(), "genPartFlav");
     branchName_genMatchIdx_ = Form("%s_%s", branchName_obj_.data(), "genMatchIdx");
@@ -207,7 +204,6 @@ RecoHadTauReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(hadTau_filterBits_, branchName_filterBits_);
     bai.setBranchAddress(hadTau_jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(hadTau_genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
-    bai.setBranchAddress(hadTau_genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
 
     const std::vector<std::string> recoHadTauBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoHadTauBranches.begin(), recoHadTauBranches.end());
@@ -264,7 +260,6 @@ RecoHadTauReader::read() const
         gInstance->hadTau_filterBits_[idxHadTau],
         gInstance->hadTau_jetIdx_[idxHadTau],
         gInstance->hadTau_genPartFlav_[idxHadTau],
-        gInstance->hadTau_genMatchIdx_[idxHadTau],
       });
 
       RecoHadTau & hadTau = hadTaus.back();

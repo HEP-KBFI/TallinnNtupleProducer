@@ -105,14 +105,14 @@ class RecoHadTauReader : public ReaderBase
   Float_t * hadTau_dz_;
   Int_t * hadTau_decayMode_;
   Bool_t * hadTau_idDecayMode_;
-  Int_t * hadTau_idAgainstElec_;
-  Int_t * hadTau_idAgainstMu_;
+  UChar_t * hadTau_idAgainstElec_;
+  UChar_t * hadTau_idAgainstMu_;
   UInt_t * hadTau_filterBits_;
   Int_t * hadTau_jetIdx_;
   UChar_t * hadTau_genPartFlav_;
   Int_t * hadTau_genMatchIdx_;
 
-  std::map<TauID, Int_t *> hadTau_idMVAs_;
+  std::map<TauID, UChar_t *> hadTau_idMVAs_;
   std::map<TauID, Float_t *> hadTau_rawMVAs_;
 
   // CV: make sure that only one RecoHadronicTauReader instance exists for a given branchName,

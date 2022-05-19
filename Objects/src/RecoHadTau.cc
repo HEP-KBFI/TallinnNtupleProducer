@@ -18,8 +18,7 @@ RecoHadTau::RecoHadTau(const GenHadTau & particle,
                        Int_t antiMuon,
                        UInt_t filterBits,
                        Int_t jetIdx,
-                       UChar_t  genPartFlav,
-                       Int_t genMatchIdx)
+                       UChar_t  genPartFlav)
   : GenHadTau(particle)
   , corrFactor_(corrFactor)
   , dxy_(dxy)
@@ -33,7 +32,6 @@ RecoHadTau::RecoHadTau(const GenHadTau & particle,
   , filterBits_(filterBits)
   , jetIdx_(jetIdx)
   , genPartFlav_(genPartFlav)
-  , genMatchIdx_(genMatchIdx)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
   , genJet_(nullptr)

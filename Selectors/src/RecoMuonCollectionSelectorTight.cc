@@ -21,7 +21,7 @@ RecoMuonSelectorTight::RecoMuonSelectorTight(Era era,
   , apply_looseIdPOG_(true) // F
   , apply_mediumIdPOG_(true) // T
   , max_jetBtagCSV_(get_BtagWP(era_, Btag::kDeepJet, BtagWP::kMedium)) // T
-  , useAssocJetBtag_(false)
+  , useAssocJetBtag_(true)
 {
   // L -- inherited from the preselection (loose cut)
   // F -- inherited from the fakeable selection

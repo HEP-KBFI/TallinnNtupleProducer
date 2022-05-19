@@ -25,8 +25,7 @@ class RecoJetBase : public GenJet
 {
  public:
   RecoJetBase() = default;
-  RecoJetBase(const GenJet & particle,
-              Int_t idx);
+  RecoJetBase(const GenJet & particle);
 
   virtual ~RecoJetBase();
 

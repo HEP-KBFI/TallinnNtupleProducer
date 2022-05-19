@@ -18,7 +18,7 @@ class RecoElectron : public RecoLepton
                Double_t sigmaEtaEta,
                Double_t HoE,
                Double_t deltaEta,
-               Double_t deltaPhi,
+               //Double_t deltaPhi,
                Double_t OoEminusOoP,
                Int_t nLostHits,
                Bool_t passesConversionVeto,

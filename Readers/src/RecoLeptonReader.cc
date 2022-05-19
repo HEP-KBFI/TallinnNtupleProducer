@@ -31,12 +31,12 @@ RecoLeptonReader::RecoLeptonReader(const edm::ParameterSet & cfg)
   , dxy_(nullptr)
   , dz_(nullptr)
   , relIso_all_(nullptr)
-  , pfRelIso04_all_(nullptr)
+  , pfRelIso03_all_(nullptr)
   , relIso_chg_(nullptr)
   , relIso_neu_(nullptr)
   , sip3d_(nullptr)
   , mvaRawTTH_(nullptr)
-  , jetPtRatio_(nullptr)
+  , jetRelIso_(nullptr)
   , jetPtRel_(nullptr)
   , jetNDauChargedMVASel_(nullptr)
   , tightCharge_(nullptr)
@@ -44,7 +44,6 @@ RecoLeptonReader::RecoLeptonReader(const edm::ParameterSet & cfg)
   , filterBits_(nullptr)
   , jetIdx_(nullptr)
   , genPartFlav_(nullptr)
-  , genMatchIdx_(nullptr)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   branchName_obj_ = cfg.getParameter<std::string>("branchName");
@@ -90,12 +89,12 @@ RecoLeptonReader::~RecoLeptonReader()
     delete[] gInstance->dxy_;
     delete[] gInstance->dz_;
     delete[] gInstance->relIso_all_;
-    delete[] gInstance->pfRelIso04_all_;
+    delete[] gInstance->pfRelIso03_all_;
     delete[] gInstance->relIso_chg_;
     delete[] gInstance->relIso_neu_;
     delete[] gInstance->sip3d_;
     delete[] gInstance->mvaRawTTH_;
-    delete[] gInstance->jetPtRatio_;
+    delete[] gInstance->jetRelIso_;
     delete[] gInstance->jetPtRel_;
     delete[] gInstance->jetNDauChargedMVASel_;
     delete[] gInstance->tightCharge_;
@@ -103,7 +102,6 @@ RecoLeptonReader::~RecoLeptonReader()
     delete[] gInstance->filterBits_;
     delete[] gInstance->jetIdx_;
     delete[] gInstance->genPartFlav_;
-    delete[] gInstance->genMatchIdx_;
 
     for(auto & kv: gInstance->jetBtagCSVs_)
     {
@@ -131,12 +129,12 @@ RecoLeptonReader::setBranchNames()
     branchName_dxy_ = Form("%s_%s", branchName_obj_.data(), "dxy");
     branchName_dz_ = Form("%s_%s", branchName_obj_.data(), "dz");
     branchName_relIso_all_ = Form("%s_%s", branchName_obj_.data(), "miniPFRelIso_all");
-    branchName_pfRelIso04_all_ = Form("%s_%s", branchName_obj_.data(), "pfRelIso04_all");
+    branchName_pfRelIso03_all_ = Form("%s_%s", branchName_obj_.data(), "pfRelIso03_all");
     branchName_relIso_chg_ = Form("%s_%s", branchName_obj_.data(), "miniPFRelIso_chg");
     branchName_relIso_neu_ = Form("%s_%s", branchName_obj_.data(), "miniPFRelIso_neu");
     branchName_sip3d_ = Form("%s_%s", branchName_obj_.data(), "sip3d");
     branchName_mvaRawTTH_ = Form("%s_%s", branchName_obj_.data(), "mvaTTH");
-    branchName_jetPtRatio_ = Form("%s_%s", branchName_obj_.data(), "jetPtRatio");
+    branchName_jetRelIso_ = Form("%s_%s", branchName_obj_.data(), "jetRelIso");
     branchName_jetPtRel_ = Form("%s_%s", branchName_obj_.data(), "jetPtRelv2");
     branchName_jetNDauChargedMVASel_ = Form("%s_%s", branchName_obj_.data(), "jetNDauChargedMVASel");
     for(Btag btag: { Btag::kCSVv2, Btag::kDeepCSV, Btag::kDeepJet })
@@ -204,29 +202,20 @@ RecoLeptonReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(pdgId_, branchName_pdgId_);
     bai.setBranchAddress(dxy_, branchName_dxy_);
     bai.setBranchAddress(dz_, branchName_dz_);
-    bai.setBranchAddress(pfRelIso04_all_, branchName_pfRelIso04_all_);
+    bai.setBranchAddress(pfRelIso03_all_, branchName_pfRelIso03_all_);
     bai.setBranchAddress(relIso_all_, branchName_relIso_all_);
     bai.setBranchAddress(relIso_chg_, branchName_relIso_chg_);
-    bai.setBranchAddress(relIso_neu_, branchName_relIso_neu_);
     bai.setBranchAddress(sip3d_, branchName_sip3d_);
     bai.setBranchAddress(mvaRawTTH_, branchName_mvaRawTTH_);
-    bai.setBranchAddress(jetPtRatio_, branchName_jetPtRatio_);
-    bai.setBranchAddress(jetPtRel_, branchName_jetPtRel_, -1.);
-    for(const auto & kv: branchNames_jetBtagCSV_)
-    {
-      bai.setBranchAddress(jetBtagCSVs_[kv.first], kv.second);
-    }
+    bai.setBranchAddress(jetRelIso_, branchName_jetRelIso_);
     for(const auto & kv: branchNames_assocJetBtagCSV_)
     {
       bai.setBranchAddress(assocJetBtagCSVs_[kv.first], kv.second);
     }
-    bai.setBranchAddress(jetNDauChargedMVASel_, branchName_jetNDauChargedMVASel_, -1);
     bai.setBranchAddress(tightCharge_, branchName_tightCharge_);
     bai.setBranchAddress(charge_, branchName_charge_);
-    bai.setBranchAddress(filterBits_, branchName_filterBits_);
     bai.setBranchAddress(jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
-    bai.setBranchAddress(genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
 
     const std::vector<std::string> recoLeptonBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoLeptonBranches.begin(), recoLeptonBranches.end());

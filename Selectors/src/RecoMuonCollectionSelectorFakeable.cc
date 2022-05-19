@@ -26,7 +26,7 @@ RecoMuonSelectorFakeable::RecoMuonSelectorFakeable(Era era,
   , smoothBtagCut_minPt_(20.)
   , smoothBtagCut_maxPt_(45.)
   , smoothBtagCut_ptDiff_(smoothBtagCut_maxPt_ - smoothBtagCut_minPt_)
-  , useAssocJetBtag_(false)
+  , useAssocJetBtag_(true)
 {
   // L -- inherited from the preselection (loose cut)
   // F -- additional fakeable cut not applied in the preselection

@@ -28,13 +28,8 @@ class RecoJetAK4 : public RecoJetBase
              Double_t QGDiscr,
              Double_t bRegCorr,
              Double_t bRegRes,
-             Double_t pullEta,
-             Double_t pullPhi,
-             Double_t pullMag,
              Int_t jetId,
              Int_t puId,
-             Int_t genMatchIdx,
-             Int_t idx,
              Btag btag,
              Int_t central_or_shift);
 

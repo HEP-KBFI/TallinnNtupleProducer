@@ -162,7 +162,6 @@ RecoJetReaderAK4::setBranchNames()
         branchNames_mass_systematics_[idxShift] = getBranchName_jetMET(branchName_obj_, era_, idxShift, false);
       }
     }
-    branchName_jetCharge_ = Form("%s_%s", branchName_obj_.data(), "jetCharge");
 
     for(const auto & kv: BtagWP_map.at(era_))
     {
@@ -268,13 +267,8 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_QGDiscr_, branchName_QGDiscr_, 1.);
     bai.setBranchAddress(jet_bRegCorr_, branchName_bRegCorr_, 1.);
     bai.setBranchAddress(jet_bRegRes_, branchName_bRegRes_, 0.);
-    bai.setBranchAddress(jet_pullEta_, branchName_pullEta_);
-    bai.setBranchAddress(jet_pullPhi_, branchName_pullPhi_);
-    bai.setBranchAddress(jet_pullMag_, branchName_pullMag_);
     bai.setBranchAddress(jet_jetId_, branchName_jetId_);
     bai.setBranchAddress(jet_puId_, branchName_puId_);
-    bai.setBranchAddress(jet_jetIdx_, branchName_jetIdx_);
-    bai.setBranchAddress(jet_genMatchIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genMatchIdx_ : "", -1);
 
     const std::vector<std::string> recoJetBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoJetBranches.begin(), recoJetBranches.end());
@@ -341,17 +335,11 @@ RecoJetReaderAK4::read() const
         qgl,
         gInstance->jet_bRegCorr_[idxJet],
         gInstance->jet_bRegRes_[idxJet],
-        gInstance->jet_pullEta_[idxJet],
-        gInstance->jet_pullPhi_[idxJet],
-        gInstance->jet_pullMag_[idxJet],
         jet_id,
         gInstance->jet_puId_[idxJet],
-        gInstance->jet_genMatchIdx_[idxJet],
-        gInstance->jet_jetIdx_[idxJet],
         btag_,
         ptMassOption_,
       });
-
       RecoJetAK4 & jet = jets.back();
       if(isMC_)
       {

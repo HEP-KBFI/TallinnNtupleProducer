@@ -31,7 +31,7 @@ RecoElectronSelectorTight::RecoElectronSelectorTight(Era era,
   , invert_nLostHits_(false)
   , min_nLostHits_fornLostHitsInversion_(1)
   , invert_conversionVeto_(false)
-  , useAssocJetBtag_(false)
+  , useAssocJetBtag_(true)
 {
   // L -- inherited from the preselection (loose cut)
   // F -- inherited from the fakeable selection
