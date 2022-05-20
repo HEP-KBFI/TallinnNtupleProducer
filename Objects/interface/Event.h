@@ -63,6 +63,8 @@ class Event
   bool isInvalid() const;
 
   friend class EventReader;
+  friend class RecoHadTauMultiplicityWriter;
+  friend class RecoLeptonMultiplicityWriter;
 
  protected:
   const EventInfo * eventInfo_;
