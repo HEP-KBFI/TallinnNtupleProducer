@@ -12,9 +12,11 @@
 MEtFilterWriter::MEtFilterWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
   , branchName_("passesMEtFilters")
+  , passesMEtFilters_(false)
 {
+  edm::ParameterSet cfg_flags = cfg.getParameterSet("flags");
   bool isMC = cfg.getParameter<bool>("isMC");
-  metFilterSelector_ = new MEtFilterSelector(cfg, isMC);
+  metFilterSelector_ = new MEtFilterSelector(cfg_flags, isMC);
 }
 
 MEtFilterWriter::~MEtFilterWriter()
