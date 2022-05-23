@@ -206,6 +206,7 @@ RecoElectronReader::read() const
             gLeptonReader->tightCharge_[idxLepton],
             gLeptonReader->jetIdx_[idxLepton],
             gLeptonReader->genPartFlav_[idxLepton],
+            gLeptonReader->genMatchIdx_[idxLepton],
           },
           gElectronReader->eCorr_[idxLepton],
           gElectronReader->sigmaEtaEta_[idxLepton],

@@ -90,7 +90,6 @@ GenJetReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_eta_, branchName_eta_);
     bai.setBranchAddress(jet_phi_, branchName_phi_);
     bai.setBranchAddress(jet_mass_, branchName_mass_);
-    bai.setBranchAddress(jet_pdgId_, branchName_pdgId_);
     return bai.getBoundBranchNames_read();
   }
   return {};
@@ -119,7 +118,7 @@ std::vector<GenJet> GenJetReader::read() const
         gInstance->jet_eta_[idxJet],
         gInstance->jet_phi_[idxJet],
         gInstance->jet_mass_[idxJet],
-        gInstance->jet_pdgId_[idxJet],
+        -1,
       });
     }
   }

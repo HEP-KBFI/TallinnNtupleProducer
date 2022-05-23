@@ -13,6 +13,7 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Double_t bRegRes,
                        Int_t jetId,
                        Int_t puId,
+                       Int_t genMatchIdx,
                        Btag btag,
                        Int_t central_or_shift)
   : RecoJetBase(jet)
@@ -24,6 +25,7 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
   , bRegRes_(bRegRes)
   , jetId_(jetId)
   , puId_(puId)
+  , genMatchIdx_(genMatchIdx)
   , btag_(btag)
   , isBJet_loose_(false)
   , isBJet_medium_(false)

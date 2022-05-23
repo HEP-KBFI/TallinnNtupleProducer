@@ -27,7 +27,8 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
                        Double_t jetRelIso,
                        Int_t    tightCharge,
                        Int_t    jetIdx,
-                       UChar_t  genPartFlav)
+                       UChar_t  genPartFlav,
+                       Int_t    genMatchIdx)
   : ChargedParticle(lepton)
   , dxy_(dxy)
   , dz_(dz)
@@ -40,6 +41,7 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
   , tightCharge_(tightCharge)
   , jetIdx_(jetIdx)
   , genPartFlav_(genPartFlav)
+  , genMatchIdx_(genMatchIdx)
   , mvaRawTTH_cut_(-1.)
   , assocJet_pt_(get_assocJet_pt(pt_, jetRelIso_))
   , assocJet_p4_(assocJet_pt_, eta_, phi_, mass_)

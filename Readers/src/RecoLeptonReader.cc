@@ -44,6 +44,7 @@ RecoLeptonReader::RecoLeptonReader(const edm::ParameterSet & cfg)
   , filterBits_(nullptr)
   , jetIdx_(nullptr)
   , genPartFlav_(nullptr)
+  , genMatchIdx_(nullptr)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   branchName_obj_ = cfg.getParameter<std::string>("branchName");
@@ -102,6 +103,7 @@ RecoLeptonReader::~RecoLeptonReader()
     delete[] gInstance->filterBits_;
     delete[] gInstance->jetIdx_;
     delete[] gInstance->genPartFlav_;
+    delete[] gInstance->genMatchIdx_;
 
     for(auto & kv: gInstance->jetBtagCSVs_)
     {
@@ -216,6 +218,7 @@ RecoLeptonReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(charge_, branchName_charge_);
     bai.setBranchAddress(jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
+    bai.setBranchAddress(genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
 
     const std::vector<std::string> recoLeptonBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoLeptonBranches.begin(), recoLeptonBranches.end());

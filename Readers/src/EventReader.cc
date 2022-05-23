@@ -54,7 +54,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , applyNumNominalHadTausCut_(false)
   , era_(Era::kUndefined)
   , isMC_(false)
-  , readGenMatching_(false)
   , lastRun_(0)
   , lastLumi_(0)
   , lastEvent_(0)
@@ -98,6 +97,10 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , electronGenMatcher_(nullptr)
   , hadTauGenMatcher_(nullptr)
   , jetGenMatcherAK4_(nullptr)
+  ,genMatchToMuonReader_(nullptr)
+  ,genMatchToElectronReader_(nullptr)
+  ,genMatchToHadTauReader_(nullptr)
+  ,genMatchToJetReader_(nullptr)
   , jetReaderAK8_Hbb_(nullptr)
   , jetReaderAK8_Wjj_(nullptr)
   , jetCleanerAK8_dR08_(nullptr)
@@ -125,7 +128,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
 
   era_ = get_era(cfg.getParameter<std::string>("era"));
   isMC_ = cfg.getParameter<bool>("isMC");
-  readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
 
   runLumiEventReader_ = new RunLumiEventReader(cfg);
 
@@ -195,17 +197,27 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   jetSelectorAK4_btagLoose_ = new RecoJetCollectionSelectorAK4_btagLoose(era_, -1, isDEBUG_);
   jetSelectorAK4_btagMedium_ = new RecoJetCollectionSelectorAK4_btagMedium(era_, -1, isDEBUG_);
 
-  if ( readGenMatching_ )
-  {
-    genLeptonReader_ = new GenLeptonReader(make_cfg(cfg, "branchName_genLeptons"));
-    genHadTauReader_ = new GenHadTauReader(make_cfg(cfg, "branchName_genHadTaus"));
-    genPhotonReader_ = new GenPhotonReader(make_cfg(cfg, "branchName_genPhotons"));
-    genJetReader_ = new GenJetReader(make_cfg(cfg, "branchName_genJets"));
-    muonGenMatcher_ = new RecoMuonCollectionGenMatcher();
-    electronGenMatcher_ = new RecoElectronCollectionGenMatcher();
-    hadTauGenMatcher_ = new RecoHadTauCollectionGenMatcher();
-    jetGenMatcherAK4_ = new RecoJetCollectionGenMatcherAK4();
-  }
+  genLeptonReader_ = new GenLeptonReader(make_cfg(cfg, "branchName_genLeptons"));
+  genHadTauReader_ = new GenHadTauReader(make_cfg(cfg, "branchName_genHadTaus"));
+  genPhotonReader_ = new GenPhotonReader(make_cfg(cfg, "branchName_genPhotons"));
+  genJetReader_ = new GenJetReader(make_cfg(cfg, "branchName_genJets"));
+
+  muonGenMatcher_ = new RecoMuonCollectionGenMatcher();
+  electronGenMatcher_ = new RecoElectronCollectionGenMatcher();
+  hadTauGenMatcher_ = new RecoHadTauCollectionGenMatcher();
+  jetGenMatcherAK4_ = new RecoJetCollectionGenMatcherAK4();
+
+  genMatchToMuonReader_ = new GenParticleReader(make_cfg(cfg, "branchName_muonGenMatch"));
+  genMatchToMuonReader_ -> readGenPartFlav(true);
+
+  genMatchToElectronReader_ = new GenParticleReader(make_cfg(cfg, "branchName_electronGenMatch"));
+  genMatchToElectronReader_ -> readGenPartFlav(true);
+
+  genMatchToHadTauReader_ = new GenParticleReader(make_cfg(cfg, "branchName_hadTauGenMatch"));
+  genMatchToHadTauReader_ -> readGenPartFlav(true);
+
+  genMatchToJetReader_ = new GenParticleReader(make_cfg(cfg, "branchName_jetGenMatch"));
+  genMatchToJetReader_ -> readGenPartFlav(true);
 
   jetReaderAK8_Hbb_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Hbb", "branchName_subjets_ak8_Hbb"));
   jetReaderAK8_Wjj_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Wjj", "branchName_subjets_ak8_Wjj"));
@@ -253,6 +265,10 @@ EventReader::~EventReader()
   delete electronGenMatcher_;
   delete hadTauGenMatcher_;
   delete jetGenMatcherAK4_;
+  delete genMatchToMuonReader_;
+  delete genMatchToElectronReader_;
+  delete genMatchToHadTauReader_;
+  delete genMatchToJetReader_;
   delete jetReaderAK8_Hbb_;
   delete jetReaderAK8_Wjj_;
   delete jetCleanerAK8_dR08_;
@@ -318,12 +334,22 @@ EventReader::setBranchAddresses(TTree * inputTree)
   std::vector<std::string> genHadTauBranches;
   std::vector<std::string> genPhotonBranches;
   std::vector<std::string> genJetBranches;
-  if ( readGenMatching_ ) {
-    genLeptonBranches = genLeptonReader_->setBranchAddresses(inputTree);
-    genHadTauBranches = genHadTauReader_->setBranchAddresses(inputTree);
-    genPhotonBranches = genPhotonReader_->setBranchAddresses(inputTree);
-    genJetBranches = genJetReader_->setBranchAddresses(inputTree);
-  }
+
+  genLeptonBranches = genLeptonReader_->setBranchAddresses(inputTree);
+  genHadTauBranches = genHadTauReader_->setBranchAddresses(inputTree);
+  genPhotonBranches = genPhotonReader_->setBranchAddresses(inputTree);
+  genJetBranches = genJetReader_->setBranchAddresses(inputTree);
+
+  std::vector<std::string> genMatchToMuonBranches;
+  std::vector<std::string> genMatchToElectronBranches;
+  std::vector<std::string> genMatchToHadTauBranches;
+  std::vector<std::string> genMatchToJetBranches;
+
+  genMatchToMuonBranches = genMatchToMuonReader_->setBranchAddresses(inputTree);
+  genMatchToElectronBranches = genMatchToElectronReader_->setBranchAddresses(inputTree);
+  genMatchToHadTauBranches = genMatchToHadTauReader_->setBranchAddresses(inputTree);
+  genMatchToJetBranches = genMatchToJetReader_->setBranchAddresses(inputTree);
+
   const std::vector<std::string> jetBranchesAK8_Hbb = jetReaderAK8_Hbb_->setBranchAddresses(inputTree);
   const std::vector<std::string> jetBranchesAK8_Wjj = jetReaderAK8_Wjj_->setBranchAddresses(inputTree);
   const std::vector<std::string> metBranches = metReader_->setBranchAddresses(inputTree);
@@ -337,12 +363,16 @@ EventReader::setBranchAddresses(TTree * inputTree)
   bound_branches.insert(bound_branches.end(), electronBranches.begin(), electronBranches.end());
   bound_branches.insert(bound_branches.end(), hadTauBranches.begin(), hadTauBranches.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK4.begin(), jetBranchesAK4.end());
-  if (readGenMatching_ ){
-    bound_branches.insert(bound_branches.end(), genLeptonBranches.begin(), genLeptonBranches.end());
-    bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
-    bound_branches.insert(bound_branches.end(), genPhotonBranches.begin(), genPhotonBranches.end());
-    bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
-  }
+
+  bound_branches.insert(bound_branches.end(), genLeptonBranches.begin(), genLeptonBranches.end());
+  bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
+  bound_branches.insert(bound_branches.end(), genPhotonBranches.begin(), genPhotonBranches.end());
+  bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
+
+  bound_branches.insert(bound_branches.end(), genMatchToMuonBranches.begin(), genMatchToMuonBranches.end());
+  bound_branches.insert(bound_branches.end(), genMatchToElectronBranches.begin(), genMatchToElectronBranches.end());
+  bound_branches.insert(bound_branches.end(), genMatchToHadTauBranches.begin(), genMatchToHadTauBranches.end());
+  bound_branches.insert(bound_branches.end(), genMatchToJetBranches.begin(), genMatchToJetBranches.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Hbb.begin(), jetBranchesAK8_Hbb.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Wjj.begin(), jetBranchesAK8_Wjj.end());
   bound_branches.insert(bound_branches.end(), metBranches.begin(), metBranches.end());
@@ -549,60 +579,63 @@ EventReader::read() const
     jetAK4_lastSystematic_ = ( isJetSystematicAK4 ) ? current_central_or_shift_ : "central";
   }
   jetAK4_isInvalid_ = false;
-  if ( readGenMatching_ )
+
+  if ( isNewEvent )
   {
-    if ( isNewEvent )
+    event_.genLeptons_ = genLeptonReader_->read();
+    event_.genElectrons_.clear();
+    event_.genMuons_.clear();
+    for ( auto genLepton : event_.genLeptons_ )
     {
-      event_.genLeptons_ = genLeptonReader_->read();
-      event_.genElectrons_.clear();
-      event_.genMuons_.clear();
-      for ( auto genLepton : event_.genLeptons_ )
+      const int abs_pdgId = std::abs(genLepton.pdgId());
+      switch ( abs_pdgId )
       {
-        const int abs_pdgId = std::abs(genLepton.pdgId());
-        switch ( abs_pdgId )
-        {
-          case 11: event_.genElectrons_.push_back(genLepton); break;
-          case 13: event_.genMuons_.push_back(genLepton);     break;
-          default: assert(0);
-        }
+      case 11: event_.genElectrons_.push_back(genLepton); break;
+      case 13: event_.genMuons_.push_back(genLepton);     break;
+      default: assert(0);
       }
-      event_.genHadTaus_ = genHadTauReader_->read();
-      event_.genPhotons_ = genPhotonReader_->read();
-      event_.genJets_ = genJetReader_->read();
     }
+    event_.genHadTaus_ = genHadTauReader_->read();
+    event_.genPhotons_ = genPhotonReader_->read();
+    event_.genJets_ = genJetReader_->read();
 
-    // CV: performing the gen-matching on the muon_ptrs, electron_ptrs, and hadTau_ptrs collections
-    //     adds gen-matching information to all loose, fakeable, and tight collections of muons, electrons and hadronic taus
-    if ( isUpdatedMuons )
-    {
-      muonGenMatcher_->addGenLeptonMatch(event_.muon_ptrs_, event_.genMuons_);
-      muonGenMatcher_->addGenHadTauMatch(event_.muon_ptrs_, event_.genHadTaus_);
-      muonGenMatcher_->addGenJetMatch(event_.muon_ptrs_, event_.genJets_);
-    }
+    event_.muonGenMatch_ = genMatchToMuonReader_->read();
+    event_.electronGenMatch_ = genMatchToElectronReader_->read();
+    event_.hadTauGenMatch_ = genMatchToHadTauReader_->read();
+    event_.jetGenMatch_ = genMatchToJetReader_->read();
+  }
 
-    if ( isUpdatedElectrons )
-    {
-      electronGenMatcher_->addGenLeptonMatch(event_.electron_ptrs_, event_.genElectrons_);
-      electronGenMatcher_->addGenPhotonMatch(event_.electron_ptrs_, event_.genPhotons_);
-      electronGenMatcher_->addGenHadTauMatch(event_.electron_ptrs_, event_.genHadTaus_);
-      electronGenMatcher_->addGenJetMatch(event_.electron_ptrs_, event_.genJets_);
-    }
+  // CV: performing the gen-matching on the muon_ptrs, electron_ptrs, and hadTau_ptrs collections
+  //     adds gen-matching information to all loose, fakeable, and tight collections of muons, electrons and hadronic taus
+  if ( isUpdatedMuons )
+  {
+    muonGenMatcher_->addGenLeptonMatchByIndex(event_.muon_ptrs_, event_.muonGenMatch_, GenParticleType::kGenMuon);
+    muonGenMatcher_->addGenHadTauMatch(event_.muon_ptrs_, event_.genHadTaus_);
+    muonGenMatcher_->addGenJetMatch(event_.muon_ptrs_, event_.genJets_);
+  }
 
-    if ( isUpdatedHadTaus )
-    {
-      hadTauGenMatcher_->addGenLeptonMatch(event_.hadTau_ptrs_, event_.genLeptons_);
-      hadTauGenMatcher_->addGenHadTauMatch(event_.hadTau_ptrs_, event_.genHadTaus_);
-      hadTauGenMatcher_->addGenJetMatch(event_.hadTau_ptrs_, event_.genJets_);
-    }
+  if ( isUpdatedElectrons )
+  {
+    electronGenMatcher_->addGenLeptonMatchByIndex(event_.electron_ptrs_, event_.electronGenMatch_, GenParticleType::kGenElectron);
+    electronGenMatcher_->addGenPhotonMatchByIndex(event_.electron_ptrs_, event_.electronGenMatch_);
+    electronGenMatcher_->addGenHadTauMatch(event_.electron_ptrs_, event_.genHadTaus_);
+    electronGenMatcher_->addGenJetMatch(event_.electron_ptrs_, event_.genJets_);
+  }
+
+  if ( isUpdatedHadTaus )
+  {
+    hadTauGenMatcher_->addGenLeptonMatchByIndex(event_.hadTau_ptrs_, event_.hadTauGenMatch_, GenParticleType::kGenAnyLepton);
+    hadTauGenMatcher_->addGenHadTauMatch(event_.hadTau_ptrs_, event_.genHadTaus_);
+    hadTauGenMatcher_->addGenJetMatch(event_.hadTau_ptrs_, event_.genJets_);
+  }
     
-    // CV: performing the gen-matching on the jet_ptrsAK4 collection
-    //     adds gen-matching information to three collections of AK4 jets at once (selJetsAK4, selJetsAK4_btagLoose, selJetsAK4_btagMedium)
-    if ( isUpdatedJetsAK4 )
-    {
-      jetGenMatcherAK4_->addGenLeptonMatch(event_.jet_ptrsAK4_, event_.genLeptons_);
-      jetGenMatcherAK4_->addGenHadTauMatch(event_.jet_ptrsAK4_, event_.genHadTaus_);
-      jetGenMatcherAK4_->addGenJetMatch(event_.jet_ptrsAK4_, event_.genJets_);
-    }
+  // CV: performing the gen-matching on the jet_ptrsAK4 collection
+  //     adds gen-matching information to three collections of AK4 jets at once (selJetsAK4, selJetsAK4_btagLoose, selJetsAK4_btagMedium)
+  if ( isUpdatedJetsAK4 )
+  {
+    jetGenMatcherAK4_->addGenLeptonMatch(event_.jet_ptrsAK4_, event_.genLeptons_);
+    jetGenMatcherAK4_->addGenHadTauMatch(event_.jet_ptrsAK4_, event_.genHadTaus_);
+    jetGenMatcherAK4_->addGenJetMatchByIndex(event_.jet_ptrsAK4_, event_.jetGenMatch_);
   }
 
   bool isJetSystematicAK8_Hbb = contains(jetsAK8_Hbb_supported_systematics_, current_central_or_shift_);
