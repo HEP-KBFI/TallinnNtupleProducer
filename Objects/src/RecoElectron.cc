@@ -11,7 +11,6 @@ RecoElectron::RecoElectron(const RecoLepton & lepton,
                            Double_t sigmaEtaEta,
                            Double_t HoE,
                            Double_t deltaEta,
-                           //Double_t deltaPhi,
                            Double_t OoEminusOoP,
                            Int_t    nLostHits,
                            Bool_t   passesConversionVeto,
@@ -20,8 +19,7 @@ RecoElectron::RecoElectron(const RecoLepton & lepton,
   , eCorr_(eCorr)
   , sigmaEtaEta_(sigmaEtaEta)
   , HoE_(HoE)
-  , deltaEta_(deltaEta) 
-  //, deltaPhi_(deltaPhi)
+  , deltaEta_(deltaEta)
   , OoEminusOoP_(OoEminusOoP)
   , nLostHits_(nLostHits)
   , passesConversionVeto_(passesConversionVeto)
@@ -95,12 +93,6 @@ RecoElectron::deltaEta() const
 }
 
 Double_t
-RecoElectron::deltaPhi() const
-{
-  return deltaPhi_; 
-}
-
-Double_t
 RecoElectron::etaSC() const
 {
   return deltaEta_ + eta_;
@@ -109,7 +101,7 @@ RecoElectron::etaSC() const
 Double_t
 RecoElectron::phiSC() const
 {
-  return deltaPhi_ + phi_;
+  return phi_;
 }
 
 Double_t
@@ -176,7 +168,6 @@ operator<<(std::ostream & stream,
             "passesConversionVeto = " << electron.passesConversionVeto()    << ", "
             "sigmaEtaEta = "          << electron.sigmaEtaEta()             << ", "
             "deltaEta = "             << electron.deltaEta()                << ",\n "
-            "deltaPhi = "             << electron.deltaPhi()                << ", "
             "HoE = "                  << electron.HoE()                     << ", "
             "OoEminusOoP = "          << electron.OoEminusOoP()             << ",\n"
             "cutbasedID_HLT = "       << electron.cutbasedID_HLT()          << '\n'
