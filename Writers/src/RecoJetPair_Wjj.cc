@@ -1,6 +1,7 @@
 #include "TallinnNtupleProducer/Writers/interface/RecoJetPair_Wjj.h"
 
 #include <algorithm> // std::sort()
+#include <cmath>     // std::fabs()
 
 namespace
 {
@@ -79,6 +80,12 @@ RecoJetPair_Wjj::update()
   {
     p4_ += jet_sublead_->p4();
   }
+  pt_ = p4_.pt();
+  eta_ = p4_.eta();
+  phi_ = p4_.phi();
+  mass_ = p4_.mass();
+  absEta_ = std::fabs(eta_);
+  isValid_ = true;
 }
 
 const RecoJetBase *

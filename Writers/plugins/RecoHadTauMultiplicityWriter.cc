@@ -16,26 +16,68 @@ RecoHadTauMultiplicityWriter::RecoHadTauMultiplicityWriter(const edm::ParameterS
   , branchName_numFakeableHadTausFull_("nfakeabletau")
   , branchName_numTightHadTausFull_("ntighttau")
 {
-  nFakeableHadTausFull_ = 0;
-  nTightHadTausFull_ = 0;
+  merge_systematic_shifts(supported_systematics_, RecoHadTauMultiplicityWriter::get_supported_systematics(cfg));
+  merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
+  for ( auto central_or_shift : supported_systematics_ )
+  {    
+    central_or_shiftEntry it;
+    it.nFakeableHadTausFull_ = 0;
+    it.nTightHadTausFull_ = 0;
+    central_or_shiftEntries_[central_or_shift] = it;
+  }
+  current_central_or_shiftEntry_ = &central_or_shiftEntries_["central"];
 }
 
 RecoHadTauMultiplicityWriter::~RecoHadTauMultiplicityWriter()
 {}
 
+namespace
+{
+  std::string
+  get_branchName_num(const std::string & branchName_num, const std::string & central_or_shift)
+  {
+    if ( central_or_shift == "central" ) return branchName_num;
+    else                                 return Form("%s_%s", branchName_num.data(), central_or_shift.data());
+  }
+}
+
 void
 RecoHadTauMultiplicityWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  bai.setBranch(nFakeableHadTausFull_, branchName_numFakeableHadTausFull_);
-  bai.setBranch(nTightHadTausFull_, branchName_numTightHadTausFull_);
+  for ( auto central_or_shift : supported_systematics_ )
+  {
+    auto it = central_or_shiftEntries_.find(central_or_shift);
+    assert(it != central_or_shiftEntries_.end());
+    bai.setBranch(it->second.nFakeableHadTausFull_, get_branchName_num(branchName_numFakeableHadTausFull_, central_or_shift));
+    bai.setBranch(it->second.nTightHadTausFull_, get_branchName_num(branchName_numTightHadTausFull_, central_or_shift));
+  }
+}
+
+void
+RecoHadTauMultiplicityWriter::set_central_or_shift(const std::string & central_or_shift) const
+{
+  WriterBase::set_central_or_shift(central_or_shift);
+  auto it = central_or_shiftEntries_.find(central_or_shift);
+  if ( it != central_or_shiftEntries_.end() )
+  {
+    current_central_or_shiftEntry_ = const_cast<central_or_shiftEntry *>(&it->second);
+  }
+  else
+  {
+    current_central_or_shiftEntry_ = nullptr;
+  }
 }
 
 void
 RecoHadTauMultiplicityWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  nFakeableHadTausFull_ = event.fakeableHadTausFull_.size();
-  nTightHadTausFull_ = event.tightHadTausFull_.size();
+  if ( current_central_or_shiftEntry_ )
+  {
+    auto it = current_central_or_shiftEntry_;
+    it->nFakeableHadTausFull_ = event.fakeableHadTausFull_.size();
+    it->nTightHadTausFull_ = event.tightHadTausFull_.size();
+  }
 }
 
 std::vector<std::string>

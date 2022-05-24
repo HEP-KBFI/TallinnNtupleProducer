@@ -12,7 +12,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"             // RecoJetReaderAK8::get_supported_systematics()
 #include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                // RecoMEtReader::get_supported_systematics()
 #include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"               // RecoMuonReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Writers/interface/bdtVarAuxFunctions.h"           // comp_min_dR_jet(), comp_mT(), comp_sumP4()
+#include "TallinnNtupleProducer/Writers/interface/bdtVarAuxFunctions.h"           // comp_min_dR_jet(), comp_mT(), comp_sum_coneP4(), comp_sumP4()
 #include "TallinnNtupleProducer/Writers/interface/createRecoJetPairs_Wjj.h"       // createRecoJetPairs_Wjj();
 #include "TallinnNtupleProducer/Writers/interface/RecoJetPair_Wjj.h"              // RecoJetPair_Wjj
 
@@ -155,7 +155,7 @@ BDTVarWriter_HH_2lss::writeImp(const Event & event, const EvtWeightRecorder & ev
       m_jj_W2_  = jetPair_Wjj_sublead->mass();
     }
 
-    mHH_vis_ = (lepton_lead->p4() + lepton_sublead->p4() + comp_sumP4(jetPairs_Wjj)).mass();
+    mHH_vis_ = (comp_sumP4(std::vector<const RecoLepton *>({ lepton_lead, lepton_sublead })) + comp_sumP4(jetPairs_Wjj)).mass();
   }
 }
 

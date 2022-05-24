@@ -79,7 +79,7 @@ namespace
   get_branchName_obj(const std::string & branchName_obj, int idx, const std::string & suffix, const std::string & central_or_shift)
   {
     if ( central_or_shift == "central" ) return Form("%s%i_%s",    branchName_obj.data(), (int)idx + 1, suffix.data());
-    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), (int)idx + 1, central_or_shift.data(), suffix.data());
+    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), (int)idx + 1, suffix.data(), central_or_shift.data());
   }
 }
 

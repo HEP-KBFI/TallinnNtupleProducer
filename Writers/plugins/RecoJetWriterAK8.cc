@@ -74,7 +74,7 @@ namespace
   get_branchName_obj(const std::string & branchName_obj, int idx, const std::string & suffix, const std::string & central_or_shift)
   {
     if ( central_or_shift == "central" ) return Form("%s%i_%s",    branchName_obj.data(), (int)idx + 1, suffix.data());
-    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), (int)idx + 1, central_or_shift.data(), suffix.data());
+    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), (int)idx + 1, suffix.data(), central_or_shift.data());
   }
 }
 
@@ -123,8 +123,8 @@ RecoJetWriterAK8::writeImp(const Event & event, const EvtWeightRecorder & evtWei
   if ( current_central_or_shiftEntry_ )
   {
     const RecoJetPtrCollectionAK8* jets = nullptr;
-    if      ( jetCollection_ == JetCollection::kSelJetsAK8_Wjj        ) jets = &event.selJetsAK8_Wjj();
-    else if ( jetCollection_ == JetCollection::kSelJetsAK8_Hbb        ) jets = &event.selJetsAK8_Hbb();
+    if      ( jetCollection_ == JetCollection::kSelJetsAK8_Wjj ) jets = &event.selJetsAK8_Wjj();
+    else if ( jetCollection_ == JetCollection::kSelJetsAK8_Hbb ) jets = &event.selJetsAK8_Hbb();
     else assert(0);
     auto it = current_central_or_shiftEntry_;
     it->nJets_ = jets->size();

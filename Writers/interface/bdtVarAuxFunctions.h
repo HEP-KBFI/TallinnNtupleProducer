@@ -24,7 +24,10 @@ comp_sumP4(const std::vector<const T *> & particles)
   Particle::LorentzVector sumP4;
   for ( const T * particle : particles )
   {
-    sumP4 += particle->p4();
+    //const RecoLepton * lepton = dynamic_cast<const RecoLepton *>(particle);
+    //if ( lepton ) sumP4 += lepton->cone_p4();
+    //else          sumP4 += particle->p4();
+    sumP4 += particle->p4(); // CV: only for testing (backwards compatibility with old HH->multilepton 2lss code) !!
   }
   return sumP4;
 }

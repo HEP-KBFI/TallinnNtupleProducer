@@ -103,7 +103,7 @@ namespace
     unsigned genMatch = 0;
     if ( lepton->genLepton() )
     {
-      if ( lepton->charge() == lepton->genLepton()->charge() ) genMatch = 1;
+      if ( lepton->charge()*lepton->genLepton()->charge() >= 0 ) genMatch = 1;
       else genMatch = 2;
     }
     else if ( lepton->is_electron() && lepton->genPhoton() && lepton->genPhoton()->pt() > (0.50*lepton->pt()) )
@@ -144,8 +144,8 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
       isTight_[idxLepton] = lepton->isTight();
       tightCharge_[idxLepton] = lepton->tightCharge();
       genMatch_[idxLepton] = compGenMatch(lepton);
-      isFake_[idxLepton] = genMatch_[idxLepton] == 16;
-      isFlip_[idxLepton] = genMatch_[idxLepton] == 2;
+      isFake_[idxLepton] = (genMatch_[idxLepton] == 16);
+      isFlip_[idxLepton] = (genMatch_[idxLepton] == 2);
     }
     else
     {

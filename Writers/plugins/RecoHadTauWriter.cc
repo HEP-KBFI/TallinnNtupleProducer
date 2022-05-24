@@ -72,7 +72,7 @@ namespace
   get_branchName_obj(const std::string & branchName_obj, int idx, const std::string & suffix, const std::string & central_or_shift)
   {
     if ( central_or_shift == "central" ) return Form("%s%i_%s",    branchName_obj.data(), (int)idx + 1, suffix.data());
-    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), (int)idx + 1, central_or_shift.data(), suffix.data());
+    else                                 return Form("%s%i_%s_%s", branchName_obj.data(), (int)idx + 1, suffix.data(), central_or_shift.data());
   }
 }
 
@@ -125,17 +125,17 @@ namespace
     unsigned genMatch = 0;
     if ( hadTau->genHadTau() )
     {
-      if ( hadTau->charge() == hadTau->genHadTau()->charge() ) genMatch = 1;
+      if ( hadTau->charge()*hadTau->genHadTau()->charge() >= 0 ) genMatch = 1;
       else genMatch = 2;
     }
     else if ( hadTau->genLepton() && std::abs(hadTau->genLepton()->pdgId()) == 11 )
     {
-      if ( hadTau->charge() == hadTau->genLepton()->charge() ) genMatch = 4;
+      if ( hadTau->charge()*hadTau->genLepton()->charge() >= 0 ) genMatch = 4;
       else genMatch = 8;
     }
     else if ( hadTau->genLepton() && std::abs(hadTau->genLepton()->pdgId()) == 13 )
     {
-      if ( hadTau->charge() == hadTau->genLepton()->charge() ) genMatch = 16;
+      if ( hadTau->charge()*hadTau->genLepton()->charge() >= 0 ) genMatch = 16;
       else genMatch = 32;
     }
     else
@@ -168,8 +168,8 @@ RecoHadTauWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
         it->isFakeable_[idxHadTau] = hadTau->isFakeable();
         it->isTight_[idxHadTau] = hadTau->isTight();
         it->genMatch_[idxHadTau] = compGenMatch(hadTau);
-        it->isFake_[idxHadTau] = it->genMatch_[idxHadTau] == 64;
-        it->isFlip_[idxHadTau] = it->genMatch_[idxHadTau] == 2 || it->genMatch_[idxHadTau] == 8 || it->genMatch_[idxHadTau] == 32;
+        it->isFake_[idxHadTau] = (it->genMatch_[idxHadTau] == 64);
+        it->isFlip_[idxHadTau] = (it->genMatch_[idxHadTau] == 2 || it->genMatch_[idxHadTau] == 8 || it->genMatch_[idxHadTau] == 32);
       }
       else
       {

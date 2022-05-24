@@ -26,6 +26,13 @@ class RecoHadTauMultiplicityWriter : public WriterBase
   setBranches(TTree * outputTree);
  
   /**
+   * @brief Switch branches to those for the central value or for systematic shifts.
+   *        This method needs to be called before each call to the "write" method in the event loop.
+   */
+  void
+  set_central_or_shift(const std::string & central_or_shift) const;
+
+  /**
    * @brief Return list of systematic uncertainties supported by this plugin
    */
   std::vector<std::string>
@@ -41,8 +48,13 @@ class RecoHadTauMultiplicityWriter : public WriterBase
   std::string branchName_numFakeableHadTausFull_;
   std::string branchName_numTightHadTausFull_;
 
-  UInt_t nFakeableHadTausFull_;
-  UInt_t nTightHadTausFull_;
+  struct central_or_shiftEntry
+  {
+    UInt_t nFakeableHadTausFull_;
+    UInt_t nTightHadTausFull_;
+  };
+  std::map<std::string, central_or_shiftEntry> central_or_shiftEntries_; // key = central_or_shift
+  mutable central_or_shiftEntry * current_central_or_shiftEntry_;
 };
 
 #endif // TallinnNtupleProducer_Writers_RecoHadTauMultiplicityWriter_h
