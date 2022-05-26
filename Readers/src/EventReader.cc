@@ -9,6 +9,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/pickFirstNobjects.h"        // pickFirstNobjects()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getBTagWeight_option(), getMET_option()
+#include "TallinnNtupleProducer/Objects/interface/printCollection.h"              // printCollection()
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
 
@@ -275,7 +276,7 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
   {
     // CV: electron energy scale uncertainty not implemented yet 
   }
-  if ( contains(hadTauReader_->get_supported_systematics(cfg_), central_or_shift) )
+  if ( central_or_shift == "central" || contains(hadTauReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int hadTauPt_option = getHadTauPt_option(central_or_shift);
     hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
@@ -414,6 +415,12 @@ namespace
   }
 }
 
+const RunLumiEvent &
+EventReader::read_runLumiEvent() const
+{
+  return runLumiEventReader_->read();
+}
+
 const Event &
 EventReader::read() const
 {
@@ -473,7 +480,7 @@ EventReader::read() const
     isUpdatedElectrons = true;
   }
   if ( isUpdatedMuons || isUpdatedElectrons )
-  {
+  {    
     event_.looseElectronsFull_ = electronCleaner_->operator()(event_.looseElectronsUncleaned_, event_.looseMuonsFull_);
     event_.fakeableElectronsFull_ = electronCleaner_->operator()(event_.fakeableElectronsUncleaned_, event_.looseMuonsFull_);
     event_.tightElectronsFull_ = getIntersection(event_.fakeableElectronsFull_, event_.tightElectronsUncleaned_, isHigherConePt<RecoElectron>);
@@ -486,12 +493,19 @@ EventReader::read() const
   bool isUpdatedLeptons = false;
   if ( isUpdatedMuons || isUpdatedElectrons )
   {
+    event_.looseLeptonsUncleaned_ = mergeLeptonCollections(event_.looseElectronsUncleaned_, event_.looseMuonsFull_, isHigherConePt<RecoLepton>);
     event_.looseLeptonsFull_ = mergeLeptonCollections(event_.looseElectronsFull_, event_.looseMuonsFull_, isHigherConePt<RecoLepton>);
     event_.fakeableLeptonsFull_ = mergeLeptonCollections(event_.fakeableElectronsFull_, event_.fakeableMuonsFull_, isHigherConePt<RecoLepton>);
     event_.tightLeptonsFull_ = mergeLeptonCollections(event_.tightElectronsFull_, event_.tightMuonsFull_, isHigherConePt<RecoLepton>);
     event_.fakeableLeptons_ = pickFirstNobjects(event_.fakeableLeptonsFull_, numNominalLeptons_);
     event_.tightLeptons_ = getIntersection(event_.fakeableLeptons_, event_.tightLeptonsFull_, isHigherConePt<RecoLepton>);
     isUpdatedLeptons = true;
+  }
+  if ( isDEBUG_ )
+  {
+    printCollection("looseLeptonsUncleaned", event_.looseLeptonsUncleaned_);
+    printCollection("fakeableLeptonsFull", event_.fakeableLeptonsFull_);
+    printCollection("tightLeptonsFull", event_.tightLeptonsFull_);
   }
   if ( applyNumNominalLeptonsCut_ && event_.fakeableLeptons_.size() < numNominalLeptons_ )
   {
@@ -519,6 +533,12 @@ EventReader::read() const
     isUpdatedHadTaus = true;
     hadTau_lastSystematic_ = ( isHadTauSystematic ) ? current_central_or_shift_ : "central";
   }
+  if ( isDEBUG_ )
+  {
+    printCollection("fakeableHadTausUncleaned", event_.fakeableHadTausUncleaned_);
+    printCollection("fakeableHadTausFull", event_.fakeableHadTausFull_);
+    printCollection("tightHadTausFull", event_.tightHadTausFull_);
+  }
   hadTau_isInvalid_ = false;
   if ( applyNumNominalHadTausCut_ && event_.fakeableHadTaus_.size() < numNominalHadTaus_ )
   {
@@ -545,6 +565,13 @@ EventReader::read() const
     event_.selJetsAK4_btagMedium_ = jetCleanerAK4_dR04_->operator()(event_.selJetsUncleanedAK4_btagMedium_, event_.fakeableLeptons_, event_.fakeableHadTaus_);
     isUpdatedJetsAK4 = true;
     jetAK4_lastSystematic_ = ( isJetSystematicAK4 ) ? current_central_or_shift_ : "central";
+  }
+  if ( isDEBUG_ )
+  {
+    printCollection("selJetsUncleanedAK4", event_.selJetsUncleanedAK4_);
+    printCollection("selJetsAK4", event_.selJetsAK4_);
+    printCollection("selJetsAK4_btagLoose", event_.selJetsAK4_btagLoose_);
+    printCollection("selJetsAK4_btagMedium", event_.selJetsAK4_btagMedium_);
   }
   jetAK4_isInvalid_ = false;
 
@@ -603,7 +630,7 @@ EventReader::read() const
       jetGenMatcherAK4_->addGenJetMatch(event_.jet_ptrsAK4_, event_.genJets_);
     }
   }
-
+  
   bool isJetSystematicAK8_Hbb = contains(jetsAK8_Hbb_supported_systematics_, current_central_or_shift_);
   bool isUpdatedJetsAK8_Hbb = false;
   bool jetAK8_Hbb_needsUpdate = isJetSystematicAK8_Hbb || isNewEvent || jetAK8_Hbb_isInvalid_ || (jetAK8_Hbb_lastSystematic_ != "central" && !isJetSystematicAK8_Hbb);
@@ -619,6 +646,11 @@ EventReader::read() const
     // CV: clean AK8_Hbb jets wrt leptons only (not wrt hadronic taus)
     event_.selJetsAK8_Hbb_ = jetCleanerAK8_dR08_->operator()(event_.selJetsUncleanedAK8_Hbb_, event_.fakeableLeptons_);
     jetAK8_Hbb_lastSystematic_ = ( isJetSystematicAK8_Hbb ) ? current_central_or_shift_ : "central";
+  }
+  if ( isDEBUG_ )
+  {
+    printCollection("selJetsUncleanedAK8_Hbb", event_.selJetsUncleanedAK8_Hbb_);
+    printCollection("selJetsAK8_Hbb", event_.selJetsAK8_Hbb_);
   }
   jetAK8_Hbb_isInvalid_ = false;
 
@@ -645,6 +677,10 @@ EventReader::read() const
       event_.selJetsAK8_Wjj_.clear();
     }
     jetAK8_Wjj_lastSystematic_ = ( isJetSystematicAK8_Wjj ) ? current_central_or_shift_ : "central";
+  }
+  if ( isDEBUG_ )
+  {
+    printCollection("selJetsAK8_Wjj", event_.selJetsAK8_Wjj_);
   }
   jetAK8_Wjj_isInvalid_ = false;
 

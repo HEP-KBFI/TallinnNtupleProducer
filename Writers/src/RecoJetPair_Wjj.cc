@@ -144,3 +144,43 @@ RecoJetPair_Wjj::type() const
 {
   return type_;
 }
+
+std::ostream &
+operator<<(std::ostream & stream,
+           const RecoJetPair_Wjj & jetPair)
+{
+  stream << "pT = " << jetPair.pt() << "," 
+         << " eta = " << jetPair.eta() << "," 
+         << " phi = " << jetPair.phi() << "," 
+         << " mass = " << jetPair.mass() << "," 
+         << " type = ";
+  if      ( jetPair.type() == RecoJetPair_Wjj::kBoosted  ) stream << "boosted/AK8";
+  else if ( jetPair.type() == RecoJetPair_Wjj::kResolved ) stream << "resolved/AK4";
+  else assert(0);
+  stream << '\n';
+  stream << "subjet1: ";
+  if ( jetPair.jet_lead() )
+  {
+    stream << "pT = " << jetPair.jet_lead()->pt() << "," 
+           << " eta = " << jetPair.jet_lead()->eta() << "," 
+           << " phi = " << jetPair.jet_lead()->phi();
+  }
+  else
+  {
+    stream << "N/A";
+  }
+  stream << '\n';
+  stream << "subjet2: ";
+  if ( jetPair.jet_sublead() )
+  {
+    stream << "pT = " << jetPair.jet_sublead()->pt() << "," 
+           << " eta = " << jetPair.jet_sublead()->eta() << "," 
+           << " phi = " << jetPair.jet_sublead()->phi();
+  }
+  else
+  {
+    stream << "N/A";
+  }
+  stream << '\n';
+  return stream;
+}

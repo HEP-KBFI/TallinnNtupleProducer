@@ -38,9 +38,9 @@ RecoLeptonMultiplicityWriter::setBranches(TTree * outputTree)
 void
 RecoLeptonMultiplicityWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
-  nLooseLeptonsFull_ = event.looseLeptonsFull_.size();
-  nFakeableLeptonsFull_ = event.fakeableLeptonsFull_.size();
-  nTightLeptonsFull_ = event.tightLeptonsFull_.size();
+  nLooseLeptonsFull_ = event.looseLeptonsFull().size();
+  nFakeableLeptonsFull_ = event.fakeableLeptonsFull().size();
+  nTightLeptonsFull_ = event.tightLeptonsFull().size();
 }
 
 std::vector<std::string>

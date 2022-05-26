@@ -57,4 +57,8 @@ class RecoJetPair_Wjj : public Particle
 typedef std::vector<RecoJetPair_Wjj>  RecoJetPairCollection_Wjj;
 typedef std::vector<const RecoJetPair_Wjj *>  RecoJetPairPtrCollection_Wjj;
 
+std::ostream &
+operator<<(std::ostream & stream,
+           const RecoJetPair_Wjj & jetPair);
+
 #endif // TallinnNtupleProducer_Writers_RecoJetPair_Wjj_h

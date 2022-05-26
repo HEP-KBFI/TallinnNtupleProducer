@@ -58,6 +58,8 @@ class BDTVarWriter_HH_2lss : public WriterBase
   Float_t dR_jj_W2_;
   Float_t m_jj_W2_;
   Float_t mHH_vis_;
+
+  bool isDEBUG_;
 };
 
 #endif // TallinnNtupleProducer_Writers_BDTVarWriter_HH_2lss_h

@@ -24,7 +24,9 @@
 
 BDTVarWriter_HH_2lss::BDTVarWriter_HH_2lss(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
-{}
+{
+  isDEBUG_ = cfg.getParameter<bool>("isDEBUG");
+}
 
 BDTVarWriter_HH_2lss::~BDTVarWriter_HH_2lss()
 {}
@@ -104,6 +106,14 @@ BDTVarWriter_HH_2lss::writeImp(const Event & event, const EvtWeightRecorder & ev
   
     RecoJetPairCollection_Wjj tmp = createRecoJetPairs_Wjj(jetsAK4, jetsAK8_Wjj, 2);
     RecoJetPairPtrCollection_Wjj jetPairs_Wjj = convert_to_ptrs(tmp);
+    if ( isDEBUG_ )
+    {
+      size_t numJetPairs_Wjj = jetPairs_Wjj.size();
+      for ( size_t idxJetPair_Wjj = 0; idxJetPair_Wjj < numJetPairs_Wjj; ++idxJetPair_Wjj )
+      {
+        std::cout << "jetPair_Wjj #" << idxJetPair_Wjj << ": " << (*jetPairs_Wjj.at(idxJetPair_Wjj));
+      } 
+    }
 
     min_dR_lep_Wjets_ =  1.e+3;
     max_dR_lep_Wjets_ = -1.;

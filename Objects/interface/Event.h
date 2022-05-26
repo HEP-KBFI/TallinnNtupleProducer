@@ -41,12 +41,20 @@ class Event
   const RecoElectronPtrCollection& fakeableElectrons() const;
   const RecoElectronPtrCollection& tightElectrons() const;
 
-  const RecoLeptonPtrCollection& looseLeptons() const;
   const RecoLeptonPtrCollection& fakeableLeptons() const;
   const RecoLeptonPtrCollection& tightLeptons() const;
 
+  const RecoLeptonPtrCollection& looseLeptonsUncleaned() const;
+
+  const RecoLeptonPtrCollection& looseLeptonsFull() const;
+  const RecoLeptonPtrCollection& fakeableLeptonsFull() const;
+  const RecoLeptonPtrCollection& tightLeptonsFull() const;
+
   const RecoHadTauPtrCollection& fakeableHadTaus() const;
   const RecoHadTauPtrCollection& tightHadTaus() const;
+
+  const RecoHadTauPtrCollection& fakeableHadTausFull() const;
+  const RecoHadTauPtrCollection& tightHadTausFull() const;
 
   const RecoJetPtrCollectionAK4& selJetsAK4() const;
   const RecoJetPtrCollectionAK4& selJetsAK4_btagLoose() const;
@@ -94,6 +102,7 @@ class Event
   RecoElectronPtrCollection fakeableElectrons_;
   RecoElectronPtrCollection tightElectrons_;
 
+  RecoLeptonPtrCollection looseLeptonsUncleaned_;
   RecoLeptonPtrCollection looseLeptonsFull_;
   RecoLeptonPtrCollection fakeableLeptonsFull_;
   RecoLeptonPtrCollection tightLeptonsFull_;

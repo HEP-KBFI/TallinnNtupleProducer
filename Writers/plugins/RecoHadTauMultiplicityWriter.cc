@@ -75,8 +75,8 @@ RecoHadTauMultiplicityWriter::writeImp(const Event & event, const EvtWeightRecor
   if ( current_central_or_shiftEntry_ )
   {
     auto it = current_central_or_shiftEntry_;
-    it->nFakeableHadTausFull_ = event.fakeableHadTausFull_.size();
-    it->nTightHadTausFull_ = event.tightHadTausFull_.size();
+    it->nFakeableHadTausFull_ = event.fakeableHadTausFull().size();
+    it->nTightHadTausFull_ = event.tightHadTausFull().size();
   }
 }
 

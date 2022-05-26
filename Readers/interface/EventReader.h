@@ -63,6 +63,13 @@ class EventReader : public ReaderBase
   setBranchAddresses(TTree * inputTree) override;
 
   /**
+   * @brief Read run, lumi, and event number branches from tree
+   * @return Event object
+   */
+  const RunLumiEvent &
+  read_runLumiEvent() const;
+
+  /**
    * @brief Read branches from tree and use information to fill Event object
    * @return Event object
    */

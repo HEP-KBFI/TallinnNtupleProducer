@@ -42,9 +42,12 @@ class ZbosonMassVetoWriter : public WriterBase
 
   double z_mass_;
   double z_window_;
-  bool requireOS_;
+  bool requireOS_e_;
+  bool requireOS_mu_;
 
   Bool_t passesZbosonMassVeto_;
+
+  bool isDEBUG_;
 };
 
 #endif // TallinnNtupleProducer_Writers_ZbosonMassVetoWriter_h
