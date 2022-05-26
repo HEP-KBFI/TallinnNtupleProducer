@@ -4,5 +4,5 @@ lowMassLeptonPairVeto = cms.PSet(
     pluginType = cms.string("LowMassLeptonPairVetoWriter"),
     requireSF = cms.bool(False),
     requireOS = cms.bool(False),
-    isDEBUG = cms.bool(True)
+    isDEBUG = cms.bool(False)
 )

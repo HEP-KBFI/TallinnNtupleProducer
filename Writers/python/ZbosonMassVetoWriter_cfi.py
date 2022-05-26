@@ -6,5 +6,5 @@ ZbosonMassVeto = cms.PSet(
     z_window = cms.double(10.),
     requireOS_e = cms.bool(False),
     requireOS_mu = cms.bool(True),
-    isDEBUG = cms.bool(True)
+    isDEBUG = cms.bool(False)
 )
