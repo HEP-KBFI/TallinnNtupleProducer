@@ -41,6 +41,7 @@
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"                                     // GenJet
 #include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                                  // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                                  // GenPhoton
+#include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                               // RunLumiEvent
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"                                // TriggerInfo
 #include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                // EventReader
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                            // GenHadTauReader
@@ -126,6 +127,14 @@ int main(int argc, char* argv[])
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
   bool applyNumNominalHadTausCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalHadTausCut");
   std::cout << "Setting nominal multiplicity of leptons and taus to: #leptons = " << numNominalLeptons << ", #taus = " << numNominalHadTaus << std::endl;
+  if ( applyNumNominalLeptonsCut )
+  {
+    std::cout << "Skipping events that contain fewer than the nominal number of leptons." << std::endl;
+  }
+  if ( applyNumNominalHadTausCut )
+  {
+    std::cout << "Skipping events that contain fewer than the nominal number of taus." << std::endl;
+  }
 
   std::string hadTauWP_againstJets = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstJets_tight");
   std::string hadTauWP_againstElectrons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstElectrons");
@@ -267,7 +276,7 @@ int main(int argc, char* argv[])
   {
     for ( auto & writer : writers )
     {
-       merge_systematic_shifts(systematic_shifts, writer->get_supported_systematics(cfg_produceNtuple));
+      merge_systematic_shifts(systematic_shifts, writer->get_supported_systematics(cfg_produceNtuple));
     }
   }
   // CV: add central value (for data and MC)
@@ -281,9 +290,11 @@ int main(int argc, char* argv[])
     bool skipEvent = false;
     for ( const auto & central_or_shift : systematic_shifts )
     {
-      eventReader->set_central_or_shift(central_or_shift);
-      const Event& event = eventReader->read();
-      
+      if ( isDEBUG || run_lumi_eventSelector )
+      {
+        std::cout << "Processing central_or_shift = '" << central_or_shift << "'" << std::endl;
+      }
+      const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
       if ( central_or_shift == "central" )
       {
         if ( inputTree->canReport(reportEvery) )
@@ -291,31 +302,28 @@ int main(int argc, char* argv[])
           std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx()
                     << " or " << inputTree->getCurrentEventIdx() << " entry in #"
                     << (inputTree->getProcessedFileCount() - 1)
-                    << " (" << event.eventInfo()
+                    << " (" << runLumiEvent
                     << ") file\n";
         }
         ++analyzedEntries;
         histogram_analyzedEntries->Fill(0.);
-
-        if ( run_lumi_eventSelector )
-        { 
-          if ( !(*run_lumi_eventSelector)(event.eventInfo()) )
-          {
-            skipEvent = true;
-            continue;
-          }
-          std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << event.eventInfo() << '\n';
-          if ( inputTree->isOpen() )
-          {
-            std::cout << "input File = " << inputTree->getCurrentFileName() << '\n';
-          }
-        }
-
-        if ( isDEBUG )
+      }
+      if ( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) )
+      {
+        skipEvent = true;
+        continue;
+      }
+      if ( central_or_shift == "central" && (isDEBUG || run_lumi_eventSelector) )
+      {
+        std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << runLumiEvent << '\n';
+        if ( inputTree->isOpen() )
         {
-          std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << " " << event.eventInfo() << '\n';
+          std::cout << "input File = " << inputTree->getCurrentFileName() << '\n';
         }
       }
+
+      eventReader->set_central_or_shift(central_or_shift);
+      const Event& event = eventReader->read();
 
       // CV: skip processing events that don't contain the nominal number of leptons and hadronic taus,
       //     if the flags applyNumNominalLeptonsCut and applyNumNominalHadTausCut are enabled in the config file
