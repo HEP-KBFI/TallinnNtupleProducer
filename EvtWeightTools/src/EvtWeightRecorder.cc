@@ -784,7 +784,7 @@ EvtWeightRecorder::record_gen_mHH_cosThetaStar(const LHEParticleReader * const l
   TLorentzVector h1, h2, H;
   for (unsigned int indx=0; indx<lheParticles.size(); indx++)
   {
-    if ( lheParticles[indx].pdgId() ==24 ) higgs.push_back(indx);
+    if ( lheParticles[indx].pdgId() ==25 ) higgs.push_back(indx);
   }
     if ( higgs.size() ==2 )
     {
