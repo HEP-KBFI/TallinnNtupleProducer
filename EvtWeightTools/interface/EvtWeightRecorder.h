@@ -4,6 +4,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"          // edm::VParameterSet
 
 #include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle
+#include "TallinnNtupleProducer/Objects/interface/LHEParticle.h"
 
 // forward declarations
 class L1PreFiringWeightReader;
@@ -221,7 +222,7 @@ class EvtWeightRecorder
   record_prescale(double weight);
 
   void
-  record_gen_mHH_cosThetaStar(const LHEParticleReader * const lheParticleReader);
+  record_gen_mHH_cosThetaStar(const LHEParticleCollection & lheParticles);
 
   // CV: weight specific to LO HH MC samples, computed by HHWeightInterfaceLO->getWeight("SM",...) method
   void
