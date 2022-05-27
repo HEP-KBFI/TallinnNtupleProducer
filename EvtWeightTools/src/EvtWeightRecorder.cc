@@ -23,7 +23,6 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                                            // RecoLepton
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                               // L1PreFiringWeightReader
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                                         // LHEInfoReader
-#include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
 #include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                                        // PSWeightReader
 
 #include <boost/math/special_functions/sign.hpp>                                                           // boost::math::sign()
@@ -777,9 +776,8 @@ EvtWeightRecorder::record_lheScaleWeight(const LHEInfoReader * const lheInfoRead
 }
 
 void
-EvtWeightRecorder::record_gen_mHH_cosThetaStar(const LHEParticleReader * const lheParticleReader)
+EvtWeightRecorder::record_gen_mHH_cosThetaStar(const LHEParticleCollection & lheParticles)
 {
-  LHEParticleCollection lheParticles = lheParticleReader->read();
   std::vector<int> higgs;
   TLorentzVector h1, h2, H;
   for (unsigned int indx=0; indx<lheParticles.size(); indx++)

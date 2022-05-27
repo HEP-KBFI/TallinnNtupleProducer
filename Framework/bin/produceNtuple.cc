@@ -338,7 +338,8 @@ int main(int argc, char* argv[])
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
         evtWeightRecorder.record_psWeight(psWeightReader);
-        evtWeightRecorder.record_gen_mHH_cosThetaStar(lheParticleReader);
+        LHEParticleCollection lheParticles = lheParticleReader->read();
+        evtWeightRecorder.record_gen_mHH_cosThetaStar(lheParticles);
         evtWeightRecorder.record_puWeight(&event.eventInfo());
         evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
