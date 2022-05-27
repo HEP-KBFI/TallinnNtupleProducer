@@ -7,9 +7,10 @@
 
 // forward declarations
 class L1PreFiringWeightReader;
-class LHEInfoReader;
 class PSWeightReader;
 class EventInfo;
+class LHEInfoReader;
+class LHEParticleReader;
 class RecoJetAK4;
 class Data_to_MC_CorrectionInterface_Base;
 class HadTauFakeRateInterface;
@@ -219,13 +220,15 @@ class EvtWeightRecorder
   void
   record_prescale(double weight);
 
+  void
+  record_gen_mHH_cosThetaStar(const LHEParticleReader * const lheParticleReader);
+
   // CV: weight specific to LO HH MC samples, computed by HHWeightInterfaceLO->getWeight("SM",...) method
   void
   record_hhWeight_lo(double weight);
 
   void
   record_hhWeight_lo(const HHWeightInterfaceLO * const HHWeightLO_calc,
-                     const EventInfo & eventInfo,
                      bool isDEBUG = false);
 
   // CV: weight specific to LO HH MC samples, computed by HHWeightInterfaceNLO->getWeight("SM",...) method
@@ -234,7 +237,6 @@ class EvtWeightRecorder
 
   void
   record_hhWeight_nlo(const HHWeightInterfaceNLO * const HHWeightNLO_calc,
-                      const EventInfo & eventInfo,
                       bool isDEBUG = false);
 
   void
@@ -333,6 +335,8 @@ class EvtWeightRecorder
   double hhWeight_lo_;
   double hhWeight_nlo_;
   double rescaling_;
+  double gen_mHH_;
+  double gen_cosThetaStar_;
   std::string central_or_shift_;
   std::vector<std::string> central_or_shifts_;
 

@@ -23,7 +23,7 @@ LHEParticleReader::LHEParticleReader(const edm::ParameterSet & cfg)
   , particle_pdgId_(nullptr)
   , particle_status_(nullptr)
 {
-  branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "LHEPart"
+  branchName_obj_ = "LHEPart"; // default = "LHEPart"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   setBranchNames();
 }

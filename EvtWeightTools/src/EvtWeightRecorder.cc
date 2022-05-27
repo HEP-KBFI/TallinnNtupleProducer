@@ -23,11 +23,13 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                                            // RecoLepton
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                               // L1PreFiringWeightReader
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                                         // LHEInfoReader
+#include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
 #include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                                        // PSWeightReader
 
 #include <boost/math/special_functions/sign.hpp>                                                           // boost::math::sign()
 
 #include <assert.h>                                                                                        // assert()
+#include<TLorentzVector.h>
 
 EvtWeightRecorder::EvtWeightRecorder()
   : EvtWeightRecorder({ "central" }, "central", false)
@@ -721,11 +723,10 @@ EvtWeightRecorder::record_hhWeight_lo(double weight)
 
 void
 EvtWeightRecorder::record_hhWeight_lo(const HHWeightInterfaceLO * const HHWeightLO_calc,
-                                      const EventInfo & eventInfo,
                                       bool isDEBUG)
 {
   assert(HHWeightLO_calc);
-  return record_hhWeight_lo(HHWeightLO_calc->getWeight("SM", eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar(), isDEBUG));
+  return record_hhWeight_lo(HHWeightLO_calc->getWeight("SM", gen_mHH_, gen_cosThetaStar_, isDEBUG));
 }
 
 void
@@ -737,11 +738,10 @@ EvtWeightRecorder::record_hhWeight_nlo(double weight)
 
 void
 EvtWeightRecorder::record_hhWeight_nlo(const HHWeightInterfaceNLO * const HHWeightNLO_calc,
-                                       const EventInfo & eventInfo,
                                        bool isDEBUG)
 {
   assert(HHWeightNLO_calc);
-  return record_hhWeight_nlo(HHWeightNLO_calc->getWeight_LOtoNLO("SM", eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar(), isDEBUG));
+  return record_hhWeight_nlo(HHWeightNLO_calc->getWeight_LOtoNLO("SM", gen_mHH_, gen_cosThetaStar_, isDEBUG));
 }
 
 void
@@ -774,6 +774,27 @@ EvtWeightRecorder::record_lheScaleWeight(const LHEInfoReader * const lheInfoRead
     }
     weights_lheScale_[lheScale_option] = lheInfoReader->getWeight_scale(lheScale_option);
   }
+}
+
+void
+EvtWeightRecorder::record_gen_mHH_cosThetaStar(const LHEParticleReader * const lheParticleReader)
+{
+  LHEParticleCollection lheParticles = lheParticleReader->read();
+  std::vector<int> higgs;
+  TLorentzVector h1, h2, H;
+  for (unsigned int indx=0; indx<lheParticles.size(); indx++)
+  {
+    if ( lheParticles[indx].pdgId() ==24 ) higgs.push_back(indx);
+  }
+    if ( higgs.size() ==2 )
+    {
+      h1.SetPtEtaPhiM(lheParticles[higgs[0]].pt(), lheParticles[higgs[0]].eta(), lheParticles[higgs[0]].phi(), lheParticles[higgs[0]].mass());
+      h2.SetPtEtaPhiM(lheParticles[higgs[1]].pt(), lheParticles[higgs[1]].eta(), lheParticles[higgs[1]].phi(), lheParticles[higgs[1]].mass());
+      H = h1 + h2;
+      h1.Boost(-H.BoostVector());
+      gen_mHH_ = H.M();
+      gen_cosThetaStar_ = std::abs(h1.CosTheta());
+    }
 }
 
 void
