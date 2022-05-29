@@ -11,8 +11,7 @@ Double_t
 RecoLepton::get_assocJet_pt(Double_t reco_pt,
                             Double_t jetRelIso)
 {
-  double jetPtRatio = 1. / jetRelIso - 1.;
-  return jetPtRatio > 1.e-3 ? 0.90 * reco_pt / jetPtRatio : reco_pt;
+  return 0.9 * reco_pt * (jetRelIso + 1);
 }
 
 RecoLepton::RecoLepton(const ChargedParticle & lepton,
@@ -218,7 +217,7 @@ RecoLepton::jetRelIso() const
 Double_t
 RecoLepton::jetPtRatio() const
 {
-  return 1. / jetRelIso_ - 1.;
+  return  1 / (1 + jetRelIso_);
 }
 
 Double_t

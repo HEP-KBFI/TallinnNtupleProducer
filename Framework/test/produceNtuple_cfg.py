@@ -152,6 +152,8 @@ process.produceNtuple = cms.PSet(
     has_LHE_weights = cms.bool(False),
     has_pdf_weights = cms.bool(False),
 
+    branchName_LHE_particle = cms.string('LHEPart'),
+
     redoGenMatching = cms.bool(False),
     genMatchingByIndex = cms.bool(True),
     jetCleaningByIndex = cms.bool(True),

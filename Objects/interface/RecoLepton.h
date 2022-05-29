@@ -173,7 +173,7 @@ class RecoLepton : public ChargedParticle
   Double_t miniRelIsoNeutral_;  ///< relative neutral mini-isolation (PU corrected)
   Double_t sip3d_;              ///< significance of IP
   Double_t mvaRawTTH_;          ///< raw output of lepton MVA of ttH multilepton analysis
-  Double_t jetRelIso_;         ///< ratio of lepton pT to pT of nearby jet
+  Double_t jetRelIso_;         ///< relative isolation in matched jet (1/ptRatio-1, pfRelIso04_all if no matched jet)
   Double_t jetPtRel_;           ///< perpendicular component of the distance vector between lepton and its jet pT vectors
   Int_t jetNDauChargedMVASel_;  ///< number of charged constituents in the nearest jet
   Int_t tightCharge_;           ///< Flag indicating if lepton passes (>= 2) or fails (< 2) tight charge requirement

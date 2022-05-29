@@ -99,12 +99,6 @@ RecoElectron::etaSC() const
 }
 
 Double_t
-RecoElectron::phiSC() const
-{
-  return phi_;
-}
-
-Double_t
 RecoElectron::absEtaSC() const
 {
   return std::fabs(etaSC());
