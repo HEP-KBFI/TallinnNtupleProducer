@@ -22,7 +22,6 @@ RecoElectronReader::RecoElectronReader(const edm::ParameterSet & cfg)
   , sigmaEtaEta_(nullptr)
   , HoE_(nullptr)
   , deltaEta_(nullptr)
-  , deltaPhi_(nullptr)
   , OoEminusOoP_(nullptr)
   , lostHits_(nullptr)
   , conversionVeto_(nullptr)
@@ -50,7 +49,6 @@ RecoElectronReader::~RecoElectronReader()
     delete[] gInstance->sigmaEtaEta_;
     delete[] gInstance->HoE_;
     delete[] gInstance->deltaEta_;
-    delete[] gInstance->deltaPhi_;
     delete[] gInstance->OoEminusOoP_;
     delete[] gInstance->lostHits_;
     delete[] gInstance->conversionVeto_;
@@ -95,7 +93,6 @@ RecoElectronReader::setBranchNames()
     branchName_sigmaEtaEta_ = Form("%s_%s", branchName_obj_.data(), "sieie");
     branchName_HoE_ = Form("%s_%s", branchName_obj_.data(), "hoe");
     branchName_deltaEta_ = Form("%s_%s", branchName_obj_.data(), "deltaEtaSC");
-    branchName_deltaPhi_ = Form("%s_%s", branchName_obj_.data(), "deltaPhiSC");
     branchName_OoEminusOoP_ = Form("%s_%s", branchName_obj_.data(), "eInvMinusPInv");
     branchName_lostHits_ = Form("%s_%s", branchName_obj_.data(), "lostHits");
     branchName_conversionVeto_ = Form("%s_%s", branchName_obj_.data(), "convVeto");

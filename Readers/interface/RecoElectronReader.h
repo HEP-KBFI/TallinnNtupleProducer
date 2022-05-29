@@ -67,7 +67,6 @@ class RecoElectronReader : public ReaderBase
   std::string branchName_sigmaEtaEta_;
   std::string branchName_HoE_;
   std::string branchName_deltaEta_;
-  std::string branchName_deltaPhi_;
   std::string branchName_OoEminusOoP_;
   std::string branchName_lostHits_;
   std::string branchName_conversionVeto_;
@@ -80,7 +79,6 @@ class RecoElectronReader : public ReaderBase
   Float_t * sigmaEtaEta_;
   Float_t * HoE_;
   Float_t * deltaEta_;
-  Float_t * deltaPhi_;
   Float_t * OoEminusOoP_;
   UChar_t * lostHits_;
   Bool_t * conversionVeto_;
