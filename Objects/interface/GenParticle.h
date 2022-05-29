@@ -35,13 +35,15 @@ class GenParticle : public ChargedParticle
               Int_t charge,
               Int_t status = -1,
               Int_t statusFlags = -1,
-              UChar_t genPartFlav = 0);
+              UChar_t genPartFlav = 0,
+              UChar_t genHadronFlav = 0);
   GenParticle(const math::PtEtaPhiMLorentzVector & p4,
               Int_t pdgId,
               Int_t charge,
               Int_t status = -1,
               Int_t statusFlags = -1,
-              UChar_t genPartFlav = 0);
+              UChar_t genPartFlav = 0,
+              UChar_t genHadronFlav = 0);
   virtual ~GenParticle() {}
 
   /**
@@ -96,6 +98,9 @@ class GenParticle : public ChargedParticle
   UChar_t
   genPartFlav() const;
 
+  UChar_t
+  genHadronFlav() const;
+
   /**
    * @brief Sets the variable isMatchedToReco_ to true, indicating that
    *        the gen lvl object is now matched to a reco object
@@ -123,6 +128,7 @@ class GenParticle : public ChargedParticle
   Int_t status_;        ///< particle status (1 = stable)
   Int_t statusFlags_;   ///< gen status flags stored bitwise
   UChar_t genPartFlav_; ///< parton flavor of the gen particle
+  UChar_t genHadronFlav_; ///< hadron flavor of the gen particle
 
   bool isMatchedToReco_; ///< true, if the gen object is already matched to a reco object
 };

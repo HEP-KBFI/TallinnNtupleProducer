@@ -11,7 +11,6 @@ std::map<std::string, GenJetReader *> GenJetReader::instances_;
 
 GenJetReader::GenJetReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
-  , read_partonFlavour_(false)
   , max_nJets_(36)
   , branchName_num_("")
   , branchName_obj_("")
@@ -19,7 +18,8 @@ GenJetReader::GenJetReader(const edm::ParameterSet & cfg)
   , jet_eta_(nullptr)
   , jet_phi_(nullptr)
   , jet_mass_(nullptr)
-  , jet_pdgId_(nullptr)
+  , jet_partonFlavour_(nullptr)
+  , jet_hadronFlavour_(nullptr)
 {
   if ( cfg.exists("max_nJets") )
   {
@@ -42,7 +42,8 @@ GenJetReader::~GenJetReader()
     delete[] gInstance->jet_eta_;
     delete[] gInstance->jet_phi_;
     delete[] gInstance->jet_mass_;
-    delete[] gInstance->jet_pdgId_;
+    delete[] gInstance->jet_partonFlavour_;
+    delete[] gInstance->jet_hadronFlavour_;
     instances_[branchName_obj_] = nullptr;
   }
 }
@@ -56,7 +57,8 @@ GenJetReader::setBranchNames()
     branchName_eta_ = Form("%s_%s", branchName_obj_.data(), "eta");
     branchName_phi_ = Form("%s_%s", branchName_obj_.data(), "phi");
     branchName_mass_ = Form("%s_%s", branchName_obj_.data(), "mass");
-    branchName_pdgId_ = Form("%s_%s", branchName_obj_.data(), "pdgId");
+    branchName_partonFlavour_ = Form("%s_%s", branchName_obj_.data(), "partonFlavour");
+    branchName_hadronFlavour_ = Form("%s_%s", branchName_obj_.data(), "hadronFlavour");
     instances_[branchName_obj_] = this;
   }
   else
@@ -73,12 +75,6 @@ GenJetReader::setBranchNames()
   ++numInstances_[branchName_obj_];
 }
 
-void
-GenJetReader::read_partonFlavour()
-{
-  branchName_pdgId_ = Form("%s_%s", branchName_obj_.data(), "partonFlavour");
-}
-
 std::vector<std::string>
 GenJetReader::setBranchAddresses(TTree * tree)
 {
@@ -90,6 +86,8 @@ GenJetReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_eta_, branchName_eta_);
     bai.setBranchAddress(jet_phi_, branchName_phi_);
     bai.setBranchAddress(jet_mass_, branchName_mass_);
+    bai.setBranchAddress(jet_partonFlavour_, branchName_partonFlavour_);
+    bai.setBranchAddress(jet_hadronFlavour_, branchName_hadronFlavour_);
     return bai.getBoundBranchNames_read();
   }
   return {};
@@ -118,7 +116,8 @@ std::vector<GenJet> GenJetReader::read() const
         gInstance->jet_eta_[idxJet],
         gInstance->jet_phi_[idxJet],
         gInstance->jet_mass_[idxJet],
-        -1,
+        gInstance->jet_partonFlavour_[idxJet],
+        gInstance->jet_hadronFlavour_[idxJet]
       });
     }
   }

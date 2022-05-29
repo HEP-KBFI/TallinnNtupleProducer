@@ -28,17 +28,12 @@ class GenJetReader : public ReaderBase
   std::vector<GenJet>
   read() const;
 
-  void
-  read_partonFlavour();
-
  protected:
  /**
    * @brief Initialize names of branches to be read from tree
    */
   void
   setBranchNames();
-
-  bool read_partonFlavour_;
 
   unsigned int max_nJets_;
   std::string branchName_num_;
@@ -48,14 +43,16 @@ class GenJetReader : public ReaderBase
   std::string branchName_eta_;
   std::string branchName_phi_;
   std::string branchName_mass_;
-  std::string branchName_pdgId_;
+  std::string branchName_partonFlavour_;
+  std::string branchName_hadronFlavour_;
 
   UInt_t nJets_;
   Float_t * jet_pt_;
   Float_t * jet_eta_;
   Float_t * jet_phi_;
   Float_t * jet_mass_;
-  Int_t * jet_pdgId_;
+  Int_t * jet_partonFlavour_;
+  UChar_t * jet_hadronFlavour_;
 
   // CV: make sure that only one RecoJetReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

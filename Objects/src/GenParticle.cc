@@ -15,6 +15,7 @@ GenParticle::GenParticle(const GenParticle & genParticle)
     , genParticle.status_
     , genParticle.statusFlags_
     , genParticle.genPartFlav_
+    , genParticle.genHadronFlav_
   )
 {}
 
@@ -26,11 +27,13 @@ GenParticle::GenParticle(Double_t pt,
                          Int_t charge,
                          Int_t status,
                          Int_t statusFlags,
-                         UChar_t genPartFlav)
+                         UChar_t genPartFlav,
+                         UChar_t genHadronFlav)
   : ChargedParticle(pt, eta, phi, mass, pdgId, charge)
   , status_(status)
   , statusFlags_(statusFlags)
   , genPartFlav_(genPartFlav)
+  , genHadronFlav_(genHadronFlav)
   , isMatchedToReco_(false)
 {}
 
@@ -39,11 +42,13 @@ GenParticle::GenParticle(const math::PtEtaPhiMLorentzVector & p4,
                          Int_t charge,
                          Int_t status,
                          Int_t statusFlags,
-                         UChar_t genPartFlav)
+                         UChar_t genPartFlav,
+                         UChar_t genHadronFlav)
   : ChargedParticle(p4, pdgId, charge)
   , status_(status)
   , statusFlags_(statusFlags)
   , genPartFlav_(genPartFlav)
+  , genHadronFlav_(genHadronFlav)
   , isMatchedToReco_(false)
 {}
 
@@ -63,6 +68,12 @@ UChar_t
 GenParticle::genPartFlav() const
 {
   return genPartFlav_;
+}
+
+UChar_t
+GenParticle::genHadronFlav() const
+{
+  return genHadronFlav_;
 }
 
 void

@@ -15,7 +15,8 @@ class GenJet : public GenParticle
          Double_t eta,
          Double_t phi,
          Double_t mass,
-         Int_t pdgId);
+         Int_t partonFlavour,
+         Int_t hadronFlavour);
   GenJet(const GenParticle & genParticle);
 
   virtual ~GenJet() {}
