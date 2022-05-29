@@ -115,7 +115,6 @@ class RecoLeptonReader : public ReaderBase
   std::string branchName_genPartFlav_;
   std::string branchName_genMatchIdx_;
 
-  std::map<Btag, std::string> branchNames_jetBtagCSV_;
   std::map<Btag, std::string> branchNames_assocJetBtagCSV_;
 
   UInt_t nLeptons_;

@@ -148,7 +148,6 @@ RecoLeptonReader::setBranchNames()
         case Btag::kDeepCSV: btag_str = "DeepCSV"; break;
         case Btag::kDeepJet: btag_str = "DeepJet"; break;
       }
-      branchNames_jetBtagCSV_[btag] = Form("%s_jetBTag%s", branchName_obj_.data(), btag_str.data());
       branchNames_assocJetBtagCSV_[btag] = Form("%s_assocJetBtag_%s", branchName_obj_.data(), btag_str.data());
     }
     branchName_tightCharge_ = Form("%s_%s", branchName_obj_.data(), "tightCharge");
