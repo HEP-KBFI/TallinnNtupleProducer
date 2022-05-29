@@ -36,8 +36,6 @@ class RecoElectronSelectorTight
 
   void set_selection_flags(bool selection_flag);
 
-  void set_assocJetBtag(bool flag);
-
   /**
    * @brief Get cut thresholds
    */
@@ -81,7 +79,6 @@ class RecoElectronSelectorTight
   Int_t min_nLostHits_fornLostHitsInversion_; ///<fornLostHitsInversion: lower cut threshold on lost hits in the innermost layer of the tracker (electrons with lost_hits equal to cut threshold pass)
   bool invert_conversionVeto_;                ///< invert (True) or do not invert (False) conversion veto
 //-------------------------------------------------------------------------------
-  bool useAssocJetBtag_;                     ///< if true, use finalJets instead of updatedJets
 };
 
 class RecoElectronCollectionSelectorTight : public ParticleCollectionSelector<RecoElectron, RecoElectronSelectorTight>

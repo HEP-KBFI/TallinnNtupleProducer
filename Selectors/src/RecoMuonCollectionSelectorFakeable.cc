@@ -26,7 +26,6 @@ RecoMuonSelectorFakeable::RecoMuonSelectorFakeable(Era era,
   , smoothBtagCut_minPt_(20.)
   , smoothBtagCut_maxPt_(45.)
   , smoothBtagCut_ptDiff_(smoothBtagCut_maxPt_ - smoothBtagCut_minPt_)
-  , useAssocJetBtag_(true)
 {
   // L -- inherited from the preselection (loose cut)
   // F -- additional fakeable cut not applied in the preselection
@@ -54,12 +53,6 @@ void
 RecoMuonSelectorFakeable::set_selection_flags(bool selection_flags)
 {
   set_selection_flags_ = selection_flags;
-}
-
-void
-RecoMuonSelectorFakeable::set_assocJetBtag(bool flag)
-{
-  useAssocJetBtag_ = flag;
 }
 
 double
@@ -167,11 +160,11 @@ RecoMuonSelectorFakeable::operator()(const RecoMuon & muon) const
     }
     return false;
   }
-  if(muon.jetBtagCSV(useAssocJetBtag_) > max_jetBtagCSV_)
+  if(muon.jetBtagCSV() > max_jetBtagCSV_)
   {
     if(debug_)
     {
-      std::cout << "FAILS jetBtagCSV = " << muon.jetBtagCSV(useAssocJetBtag_) << " <= " << max_jetBtagCSV_ << " fakeable cut\n";
+      std::cout << "FAILS jetBtagCSV = " << muon.jetBtagCSV() << " <= " << max_jetBtagCSV_ << " fakeable cut\n";
     }
     return false;
   }
@@ -192,11 +185,11 @@ RecoMuonSelectorFakeable::operator()(const RecoMuon & muon) const
     {
       std::cout << get_human_line(this, __func__) << ": smooth jetBtagCSV cut = " << max_jetBtagCSV << '\n';
     }
-    if(muon.jetBtagCSV(useAssocJetBtag_) > max_jetBtagCSV)
+    if(muon.jetBtagCSV() > max_jetBtagCSV)
     {
       if(debug_)
       {
-        std::cout << "FAILS smooth jetBtagCSV = " << muon.jetBtagCSV(useAssocJetBtag_) << " <= " << max_jetBtagCSV << " fakeable cut\n";
+        std::cout << "FAILS smooth jetBtagCSV = " << muon.jetBtagCSV() << " <= " << max_jetBtagCSV << " fakeable cut\n";
       }
       return false;
     }

@@ -21,7 +21,6 @@ RecoMuonSelectorTight::RecoMuonSelectorTight(Era era,
   , apply_looseIdPOG_(true) // F
   , apply_mediumIdPOG_(true) // T
   , max_jetBtagCSV_(get_BtagWP(era_, Btag::kDeepJet, BtagWP::kMedium)) // T
-  , useAssocJetBtag_(true)
 {
   // L -- inherited from the preselection (loose cut)
   // F -- inherited from the fakeable selection
@@ -100,11 +99,11 @@ RecoMuonSelectorTight::operator()(const RecoMuon & muon) const
     }
     return false;
   }
-  if(muon.jetBtagCSV(useAssocJetBtag_) > max_jetBtagCSV_)
+  if(muon.jetBtagCSV() > max_jetBtagCSV_)
   {
     if(debug_)
     {
-      std::cout << "FAILS jetBtagCSV " << muon.jetBtagCSV(useAssocJetBtag_) << " <= " << max_jetBtagCSV_ << " tight cut\n";
+      std::cout << "FAILS jetBtagCSV " << muon.jetBtagCSV() << " <= " << max_jetBtagCSV_ << " tight cut\n";
     }
     return false;
   }
@@ -173,12 +172,6 @@ void
 RecoMuonSelectorTight::set_selection_flags(bool selection_flags)
 {
   set_selection_flags_ = selection_flags;
-}
-
-void
-RecoMuonSelectorTight::set_assocJetBtag(bool flag)
-{
-  useAssocJetBtag_ = flag;
 }
 
 RecoMuonCollectionSelectorTight::RecoMuonCollectionSelectorTight(Era era,

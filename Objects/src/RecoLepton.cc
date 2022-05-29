@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"     // as_integer()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag::kCSVv2, Btag::kDeepCSV, Btag::kDeepJet
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"          // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"             // GenJet
 #include "TallinnNtupleProducer/Objects/interface/GenLepton.h"          // GenLepton
@@ -229,22 +228,15 @@ RecoLepton::jetPtRel() const
 }
 
 Double_t
-RecoLepton::jetBtagCSV(bool doAssoc) const
+RecoLepton::jetBtagCSV(Btag btag) const
 {
-  return jetBtagCSV(Btag::kDeepJet, doAssoc);
-}
-
-Double_t
-RecoLepton::jetBtagCSV(Btag btag,
-                       bool doAssoc) const
-{
-  if(! hasJetBtagCSV(btag, doAssoc))
+  if(! hasJetBtagCSV(btag))
   {
     throw cmsException(this, __func__, __LINE__)
       << "b-tagging discriminator not available: " << as_integer(btag)
     ;
   }
-  return doAssoc ? assocJetBtagCSVs_.at(btag) : jetBtagCSVs_.at(btag);
+  return assocJetBtagCSVs_.at(btag);
 }
 
 Int_t
@@ -308,8 +300,7 @@ RecoLepton::genJet() const
 }
 
 bool
-RecoLepton::hasJetBtagCSV(Btag btag,
-                          bool doAssoc) const
+RecoLepton::hasJetBtagCSV(Btag btag) const
 {
   return assocJetBtagCSVs_.count(btag);
 }
@@ -396,7 +387,7 @@ operator<<(std::ostream & stream,
             " tightCharge = "         << lepton.tightCharge()                   << ","
             " jetRelIso = "          << lepton.jetRelIso()                    << ","
             " jetPtRel = "            << lepton.jetPtRel()                      << ",\n"
-            " jetBtagCSV(default) = " << lepton.jetBtagCSV()
+    " jetBtagCSV() = " << lepton.jetBtagCSV()
   ;
   std::cout << ", jetBtagCSV(DeepJet) = ";
   if(lepton.hasJetBtagCSV(Btag::kDeepJet)) stream << lepton.jetBtagCSV(Btag::kDeepJet); else stream << "N/A";

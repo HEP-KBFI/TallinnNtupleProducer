@@ -105,10 +105,6 @@ RecoLeptonReader::~RecoLeptonReader()
     delete[] gInstance->genPartFlav_;
     delete[] gInstance->genMatchIdx_;
 
-    for(auto & kv: gInstance->jetBtagCSVs_)
-    {
-      delete[] kv.second;
-    }
     for(auto & kv: gInstance->assocJetBtagCSVs_)
     {
       delete[] kv.second;

@@ -24,7 +24,6 @@ class RecoMuonSelectorFakeable
 
   void set_selection_flags(bool selection_flags);
 
-  void set_assocJetBtag(bool flag);
 
   /**
    * @brief Get cut thresholds
@@ -65,7 +64,6 @@ class RecoMuonSelectorFakeable
   const Double_t smoothBtagCut_maxPt_;
   const Double_t smoothBtagCut_ptDiff_;
 //-------------------------------------------------------------------------------
-  bool useAssocJetBtag_;                    ///< if true, use finalJets instead of updatedJets
 
   double
   smoothBtagCut(double assocJet_pt) const;
