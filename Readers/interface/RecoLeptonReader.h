@@ -106,7 +106,6 @@ class RecoLeptonReader : public ReaderBase
   std::string branchName_sip3d_;
   std::string branchName_mvaRawTTH_;
   std::string branchName_jetRelIso_;
-  std::string branchName_jetPtRel_;
   std::string branchName_jetNDauChargedMVASel_;
   std::string branchName_tightCharge_;
   std::string branchName_charge_;
@@ -132,7 +131,6 @@ class RecoLeptonReader : public ReaderBase
   Float_t * sip3d_;
   Float_t * mvaRawTTH_;
   Float_t * jetRelIso_;
-  Float_t * jetPtRel_;
   Int_t * jetNDauChargedMVASel_;
   Int_t * tightCharge_;
   Int_t * charge_;

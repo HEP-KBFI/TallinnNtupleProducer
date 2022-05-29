@@ -37,7 +37,6 @@ RecoLeptonReader::RecoLeptonReader(const edm::ParameterSet & cfg)
   , sip3d_(nullptr)
   , mvaRawTTH_(nullptr)
   , jetRelIso_(nullptr)
-  , jetPtRel_(nullptr)
   , jetNDauChargedMVASel_(nullptr)
   , tightCharge_(nullptr)
   , charge_(nullptr)
@@ -96,7 +95,6 @@ RecoLeptonReader::~RecoLeptonReader()
     delete[] gInstance->sip3d_;
     delete[] gInstance->mvaRawTTH_;
     delete[] gInstance->jetRelIso_;
-    delete[] gInstance->jetPtRel_;
     delete[] gInstance->jetNDauChargedMVASel_;
     delete[] gInstance->tightCharge_;
     delete[] gInstance->charge_;
@@ -133,7 +131,6 @@ RecoLeptonReader::setBranchNames()
     branchName_sip3d_ = Form("%s_%s", branchName_obj_.data(), "sip3d");
     branchName_mvaRawTTH_ = Form("%s_%s", branchName_obj_.data(), "mvaTTH");
     branchName_jetRelIso_ = Form("%s_%s", branchName_obj_.data(), "jetRelIso");
-    branchName_jetPtRel_ = Form("%s_%s", branchName_obj_.data(), "jetPtRelv2");
     branchName_jetNDauChargedMVASel_ = Form("%s_%s", branchName_obj_.data(), "jetNDauChargedMVASel");
     for(Btag btag: { Btag::kCSVv2, Btag::kDeepCSV, Btag::kDeepJet })
     {
