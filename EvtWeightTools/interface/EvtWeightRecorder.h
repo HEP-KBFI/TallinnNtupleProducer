@@ -221,6 +221,9 @@ class EvtWeightRecorder
   void
   record_prescale(double weight);
 
+  std::pair<std::vector<int>, std::vector<int>>
+  findHiggs(const LHEParticleCollection & lheParticles, std::vector<int> & exclude);
+
   void
   record_gen_mHH_cosThetaStar(const LHEParticleCollection & lheParticles);
 
@@ -312,6 +315,12 @@ class EvtWeightRecorder
 
   void
   compute_FR();
+
+  double
+  gen_mHH() const;
+
+  double
+  gen_cosThetaStar() const;
 
   friend std::ostream &
   operator<<(std::ostream & os,

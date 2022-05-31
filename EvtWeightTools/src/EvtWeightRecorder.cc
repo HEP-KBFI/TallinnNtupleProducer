@@ -46,6 +46,8 @@ EvtWeightRecorder::EvtWeightRecorder(const std::vector<std::string> & central_or
   , hhWeight_lo_(1.)
   , hhWeight_nlo_(1.)
   , rescaling_(1.)
+  , gen_mHH_(-1)
+  , gen_cosThetaStar_(-1)
   , central_or_shift_(central_or_shift)
   , central_or_shifts_(central_or_shifts)
 {
@@ -775,24 +777,82 @@ EvtWeightRecorder::record_lheScaleWeight(const LHEInfoReader * const lheInfoRead
   }
 }
 
+std::pair<std::vector<int>, std::vector<int>>
+EvtWeightRecorder::findHiggs(const LHEParticleCollection & lheParticles, std::vector<int> & exclude)
+{
+  int bestindex1(-1), bestindex2(-1);
+  TLorentzVector d1, d2;
+  std::vector<int> higgs;
+  for (unsigned int indx1=0; indx1<lheParticles.size(); indx1++)
+  {
+    if ( lheParticles[indx1].pdgId() == 25 )
+    {
+      higgs.push_back(indx1);
+      if ( higgs.size() == 2 ) break;
+      continue;
+    }
+    if ( indx1 == lheParticles.size()-1 ) break;
+    if ( std::count(exclude.begin(), exclude.end(), indx1) ) continue;
+    double dmass(999);
+    for (unsigned int indx2=indx1+1; indx2<lheParticles.size(); indx2++)
+    {
+      if ( lheParticles[indx2].pdgId() == 25 )
+      {
+        higgs.push_back(indx2);
+        if ( higgs.size() == 2 ) break;
+        continue;
+      }
+      if ( std::count(exclude.begin(), exclude.end(), indx2) ) continue;
+      if (std::fabs(lheParticles[indx1].pdgId()) != std::fabs(lheParticles[indx2].pdgId())) continue;
+      d1.SetPtEtaPhiM(lheParticles[indx1].pt(), lheParticles[indx1].eta(), lheParticles[indx1].phi(), lheParticles[indx1].mass());
+      d2.SetPtEtaPhiM(lheParticles[indx2].pt(), lheParticles[indx2].eta(), lheParticles[indx2].phi(), lheParticles[indx2].mass());
+      double dm = abs((d1+d2).M() - 125) / 125.;
+      if ( dm <= 0.01 && dm < dmass )
+      {
+        bestindex1 = indx1;
+        bestindex2 = indx2;
+        dmass = dm;
+      }
+    }
+    if ( higgs.size() == 2 ) break;
+  }
+  std::vector<int> bestpair{bestindex1, bestindex2};
+  return std::make_pair(higgs, bestpair);
+}
+
 void
 EvtWeightRecorder::record_gen_mHH_cosThetaStar(const LHEParticleCollection & lheParticles)
 {
-  std::vector<int> higgs;
   TLorentzVector h1, h2, H;
-  for (unsigned int indx=0; indx<lheParticles.size(); indx++)
+  std::vector<int> first_daus, second_daus;
+  std::pair<std::vector<int>, std::vector<int>> higgs_info = findHiggs(lheParticles, first_daus);
+
+  if ( higgs_info.first.size() == 2 )
   {
-    if ( lheParticles[indx].pdgId() ==25 ) higgs.push_back(indx);
+    std::vector<int> higgs = higgs_info.first;
+    h1.SetPtEtaPhiM(lheParticles[higgs[0]].pt(), lheParticles[higgs[0]].eta(), lheParticles[higgs[0]].phi(), lheParticles[higgs[0]].mass());
+    h2.SetPtEtaPhiM(lheParticles[higgs[1]].pt(), lheParticles[higgs[1]].eta(), lheParticles[higgs[1]].phi(), lheParticles[higgs[1]].mass());
   }
-    if ( higgs.size() ==2 )
-    {
-      h1.SetPtEtaPhiM(lheParticles[higgs[0]].pt(), lheParticles[higgs[0]].eta(), lheParticles[higgs[0]].phi(), lheParticles[higgs[0]].mass());
-      h2.SetPtEtaPhiM(lheParticles[higgs[1]].pt(), lheParticles[higgs[1]].eta(), lheParticles[higgs[1]].phi(), lheParticles[higgs[1]].mass());
-      H = h1 + h2;
-      h1.Boost(-H.BoostVector());
-      gen_mHH_ = H.M();
-      gen_cosThetaStar_ = std::abs(h1.CosTheta());
-    }
+  else
+  {
+    first_daus = higgs_info.second;
+    second_daus = findHiggs(lheParticles, first_daus).second;
+
+    TLorentzVector d1, d2;
+
+    d1.SetPtEtaPhiM(lheParticles[first_daus[0]].pt(), lheParticles[first_daus[0]].eta(), lheParticles[first_daus[0]].phi(), lheParticles[first_daus[0]].mass());
+    d2.SetPtEtaPhiM(lheParticles[first_daus[1]].pt(), lheParticles[first_daus[1]].eta(), lheParticles[first_daus[1]].phi(), lheParticles[first_daus[1]].mass());
+    h1 = d1 + d2;
+
+    d1.SetPtEtaPhiM(lheParticles[second_daus[0]].pt(), lheParticles[second_daus[0]].eta(), lheParticles[second_daus[0]].phi(), lheParticles[second_daus[0]].mass());
+    d2.SetPtEtaPhiM(lheParticles[second_daus[1]].pt(), lheParticles[second_daus[1]].eta(), lheParticles[second_daus[1]].phi(), lheParticles[second_daus[1]].mass());
+    h2 = d1 + d2;
+  }
+
+  H = h1 + h2;
+  h1.Boost(-H.BoostVector());
+  gen_mHH_ = H.M();
+  gen_cosThetaStar_ = std::abs(h1.CosTheta());
 }
 
 void
@@ -1252,6 +1312,18 @@ EvtWeightRecorder::compute_FR()
     }
     weights_FR_[weightKey] = weights_jetToLeptonFakeRate_.at(jetToLeptonFakeRate_option)*weights_jetToTauFakeRate_.at(jetToTauFakeRate_option);
   }
+}
+
+double
+EvtWeightRecorder::gen_mHH() const
+{
+  return gen_mHH_;
+}
+
+double
+EvtWeightRecorder::gen_cosThetaStar() const
+{
+  return gen_cosThetaStar_;
 }
 
 std::ostream &

@@ -13,7 +13,7 @@ GenJet::GenJet(Double_t pt,
                Double_t mass,
                Int_t partonFlavour,
                Int_t hadronFlavour)
-  : GenParticle(pt, eta, phi, mass, -1, 0, -1, -1, partonFlavour, hadronFlavour)
+  : GenParticle(pt, eta, phi, mass, -1, 0, -1, -1, partonFlavour)
 {}
 
 GenJet::GenJet(const GenParticle & genParticle)
@@ -26,4 +26,10 @@ operator<<(std::ostream & stream,
 {
   stream << static_cast<const GenParticle &>(genJet);
   return stream;
+}
+
+UChar_t
+GenJet::genHadronFlav() const
+{
+  return genHadronFlav_;
 }
