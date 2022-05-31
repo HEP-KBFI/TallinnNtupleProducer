@@ -12,7 +12,7 @@ RecoJetAK8::RecoJetAK8(const GenJet & jet,
                          Int_t idx,
                          Int_t central_or_shift,
                          Int_t ignored_corrections)
-  : RecoJetBase(jet)
+: RecoJetBase(jet, idx)
   , msoftdrop_(msoftdrop)
   , subJet1_(subJet1)
   , subJet2_(subJet2)

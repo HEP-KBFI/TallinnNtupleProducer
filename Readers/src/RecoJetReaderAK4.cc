@@ -269,6 +269,7 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_bRegRes_, branchName_bRegRes_, 0.);
     bai.setBranchAddress(jet_jetId_, branchName_jetId_);
     bai.setBranchAddress(jet_puId_, branchName_puId_);
+    bai.setBranchAddress(jet_jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(jet_genMatchIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genMatchIdx_ : "", -1);
 
     const std::vector<std::string> recoJetBranches = bai.getBoundBranchNames_read();
@@ -338,6 +339,7 @@ RecoJetReaderAK4::read() const
         gInstance->jet_bRegRes_[idxJet],
         jet_id,
         gInstance->jet_puId_[idxJet],
+        gInstance->jet_jetIdx_[idxJet],
         gInstance->jet_genMatchIdx_[idxJet],
         btag_,
         ptMassOption_,

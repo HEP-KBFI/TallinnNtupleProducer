@@ -31,6 +31,7 @@ class RecoJetAK4 : public RecoJetBase
              Int_t jetId,
              Int_t puId,
              Int_t genMatchIdx,
+             Int_t idx,
              Btag btag,
              Int_t central_or_shift);
 

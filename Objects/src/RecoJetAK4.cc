@@ -13,10 +13,11 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Double_t bRegRes,
                        Int_t jetId,
                        Int_t puId,
+                       Int_t idx,
                        Int_t genMatchIdx,
                        Btag btag,
                        Int_t central_or_shift)
-  : RecoJetBase(jet)
+: RecoJetBase(jet, idx)
   , jetCharge_(charge)
   , BtagCSV_(BtagCSV)
   , BtagWeight_(BtagWeight)

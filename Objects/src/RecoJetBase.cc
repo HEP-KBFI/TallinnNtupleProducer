@@ -2,9 +2,11 @@
 
 #include "TallinnNtupleProducer/Objects/interface/GenLepton.h" // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h" // GenHadTau
-
-RecoJetBase::RecoJetBase(const GenJet & jet)
+#include <iostream>
+RecoJetBase::RecoJetBase(const GenJet & jet,
+                         Int_t idx)
   : GenJet(jet)
+  , idx_(idx)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
   , genJet_(nullptr)
@@ -34,6 +36,7 @@ RecoJetBase::set_genJet(const GenJet * genJet)
 Int_t
 RecoJetBase::idx() const
 {
+  std::cout << "*********calling " << std::endl;
   return idx_;
 }
 

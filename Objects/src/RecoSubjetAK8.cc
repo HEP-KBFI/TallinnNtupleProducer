@@ -3,7 +3,7 @@
 RecoSubjetAK8::RecoSubjetAK8(const GenJet & jet,
                              Double_t BtagCSV,
                              Int_t idx)
-  : RecoJetBase(jet)
+  : RecoJetBase(jet, idx)
   , BtagCSV_(BtagCSV)
 {}
 
