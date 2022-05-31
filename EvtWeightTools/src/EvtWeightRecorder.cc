@@ -803,7 +803,7 @@ EvtWeightRecorder::findHiggs(const LHEParticleCollection & lheParticles, std::ve
         continue;
       }
       if ( std::count(exclude.begin(), exclude.end(), indx2) ) continue;
-      if (std::fabs(lheParticles[indx1].pdgId()) != std::fabs(lheParticles[indx2].pdgId())) continue;
+      if ( lheParticles[indx1].pdgId() + lheParticles[indx2].pdgId() !=0 ) continue;
       d1.SetPtEtaPhiM(lheParticles[indx1].pt(), lheParticles[indx1].eta(), lheParticles[indx1].phi(), lheParticles[indx1].mass());
       d2.SetPtEtaPhiM(lheParticles[indx2].pt(), lheParticles[indx2].eta(), lheParticles[indx2].phi(), lheParticles[indx2].mass());
       double dm = abs((d1+d2).M() - 125) / 125.;
