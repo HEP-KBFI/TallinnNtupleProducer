@@ -4,7 +4,7 @@
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h" // GenHadTau
 #include <iostream>
 RecoJetBase::RecoJetBase(const GenJet & jet,
-                         Int_t idx)
+                         UInt_t idx)
   : GenJet(jet)
   , idx_(idx)
   , genLepton_(nullptr)
@@ -33,10 +33,9 @@ RecoJetBase::set_genJet(const GenJet * genJet)
   genJet_.reset(genJet);
 }
 
-Int_t
+UInt_t
 RecoJetBase::idx() const
 {
-  std::cout << "*********calling " << std::endl;
   return idx_;
 }
 

@@ -379,7 +379,7 @@ RecoJetReaderAK8::read() const
         gInstance->jet_tau3_[idxJet],
         gInstance->jet_tau4_[idxJet],
         gInstance->jet_jetId_[idxJet],
-        static_cast<Int_t>(idxJet),
+        static_cast<UInt_t>(idxJet),
         sysOption_,
         ignoreSys_,
       });
