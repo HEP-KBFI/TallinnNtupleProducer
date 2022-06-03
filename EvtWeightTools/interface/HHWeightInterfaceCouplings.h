@@ -24,10 +24,10 @@ class HHWeightInterfaceCouplings
   void
   add(const HHCoupling & coupling);
 
-  std::map<std::string, HHCoupling>
+  const std::map<std::string, HHCoupling> &
   getCouplings() const;
 
-  HHCoupling
+  const HHCoupling &
   getCoupling(const std::string & name) const;
 
   std::vector<std::string>
@@ -36,16 +36,16 @@ class HHWeightInterfaceCouplings
   std::vector<std::string>
   get_weight_names() const;
 
-  HHWeightInterfaceNLOMode
+  const HHWeightInterfaceNLOMode &
   nlo_mode() const;
 
-  std::string
+  const std::string &
   denominator_file_lo() const;
 
-  std::string
+  const std::string &
   denominator_file_nlo() const;
 
-  std::string
+  const std::string &
   histtitle() const;
 
   static TH2 *

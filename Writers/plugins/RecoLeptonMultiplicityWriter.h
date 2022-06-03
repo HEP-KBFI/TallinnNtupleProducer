@@ -1,5 +1,5 @@
-#ifndef TallinnNtupleProducer_Writers_ZbosonMassVetoWriter_h
-#define TallinnNtupleProducer_Writers_ZbosonMassVetoWriter_h
+#ifndef TallinnNtupleProducer_Writers_RecoLeptonMultiplicityWriter_h
+#define TallinnNtupleProducer_Writers_RecoLeptonMultiplicityWriter_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                       // edm::ParameterSet
 
@@ -13,11 +13,11 @@
 // forward declarations
 class TTree;
 
-class ZbosonMassVetoWriter : public WriterBase
+class RecoLeptonMultiplicityWriter : public WriterBase
 {
  public:
-  ZbosonMassVetoWriter(const edm::ParameterSet & cfg);
-  ~ZbosonMassVetoWriter();
+  RecoLeptonMultiplicityWriter(const edm::ParameterSet & cfg);
+  ~RecoLeptonMultiplicityWriter();
 
   /**
    * @brief Call tree->Branch for all branches
@@ -38,16 +38,13 @@ class ZbosonMassVetoWriter : public WriterBase
   void
   writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder);
 
-  std::string branchName_;
+  std::string branchName_numLooseLeptonsFull_;
+  std::string branchName_numFakeableLeptonsFull_;
+  std::string branchName_numTightLeptonsFull_;
 
-  double z_mass_;
-  double z_window_;
-  bool requireOS_e_;
-  bool requireOS_mu_;
-
-  Bool_t passesZbosonMassVeto_;
-
-  bool isDEBUG_;
+  UInt_t nLooseLeptonsFull_;
+  UInt_t nFakeableLeptonsFull_;
+  UInt_t nTightLeptonsFull_;
 };
 
-#endif // TallinnNtupleProducer_Writers_ZbosonMassVetoWriter_h
+#endif // TallinnNtupleProducer_Writers_RecoLeptonMultiplicityWriter_h

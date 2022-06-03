@@ -44,6 +44,8 @@ class LowMassLeptonPairVetoWriter : public WriterBase
   bool requireOS_;
 
   Bool_t passesLowMassLeptonPairVeto_;
+
+  bool isDEBUG_;
 };
 
 #endif // TallinnNtupleProducer_Writers_LowMassLeptonPairVetoWriter_h

@@ -21,7 +21,8 @@ EvtReweightWriter_HH::EvtReweightWriter_HH(const edm::ParameterSet & cfg)
 {
   if ( apply_HH_rwgt_lo_ || apply_HH_rwgt_nlo_ )
   {
-    hhWeightInterface_couplings_ = new HHWeightInterfaceCouplings(cfg);
+    edm::ParameterSet cfg_hhCoupling = cfg.getParameterSet("hhCoupling");
+    hhWeightInterface_couplings_ = new HHWeightInterfaceCouplings(cfg_hhCoupling);
     bmNames_ = hhWeightInterface_couplings_->get_bm_names();
     if ( apply_HH_rwgt_lo_ )
     {
@@ -64,20 +65,29 @@ EvtReweightWriter_HH::writeImp(const Event & event, const EvtWeightRecorder & ev
   const AnalysisConfig& analysisConfig = eventInfo.analysisConfig();
   if ( analysisConfig.isMC_HH_nonresonant() && analysisConfig.isHH_rwgt_allowed() && (apply_HH_rwgt_lo_ || apply_HH_rwgt_nlo_) )
   {
+    double hhReweight_sm = 1.;
+    if ( apply_HH_rwgt_lo_ )
+    {
+      hhReweight_sm *= hhWeightInterfaceLO_->getWeight("SM", eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar());
+    }
+    if ( apply_HH_rwgt_nlo_ )
+    {
+      hhReweight_sm *= hhWeightInterfaceNLO_->getWeight_LOtoNLO("SM", eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar());
+    }
     for ( auto bmName : bmNames_ )
     {
-      double hhReweight = 1.;
+      double hhReweight_bm = 1.;
       if ( apply_HH_rwgt_lo_ )
       {
         assert(hhWeightInterfaceLO_);
-        hhReweight = hhWeightInterfaceLO_->getRelativeWeight(bmName, evtWeightRecorder.gen_mHH(), evtWeightRecorder.gen_cosThetaStar());
+        hhReweight_bm *= hhWeightInterfaceLO_->getRelativeWeight(bmName, evtWeightRecorder.gen_mHH(), evtWeightRecorder.gen_cosThetaStar());
       }
       if ( apply_HH_rwgt_nlo_ )
       {
         assert(hhWeightInterfaceNLO_);
-        hhReweight *= hhWeightInterfaceNLO_->getRelativeWeight_LOtoNLO(bmName, evtWeightRecorder.gen_mHH(), evtWeightRecorder.gen_cosThetaStar());
+        hhReweight_bm *= hhWeightInterfaceNLO_->getRelativeWeight_LOtoNLO(bmName, evtWeightRecorder.gen_mHH(), evtWeightRecorder.gen_cosThetaStar());
       }
-      hhReweights_[bmName] = hhReweight;
+      hhReweights_[bmName] = hhReweight_sm*hhReweight_bm;
     }
   }
 }

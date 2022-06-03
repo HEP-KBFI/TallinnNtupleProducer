@@ -34,7 +34,7 @@ void
 HtoZZto4lVetoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   passesHtoZZto4lVeto_ = true;
-  const RecoLeptonPtrCollection& looseLeptons = event.looseLeptons();
+  const RecoLeptonPtrCollection& looseLeptons = event.looseLeptonsFull();
   for ( auto lepton1 = looseLeptons.begin(); lepton1 != looseLeptons.end(); ++lepton1 )
   {
     for ( auto lepton2 = lepton1 + 1; lepton2 != looseLeptons.end(); ++lepton2 )

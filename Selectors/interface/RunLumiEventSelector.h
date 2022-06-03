@@ -10,9 +10,9 @@
  *
  */
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"        // edm::ParameterSet
+#include "FWCore/ParameterSet/interface/ParameterSet.h"           // edm::ParameterSet
 
-#include "TallinnNtupleProducer/Objects/interface/EventInfo.h" // EventInfo
+#include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h" // RunLumiEvent
 
 #include <set> // std::set
 
@@ -30,7 +30,7 @@ class RunLumiEventSelector
              ULong_t event) const;
 
   bool
-  operator()(const EventInfo & info) const;
+  operator()(const RunLumiEvent & info) const;
 
   bool
   areWeDone() const;
@@ -53,6 +53,10 @@ class RunLumiEventSelector
   typedef std::map<EventType, int> matchedEventNumbersMap;
   typedef std::map<LumiSectionType, matchedEventNumbersMap> matchedLumiSectionEventNumberMap;
   mutable std::map<RunType, matchedLumiSectionEventNumberMap> matchedRunLumiSectionEventNumbers_;
+
+  mutable RunType lastRun_;
+  mutable LumiSectionType lastLumi_;
+  mutable EventType lastEvent_;
 
   mutable long numEventsProcessed_;
   mutable long numEventsToBeSelected_;

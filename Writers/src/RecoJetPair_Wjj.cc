@@ -1,6 +1,7 @@
 #include "TallinnNtupleProducer/Writers/interface/RecoJetPair_Wjj.h"
 
 #include <algorithm> // std::sort()
+#include <cmath>     // std::fabs()
 
 namespace
 {
@@ -23,7 +24,7 @@ namespace
   const RecoJetBase *
   get_jet(const std::vector<const RecoJetBase *> & jets, size_t idx)
   {
-    if ( jets.size() > idx )
+    if ( idx < jets.size() )
     {
       return jets.at(idx);
     }
@@ -73,12 +74,18 @@ RecoJetPair_Wjj::update()
   p4_ = Particle::LorentzVector(0., 0., 0., 0.);
   if ( jet_lead_ )
   {
-    p4_ = jet_lead_->p4();
+    p4_ += jet_lead_->p4();
   }
   if ( jet_sublead_ )
   {
-    p4_ = jet_sublead_->p4();
+    p4_ += jet_sublead_->p4();
   }
+  pt_ = p4_.pt();
+  eta_ = p4_.eta();
+  phi_ = p4_.phi();
+  mass_ = p4_.mass();
+  absEta_ = std::fabs(eta_);
+  isValid_ = true;
 }
 
 const RecoJetBase *
@@ -136,4 +143,44 @@ RecoJetPair_Wjj::Type
 RecoJetPair_Wjj::type() const
 {
   return type_;
+}
+
+std::ostream &
+operator<<(std::ostream & stream,
+           const RecoJetPair_Wjj & jetPair)
+{
+  stream << "pT = " << jetPair.pt() << "," 
+         << " eta = " << jetPair.eta() << "," 
+         << " phi = " << jetPair.phi() << "," 
+         << " mass = " << jetPair.mass() << "," 
+         << " type = ";
+  if      ( jetPair.type() == RecoJetPair_Wjj::kBoosted  ) stream << "boosted/AK8";
+  else if ( jetPair.type() == RecoJetPair_Wjj::kResolved ) stream << "resolved/AK4";
+  else assert(0);
+  stream << '\n';
+  stream << "subjet1: ";
+  if ( jetPair.jet_lead() )
+  {
+    stream << "pT = " << jetPair.jet_lead()->pt() << "," 
+           << " eta = " << jetPair.jet_lead()->eta() << "," 
+           << " phi = " << jetPair.jet_lead()->phi();
+  }
+  else
+  {
+    stream << "N/A";
+  }
+  stream << '\n';
+  stream << "subjet2: ";
+  if ( jetPair.jet_sublead() )
+  {
+    stream << "pT = " << jetPair.jet_sublead()->pt() << "," 
+           << " eta = " << jetPair.jet_sublead()->eta() << "," 
+           << " phi = " << jetPair.jet_sublead()->phi();
+  }
+  else
+  {
+    stream << "N/A";
+  }
+  stream << '\n';
+  return stream;
 }

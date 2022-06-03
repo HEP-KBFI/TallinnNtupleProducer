@@ -14,8 +14,11 @@ from TallinnNtupleProducer.Writers.HtoZZto4lVetoWriter_cfi import HtoZZto4lVeto 
 from TallinnNtupleProducer.Writers.LowMassLeptonPairVetoWriter_cfi import lowMassLeptonPairVeto as writers_lowMassLeptonPairVeto
 from TallinnNtupleProducer.Writers.MEtFilterWriter_cfi import metFilters as writers_metFilters
 from TallinnNtupleProducer.Writers.ProcessWriter_cfi import process as writers_process
+from TallinnNtupleProducer.Writers.RecoHadTauMultiplicityWriter_cfi import hadTauMultiplicity as writers_hadTauMultiplicity
 from TallinnNtupleProducer.Writers.RecoHadTauWriter_cfi import fakeableHadTaus as writers_fakeableHadTaus
 from TallinnNtupleProducer.Writers.RecoJetWriterAK4_cfi import selJetsAK4 as writers_selJetsAK4, selJetsAK4_btagLoose as writers_selJetsAK4_btagLoose, selJetsAK4_btagMedium as writers_selJetsAK4_btagMedium
+from TallinnNtupleProducer.Writers.RecoJetWriterAK8_Wjj_cfi import selJetsAK8_Wjj as writers_selJetsAK8_Wjj
+from TallinnNtupleProducer.Writers.RecoLeptonMultiplicityWriter_cfi import leptonMultiplicity as writers_leptonMultiplicity
 from TallinnNtupleProducer.Writers.RecoLeptonWriter_cfi import fakeableLeptons as writers_fakeableLeptons
 from TallinnNtupleProducer.Writers.RecoMEtWriter_cfi import met as writers_met
 from TallinnNtupleProducer.Writers.RunLumiEventWriter_cfi import run_lumi_event as writers_run_lumi_event
@@ -26,7 +29,8 @@ process = cms.PSet()
 
 process.fwliteInput = cms.PSet(
     fileNames = cms.vstring(),
-    maxEvents = cms.int32(10000),
+    maxEvents = cms.int32(-1),
+    #maxEvents = cms.int32(10000),
     outputEvery = cms.uint32(1000)
 )
 
@@ -96,7 +100,7 @@ process.produceNtuple = cms.PSet(
     apply_l1PreFireWeight = cms.bool(True),
     btagSFRatio = cms.PSet(),
     apply_btagSFRatio = cms.bool(True),
-    metFilters = cms.PSet(),
+    #metFilters = cms.PSet(),
     #apply_hadTauFakeRateSF = cms.bool(False),
     #apply_genPhotonFilter = cms.string("disabled"),
     disable_ak8_corr = cms.vstring(['JMS', 'JMR', 'PUPPI']),
@@ -172,6 +176,8 @@ process.produceNtuple = cms.PSet(
         # CV: GenPhotonFilterWriter plugin can be run for some MC samples only,
         #     because the collection "GenPhotonCandidate" does not exist in all MC samples !!
         #writers_genPhotonFilter,
+        writers_hadTauMultiplicity,
+        writers_leptonMultiplicity,
         writers_lowMassLeptonPairVeto,
         writers_met,
         writers_metFilters,
@@ -180,6 +186,8 @@ process.produceNtuple = cms.PSet(
         writers_selJetsAK4,
         writers_selJetsAK4_btagLoose,
         writers_selJetsAK4_btagMedium,
+        writers_selJetsAK8_Wjj,
+        writers_triggerInfo,
         writers_ZbosonMassVeto,
         writers_HtoZZto4lVeto
     ),
@@ -202,8 +210,7 @@ process.fwliteOutput.fileName = cms.string('produceNtuple.root')
 process.produceNtuple.era                                            = cms.string('2017')
 process.produceNtuple.redoGenMatching                                = cms.bool(True)
 process.produceNtuple.isDEBUG                                        = cms.bool(False)
-writers_metFilters                                                   = config_recommendedMEtFilters_2017
-writers_metFilters.pluginType                                        = cms.string("MEtFilterWriter")
+writers_metFilters.flags                                             = config_recommendedMEtFilters_2017
 process.produceNtuple.process                                        = cms.string('signal_ggf_nonresonant_hh')
 process.produceNtuple.process_hh                                     = cms.string('signal_ggf_nonresonant_hh_wwww')
 process.produceNtuple.isMC                                           = cms.bool(True)
@@ -283,6 +290,6 @@ process.produceNtuple.has_pdf_weights                                = cms.bool(
 process.produceNtuple.btagSFRatio                                    = cms.PSet(
   central = cms.vdouble(1.0, 0.983850754831, 0.970806608203, 0.95589515666, 0.941090355157, 0.919510668991, 0.896747198034, 0.869121413881, 0.843409507134, 0.788891130366),
 )
-process.produceNtuple.selection                                      = cms.string("nlep == 2 & ntau == 1")
-#process.produceNtuple.selection                                      = cms.string("")
+#process.produceNtuple.selection                                      = cms.string("nlep == 2 & ntau == 1")
+process.produceNtuple.selection                                      = cms.string("")
 #process.produceNtuple.selEventsFileName                              = cms.string('selEvents_DEBUG.txt')

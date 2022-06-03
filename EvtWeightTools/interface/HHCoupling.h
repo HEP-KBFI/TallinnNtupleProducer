@@ -40,13 +40,13 @@ class HHCoupling
   double
   c2g() const;
 
-  std::string
+  const std::string &
   name() const;
 
-  std::string
+  const std::string &
   weightName() const;
 
-  std::string
+  const std::string &
   training() const;
 
   friend std::ostream &
@@ -61,6 +61,7 @@ class HHCoupling
   double c2g_;
 
   std::string name_;
+  std::string weightName_;
   std::string training_;
 };
 

@@ -1,9 +1,10 @@
 #ifndef TallinnNtupleProducer_Framework_GenMatchInterface_h
 #define TallinnNtupleProducer_Framework_GenMatchInterface_h
 
-#include <string>
-#include <vector>
+#include <string> // std::string
+#include <vector> // std::vector
 
+// forward declarations
 class RecoLepton;
 class RecoHadTau;
 

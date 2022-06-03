@@ -3,6 +3,11 @@
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
+//-------------------------------------------------------------------------------
+// CV: only for testing !!
+#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"
+//-------------------------------------------------------------------------------
+
 #include "TTree.h"                                                                // TTree
 
 typedef std::vector<std::string> vstring;
@@ -58,10 +63,10 @@ namespace
     unsigned numTriggerMatchedObjects = 0;
     if ( hltFilterBits.size() > 0 ) // at least one HLT filter bit defined
     {
-      for ( auto object : objects )
+      for ( const T * object : objects )
       {
         bool passesHLTFilterBit = false;
-        for ( auto hltFilterBit : hltFilterBits )
+        for ( unsigned hltFilterBit : hltFilterBits )
         {
           if ( object->filterBits() & hltFilterBit )
           {
@@ -90,13 +95,13 @@ TriggerInfoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWe
   std::map<int, bool> passesTriggerMap; // key = PD
 
   const std::vector<trigger::Entry>& triggerEntries = event.triggerInfo().entries();
-  for ( auto triggerEntry : triggerEntries )
+  for ( const trigger::Entry& triggerEntry : triggerEntries )
   {
     if ( !triggerEntry.use_it() ) continue;
 
     bool passesHLTPath = false;
     const std::vector<trigger::HLTPath>& hltPaths = triggerEntry.hltPaths();
-    for ( auto hltPath : hltPaths )
+    for ( const trigger::HLTPath& hltPath : hltPaths )
     {
       if ( hltPath.status() )
       {

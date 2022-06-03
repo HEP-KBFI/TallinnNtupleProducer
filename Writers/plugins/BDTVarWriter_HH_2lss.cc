@@ -4,7 +4,6 @@
 #include "DataFormats/Math/interface/deltaR.h"                                    // deltaR()
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
@@ -13,7 +12,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"             // RecoJetReaderAK8::get_supported_systematics()
 #include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                // RecoMEtReader::get_supported_systematics()
 #include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"               // RecoMuonReader::get_supported_systematics()
-#include "TallinnNtupleProducer/Writers/interface/bdtVarAuxFunctions.h"           // comp_min_dR_jet(), comp_mT(), comp_sumP4()
+#include "TallinnNtupleProducer/Writers/interface/bdtVarAuxFunctions.h"           // comp_min_dR_jet(), comp_mT(), comp_sum_coneP4(), comp_sumP4()
 #include "TallinnNtupleProducer/Writers/interface/createRecoJetPairs_Wjj.h"       // createRecoJetPairs_Wjj();
 #include "TallinnNtupleProducer/Writers/interface/RecoJetPair_Wjj.h"              // RecoJetPair_Wjj
 
@@ -25,7 +24,9 @@
 
 BDTVarWriter_HH_2lss::BDTVarWriter_HH_2lss(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
-{}
+{
+  isDEBUG_ = cfg.getParameter<bool>("isDEBUG");
+}
 
 BDTVarWriter_HH_2lss::~BDTVarWriter_HH_2lss()
 {}
@@ -46,10 +47,10 @@ BDTVarWriter_HH_2lss::setBranches(TTree * outputTree)
   bai.setBranch(max_dR_lep_Wjets_, "max_dR_lep_Wjets");
   bai.setBranch(min_dR_lep_leadWjet_, "min_dR_lep_leadWjet");
   bai.setBranch(max_dR_lep_leadWjet_, "max_dR_lep_leadWjet");  
-  bai.setBranch(dR_Wjj1_, "dR_Wjj1");
-  bai.setBranch(m_Wjj1_, "m_Wjj1");
-  bai.setBranch(dR_Wjj2_, "dR_Wjj2");
-  bai.setBranch(m_Wjj2_, "m_Wjj2");
+  bai.setBranch(dR_jj_W1_, "dR_jj_W1");
+  bai.setBranch(m_jj_W1_, "m_jj_W1");
+  bai.setBranch(dR_jj_W2_, "dR_jj_W2");
+  bai.setBranch(m_jj_W2_, "m_jj_W2");
   bai.setBranch(mHH_vis_, "mHH_vis");
 }
 
@@ -68,10 +69,10 @@ BDTVarWriter_HH_2lss::resetBranches()
   max_dR_lep_Wjets_ = -1.;
   min_dR_lep_leadWjet_ =  1.e+3;
   max_dR_lep_leadWjet_ = -1.;
-  dR_Wjj1_ = -1.;
-  m_Wjj1_ = -1.;
-  dR_Wjj2_ = -1.;
-  m_Wjj2_ = -1.;
+  dR_jj_W1_ = -1.;
+  m_jj_W1_ = -1.;
+  dR_jj_W2_ = -1.;
+  m_jj_W2_ = -1.;
   mHH_vis_ = -1.;
 }
 
@@ -105,6 +106,14 @@ BDTVarWriter_HH_2lss::writeImp(const Event & event, const EvtWeightRecorder & ev
   
     RecoJetPairCollection_Wjj tmp = createRecoJetPairs_Wjj(jetsAK4, jetsAK8_Wjj, 2);
     RecoJetPairPtrCollection_Wjj jetPairs_Wjj = convert_to_ptrs(tmp);
+    if ( isDEBUG_ )
+    {
+      size_t numJetPairs_Wjj = jetPairs_Wjj.size();
+      for ( size_t idxJetPair_Wjj = 0; idxJetPair_Wjj < numJetPairs_Wjj; ++idxJetPair_Wjj )
+      {
+        std::cout << "jetPair_Wjj #" << idxJetPair_Wjj << ": " << (*jetPairs_Wjj.at(idxJetPair_Wjj));
+      } 
+    }
 
     min_dR_lep_Wjets_ =  1.e+3;
     max_dR_lep_Wjets_ = -1.;
@@ -147,16 +156,16 @@ BDTVarWriter_HH_2lss::writeImp(const Event & event, const EvtWeightRecorder & ev
     const RecoJetPair_Wjj * jetPair_Wjj_sublead = ( jetPairs_Wjj.size() >= 2 ) ? jetPairs_Wjj.at(1) : nullptr;
     if ( jetPair_Wjj_lead && jetPair_Wjj_lead->jet_lead() && jetPair_Wjj_lead->jet_sublead() )
     {
-      dR_Wjj1_ = deltaR(jetPair_Wjj_lead->jet_lead()->p4(), jetPair_Wjj_lead->jet_sublead()->p4());
-      m_Wjj1_  = jetPair_Wjj_lead->mass();
+      dR_jj_W1_ = deltaR(jetPair_Wjj_lead->jet_lead()->p4(), jetPair_Wjj_lead->jet_sublead()->p4());
+      m_jj_W1_  = jetPair_Wjj_lead->mass();
     }
     if ( jetPair_Wjj_sublead && jetPair_Wjj_sublead->jet_lead() && jetPair_Wjj_sublead->jet_sublead() )
     {
-      dR_Wjj2_ = deltaR(jetPair_Wjj_sublead->jet_lead()->p4(), jetPair_Wjj_sublead->jet_sublead()->p4());
-      m_Wjj2_  = jetPair_Wjj_sublead->mass();
+      dR_jj_W2_ = deltaR(jetPair_Wjj_sublead->jet_lead()->p4(), jetPair_Wjj_sublead->jet_sublead()->p4());
+      m_jj_W2_  = jetPair_Wjj_sublead->mass();
     }
 
-    mHH_vis_ = (lepton_lead->p4() + lepton_sublead->p4() + comp_sumP4(jetPairs_Wjj)).mass();
+    mHH_vis_ = (comp_sumP4(std::vector<const RecoLepton *>({ lepton_lead, lepton_sublead })) + comp_sumP4(jetPairs_Wjj)).mass();
   }
 }
 

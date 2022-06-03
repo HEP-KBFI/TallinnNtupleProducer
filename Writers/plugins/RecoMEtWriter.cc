@@ -172,7 +172,8 @@ RecoMEtWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeight
     const Particle::LorentzVector mhtP4 = compMHT(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4());
     it->metLD_ = compMEt_LD(met.p4(), mhtP4);
     it->htmiss_ = mhtP4.pt();
-    it->ht_ = compHT(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4());
+    //it->ht_ = compHT(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4());
+    it->ht_ = compHT(event.fakeableLeptons(), {}, event.selJetsAK4()); // CV: only for testing (backwards compatibility with old HH->multilepton 2lss code) !!
     it->stmet_ = compSTMEt(event.fakeableLeptons(), event.fakeableHadTaus(), event.selJetsAK4(), met.p4());
   }
 }

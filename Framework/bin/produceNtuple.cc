@@ -41,6 +41,7 @@
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"                                     // GenJet
 #include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                                  // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                                  // GenPhoton
+#include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                               // RunLumiEvent
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"                                // TriggerInfo
 #include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                // EventReader
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                            // GenHadTauReader
@@ -62,13 +63,18 @@
 
 #include <assert.h>                                                                             // assert()
 #include <cstdlib>                                                                              // EXIT_SUCCESS, EXIT_FAILURE
-#include <fstream>                                                                              // std::ofstream
-#include <iostream>                                                                             // std::cerr, std::fixed
-#include <iomanip>                                                                              // std::setprecision(), std::setw()
+#include <iostream>                                                                             // std::cout
 #include <string>                                                                               // std::string
 #include <vector>                                                                               // std::vector
 
 typedef std::vector<std::string> vstring;
+
+template <typename T>
+void
+copyParameter(const edm::ParameterSet& cfg_source, edm::ParameterSet& cfg_target, const std::string& attr)
+{
+  cfg_target.addParameter<T>(attr, cfg_source.getParameter<T>(attr));
+} 
 
 int main(int argc, char* argv[])
 {
@@ -95,9 +101,9 @@ int main(int argc, char* argv[])
   if ( !edm::readPSetsFrom(argv[1])->existsAs<edm::ParameterSet>("process") )
     throw cmsException("produceNtuple", __LINE__) << "No ParameterSet 'process' found in config file !!";
 
-  edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("process");
+  edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameterSet("process");
 
-  edm::ParameterSet cfg_produceNtuple = cfg.getParameter<edm::ParameterSet>("produceNtuple");
+  edm::ParameterSet cfg_produceNtuple = cfg.getParameterSet("produceNtuple");
   AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
   
   std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
@@ -110,7 +116,7 @@ int main(int argc, char* argv[])
   std::cout << "Setting era to: " << get_era(era) << std::endl;
 
   bool isMC = cfg_produceNtuple.getParameter<bool>("isMC");
-  edm::VParameterSet lumiScale = cfg_produceNtuple.getParameter<edm::VParameterSet>("lumiScale");
+  edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
   bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
   std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
   bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
@@ -122,6 +128,14 @@ int main(int argc, char* argv[])
   unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
   bool applyNumNominalHadTausCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalHadTausCut");
   std::cout << "Setting nominal multiplicity of leptons and taus to: #leptons = " << numNominalLeptons << ", #taus = " << numNominalHadTaus << std::endl;
+  if ( applyNumNominalLeptonsCut )
+  {
+    std::cout << "Skipping events that contain fewer than the nominal number of leptons." << std::endl;
+  }
+  if ( applyNumNominalHadTausCut )
+  {
+    std::cout << "Skipping events that contain fewer than the nominal number of taus." << std::endl;
+  }
 
   std::string hadTauWP_againstJets = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstJets_tight");
   std::string hadTauWP_againstElectrons = cfg_produceNtuple.getParameter<std::string>("hadTauWP_againstElectrons");
@@ -167,11 +181,11 @@ int main(int argc, char* argv[])
   }
   const ChargeMisIdRateInterface chargeMisIdRateInterface(era);
 
-  edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("leptonFakeRateWeight");
+  edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameterSet("leptonFakeRateWeight");
   cfg_leptonFakeRateWeight.addParameter<std::string>("era", era_string);
   LeptonFakeRateInterface* jetToLeptonFakeRateInterface = new LeptonFakeRateInterface(cfg_leptonFakeRateWeight);
 
-  edm::ParameterSet cfg_hadTauFakeRateWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("hadTauFakeRateWeight");
+  edm::ParameterSet cfg_hadTauFakeRateWeight = cfg_produceNtuple.getParameterSet("hadTauFakeRateWeight");
   cfg_hadTauFakeRateWeight.addParameter<std::string>("hadTauSelection", hadTauWP_againstJets);
   HadTauFakeRateInterface* jetToHadTauFakeRateInterface = new HadTauFakeRateInterface(cfg_hadTauFakeRateWeight);
 
@@ -201,7 +215,7 @@ int main(int argc, char* argv[])
 
   TTree* outputTree = fs.make<TTree>("Events", "Events");
 
-  const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameter<edm::ParameterSet>("evtWeight");
+  const edm::ParameterSet additionalEvtWeight = cfg_produceNtuple.getParameterSet("evtWeight");
   const bool applyAdditionalEvtWeight = additionalEvtWeight.getParameter<bool>("apply");
   EvtWeightManager* eventWeightManager = nullptr;
   if ( applyAdditionalEvtWeight )
@@ -250,9 +264,10 @@ int main(int argc, char* argv[])
     std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
-    cfg_writer.addParameter<std::string>("process", process);
+    copyParameter<vstring>(cfg_produceNtuple, cfg_writer, "disable_ak8_corr");
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
+    cfg_writer.addParameter<std::string>("process", process);
     std::unique_ptr<WriterBase> writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
     writer->registerReaders(inputTree);
     writer->setBranches(outputTree);
@@ -265,7 +280,7 @@ int main(int argc, char* argv[])
   {
     for ( auto & writer : writers )
     {
-       merge_systematic_shifts(systematic_shifts, writer->get_supported_systematics(cfg_produceNtuple));
+      merge_systematic_shifts(systematic_shifts, writer->get_supported_systematics(cfg_produceNtuple));
     }
   }
   // CV: add central value (for data and MC)
@@ -279,9 +294,11 @@ int main(int argc, char* argv[])
     bool skipEvent = false;
     for ( const auto & central_or_shift : systematic_shifts )
     {
-      eventReader->set_central_or_shift(central_or_shift);
-      const Event& event = eventReader->read();
-      
+      if ( isDEBUG || run_lumi_eventSelector )
+      {
+        std::cout << "Processing central_or_shift = '" << central_or_shift << "'" << std::endl;
+      }
+      const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
       if ( central_or_shift == "central" )
       {
         if ( inputTree->canReport(reportEvery) )
@@ -289,31 +306,28 @@ int main(int argc, char* argv[])
           std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx()
                     << " or " << inputTree->getCurrentEventIdx() << " entry in #"
                     << (inputTree->getProcessedFileCount() - 1)
-                    << " (" << event.eventInfo()
+                    << " (" << runLumiEvent
                     << ") file\n";
         }
         ++analyzedEntries;
         histogram_analyzedEntries->Fill(0.);
-
-        if ( run_lumi_eventSelector )
-        { 
-          if ( !(*run_lumi_eventSelector)(event.eventInfo()) )
-          {
-            skipEvent = true;
-            continue;
-          }
-          std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << event.eventInfo() << '\n';
-          if ( inputTree->isOpen() )
-          {
-            std::cout << "input File = " << inputTree->getCurrentFileName() << '\n';
-          }
-        }
-
-        if ( isDEBUG )
+      }
+      if ( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) )
+      {
+        skipEvent = true;
+        continue;
+      }
+      if ( central_or_shift == "central" && (isDEBUG || run_lumi_eventSelector) )
+      {
+        std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << runLumiEvent << '\n';
+        if ( inputTree->isOpen() )
         {
-          std::cout << "event #" << inputTree->getCurrentMaxEventIdx() << " " << event.eventInfo() << '\n';
+          std::cout << "input File = " << inputTree->getCurrentFileName() << '\n';
         }
       }
+
+      eventReader->set_central_or_shift(central_or_shift);
+      const Event& event = eventReader->read();
 
       // CV: skip processing events that don't contain the nominal number of leptons and hadronic taus,
       //     if the flags applyNumNominalLeptonsCut and applyNumNominalHadTausCut are enabled in the config file
@@ -398,19 +412,6 @@ int main(int argc, char* argv[])
               {
                 prob_chargeMisId_sum = chargeMisIdRateInterface.get(fakeableLepton_lead, fakeableLepton_sublead);
               }
-              // Karl: reject the event, if the applied probability of charge misidentification is 0;
-              //       note that this can happen only if both selected leptons are muons (their misId prob is 0).
-              if ( prob_chargeMisId_sum == 0. )
-              {
-                if ( run_lumi_eventSelector )
-                {
-                  std::cout << "event " << event.eventInfo().str() << " FAILS charge flip selection\n"
-                            << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << "; "
-                            << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ")\n";
-                }
-                skipEvent = true;
-                continue;
-              }
             }
             evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId_sum);
           }
@@ -438,21 +439,6 @@ int main(int argc, char* argv[])
                 if ( fakeableLepton_lead->charge()*fakeableHadTau->charge()    < 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_lead);
                 if ( fakeableLepton_sublead->charge()*fakeableHadTau->charge() < 0 ) prob_chargeMisId *= chargeMisIdRateInterface.get(fakeableLepton_sublead);
               } else assert(0);
-              // Karl: reject the event, if the applied probability of charge misidentification is 0. This can happen only if
-              //       1) both selected leptons are muons (their misId prob is 0).
-              //       2) one lepton is a muon and the other is an electron, and the muon has the same sign as the selected tau.
-              if ( prob_chargeMisId == 0. )
-              {
-                if ( run_lumi_eventSelector )
-                {
-                  std::cout << "event " << event.eventInfo().str() << " FAILS charge flip selection\n"
-                            << "(leading lepton: charge = " << fakeableLepton_lead->charge() << ", pdgId = " << fakeableLepton_lead->pdgId() << ";"
-                            << " subleading lepton: charge = " << fakeableLepton_sublead->charge() << ", pdgId = " << fakeableLepton_sublead->pdgId() << ";" 
-                            << " hadTau: charge = " << fakeableHadTau->charge() << ")\n";
-                }
-                skipEvent = true;
-                continue;
-              }
             }
             evtWeightRecorder.record_chargeMisIdProb(prob_chargeMisId);
           }

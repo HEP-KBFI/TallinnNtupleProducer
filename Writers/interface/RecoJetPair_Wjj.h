@@ -8,7 +8,7 @@
 
 #include <vector>                                                // std::vector
 
-class RecoJetPair_Wjj
+class RecoJetPair_Wjj : public Particle
 {
  public:
   RecoJetPair_Wjj(const RecoJetAK4 * jet1, const RecoJetAK4 * jet2);
@@ -51,12 +51,14 @@ class RecoJetPair_Wjj
   const RecoJetBase * jet_lead_;
   const RecoJetBase * jet_sublead_;
 
-  Particle::LorentzVector p4_; ///< four-vector of jet pair (i.e. of hadronic W candidate)
-
   Type type_;                  ///< flag indicating whether jet pair has been build from one AK8 jet (boosted case) or from two AK4 jets (resolved case)
 };
 
 typedef std::vector<RecoJetPair_Wjj>  RecoJetPairCollection_Wjj;
 typedef std::vector<const RecoJetPair_Wjj *>  RecoJetPairPtrCollection_Wjj;
+
+std::ostream &
+operator<<(std::ostream & stream,
+           const RecoJetPair_Wjj & jetPair);
 
 #endif // TallinnNtupleProducer_Writers_RecoJetPair_Wjj_h

@@ -17,6 +17,7 @@ LowMassLeptonPairVetoWriter::LowMassLeptonPairVetoWriter(const edm::ParameterSet
   requireSF_ = cfg.getParameter<bool>("requireSF");
   requireOS_ = cfg.getParameter<bool>("requireOS");
   passesLowMassLeptonPairVeto_ = true;
+  isDEBUG_ = cfg.getParameter<bool>("isDEBUG");
 }
 
 LowMassLeptonPairVetoWriter::~LowMassLeptonPairVetoWriter()
@@ -33,7 +34,7 @@ void
 LowMassLeptonPairVetoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeightRecorder)
 {
   passesLowMassLeptonPairVeto_ = true;
-  const RecoLeptonPtrCollection& looseLeptons = event.looseLeptons();
+  const RecoLeptonPtrCollection& looseLeptons = event.looseLeptonsUncleaned();
   for ( auto lepton1 = looseLeptons.begin(); lepton1 != looseLeptons.end(); ++lepton1 )
   {
     for ( auto lepton2 = lepton1 + 1; lepton2 != looseLeptons.end(); ++lepton2 )
@@ -43,6 +44,15 @@ LowMassLeptonPairVetoWriter::writeImp(const Event & event, const EvtWeightRecord
       double mass = ((*lepton1)->p4() + (*lepton2)->p4()).mass();
       if ( mass < 12. )
       {
+        if ( isDEBUG_ )
+        {
+          std::cout << "failsLowMassLeptonPairVeto:" << std::endl;
+          std::cout << "lepton1: pT = " << (*lepton1)->pt() << ", eta = " << (*lepton1)->eta() << ", phi = " << (*lepton1)->phi() << "," 
+                    << " pdgId = " << (*lepton1)->pdgId() << std::endl;
+          std::cout << "lepton2: pT = " << (*lepton2)->pt() << ", eta = " << (*lepton2)->eta() << ", phi = " << (*lepton2)->phi() << "," 
+                    << " pdgId = " << (*lepton2)->pdgId() << std::endl;
+          std::cout << "mass = " << mass << " (mass computed using cone_p4() = " << ((*lepton1)->cone_p4() + (*lepton2)->cone_p4()).mass() << ")" << std::endl;
+        }
         passesLowMassLeptonPairVeto_ = false;
         break;
       }

@@ -13,6 +13,7 @@
 #include "TTree.h"                                                                // TTree
 
 #include <assert.h>                                                               // assert()
+#include <cmath>                                                                  // std::abs()
 
 RecoLeptonWriter::RecoLeptonWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
@@ -56,27 +57,41 @@ RecoLeptonWriter::~RecoLeptonWriter()
   delete[] isFlip_;
 }
 
+namespace
+{
+  std::string
+  get_branchName_num(const std::string & branchName_num)
+  {
+    return branchName_num;
+  }
+  std::string
+  get_branchName_obj(const std::string & branchName_obj, int idx, const std::string & suffix)
+  {
+    return Form("%s%i_%s", branchName_obj.data(), (int)idx + 1, suffix.data());
+  }
+}
+
 void
 RecoLeptonWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  bai.setBranch(nLeptons_, branchName_num_);
+  bai.setBranch(nLeptons_, get_branchName_num(branchName_num_));
   for ( size_t idxLepton = 0; idxLepton < max_nLeptons_; ++idxLepton )
   {
-    bai.setBranch(pt_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "pt"));
-    bai.setBranch(conePt_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "conePt"));
-    bai.setBranch(eta_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "eta"));
-    bai.setBranch(phi_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "phi"));
-    bai.setBranch(mass_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "mass"));
-    bai.setBranch(pdgId_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "pdgId"));
-    bai.setBranch(charge_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "charge"));
-    bai.setBranch(mvaRawTTH_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "mvaRawTTH"));
-    bai.setBranch(isFakeable_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "isFakeable"));
-    bai.setBranch(isTight_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "isTight"));    
-    bai.setBranch(tightCharge_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "tightCharge"));
-    bai.setBranch(genMatch_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "genMatch"));
-    bai.setBranch(isFake_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "isFake"));
-    bai.setBranch(isFlip_[idxLepton], Form("%s%i_%s", branchName_obj_.data(), (int)idxLepton, "isFlip"));
+    bai.setBranch(pt_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "pt"));
+    bai.setBranch(conePt_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "conePt"));
+    bai.setBranch(eta_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "eta"));
+    bai.setBranch(phi_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "phi"));
+    bai.setBranch(mass_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "mass"));
+    bai.setBranch(pdgId_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "pdgId"));
+    bai.setBranch(charge_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "charge"));
+    bai.setBranch(mvaRawTTH_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "mvaRawTTH"));
+    bai.setBranch(isFakeable_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "isFakeable"));
+    bai.setBranch(isTight_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "isTight"));    
+    bai.setBranch(tightCharge_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "tightCharge"));
+    bai.setBranch(genMatch_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "genMatch"));
+    bai.setBranch(isFake_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "isFake"));
+    bai.setBranch(isFlip_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "isFlip"));
   }
 }
 
@@ -88,7 +103,7 @@ namespace
     unsigned genMatch = 0;
     if ( lepton->genLepton() )
     {
-      if ( lepton->charge() == lepton->genLepton()->charge() ) genMatch = 1;
+      if ( lepton->charge()*lepton->genLepton()->charge() >= 0 ) genMatch = 1;
       else genMatch = 2;
     }
     else if ( lepton->is_electron() && lepton->genPhoton() && lepton->genPhoton()->pt() > (0.50*lepton->pt()) )
@@ -122,15 +137,15 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
       eta_[idxLepton] = lepton->eta();
       phi_[idxLepton] = lepton->phi();
       mass_[idxLepton] = lepton->mass();
-      pdgId_[idxLepton] = lepton->pdgId();
+      pdgId_[idxLepton] = std::abs(lepton->pdgId());
       charge_[idxLepton] = lepton->charge();
       mvaRawTTH_[idxLepton] = lepton->mvaRawTTH();
       isFakeable_[idxLepton] = lepton->isFakeable();
       isTight_[idxLepton] = lepton->isTight();
       tightCharge_[idxLepton] = lepton->tightCharge();
       genMatch_[idxLepton] = compGenMatch(lepton);
-      isFake_[idxLepton] = genMatch_[idxLepton] == 16;
-      isFlip_[idxLepton] = genMatch_[idxLepton] == 2;
+      isFake_[idxLepton] = (genMatch_[idxLepton] == 16);
+      isFlip_[idxLepton] = (genMatch_[idxLepton] == 2);
     }
     else
     {

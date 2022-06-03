@@ -70,12 +70,6 @@ Event::tightElectrons() const
 }
 
 const RecoLeptonPtrCollection&
-Event::looseLeptons() const
-{
-  return looseLeptonsFull_;
-}
-
-const RecoLeptonPtrCollection&
 Event::fakeableLeptons() const
 {
   return fakeableLeptons_;
@@ -85,6 +79,30 @@ const RecoLeptonPtrCollection&
 Event::tightLeptons() const
 {
   return tightLeptons_;
+}
+
+const RecoLeptonPtrCollection&
+Event::looseLeptonsUncleaned() const
+{
+  return looseLeptonsUncleaned_;
+}
+
+const RecoLeptonPtrCollection&
+Event::looseLeptonsFull() const
+{
+  return looseLeptonsFull_;
+}
+
+const RecoLeptonPtrCollection&
+Event::fakeableLeptonsFull() const
+{
+  return fakeableLeptonsFull_;
+}
+
+const RecoLeptonPtrCollection&
+Event::tightLeptonsFull() const
+{
+  return tightLeptonsFull_;
 }
 
 const RecoHadTauPtrCollection&
@@ -97,6 +115,18 @@ const RecoHadTauPtrCollection&
 Event::tightHadTaus() const
 {
   return tightHadTaus_;
+}
+
+const RecoHadTauPtrCollection&
+Event::fakeableHadTausFull() const
+{
+  return fakeableHadTausFull_;
+}
+
+const RecoHadTauPtrCollection&
+Event::tightHadTausFull() const
+{
+  return tightHadTausFull_;
 }
 
 const RecoJetPtrCollectionAK4&

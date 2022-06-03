@@ -11,7 +11,10 @@
 RunLumiEventSelector::RunLumiEventSelector(const std::string & inputFileName,
                                            const std::string & separator)
   : inputFileName_(inputFileName)
-  , separator_(separator)
+  , separator_(separator)  
+  , lastRun_(0)
+  , lastLumi_(0)
+  , lastEvent_(0)
   , numEventsProcessed_(0)
   , numEventsToBeSelected_(0)
   , numEventsSelected_(0)
@@ -186,7 +189,13 @@ RunLumiEventSelector::operator()(UInt_t run,
     std::cout << "<RunLumiEventSelector::operator>: selecting "
                  "run = " << run << ", ls = " << lumi << ", event = " << event << '\n';
 
-    ++matchedRunLumiSectionEventNumbers_[run][lumi][event];
+    if ( run != lastRun_ || lumi != lastLumi_ || event != lastEvent_ )
+    {
+      ++matchedRunLumiSectionEventNumbers_[run][lumi][event];
+    }
+    lastRun_ = run;
+    lastLumi_ = lumi;
+    lastEvent_ = event;
     if ( matchedRunLumiSectionEventNumbers_[run][lumi][event] == 1 ) { // CV: select only first match
       ++numEventsSelected_;
       return true;
@@ -205,7 +214,7 @@ RunLumiEventSelector::areWeDone() const
 }
 
 bool
-RunLumiEventSelector::operator()(const EventInfo & info) const
+RunLumiEventSelector::operator()(const RunLumiEvent & info) const
 {
   return RunLumiEventSelector::operator()(info.run(), info.lumi(), info.event());
 }

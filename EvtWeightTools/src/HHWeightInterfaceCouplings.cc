@@ -1,7 +1,7 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException(), get_human_line()
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                // format_vstring()
 #include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"             // get_fullpath()
@@ -254,13 +254,13 @@ HHWeightInterfaceCouplings::add(const HHCoupling & coupling)
   couplings_[coupling.name()] = coupling;
 }
 
-std::map<std::string, HHCoupling>
+const std::map<std::string, HHCoupling> &
 HHWeightInterfaceCouplings::getCouplings() const
 {
   return couplings_;
 }
 
-HHCoupling
+const HHCoupling &
 HHWeightInterfaceCouplings::getCoupling(const std::string & name) const
 {
   if(! couplings_.count(name))
@@ -294,25 +294,25 @@ HHWeightInterfaceCouplings::get_weight_names() const
   return weightNames;
 }
 
-HHWeightInterfaceNLOMode
+const HHWeightInterfaceNLOMode &
 HHWeightInterfaceCouplings::nlo_mode() const
 {
   return nlo_mode_;
 }
 
-std::string
+const std::string &
 HHWeightInterfaceCouplings::denominator_file_lo() const
 {
   return denominator_file_lo_;
 }
 
-std::string
+const std::string &
 HHWeightInterfaceCouplings::denominator_file_nlo() const
 {
   return denominator_file_nlo_;
 }
 
-std::string
+const std::string &
 HHWeightInterfaceCouplings::histtitle() const
 {
   return histtitle_;

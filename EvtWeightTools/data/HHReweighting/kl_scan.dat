@@ -1,8 +1,8 @@
 # kl=2.45 kt=1 c2=0 cg=0 c2g=0
 # kl=5    kt=1 c2=0 cg=0 c2g=0
-kl=2.45 kt=1 c2=0 cg=0 c2g=0  name=kl_2p45_kt_1p00_c2_0p00_BM9 training=BM9
-kl=1p00 kt=1 c2=0 cg=0 c2g=0  name=kl_1p00_kt_1p00_c2_0p00_BM9 training=BM9
-kl=5p00 kt=1 c2=0 cg=0 c2g=0  name=kl_5p00_kt_1p00_c2_0p00_BM9 training=BM9
-kl=2.45 kt=1 c2=0 cg=0 c2g=0  name=kl_2p45_kt_1p00_c2_0p00_BM7 training=BM7
-kl=1p00 kt=1 c2=0 cg=0 c2g=0  name=kl_1p00_kt_1p00_c2_0p00_BM7 training=BM7
-kl=5p00 kt=1 c2=0 cg=0 c2g=0  name=kl_5p00_kt_1p00_c2_0p00_BM7 training=BM7
+kl=2.45 kt=1 c2=0 cg=0 c2g=0  name=kl_2p45_kt_1p00_c2_0p00_BM9 training=JHEP04BM9
+kl=1p00 kt=1 c2=0 cg=0 c2g=0  name=kl_1p00_kt_1p00_c2_0p00_BM9 training=JHEP04BM9
+kl=5p00 kt=1 c2=0 cg=0 c2g=0  name=kl_5p00_kt_1p00_c2_0p00_BM9 training=JHEP04BM9
+kl=2.45 kt=1 c2=0 cg=0 c2g=0  name=kl_2p45_kt_1p00_c2_0p00_BM7 training=JHEP04BM7
+kl=1p00 kt=1 c2=0 cg=0 c2g=0  name=kl_1p00_kt_1p00_c2_0p00_BM7 training=JHEP04BM7
+kl=5p00 kt=1 c2=0 cg=0 c2g=0  name=kl_5p00_kt_1p00_c2_0p00_BM7 training=JHEP04BM7
