@@ -79,11 +79,13 @@ EvtReweightWriter_HH::writeImp(const Event & event, const EvtWeightRecorder & ev
       double hhReweight_bm = 1.;
       if ( apply_HH_rwgt_lo_ )
       {
-        hhReweight_bm *= hhWeightInterfaceLO_->getRelativeWeight(bmName, eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar());
+        assert(hhWeightInterfaceLO_);
+        hhReweight_bm *= hhWeightInterfaceLO_->getRelativeWeight(bmName, evtWeightRecorder.gen_mHH(), evtWeightRecorder.gen_cosThetaStar());
       }
       if ( apply_HH_rwgt_nlo_ )
       {
-        hhReweight_bm *= hhWeightInterfaceNLO_->getRelativeWeight_LOtoNLO(bmName, eventInfo.gen_mHH(), eventInfo.gen_cosThetaStar());
+        assert(hhWeightInterfaceNLO_);
+        hhReweight_bm *= hhWeightInterfaceNLO_->getRelativeWeight_LOtoNLO(bmName, evtWeightRecorder.gen_mHH(), evtWeightRecorder.gen_cosThetaStar());
       }
       hhReweights_[bmName] = hhReweight_sm*hhReweight_bm;
     }

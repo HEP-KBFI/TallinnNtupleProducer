@@ -18,7 +18,6 @@ class RecoElectron : public RecoLepton
                Double_t sigmaEtaEta,
                Double_t HoE,
                Double_t deltaEta,
-               Double_t deltaPhi,
                Double_t OoEminusOoP,
                Int_t nLostHits,
                Bool_t passesConversionVeto,
@@ -36,9 +35,7 @@ class RecoElectron : public RecoLepton
   Double_t sigmaEtaEta() const;
   Double_t HoE() const;
   Double_t deltaEta() const;
-  Double_t deltaPhi() const;
   Double_t etaSC() const;
-  Double_t phiSC() const;
   Double_t absEtaSC() const;
   Double_t OoEminusOoP() const;
   Int_t nLostHits() const;
@@ -69,7 +66,6 @@ class RecoElectron : public RecoLepton
   Double_t sigmaEtaEta_;        ///< second shower moment in eta-direction
   Double_t HoE_;                ///< ratio of energy deposits in hadronic/electromagnetic section of calorimeter
   Double_t deltaEta_;           ///< difference in eta between impact position of track and electron cluster
-  Double_t deltaPhi_;           ///< difference in phi between impact position of track and electron cluster
   Double_t OoEminusOoP_;        ///< difference between calorimeter energy and track momentum (1/E - 1/P)
   Int_t nLostHits_;             ///< number of operational tracker layers between interaction point and innermost hit on track
   Bool_t passesConversionVeto_; ///< Flag indicating if electron passes (true) or fails (false) photon conversion veto

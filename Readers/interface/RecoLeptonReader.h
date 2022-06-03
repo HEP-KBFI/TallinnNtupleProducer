@@ -100,13 +100,12 @@ class RecoLeptonReader : public ReaderBase
   std::string branchName_dxy_;
   std::string branchName_dz_;
   std::string branchName_relIso_all_;
-  std::string branchName_pfRelIso04_all_;
+  std::string branchName_pfRelIso03_all_;
   std::string branchName_relIso_chg_;
   std::string branchName_relIso_neu_;
   std::string branchName_sip3d_;
   std::string branchName_mvaRawTTH_;
-  std::string branchName_jetPtRatio_;
-  std::string branchName_jetPtRel_;
+  std::string branchName_jetRelIso_;
   std::string branchName_jetNDauChargedMVASel_;
   std::string branchName_tightCharge_;
   std::string branchName_charge_;
@@ -115,7 +114,6 @@ class RecoLeptonReader : public ReaderBase
   std::string branchName_genPartFlav_;
   std::string branchName_genMatchIdx_;
 
-  std::map<Btag, std::string> branchNames_jetBtagCSV_;
   std::map<Btag, std::string> branchNames_assocJetBtagCSV_;
 
   UInt_t nLeptons_;
@@ -127,13 +125,12 @@ class RecoLeptonReader : public ReaderBase
   Float_t * dxy_;
   Float_t * dz_;
   Float_t * relIso_all_;
-  Float_t * pfRelIso04_all_;
+  Float_t * pfRelIso03_all_;
   Float_t * relIso_chg_;
   Float_t * relIso_neu_;
   Float_t * sip3d_;
   Float_t * mvaRawTTH_;
-  Float_t * jetPtRatio_;
-  Float_t * jetPtRel_;
+  Float_t * jetRelIso_;
   Int_t * jetNDauChargedMVASel_;
   Int_t * tightCharge_;
   Int_t * charge_;
@@ -142,7 +139,6 @@ class RecoLeptonReader : public ReaderBase
   UChar_t * genPartFlav_;
   Int_t * genMatchIdx_;
 
-  std::map<Btag, Float_t *> jetBtagCSVs_;
   std::map<Btag, Float_t *> assocJetBtagCSVs_;
 
   // CV: make sure that only one RecoLeptonReader instance exists for a given branchName,

@@ -11,6 +11,7 @@
 #include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                             // GenJetReader
 #include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"                          // GenLeptonReader
 #include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"                          // GenPhotonReader
+#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"
 #include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"                          // MEtFilterReader
 #include "TallinnNtupleProducer/Readers/interface/ParticleCollectionGenMatcher.h"             // RecoElectronCollectionGenMatcher, RecoMuonCollectionGenMatcher, RecoHadTauCollectionGenMatcher, RecoJetCollectionGenMatcher
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                               // ReaderBase
@@ -98,6 +99,7 @@ class EventReader : public ReaderBase
   Era era_;
   bool isMC_;
   bool readGenMatching_;
+  bool jetCleaningByIndex_;
 
   mutable UInt_t lastRun_;
   mutable UInt_t lastLumi_;
@@ -124,7 +126,7 @@ class EventReader : public ReaderBase
   mutable std::string muon_lastSystematic_;
 
   RecoElectronReader * electronReader_;
-  RecoElectronCollectionCleaner * electronCleaner_;
+  RecoElectronCollectionCleaner electronCleaner_;
   RecoElectronCollectionSelectorLoose * looseElectronSelector_;
   RecoElectronCollectionSelectorFakeable * fakeableElectronSelector_;
   RecoElectronCollectionSelectorTight * tightElectronSelector_;
@@ -132,7 +134,7 @@ class EventReader : public ReaderBase
   mutable std::string electron_lastSystematic_;
 
   RecoHadTauReader * hadTauReader_;
-  RecoHadTauCollectionCleaner * hadTauCleaner_;
+  RecoHadTauCollectionCleaner hadTauCleaner_;
   RecoHadTauCollectionSelectorLoose * looseHadTauSelector_;
   RecoHadTauCollectionSelectorFakeable * fakeableHadTauSelector_;
   RecoHadTauCollectionSelectorTight * tightHadTauSelector_;
@@ -141,8 +143,9 @@ class EventReader : public ReaderBase
   mutable bool hadTau_isInvalid_;
 
   RecoJetReaderAK4 * jetReaderAK4_;
-  RecoJetCollectionCleanerAK4 * jetCleanerAK4_dR04_; // used for cleaning AK4 jets wrt electrons, muons, and tauh
-  RecoJetCollectionCleanerAK4 * jetCleanerAK4_dR12_; // used for cleaning AK4 jets wrt AK8 jets
+  RecoJetCollectionCleanerAK4 jetCleanerAK4_dR04_; // used for cleaning AK4 jets wrt electrons, muons, and tauh
+  RecoJetCollectionCleanerByIndexAK4 jetCleanerAK4ByIndex_dR04_;
+  RecoJetCollectionCleanerAK4 jetCleanerAK4_dR12_; // used for cleaning AK4 jets wrt AK8 jets
   RecoJetCollectionSelectorAK4 * jetSelectorAK4_;
   RecoJetCollectionSelectorAK4_btagLoose * jetSelectorAK4_btagLoose_;
   RecoJetCollectionSelectorAK4_btagMedium * jetSelectorAK4_btagMedium_;
@@ -159,9 +162,14 @@ class EventReader : public ReaderBase
   RecoHadTauCollectionGenMatcher * hadTauGenMatcher_;
   RecoJetCollectionGenMatcherAK4 * jetGenMatcherAK4_;
 
+  GenParticleReader * genMatchToMuonReader_;
+  GenParticleReader * genMatchToElectronReader_;
+  GenParticleReader * genMatchToHadTauReader_;
+  GenParticleReader * genMatchToJetReader_;
+
   RecoJetReaderAK8 * jetReaderAK8_Hbb_;
   RecoJetReaderAK8 * jetReaderAK8_Wjj_;
-  RecoJetCollectionCleanerAK8 * jetCleanerAK8_dR08_;  // used for cleaning AK8 jets wrt electrons, muons, and tauh
+  RecoJetCollectionCleanerAK8 jetCleanerAK8_dR08_;  // used for cleaning AK8 jets wrt electrons, muons, and tauh
   RecoJetCollectionSelectorAK8_Hbb * jetSelectorAK8_Hbb_;
   RecoJetCollectionSelectorAK8_Wjj * jetSelectorAK8_Wjj_;
   std::set<std::string> jetsAK8_Hbb_supported_systematics_;

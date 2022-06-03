@@ -131,16 +131,12 @@ RecoMuonReader::read() const
             gLeptonReader->dxy_[idxLepton],
             gLeptonReader->dz_[idxLepton],
             gLeptonReader->relIso_all_[idxLepton],
-            gLeptonReader->pfRelIso04_all_[idxLepton],
+            gLeptonReader->pfRelIso03_all_[idxLepton],
             gLeptonReader->relIso_chg_[idxLepton],
-            gLeptonReader->relIso_neu_[idxLepton],
             gLeptonReader->sip3d_[idxLepton],
             gLeptonReader->mvaRawTTH_[idxLepton],
-            gLeptonReader->jetPtRatio_[idxLepton],
-            gLeptonReader->jetPtRel_[idxLepton],
-            gLeptonReader->jetNDauChargedMVASel_[idxLepton],
+            gLeptonReader->jetRelIso_[idxLepton],
             gLeptonReader->tightCharge_[idxLepton],
-            gLeptonReader->filterBits_[idxLepton],
             gLeptonReader->jetIdx_[idxLepton],
             gLeptonReader->genPartFlav_[idxLepton],
             gLeptonReader->genMatchIdx_[idxLepton],
@@ -149,14 +145,8 @@ RecoMuonReader::read() const
           gMuonReader->mediumIdPOG_[idxLepton],
           gMuonReader->segmentCompatibility_[idxLepton],
           gMuonReader->ptErr_[idxLepton]
-        }));
-
+            }));
         RecoMuon & muon = muons.back();
-        for(const auto & kv: gLeptonReader->jetBtagCSVs_)
-        {
-          const double val = kv.second[idxLepton];
-          muon.jetBtagCSVs_[kv.first] = std::isnan(val) ? -2. : val;
-        }
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

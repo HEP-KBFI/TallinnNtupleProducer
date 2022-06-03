@@ -11,25 +11,19 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Double_t QGDiscr,
                        Double_t bRegCorr,
                        Double_t bRegRes,
-                       Double_t pullEta,
-                       Double_t pullPhi,
-                       Double_t pullMag,
                        Int_t jetId,
                        Int_t puId,
+                       UInt_t idx,
                        Int_t genMatchIdx,
-                       Int_t idx,
                        Btag btag,
                        Int_t central_or_shift)
-  : RecoJetBase(jet, idx)
+: RecoJetBase(jet, idx)
   , jetCharge_(charge)
   , BtagCSV_(BtagCSV)
   , BtagWeight_(BtagWeight)
   , QGDiscr_(QGDiscr)
   , bRegCorr_(bRegCorr)
   , bRegRes_(bRegRes)
-  , pullEta_(pullEta)
-  , pullPhi_(pullPhi)
-  , pullMag_(pullMag)
   , jetId_(jetId)
   , puId_(puId)
   , genMatchIdx_(genMatchIdx)
@@ -121,24 +115,6 @@ Double_t
 RecoJetAK4::bRegRes() const
 {
   return bRegRes_;
-}
-
-Double_t
-RecoJetAK4::pullEta() const
-{
-  return pullEta_;
-}
-
-Double_t
-RecoJetAK4::pullPhi() const
-{
-  return pullPhi_;
-}
-
-Double_t
-RecoJetAK4::pullMag() const
-{
-  return pullMag_;
 }
 
 Int_t

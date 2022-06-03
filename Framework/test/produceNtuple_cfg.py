@@ -125,8 +125,8 @@ process.produceNtuple = cms.PSet(
     branchName_jets_ak4 = cms.string('Jet'),
     branchName_jets_ak8_Hbb = cms.string('FatJet'),
     branchName_subjets_ak8_Hbb = cms.string('SubJet'),
-    branchName_jets_ak8_Wjj = cms.string('FatJetAK8LSLoose'),
-    branchName_subjets_ak8_Wjj = cms.string('SubJetAK8LSLoose'), 
+    branchName_jets_ak8_Wjj = cms.string('FatJet'),
+    branchName_subjets_ak8_Wjj = cms.string('SubJet'),
     branchName_met = cms.string('MET'),
     branchName_vertex = cms.string('PV'),
 
@@ -155,6 +155,8 @@ process.produceNtuple = cms.PSet(
     branchName_envelope_weight_down = cms.string('LHEEnvelopeWeightDown'),
     has_LHE_weights = cms.bool(False),
     has_pdf_weights = cms.bool(False),
+
+    branchName_LHE_particle = cms.string('LHEPart'),
 
     redoGenMatching = cms.bool(False),
     genMatchingByIndex = cms.bool(True),
@@ -203,10 +205,10 @@ process.produceNtuple = cms.PSet(
     isDEBUG = cms.bool(False)
 )
 
-process.fwliteInput.fileNames = cms.vstring(['/hdfs/local/karl/ttHNtupleProduction/2017/2021Mar05_wPresel_nom_all_hh_multilepton/ntuples/signal_ggf_nonresonant_node_sm_hh_4v/0000/tree_1.root'])
+process.fwliteInput.fileNames = cms.vstring(['/hdfs/local/snandan/hhAnalysis/2017/official_nanoaod_file/F1B4499C-4A59-D142-8C2E-8364C1C6F90Cii.root'])
 process.fwliteOutput.fileName = cms.string('produceNtuple.root')
 process.produceNtuple.era                                            = cms.string('2017')
-process.produceNtuple.redoGenMatching                                = cms.bool(False)
+process.produceNtuple.redoGenMatching                                = cms.bool(True)
 process.produceNtuple.isDEBUG                                        = cms.bool(False)
 writers_metFilters.flags                                             = config_recommendedMEtFilters_2017
 process.produceNtuple.process                                        = cms.string('signal_ggf_nonresonant_hh')

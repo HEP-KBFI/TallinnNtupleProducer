@@ -145,12 +145,11 @@ RecoHadTauReader::setBranchNames()
     for(const auto & kv: TauID_levels)
     {
       const std::string & mvaString = TauID_names.at(kv.first);
-      branchNames_idMVA_[kv.first]  = Form("%s_%s", branchName_obj_.data(), Form("id%s_log", mvaString.data()));
+      branchNames_idMVA_[kv.first]  = Form("%s_%s", branchName_obj_.data(), Form("id%s", mvaString.data()));
       branchNames_rawMVA_[kv.first] = Form("%s_%s", branchName_obj_.data(), Form("raw%s", mvaString.data()));
     }
-    branchName_idAgainstElec_ = Form("%s_%s", branchName_obj_.data(), "idAntiEle_log");
-    branchName_idAgainstMu_ = Form("%s_%s", branchName_obj_.data(), "idAntiMu_log");
-    branchName_filterBits_ = Form("%s_%s", branchName_obj_.data(), "filterBits");
+    branchName_idAgainstElec_ = Form("%s_%s", branchName_obj_.data(), "idAntiEle");
+    branchName_idAgainstMu_ = Form("%s_%s", branchName_obj_.data(), "idAntiMu");
     branchName_jetIdx_ = Form("%s_%s", branchName_obj_.data(), "jetIdx");
     branchName_genPartFlav_ = Form("%s_%s", branchName_obj_.data(), "genPartFlav");
     branchName_genMatchIdx_ = Form("%s_%s", branchName_obj_.data(), "genMatchIdx");

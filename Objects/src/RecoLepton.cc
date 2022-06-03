@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"     // as_integer()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag::kCSVv2, Btag::kDeepCSV, Btag::kDeepJet
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"          // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"             // GenJet
 #include "TallinnNtupleProducer/Objects/interface/GenLepton.h"          // GenLepton
@@ -10,25 +9,21 @@
 
 Double_t
 RecoLepton::get_assocJet_pt(Double_t reco_pt,
-                            Double_t jetPtRatio)
+                            Double_t jetRelIso)
 {
-  return jetPtRatio > 1.e-3 ? 0.90 * reco_pt / jetPtRatio : reco_pt;
+  return 0.9 * reco_pt * (jetRelIso + 1);
 }
 
 RecoLepton::RecoLepton(const ChargedParticle & lepton,
                        Double_t dxy,
                        Double_t dz,
                        Double_t relIso,
-                       Double_t pfRelIso04All,
+                       Double_t pfRelIso03All,
                        Double_t miniRelIsoCharged,
-                       Double_t miniRelIsoNeutral,
                        Double_t sip3d,
                        Double_t mvaRawTTH,
-                       Double_t jetPtRatio,
-                       Double_t jetPtRel,
-                       Int_t    jetNDauChargedMVASel,
+                       Double_t jetRelIso,
                        Int_t    tightCharge,
-                       UInt_t   filterBits,
                        Int_t    jetIdx,
                        UChar_t  genPartFlav,
                        Int_t    genMatchIdx)
@@ -36,21 +31,17 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
   , dxy_(dxy)
   , dz_(dz)
   , relIso_(relIso)
-  , pfRelIso04All_(pfRelIso04All)
+  , pfRelIso03All_(pfRelIso03All)
   , miniRelIsoCharged_(miniRelIsoCharged)
-  , miniRelIsoNeutral_(miniRelIsoNeutral)
   , sip3d_(sip3d)
   , mvaRawTTH_(mvaRawTTH)
-  , jetPtRatio_(jetPtRatio)
-  , jetPtRel_(jetPtRel)
-  , jetNDauChargedMVASel_(jetNDauChargedMVASel)
+  , jetRelIso_(jetRelIso)
   , tightCharge_(tightCharge)
-  , filterBits_(filterBits)
   , jetIdx_(jetIdx)
   , genPartFlav_(genPartFlav)
   , genMatchIdx_(genMatchIdx)
   , mvaRawTTH_cut_(-1.)
-  , assocJet_pt_(get_assocJet_pt(pt_, jetPtRatio_))
+  , assocJet_pt_(get_assocJet_pt(pt_, jetRelIso_))
   , assocJet_p4_(assocJet_pt_, eta_, phi_, mass_)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
@@ -181,9 +172,9 @@ RecoLepton::relIso() const
 }
 
 Double_t
-RecoLepton::pfRelIso04All() const
+RecoLepton::pfRelIso03All() const
 {
-  return pfRelIso04All_;
+  return pfRelIso03All_;
 }
 
 Double_t
@@ -218,15 +209,15 @@ RecoLepton::mvaRawTTH_cut() const
 }
 
 Double_t
-RecoLepton::jetPtRatio() const
+RecoLepton::jetRelIso() const
 {
-  return jetPtRatio_;
+  return jetRelIso_;
 }
 
 Double_t
-RecoLepton::jetRelIso() const
+RecoLepton::jetPtRatio() const
 {
-  return 1. / jetPtRatio_ - 1.;
+  return  1 / (1 + jetRelIso_);
 }
 
 Double_t
@@ -236,22 +227,15 @@ RecoLepton::jetPtRel() const
 }
 
 Double_t
-RecoLepton::jetBtagCSV(bool doAssoc) const
+RecoLepton::jetBtagCSV(Btag btag) const
 {
-  return jetBtagCSV(Btag::kDeepJet, doAssoc);
-}
-
-Double_t
-RecoLepton::jetBtagCSV(Btag btag,
-                       bool doAssoc) const
-{
-  if(! hasJetBtagCSV(btag, doAssoc))
+  if(! hasJetBtagCSV(btag))
   {
     throw cmsException(this, __func__, __LINE__)
       << "b-tagging discriminator not available: " << as_integer(btag)
     ;
   }
-  return doAssoc ? assocJetBtagCSVs_.at(btag) : jetBtagCSVs_.at(btag);
+  return assocJetBtagCSVs_.at(btag);
 }
 
 Int_t
@@ -315,10 +299,9 @@ RecoLepton::genJet() const
 }
 
 bool
-RecoLepton::hasJetBtagCSV(Btag btag,
-                          bool doAssoc) const
+RecoLepton::hasJetBtagCSV(Btag btag) const
 {
-  return doAssoc ? assocJetBtagCSVs_.count(btag) : jetBtagCSVs_.count(btag);
+  return assocJetBtagCSVs_.count(btag);
 }
 
 bool
@@ -383,7 +366,7 @@ RecoLepton::set_ptEtaPhiMass(Double_t pt,
 void
 RecoLepton::set_assocJet_p4()
 {
-  assocJet_pt_ = get_assocJet_pt(pt_, jetPtRatio_);
+  assocJet_pt_ = get_assocJet_pt(pt_, jetRelIso_);
   assocJet_p4_ = { assocJet_pt_, eta_, phi_, mass_ };
 }
 
@@ -398,12 +381,12 @@ operator<<(std::ostream & stream,
             " dz = "                  << lepton.dz()                            << ",\n"
             " sip3d = "               << lepton.sip3d()                         << ","
             " relIso = "              << lepton.relIso()                        << ","
-            " pfRelIso04All = "       << lepton.pfRelIso04All()                 << ",\n"
+            " pfRelIso03All = "       << lepton.pfRelIso03All()                 << ",\n"
             " genPartFlav = "         << static_cast<int>(lepton.genPartFlav()) << ", "
             " tightCharge = "         << lepton.tightCharge()                   << ","
-            " jetPtRatio = "          << lepton.jetPtRatio()                    << ","
+            " jetRelIso = "          << lepton.jetRelIso()                    << ","
             " jetPtRel = "            << lepton.jetPtRel()                      << ",\n"
-            " jetBtagCSV(default) = " << lepton.jetBtagCSV()
+    " jetBtagCSV() = " << lepton.jetBtagCSV()
   ;
   std::cout << ", jetBtagCSV(DeepJet) = ";
   if(lepton.hasJetBtagCSV(Btag::kDeepJet)) stream << lepton.jetBtagCSV(Btag::kDeepJet); else stream << "N/A";

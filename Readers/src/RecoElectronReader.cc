@@ -22,7 +22,6 @@ RecoElectronReader::RecoElectronReader(const edm::ParameterSet & cfg)
   , sigmaEtaEta_(nullptr)
   , HoE_(nullptr)
   , deltaEta_(nullptr)
-  , deltaPhi_(nullptr)
   , OoEminusOoP_(nullptr)
   , lostHits_(nullptr)
   , conversionVeto_(nullptr)
@@ -50,7 +49,6 @@ RecoElectronReader::~RecoElectronReader()
     delete[] gInstance->sigmaEtaEta_;
     delete[] gInstance->HoE_;
     delete[] gInstance->deltaEta_;
-    delete[] gInstance->deltaPhi_;
     delete[] gInstance->OoEminusOoP_;
     delete[] gInstance->lostHits_;
     delete[] gInstance->conversionVeto_;
@@ -95,7 +93,6 @@ RecoElectronReader::setBranchNames()
     branchName_sigmaEtaEta_ = Form("%s_%s", branchName_obj_.data(), "sieie");
     branchName_HoE_ = Form("%s_%s", branchName_obj_.data(), "hoe");
     branchName_deltaEta_ = Form("%s_%s", branchName_obj_.data(), "deltaEtaSC");
-    branchName_deltaPhi_ = Form("%s_%s", branchName_obj_.data(), "deltaPhiSC");
     branchName_OoEminusOoP_ = Form("%s_%s", branchName_obj_.data(), "eInvMinusPInv");
     branchName_lostHits_ = Form("%s_%s", branchName_obj_.data(), "lostHits");
     branchName_conversionVeto_ = Form("%s_%s", branchName_obj_.data(), "convVeto");
@@ -148,7 +145,6 @@ RecoElectronReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(sigmaEtaEta_, branchName_sigmaEtaEta_);
     bai.setBranchAddress(HoE_, branchName_HoE_);
     bai.setBranchAddress(deltaEta_, branchName_deltaEta_);
-    bai.setBranchAddress(deltaPhi_, branchName_deltaPhi_);
     bai.setBranchAddress(OoEminusOoP_, branchName_OoEminusOoP_);
     bai.setBranchAddress(lostHits_, branchName_lostHits_);
     bai.setBranchAddress(conversionVeto_, branchName_conversionVeto_);
@@ -198,16 +194,12 @@ RecoElectronReader::read() const
             gLeptonReader->dxy_[idxLepton],
             gLeptonReader->dz_[idxLepton],
             gLeptonReader->relIso_all_[idxLepton],
-            gLeptonReader->pfRelIso04_all_[idxLepton],
+            gLeptonReader->pfRelIso03_all_[idxLepton],
             gLeptonReader->relIso_chg_[idxLepton],
-            gLeptonReader->relIso_neu_[idxLepton],
             gLeptonReader->sip3d_[idxLepton],
             gLeptonReader->mvaRawTTH_[idxLepton],
-            gLeptonReader->jetPtRatio_[idxLepton],
-            gLeptonReader->jetPtRel_[idxLepton],
-            gLeptonReader->jetNDauChargedMVASel_[idxLepton],
+            gLeptonReader->jetRelIso_[idxLepton],
             gLeptonReader->tightCharge_[idxLepton],
-            gLeptonReader->filterBits_[idxLepton],
             gLeptonReader->jetIdx_[idxLepton],
             gLeptonReader->genPartFlav_[idxLepton],
             gLeptonReader->genMatchIdx_[idxLepton],
@@ -216,7 +208,6 @@ RecoElectronReader::read() const
           gElectronReader->sigmaEtaEta_[idxLepton],
           gElectronReader->HoE_[idxLepton],
           gElectronReader->deltaEta_[idxLepton],
-          gElectronReader->deltaPhi_[idxLepton],
           gElectronReader->OoEminusOoP_[idxLepton],
           gElectronReader->lostHits_[idxLepton],
           gElectronReader->conversionVeto_[idxLepton],
@@ -224,11 +215,6 @@ RecoElectronReader::read() const
         });
 
         RecoElectron & electron = electrons.back();
-        for(const auto & kv: gLeptonReader->jetBtagCSVs_)
-        {
-          const double val = kv.second[idxLepton];
-          electron.jetBtagCSVs_[kv.first] = std::isnan(val) ? -2. : val;
-        }
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

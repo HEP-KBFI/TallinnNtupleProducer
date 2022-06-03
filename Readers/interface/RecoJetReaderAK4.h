@@ -84,12 +84,9 @@ class RecoJetReaderAK4 : public ReaderBase
   std::string branchName_QGDiscr_;
   std::string branchName_bRegCorr_;
   std::string branchName_bRegRes_;
-  std::string branchName_pullEta_;
-  std::string branchName_pullPhi_;
-  std::string branchName_pullMag_;
+  std::string branchName_BtagScore_;
   std::string branchName_jetId_;
   std::string branchName_puId_;
-  std::string branchName_jetIdx_;
   std::string branchName_genMatchIdx_;
 
   std::map<int, std::string> branchNames_pt_systematics_;
@@ -109,17 +106,13 @@ class RecoJetReaderAK4 : public ReaderBase
   Float_t * jet_QGDiscr_;
   Float_t * jet_bRegCorr_;
   Float_t * jet_bRegRes_;
-  Float_t * jet_pullEta_;
-  Float_t * jet_pullPhi_;
-  Float_t * jet_pullMag_;
+  Float_t * jet_BtagScore_;
   Int_t * jet_jetId_;
   Int_t * jet_puId_;
-  Int_t * jet_jetIdx_;
   Int_t * jet_genMatchIdx_;
 
   std::map<int, Float_t *> jet_pt_systematics_;
   std::map<int, Float_t *> jet_mass_systematics_;
-  std::map<Btag, Float_t *> jet_BtagCSV_systematics_;
   std::map<Btag, std::map<int, Float_t *>> jet_BtagWeights_systematics_;
 
   // CV: make sure that only one RecoJetReader instance exists for a given branchName,

@@ -9,10 +9,10 @@ RecoJetAK8::RecoJetAK8(const GenJet & jet,
                          Double_t tau3,
                          Double_t tau4,
                          Int_t jetId,
-                         Int_t idx,
+                         UInt_t idx,
                          Int_t central_or_shift,
                          Int_t ignored_corrections)
-  : RecoJetBase(jet, idx)
+: RecoJetBase(jet, idx)
   , msoftdrop_(msoftdrop)
   , subJet1_(subJet1)
   , subJet2_(subJet2)

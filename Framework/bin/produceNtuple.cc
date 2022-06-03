@@ -51,6 +51,7 @@
 #include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"                            // GenPhotonReader
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                    // L1PreFiringWeightReader
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                              // LHEInfoReader
+#include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
 #include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                             // PSWeightReader
 #include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
@@ -233,12 +234,15 @@ int main(int argc, char* argv[])
 
   LHEInfoReader* lheInfoReader = nullptr;
   PSWeightReader* psWeightReader = nullptr;
+  LHEParticleReader* lheParticleReader = nullptr;
   if ( isMC )
   {
     lheInfoReader = new LHEInfoReader(cfg_produceNtuple);
     inputTree->registerReader(lheInfoReader);
     psWeightReader = new PSWeightReader(cfg_produceNtuple);
     inputTree->registerReader(psWeightReader);
+    lheParticleReader = new LHEParticleReader(cfg_produceNtuple);
+    inputTree->registerReader(lheParticleReader);
   }
 
   BtagSFRatioInterface* btagSFRatioInterface = nullptr;
@@ -348,6 +352,11 @@ int main(int argc, char* argv[])
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
         evtWeightRecorder.record_psWeight(psWeightReader);
+        if ( analysisConfig.isHH_rwgt_allowed() )
+        {
+          LHEParticleCollection lheParticles = lheParticleReader->read();
+          evtWeightRecorder.record_gen_mHH_cosThetaStar(lheParticles);
+        }
         evtWeightRecorder.record_puWeight(&event.eventInfo());
         evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
@@ -501,6 +510,7 @@ int main(int argc, char* argv[])
   delete l1PreFiringWeightReader;
   delete lheInfoReader;
   delete psWeightReader;
+  delete lheParticleReader;
 
   delete dataToMCcorrectionInterface;
   delete jetToLeptonFakeRateInterface;

@@ -28,13 +28,10 @@ class RecoJetAK4 : public RecoJetBase
              Double_t QGDiscr,
              Double_t bRegCorr,
              Double_t bRegRes,
-             Double_t pullEta,
-             Double_t pullPhi,
-             Double_t pullMag,
              Int_t jetId,
              Int_t puId,
+             UInt_t idx,
              Int_t genMatchIdx,
-             Int_t idx,
              Btag btag,
              Int_t central_or_shift);
 
@@ -60,9 +57,6 @@ class RecoJetAK4 : public RecoJetBase
   Double_t bRegCorr() const;
   Particle::LorentzVector p4_bRegCorr() const;
   Double_t bRegRes() const;
-  Double_t pullEta() const;
-  Double_t pullPhi() const;
-  Double_t pullMag() const;
   Int_t jetId() const;
   Int_t puId() const;
   Int_t genMatchIdx() const;
@@ -82,9 +76,6 @@ class RecoJetAK4 : public RecoJetBase
   Double_t QGDiscr_;    ///< quark/gluon discriminator
   Double_t bRegCorr_;   ///< pT correction for b-jet regression
   Double_t bRegRes_;    ///< resolution on pT corrected with b-jet regression
-  Double_t pullEta_;    ///< eta component of pull vector, computed according to arXiv:1001.5027
-  Double_t pullPhi_;    ///< phi component of pull vector, computed according to arXiv:1001.5027
-  Double_t pullMag_;    ///< magnitude of pull vector, computed according to arXiv:1001.5027
   Int_t jetId_;         ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   Int_t puId_;          ///< pileup jet ID, as explained in https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
   Int_t genMatchIdx_;   ///< index to gen jet

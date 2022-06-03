@@ -134,6 +134,11 @@ class Event
   GenPhotonCollection genPhotons_;
   GenJetCollection genJets_;
 
+  GenParticleCollection muonGenMatch_;
+  GenParticleCollection electronGenMatch_;
+  GenParticleCollection hadTauGenMatch_;
+  GenParticleCollection jetGenMatch_;
+
   RecoJetCollectionAK8 jetsAK8_Hbb_;
   RecoJetPtrCollectionAK8 jet_ptrsAK8_Hbb_;
   RecoJetPtrCollectionAK8 selJetsUncleanedAK8_Hbb_;

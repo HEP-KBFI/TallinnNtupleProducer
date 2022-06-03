@@ -34,6 +34,8 @@ class LHEParticle : public Particle
   Int_t status_; ///< particle status (1 = stable)
 };
 
+typedef std::vector<LHEParticle> LHEParticleCollection;
+
 std::ostream &
 operator<<(std::ostream & stream,
            const LHEParticle & particle);

@@ -28,8 +28,8 @@ GenHHKinematicsWriter::writeImp(const Event & event, const EvtWeightRecorder & e
   const AnalysisConfig& analysisConfig = eventInfo.analysisConfig();
   if ( analysisConfig.isMC_HH() )
   {
-    gen_mHH_ = eventInfo.gen_mHH();
-    gen_cosThetaStar_ = eventInfo.gen_cosThetaStar();
+    gen_mHH_ = evtWeightRecorder.gen_mHH();
+    gen_cosThetaStar_ = evtWeightRecorder.gen_cosThetaStar();
   }
   else
   {
