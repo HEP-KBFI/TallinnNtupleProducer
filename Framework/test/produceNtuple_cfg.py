@@ -204,6 +204,12 @@ process.produceNtuple = cms.PSet(
 
     isDEBUG = cms.bool(False)
 )
+#official nanoaod file used in pps: /hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/F1B4499C-4A59-D142-8C2E-8364C1C6F90C.root
+#with command
+
+#nano_postproc.py -s i -I tthAnalysis.NanoAODTools.postprocessing.tthModules lepJetVarBTagAll_2017,genHiggsDecayMode,genAll,genMatchCollection,puWeight2017'(/home/snandan/hh_Analysis/CMSSW_11_1_2/src/tthAnalysis/HiggsToTauTau/data/pileup_2017.root;signal_ggf_nonresonant_node_sm_hh_4v)',jetmetUncertainties2017Merged,fatjetUncertainties2017Merged . /hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/F1B4499C-4A59-D142-8C2E-8364C1C6F90C.root
+
+#nano_postproc.py -s i -I tthAnalysis.NanoAODTools.postprocessing.tthModules countHistogramAll'(;;1.0)',btagSF_deepFlav_2017 . F1B4499C-4A59-D142-8C2E-8364C1C6F90Ci.root
 
 process.fwliteInput.fileNames = cms.vstring(['/hdfs/local/snandan/hhAnalysis/2017/official_nanoaod_file/F1B4499C-4A59-D142-8C2E-8364C1C6F90Cii.root'])
 process.fwliteOutput.fileName = cms.string('produceNtuple.root')
