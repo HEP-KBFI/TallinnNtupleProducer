@@ -40,6 +40,7 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , jet_pullEta_(nullptr)
   , jet_pullPhi_(nullptr)
   , jet_pullMag_(nullptr)
+  , jet_BtagScore_(nullptr)
   , jet_jetId_(nullptr)
   , jet_puId_(nullptr)
   , jet_genMatchIdx_(nullptr)
@@ -86,6 +87,7 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_pullEta_;
     delete[] gInstance->jet_pullPhi_;
     delete[] gInstance->jet_pullMag_;
+    delete[] gInstance->jet_BtagScore_;
     delete[] gInstance->jet_jetId_;
     delete[] gInstance->jet_puId_;
     delete[] gInstance->jet_genMatchIdx_;
@@ -94,10 +96,6 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
       delete[] kv.second;
     }
     for(auto & kv: gInstance->jet_mass_systematics_)
-    {
-      delete[] kv.second;
-    }
-    for(auto & kv: gInstance->jet_BtagCSV_systematics_)
     {
       delete[] kv.second;
     }
@@ -195,6 +193,7 @@ RecoJetReaderAK4::setBranchNames()
     branchName_pullEta_ = Form("%s_%s", branchName_obj_.data(), "pullEta");
     branchName_pullPhi_ = Form("%s_%s", branchName_obj_.data(), "pullPhi");
     branchName_pullMag_ = Form("%s_%s", branchName_obj_.data(), "pullMag");
+    branchName_BtagScore_ = Form("%s_%s", branchName_obj_.data(), "btagDeepFlavB");
     branchName_jetId_ = Form("%s_%s", branchName_obj_.data(), "jetId");
     branchName_puId_ = Form("%s_%s", branchName_obj_.data(), "puId");
     branchName_genMatchIdx_ = Form("%s_%s", branchName_obj_.data(), "genMatchIdx");
@@ -243,10 +242,6 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_eta_, branchName_eta_);
     bai.setBranchAddress(jet_phi_, branchName_phi_);
     bai.setBranchAddress(jet_charge_, branchName_jetCharge_);
-    for(const auto & kv: branchNames_btag_)
-    {
-      bai.setBranchAddress(jet_BtagCSV_systematics_[kv.first], kv.second, -3.);
-    }
 
     for(const auto & kv: branchNames_BtagWeight_systematics_)
     {
@@ -264,6 +259,7 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_QGDiscr_, branchName_QGDiscr_, 1.);
     bai.setBranchAddress(jet_bRegCorr_, branchName_bRegCorr_, 1.);
     bai.setBranchAddress(jet_bRegRes_, branchName_bRegRes_, 0.);
+    bai.setBranchAddress(jet_BtagScore_, branchName_BtagScore_);
     bai.setBranchAddress(jet_jetId_, branchName_jetId_);
     bai.setBranchAddress(jet_puId_, branchName_puId_);
     bai.setBranchAddress(jet_genMatchIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genMatchIdx_ : "", -1);
@@ -308,7 +304,7 @@ RecoJetReaderAK4::read() const
       // b-tagging discriminator. In the past we've seen similar issues with DeepCSV score as well. Will set the value
       // of b-tagging discriminant to -2. in case the score is nan (as we already did with lepton-to-jet variables).
       // Not sure how nan values affect the b-tagging scale factors, though.
-      double btagCSV = gInstance->jet_BtagCSV_systematics_.at(btag_)[idxJet];
+      double btagCSV = gInstance->jet_BtagScore_[idxJet];
       if(std::isnan(btagCSV))
       {
         btagCSV = -2.;
@@ -353,16 +349,6 @@ RecoJetReaderAK4::read() const
             }
           } // idxShift
         } // jet_BtagWeights_systematics_
-
-        for(const auto & kv: gInstance->jet_BtagCSV_systematics_)
-        {
-          double btagCSV_tmp = gInstance->jet_BtagCSV_systematics_.at(kv.first)[idxJet];
-          if(std::isnan(btagCSV_tmp))
-          {
-            btagCSV_tmp = -2;
-          }
-          jet.BtagCSV_systematics_[kv.first] = btagCSV_tmp;
-        } // jet_BtagCSV_systematics_
       } // isMC_
     } // idxJet
 
