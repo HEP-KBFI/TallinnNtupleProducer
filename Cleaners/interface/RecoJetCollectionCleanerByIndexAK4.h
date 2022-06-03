@@ -5,7 +5,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"           // get_human_line()
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"                 // RecoJetAK4
 
-class RecoJetCollectionCleanerByIndexAK4 : public ParticleCollectionCleaner<RecoJetAK4>
+class RecoJetCollectionCleanerByIndexAK4
 {
  public:
   RecoJetCollectionCleanerByIndexAK4(bool debug = false)
