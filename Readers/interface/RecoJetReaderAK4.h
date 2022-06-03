@@ -85,9 +85,6 @@ class RecoJetReaderAK4 : public ReaderBase
   std::string branchName_bRegCorr_;
   std::string branchName_bRegRes_;
   std::string branchName_BtagScore_;
-  std::string branchName_pullEta_;
-  std::string branchName_pullPhi_;
-  std::string branchName_pullMag_;
   std::string branchName_jetId_;
   std::string branchName_puId_;
   std::string branchName_genMatchIdx_;
@@ -109,9 +106,6 @@ class RecoJetReaderAK4 : public ReaderBase
   Float_t * jet_QGDiscr_;
   Float_t * jet_bRegCorr_;
   Float_t * jet_bRegRes_;
-  Float_t * jet_pullEta_;
-  Float_t * jet_pullPhi_;
-  Float_t * jet_pullMag_;
   Float_t * jet_BtagScore_;
   Int_t * jet_jetId_;
   Int_t * jet_puId_;

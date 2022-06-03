@@ -37,9 +37,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , jet_QGDiscr_(nullptr)
   , jet_bRegCorr_(nullptr)
   , jet_bRegRes_(nullptr)
-  , jet_pullEta_(nullptr)
-  , jet_pullPhi_(nullptr)
-  , jet_pullMag_(nullptr)
   , jet_BtagScore_(nullptr)
   , jet_jetId_(nullptr)
   , jet_puId_(nullptr)
@@ -84,9 +81,6 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_QGDiscr_;
     delete[] gInstance->jet_bRegCorr_;
     delete[] gInstance->jet_bRegRes_;
-    delete[] gInstance->jet_pullEta_;
-    delete[] gInstance->jet_pullPhi_;
-    delete[] gInstance->jet_pullMag_;
     delete[] gInstance->jet_BtagScore_;
     delete[] gInstance->jet_jetId_;
     delete[] gInstance->jet_puId_;
@@ -190,9 +184,6 @@ RecoJetReaderAK4::setBranchNames()
         );
       }
     }
-    branchName_pullEta_ = Form("%s_%s", branchName_obj_.data(), "pullEta");
-    branchName_pullPhi_ = Form("%s_%s", branchName_obj_.data(), "pullPhi");
-    branchName_pullMag_ = Form("%s_%s", branchName_obj_.data(), "pullMag");
     branchName_BtagScore_ = Form("%s_%s", branchName_obj_.data(), "btagDeepFlavB");
     branchName_jetId_ = Form("%s_%s", branchName_obj_.data(), "jetId");
     branchName_puId_ = Form("%s_%s", branchName_obj_.data(), "puId");

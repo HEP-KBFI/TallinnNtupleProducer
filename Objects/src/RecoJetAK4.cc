@@ -117,24 +117,6 @@ RecoJetAK4::bRegRes() const
   return bRegRes_;
 }
 
-Double_t
-RecoJetAK4::pullEta() const
-{
-  return pullEta_;
-}
-
-Double_t
-RecoJetAK4::pullPhi() const
-{
-  return pullPhi_;
-}
-
-Double_t
-RecoJetAK4::pullMag() const
-{
-  return pullMag_;
-}
-
 Int_t
 RecoJetAK4::jetId() const
 {
