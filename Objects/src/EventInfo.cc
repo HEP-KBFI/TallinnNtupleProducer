@@ -52,8 +52,6 @@ EventInfo::EventInfo()
   , genWeight_(1.)
   , pileupWeight_(1.)
   , genDiHiggsDecayMode_(-1)
-  , gen_mHH_(0.)
-  , gen_cosThetaStar_(-2.)
   , topPtRwgtSF_(-1.)
   , nLHEReweightingWeight_(0)
   , LHEReweightingWeight_(nullptr)
@@ -104,8 +102,6 @@ EventInfo::copy(const EventInfo & eventInfo)
   genHiggsDecayMode_ = eventInfo.genHiggsDecayMode_;
   genWeight_ = eventInfo.genWeight_;
   genDiHiggsDecayMode_ = eventInfo.genDiHiggsDecayMode_;
-  gen_mHH_ = eventInfo.gen_mHH_;
-  gen_cosThetaStar_ = eventInfo.gen_cosThetaStar_;
   topPtRwgtSF_ = eventInfo.topPtRwgtSF_;
   nLHEReweightingWeight_ = eventInfo.nLHEReweightingWeight_;
   if(eventInfo.LHEReweightingWeight_)
@@ -186,18 +182,6 @@ Int_t
 EventInfo::genDiHiggsDecayMode() const
 {
   return genDiHiggsDecayMode_;
-}
-
-Float_t
-EventInfo::gen_mHH() const
-{
-  return gen_mHH_;
-}
-
-Float_t
-EventInfo::gen_cosThetaStar() const
-{
-  return gen_cosThetaStar_;
 }
 
 Float_t

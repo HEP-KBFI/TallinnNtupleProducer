@@ -45,11 +45,6 @@ class EventInfo
   genDiHiggsDecayMode() const;
 
   Float_t
-  gen_mHH() const;
-  Float_t
-  gen_cosThetaStar() const;
-
-  Float_t
   topPtRwgtSF() const;
 
   const AnalysisConfig &
@@ -149,8 +144,6 @@ class EventInfo
   Float_t   pileupWeightUp_;      ///< pile-up weight up-shifted (only if MC)
   Float_t   pileupWeightDown_;    ///< pile-up weight down-shifted (only if MC)
   Int_t     genDiHiggsDecayMode_; ///< Decay mode of both Higgs bosons (only if HH signal MC)
-  Float_t   gen_mHH_;             ///< LHE parton-level di-Higgs mass
-  Float_t   gen_cosThetaStar_;    ///< LHE parton-level cos(theta*) variable
   Float_t   topPtRwgtSF_;         ///< SF correct ttbar samples in top quark pT distribution (only if MC)
 
   UInt_t nLHEReweightingWeight_;

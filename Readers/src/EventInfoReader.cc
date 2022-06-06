@@ -22,8 +22,6 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   , branchName_genWeight_("genWeight")
   , branchName_LHEReweightingWeight_("LHEReweightingWeight")
   , branchName_nLHEReweightingWeight_(Form("n%s", branchName_LHEReweightingWeight_.data()))
-  , branchName_gen_mHH_("mHH_lhe")
-  , branchName_gen_cosThetaStar_("cosThetaStar_lhe")
   , branchName_htxs_pt_("HTXS_Higgs_pt")
   , branchName_htxs_y_("HTXS_Higgs_y")
 {
@@ -93,14 +91,6 @@ EventInfoReader::setBranchAddresses(TTree * inputTree)
 
     const std::vector<std::string> lhe_branches = bai_LHEReweight.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), lhe_branches.begin(), lhe_branches.end());
-  }
-
-  // Siddhesh: Read gen_mHH for HH LO and NLO samples to make LOvsNLO HHreweighting comparison plots without much code editing
-  if(info_->analysisConfig().isMC_HH() && (info_->analysisConfig().isHH_rwgt_allowed() || info_->analysisConfig().isMC_HH_nonresonant()))
-  {
-    //SN: May be we can read LHE branches here and calculate following variables here instead of in pps
-    //    bai.setBranchAddress(info_->gen_mHH_, branchName_gen_mHH_);
-    //bai.setBranchAddress(info_->gen_cosThetaStar_, branchName_gen_cosThetaStar_);
   }
 
   const std::vector<std::string> eventInfoBranches = bai.getBoundBranchNames_read();

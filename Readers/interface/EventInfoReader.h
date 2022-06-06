@@ -56,8 +56,6 @@ class EventInfoReader : public ReaderBase
   const std::string branchName_genWeight_;
   const std::string branchName_LHEReweightingWeight_;
   const std::string branchName_nLHEReweightingWeight_;
-  const std::string branchName_gen_mHH_;
-  const std::string branchName_gen_cosThetaStar_;
   const std::string branchName_htxs_pt_;
   const std::string branchName_htxs_y_;
 };
