@@ -65,10 +65,12 @@ HHWeightInterfaceCouplings::getBinContent(const TH2 * const hist,
                                           double mHH,
                                           double cosThetaStar)
 {
-  assert ( hist->GetXaxis()->FindBin(mHH) > 0 && hist->GetYaxis()->FindBin(std::fabs(cosThetaStar)) > 0 );
+  int mHH_Bin = hist->GetXaxis()->FindBin(mHH);
+  int cosThetaStar_Bin = hist->GetYaxis()->FindBin(std::fabs(cosThetaStar));
+  assert ( mHH_Bin > 0 && cosThetaStar_Bin > 0 );
   const double value = hist->GetBinContent(
-    hist->GetXaxis()->FindBin(mHH),
-    hist->GetYaxis()->FindBin(std::fabs(cosThetaStar))
+    mHH_Bin,
+    cosThetaStar_Bin
   );
   return value;
 }
