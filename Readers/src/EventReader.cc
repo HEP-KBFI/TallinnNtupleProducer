@@ -179,7 +179,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   }
 
   jetReaderAK4_ = new RecoJetReaderAK4(make_cfg(cfg, "branchName_jets_ak4"));
-  bool jetCleaningByIndex_ = cfg.getParameter<bool>("jetCleaningByIndex");
+  jetCleaningByIndex_ = cfg.getParameter<bool>("jetCleaningByIndex");
   RecoJetCollectionCleanerByIndexAK4 jetCleanerAK4ByIndex_dR04_(isDEBUG_);
   RecoJetCollectionCleanerAK4 jetCleanerAK4_dR04_(0.4, isDEBUG_);
 
