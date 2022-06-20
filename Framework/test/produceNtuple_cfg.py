@@ -211,7 +211,7 @@ process.produceNtuple = cms.PSet(
 
 #nano_postproc.py -s i -I tthAnalysis.NanoAODTools.postprocessing.tthModules countHistogramAll'(;;1.0)',btagSF_deepFlav_2017 . F1B4499C-4A59-D142-8C2E-8364C1C6F90Ci.root
 
-process.fwliteInput.fileNames = cms.vstring(['/hdfs/local/snandan/hhAnalysis/2017/official_nanoaod_file/F1B4499C-4A59-D142-8C2E-8364C1C6F90Cii.root'])
+process.fwliteInput.fileNames = cms.vstring(['/hdfs/local/snandan/hhAnalysis/2017/official_nanoaod_file/hadd.root'])
 process.fwliteOutput.fileName = cms.string('produceNtuple.root')
 process.produceNtuple.era                                            = cms.string('2017')
 process.produceNtuple.redoGenMatching                                = cms.bool(True)
