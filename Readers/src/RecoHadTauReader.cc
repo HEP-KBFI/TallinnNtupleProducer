@@ -9,6 +9,7 @@
 #include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                 // GenJetReader
 #include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                    // TauESTool
 
+#include "TMath.h"
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
 
@@ -258,8 +259,8 @@ RecoHadTauReader::read() const
         gInstance->hadTau_idDecayMode_[idxHadTau],
         gInstance->hadTau_idMVAs_.at(tauID_)[idxHadTau],
         gInstance->hadTau_rawMVAs_.at(tauID_)[idxHadTau],
-        gInstance->hadTau_idAgainstElec_[idxHadTau],
-        gInstance->hadTau_idAgainstMu_[idxHadTau],
+        (int)TMath::Log2(gInstance->hadTau_idAgainstElec_[idxHadTau]+1),
+        (int)TMath::Log2(gInstance->hadTau_idAgainstMu_[idxHadTau]+1),
         gInstance->hadTau_filterBits_[idxHadTau],
         gInstance->hadTau_jetIdx_[idxHadTau],
         gInstance->hadTau_genPartFlav_[idxHadTau],
@@ -270,7 +271,8 @@ RecoHadTauReader::read() const
 
       for(const auto & kv: gInstance->hadTau_idMVAs_)
       {
-        hadTau.tauID_ids_[kv.first] = gInstance->hadTau_idMVAs_.at(kv.first)[idxHadTau];
+        const int idMVA = (int)TMath::Log2(gInstance->hadTau_idMVAs_.at(kv.first)[idxHadTau]+1);
+        hadTau.tauID_ids_[kv.first] = idMVA;
       }
       for(const auto & kv: gInstance->hadTau_rawMVAs_)
       {
