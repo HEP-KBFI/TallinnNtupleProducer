@@ -11,6 +11,7 @@
 // forward declarations
 class TTree;
 class RecoLeptonReader;
+class TriggerInfo;
 
 enum class EGammaID;
 enum class EGammaWP;
@@ -33,7 +34,7 @@ class RecoElectronReader : public ReaderBase
    * @return Collection of RecoElectron objects
    */
   std::vector<RecoElectron>
-  read() const;
+    read(const TriggerInfo& triggerInfo) const;
 
   /**
    * @brief Set threshold that an electron need to pass in order to qualify as tight lepton

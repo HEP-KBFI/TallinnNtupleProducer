@@ -4,7 +4,8 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"             // RecoLeptonReader
-
+#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"
+#include "TallinnNtupleProducer/CommonTools/interface/deltaR.h"
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
 
@@ -93,7 +94,7 @@ RecoMuonReader::setBranchAddresses(TTree * tree)
 }
 
 std::vector<RecoMuon>
-RecoMuonReader::read() const
+RecoMuonReader::read(const TriggerInfo& triggerInfo) const
 {
   const RecoLeptonReader * const gLeptonReader = leptonReader_->instances_[branchName_obj_];
   assert(gLeptonReader);
@@ -101,7 +102,6 @@ RecoMuonReader::read() const
   assert(gMuonReader);
   std::vector<RecoMuon> muons;
   const UInt_t nLeptons = gLeptonReader->nLeptons_;
-  
   if(nLeptons > leptonReader_->max_nLeptons_)
   {
     throw cmsException(this)
@@ -147,6 +147,15 @@ RecoMuonReader::read() const
           gMuonReader->ptErr_[idxLepton]
             }));
         RecoMuon & muon = muons.back();
+
+        muon.filterBits_ = 0;
+        for (unsigned int itrig=0; itrig<triggerInfo.muon_trigobj_.size(); itrig++)
+        {
+          if ( deltaR(gLeptonReader->eta_[idxLepton], triggerInfo.triggerObj_eta_[itrig], gLeptonReader->phi_[idxLepton], triggerInfo.triggerObj_phi_[itrig]) < 0.05 )
+          {
+            muon.filterBits_ |= triggerInfo.triggerObj_filterBits_[itrig];
+          }
+        }
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

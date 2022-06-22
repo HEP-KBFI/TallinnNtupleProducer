@@ -12,6 +12,7 @@ class GenLeptonReader;
 class GenHadTauReader;
 class GenJetReader;
 class TauESTool;
+class TriggerInfo;
 
 enum class Era;
 
@@ -38,7 +39,7 @@ class RecoHadTauReader : public ReaderBase
    * @return Collection of RecoHadTau objects
    */
   std::vector<RecoHadTau>
-  read() const;
+    read(const TriggerInfo& triggerInfo) const;
 
   /**
     * @brief Return list of systematic uncertainties supported by RecoHadTauReader class

@@ -40,7 +40,6 @@ RecoLeptonReader::RecoLeptonReader(const edm::ParameterSet & cfg)
   , jetNDauChargedMVASel_(nullptr)
   , tightCharge_(nullptr)
   , charge_(nullptr)
-  , filterBits_(nullptr)
   , jetIdx_(nullptr)
   , genPartFlav_(nullptr)
   , genMatchIdx_(nullptr)
@@ -98,7 +97,6 @@ RecoLeptonReader::~RecoLeptonReader()
     delete[] gInstance->jetNDauChargedMVASel_;
     delete[] gInstance->tightCharge_;
     delete[] gInstance->charge_;
-    delete[] gInstance->filterBits_;
     delete[] gInstance->jetIdx_;
     delete[] gInstance->genPartFlav_;
     delete[] gInstance->genMatchIdx_;
@@ -149,7 +147,6 @@ RecoLeptonReader::setBranchNames()
     }
     branchName_tightCharge_ = Form("%s_%s", branchName_obj_.data(), "tightCharge");
     branchName_charge_ = Form("%s_%s", branchName_obj_.data(), "charge");
-    branchName_filterBits_ = Form("%s_%s", branchName_obj_.data(), "filterBits");
     branchName_jetIdx_ = Form("%s_%s", branchName_obj_.data(), "jetIdx");
     branchName_genPartFlav_ = Form("%s_%s", branchName_obj_.data(), "genPartFlav");
     branchName_genMatchIdx_ = Form("%s_%s", branchName_obj_.data(), "genMatchIdx");

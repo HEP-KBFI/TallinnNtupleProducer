@@ -19,6 +19,8 @@ class TriggerInfoReader : public ReaderBase
    */
   std::vector<std::string>
   setBranchAddresses(TTree * tree) override;
+  void
+  setBranchNames();
 
   /**
    * @brief Read branches from tree and use information to fill TriggerInfo object
@@ -39,6 +41,21 @@ class TriggerInfoReader : public ReaderBase
   get_available_branches(TTree * tree) const;
 
   TriggerInfo triggerInfo_;
+  std::string branchName_num_;
+  std::string branchName_obj_;
+  std::string branchName_triggerObj_id_;
+  std::string branchName_triggerObj_filterBits_;
+  std::string branchName_triggerObj_eta_;
+  std::string branchName_triggerObj_phi_;
+
+  UInt_t ntriggerObj_;
+  Int_t * triggerObj_id_;
+  Int_t * triggerObj_filterBits_;
+  Float_t * triggerObj_eta_;
+  Float_t * triggerObj_phi_;
+
+  static std::map<std::string, int> numInstances_;
+  static std::map<std::string, TriggerInfoReader *> instances_;
 };
 
 #endif // TallinnNtupleProducer_Readers_TriggerInfoReader_h

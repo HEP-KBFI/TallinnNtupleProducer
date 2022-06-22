@@ -5,9 +5,10 @@
 #include "TallinnNtupleProducer/CommonTools/interface/electronDefinitions.h"      // EGammaID, EGammaWP
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"             // RecoLeptonReader
-
+#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
+#include "TallinnNtupleProducer/CommonTools/interface/deltaR.h"
 
 std::map<std::string, int> RecoElectronReader::numInstances_;
 std::map<std::string, RecoElectronReader *> RecoElectronReader::instances_;
@@ -157,7 +158,7 @@ RecoElectronReader::setBranchAddresses(TTree * tree)
 }
 
 std::vector<RecoElectron>
-RecoElectronReader::read() const
+RecoElectronReader::read(const TriggerInfo& triggerInfo) const
 {
   const RecoLeptonReader * const gLeptonReader = leptonReader_->instances_[branchName_obj_];
   assert(gLeptonReader);
@@ -215,6 +216,14 @@ RecoElectronReader::read() const
         });
 
         RecoElectron & electron = electrons.back();
+        electron.filterBits_ = 0;
+        for (unsigned int itrig=0; itrig<triggerInfo.ele_trigobj_.size(); itrig++)
+        {
+          if ( deltaR(gLeptonReader->eta_[idxLepton], triggerInfo.triggerObj_eta_[itrig], gLeptonReader->phi_[idxLepton], triggerInfo.triggerObj_phi_[itrig]) < 0.05 )
+          {
+            electron.filterBits_ |= triggerInfo.triggerObj_filterBits_[itrig];
+          }
+        }
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

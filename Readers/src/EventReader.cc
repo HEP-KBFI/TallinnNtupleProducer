@@ -231,6 +231,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
 
 EventReader::~EventReader()
 {
+  delete triggerInfoReader_;
   delete muonReader_;
   delete looseMuonSelector_;
   delete fakeableMuonSelector_;
@@ -465,7 +466,7 @@ EventReader::read() const
   {
     event_.eventInfo_ = &eventInfoReader_->read();
   }
-
+  if( event_.eventInfo_->run() !=1 || event_.eventInfo_->lumi() !=38 || event_.eventInfo_->event()!=37043) return event_;
   if ( event_.isInvalid() && !isNewEvent )
   {
     return event_;
@@ -480,7 +481,7 @@ EventReader::read() const
   bool muon_needsUpdate = isMuonSystematic || isNewEvent || (muon_lastSystematic_ != "central" && !isMuonSystematic);
   if ( muon_needsUpdate )
   {
-    event_.muons_ = muonReader_->read();
+    event_.muons_ = muonReader_->read(*(event_.triggerInfo_));
     event_.muon_ptrs_ = convert_to_ptrs(event_.muons_);
     event_.looseMuonsFull_ = looseMuonSelector_->operator()(event_.muon_ptrs_, isHigherConePt<RecoMuon>);
     event_.fakeableMuonsFull_ = fakeableMuonSelector_->operator()(event_.looseMuonsFull_, isHigherConePt<RecoMuon>);
@@ -495,7 +496,7 @@ EventReader::read() const
   bool electron_needsUpdate = isElectronSystematic || isNewEvent || (electron_lastSystematic_ != "central" && !isElectronSystematic);
   if ( electron_needsUpdate )
   {
-    event_.electrons_ = electronReader_->read();
+    event_.electrons_ = electronReader_->read(*(event_.triggerInfo_));
     event_.electron_ptrs_ = convert_to_ptrs(event_.electrons_);
     event_.looseElectronsUncleaned_ = looseElectronSelector_->operator()(event_.electron_ptrs_, isHigherConePt<RecoElectron>);
     event_.fakeableElectronsUncleaned_ = fakeableElectronSelector_->operator()(event_.looseElectronsUncleaned_, isHigherConePt<RecoElectron>);
@@ -539,7 +540,7 @@ EventReader::read() const
   bool hadTau_needsUpdate = isHadTauSystematic || isNewEvent || hadTau_isInvalid_ || (hadTau_lastSystematic_ != "central" && !isHadTauSystematic);
   if ( hadTau_needsUpdate )
   {
-    event_.hadTaus_ = hadTauReader_->read();
+    event_.hadTaus_ = hadTauReader_->read(*(event_.triggerInfo_));
     event_.hadTau_ptrs_ = convert_to_ptrs(event_.hadTaus_);
     event_.fakeableHadTausUncleaned_ = fakeableHadTauSelector_->operator()(event_.hadTau_ptrs_, isHigherPt<RecoHadTau>);
     event_.tightHadTausUncleaned_ = tightHadTauSelector_->operator()(event_.fakeableHadTausUncleaned_, isHigherPt<RecoHadTau>);

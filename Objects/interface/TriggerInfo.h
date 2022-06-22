@@ -114,9 +114,18 @@ class TriggerInfo
   entries() const;
 
   friend class TriggerInfoReader;
+  friend class RecoMuonReader;
+  friend class RecoElectronReader;
+  friend class RecoHadTauReader;
 
  private:
   std::vector<trigger::Entry> entries_;
+  mutable std::vector<unsigned int> ele_trigobj_;
+  mutable std::vector<unsigned int> muon_trigobj_;
+  mutable std::vector<unsigned int> tau_trigobj_;
+  mutable std::vector<Float_t> triggerObj_eta_;
+  mutable std::vector<Float_t> triggerObj_phi_;
+  mutable std::vector<Int_t>  triggerObj_filterBits_;
 };
 
 std::ostream &

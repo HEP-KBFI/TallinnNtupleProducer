@@ -11,6 +11,7 @@
 // forward declarations
 class TTree;
 class RecoLeptonReader;
+class TriggerInfo;
 
 enum class Era;
 
@@ -31,7 +32,7 @@ class RecoMuonReader : public ReaderBase
    * @return Collection of RecoMuon objects
    */
   std::vector<RecoMuon>
-  read() const;
+    read(const TriggerInfo& triggerInfo) const;
 
   /**
    * @brief Set threshold that a muon need to pass in order to qualify as tight lepton
