@@ -268,11 +268,11 @@ RecoHadTauReader::read(const TriggerInfo& triggerInfo) const
       RecoHadTau & hadTau = hadTaus.back();
 
       hadTau.filterBits_ = 0;
-      for (unsigned int itrig=0; itrig<triggerInfo.tau_trigobj_.size(); itrig++)
+      for (auto & idx : triggerInfo.tau_trigobj_)
       {
-        if ( deltaR(gInstance->hadTau_eta_[idxHadTau], triggerInfo.triggerObj_eta_[itrig], gInstance->hadTau_phi_[idxHadTau], triggerInfo.triggerObj_phi_[itrig]) < 0.05 )
+        if ( deltaR(gInstance->hadTau_eta_[idxHadTau], triggerInfo.triggerObj_eta_[idx], gInstance->hadTau_phi_[idxHadTau], triggerInfo.triggerObj_phi_[idx]) < 0.05 )
         {
-          hadTau.filterBits_ |= triggerInfo.triggerObj_filterBits_[itrig];
+          hadTau.filterBits_ |= triggerInfo.triggerObj_filterBits_[idx];
         }
       }
 

@@ -217,11 +217,11 @@ RecoElectronReader::read(const TriggerInfo& triggerInfo) const
 
         RecoElectron & electron = electrons.back();
         electron.filterBits_ = 0;
-        for (unsigned int itrig=0; itrig<triggerInfo.ele_trigobj_.size(); itrig++)
+        for (auto & idx : triggerInfo.ele_trigobj_)
         {
-          if ( deltaR(gLeptonReader->eta_[idxLepton], triggerInfo.triggerObj_eta_[itrig], gLeptonReader->phi_[idxLepton], triggerInfo.triggerObj_phi_[itrig]) < 0.05 )
+          if ( deltaR(gLeptonReader->eta_[idxLepton], triggerInfo.triggerObj_eta_[idx], gLeptonReader->phi_[idxLepton], triggerInfo.triggerObj_phi_[idx]) < 0.05 )
           {
-            electron.filterBits_ |= triggerInfo.triggerObj_filterBits_[itrig];
+            electron.filterBits_ |= triggerInfo.triggerObj_filterBits_[idx];
           }
         }
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
