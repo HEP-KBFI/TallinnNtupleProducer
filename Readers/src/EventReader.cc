@@ -466,7 +466,6 @@ EventReader::read() const
   {
     event_.eventInfo_ = &eventInfoReader_->read();
   }
-  if( event_.eventInfo_->run() !=1 || event_.eventInfo_->lumi() !=38 || event_.eventInfo_->event()!=37043) return event_;
   if ( event_.isInvalid() && !isNewEvent )
   {
     return event_;
