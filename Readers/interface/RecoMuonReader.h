@@ -32,7 +32,7 @@ class RecoMuonReader : public ReaderBase
    * @return Collection of RecoMuon objects
    */
   std::vector<RecoMuon>
-    read(const TriggerInfo& triggerInfo) const;
+  read() const;
 
   /**
    * @brief Set threshold that a muon need to pass in order to qualify as tight lepton

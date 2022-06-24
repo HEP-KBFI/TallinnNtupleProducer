@@ -114,9 +114,7 @@ class TriggerInfo
   entries() const;
 
   friend class TriggerInfoReader;
-  friend class RecoMuonReader;
-  friend class RecoElectronReader;
-  friend class RecoHadTauReader;
+  friend class EventReader;
 
  private:
   std::vector<trigger::Entry> entries_;

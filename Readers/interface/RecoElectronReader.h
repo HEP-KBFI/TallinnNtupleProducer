@@ -34,7 +34,7 @@ class RecoElectronReader : public ReaderBase
    * @return Collection of RecoElectron objects
    */
   std::vector<RecoElectron>
-    read(const TriggerInfo& triggerInfo) const;
+  read() const;
 
   /**
    * @brief Set threshold that an electron need to pass in order to qualify as tight lepton

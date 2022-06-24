@@ -39,7 +39,7 @@ class RecoHadTauReader : public ReaderBase
    * @return Collection of RecoHadTau objects
    */
   std::vector<RecoHadTau>
-    read(const TriggerInfo& triggerInfo) const;
+  read() const;
 
   /**
     * @brief Return list of systematic uncertainties supported by RecoHadTauReader class

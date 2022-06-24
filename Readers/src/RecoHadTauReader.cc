@@ -215,7 +215,7 @@ RecoHadTauReader::setBranchAddresses(TTree * tree)
 }
 
 std::vector<RecoHadTau>
-RecoHadTauReader::read(const TriggerInfo& triggerInfo) const
+RecoHadTauReader::read() const
 {
   const RecoHadTauReader * const gInstance = instances_[branchName_obj_];
   assert(gInstance);
@@ -266,15 +266,6 @@ RecoHadTauReader::read(const TriggerInfo& triggerInfo) const
       });
 
       RecoHadTau & hadTau = hadTaus.back();
-
-      hadTau.filterBits_ = 0;
-      for (auto & idx : triggerInfo.tau_trigobj_)
-      {
-        if ( deltaR(gInstance->hadTau_eta_[idxHadTau], triggerInfo.triggerObj_eta_[idx], gInstance->hadTau_phi_[idxHadTau], triggerInfo.triggerObj_phi_[idx]) < 0.05 )
-        {
-          hadTau.filterBits_ |= triggerInfo.triggerObj_filterBits_[idx];
-        }
-      }
 
       for(const auto & kv: gInstance->hadTau_idMVAs_)
       {

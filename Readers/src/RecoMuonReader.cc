@@ -94,7 +94,7 @@ RecoMuonReader::setBranchAddresses(TTree * tree)
 }
 
 std::vector<RecoMuon>
-RecoMuonReader::read(const TriggerInfo& triggerInfo) const
+RecoMuonReader::read() const
 {
   const RecoLeptonReader * const gLeptonReader = leptonReader_->instances_[branchName_obj_];
   assert(gLeptonReader);
@@ -148,14 +148,6 @@ RecoMuonReader::read(const TriggerInfo& triggerInfo) const
             }));
         RecoMuon & muon = muons.back();
 
-        muon.filterBits_ = 0;
-        for (auto & idx : triggerInfo.muon_trigobj_)
-        {
-          if ( deltaR(gLeptonReader->eta_[idxLepton], triggerInfo.triggerObj_eta_[idx], gLeptonReader->phi_[idxLepton], triggerInfo.triggerObj_phi_[idx]) < 0.05 )
-          {
-            muon.filterBits_ |= triggerInfo.triggerObj_filterBits_[idx];
-          }
-        }
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

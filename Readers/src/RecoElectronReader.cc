@@ -158,7 +158,7 @@ RecoElectronReader::setBranchAddresses(TTree * tree)
 }
 
 std::vector<RecoElectron>
-RecoElectronReader::read(const TriggerInfo& triggerInfo) const
+RecoElectronReader::read() const
 {
   const RecoLeptonReader * const gLeptonReader = leptonReader_->instances_[branchName_obj_];
   assert(gLeptonReader);
@@ -216,14 +216,7 @@ RecoElectronReader::read(const TriggerInfo& triggerInfo) const
         });
 
         RecoElectron & electron = electrons.back();
-        electron.filterBits_ = 0;
-        for (auto & idx : triggerInfo.ele_trigobj_)
-        {
-          if ( deltaR(gLeptonReader->eta_[idxLepton], triggerInfo.triggerObj_eta_[idx], gLeptonReader->phi_[idxLepton], triggerInfo.triggerObj_phi_[idx]) < 0.05 )
-          {
-            electron.filterBits_ |= triggerInfo.triggerObj_filterBits_[idx];
-          }
-        }
+
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

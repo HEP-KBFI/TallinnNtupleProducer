@@ -162,6 +162,7 @@ class RecoLepton : public ChargedParticle
 
   friend class RecoMuonReader;
   friend class RecoElectronReader;
+  friend class EventReader;
 
  protected:
 //--- common observables for electrons and muons
@@ -177,7 +178,7 @@ class RecoLepton : public ChargedParticle
   Double_t jetPtRel_;           ///< perpendicular component of the distance vector between lepton and its jet pT vectors
   Int_t jetNDauChargedMVASel_;  ///< number of charged constituents in the nearest jet
   Int_t tightCharge_;           ///< Flag indicating if lepton passes (>= 2) or fails (< 2) tight charge requirement
-  Int_t filterBits_;           ///< bitmask of matching with trigger objects
+  mutable Int_t filterBits_;           ///< bitmask of matching with trigger objects
   Int_t jetIdx_;                ///< index of jet from initial jet collection that the lepton is constituent of (-1 if no match)
   UChar_t genPartFlav_;         ///< generator-level parton flavor
   Int_t genMatchIdx_;           ///< index to matched gen particle (-1 if no match)

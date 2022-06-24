@@ -79,6 +79,7 @@ class RecoHadTau : public GenHadTau
 
   friend class RecoHadTauReader;
   friend class RecoHadTauWriter;
+  friend class EventReader;
 
  protected:
   Double_t corrFactor_; ///< correction factor for the tau energy scale
@@ -90,7 +91,7 @@ class RecoHadTau : public GenHadTau
   Double_t raw_mva_;    ///< raw output of MVA-based tau id
   Int_t antiElectron_;  ///< discriminator against electrons
   Int_t antiMuon_;      ///< discriminator against muons
-  Int_t filterBits_;   ///< bitmask of matching with trigger objects
+  mutable Int_t filterBits_;   ///< bitmask of matching with trigger objects
   Int_t jetIdx_;        ///< index of the matched jet from initial jet collection (-1 if no match)
   UChar_t genPartFlav_; ///< generator-level parton flavor (1 = prompt electron, 2 = prompt muon, 3 = tau->e decay,
                         ///<                                4 = tau->mu decay, 5 = hadronic tau decay, 0 = unknown/no match)

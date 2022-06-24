@@ -57,6 +57,39 @@ class EventReader : public ReaderBase
   void
   set_central_or_shift(const std::string& central_or_shift);
 
+  template <typename T>
+    void
+    setFilterbits(const std::vector<const T*>& particles, const TriggerInfo& triggerInfo) const
+    {
+      std::vector<unsigned int> trigger_index;
+      if ( particles.size() )
+      {
+        if ( dynamic_cast<const RecoMuon *>(particles[0]) )
+        {
+          trigger_index = triggerInfo.muon_trigobj_;
+        }
+        else if ( dynamic_cast<const RecoElectron *>(particles[0]) )
+        {
+          trigger_index = triggerInfo.ele_trigobj_;
+        }
+        else if ( dynamic_cast<const RecoHadTau *>(particles[0]) )
+        {
+          trigger_index = triggerInfo.tau_trigobj_;
+        }
+        for ( auto part : particles)
+        {
+          part->filterBits_ = 0;
+          for (auto & idx : trigger_index)
+          {
+            if ( deltaR(part->eta(), part->phi(), triggerInfo.triggerObj_eta_[idx], triggerInfo.triggerObj_phi_[idx]) < 0.05 )
+            {
+              part->filterBits_ |= triggerInfo.triggerObj_filterBits_[idx];
+            }
+          }
+        }
+      }
+    }
+
   /**
    * @brief Call tree->SetBranchAddress for all particle-collection reader classes
    */
