@@ -61,9 +61,10 @@ class EventReader : public ReaderBase
     void
     setFilterbits(const std::vector<const T*>& particles, const TriggerInfo& triggerInfo) const
     {
-      std::vector<unsigned int> trigger_index;
       if ( particles.size() )
       {
+        std::vector<unsigned int> trigger_index;
+        
         if ( dynamic_cast<const RecoMuon *>(particles[0]) )
         {
           trigger_index = triggerInfo.muon_trigobj_;
