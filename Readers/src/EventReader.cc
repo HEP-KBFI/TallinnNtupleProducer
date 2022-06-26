@@ -49,6 +49,7 @@ namespace
 EventReader::EventReader(const edm::ParameterSet& cfg)
   : ReaderBase(cfg)
   , cfg_(cfg)
+  , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
   , numNominalLeptons_(0)
   , applyNumNominalLeptonsCut_(false)
   , numNominalHadTaus_(0)
@@ -70,17 +71,22 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , tightMuonSelector_(nullptr)
   , muon_supported_systematics_(make_supported_systematics(RecoMuonReader::get_supported_systematics(cfg)))
   , electronReader_(nullptr)
+  , electronCleaner_(0.3, isDEBUG_)
   , looseElectronSelector_(nullptr)
   , fakeableElectronSelector_(nullptr)
   , tightElectronSelector_(nullptr)
   , electron_supported_systematics_(make_supported_systematics(RecoElectronReader::get_supported_systematics(cfg)))
   , hadTauReader_(nullptr)
+  , hadTauCleaner_(0.3, isDEBUG_)
   , looseHadTauSelector_(nullptr)
   , fakeableHadTauSelector_(nullptr)
   , tightHadTauSelector_(nullptr)
   , hadTau_supported_systematics_(make_supported_systematics(RecoHadTauReader::get_supported_systematics(cfg)))
   , hadTau_isInvalid_(false)
   , jetReaderAK4_(nullptr)
+  , jetCleanerAK4_dR04_(0.4, isDEBUG_)
+  , jetCleanerAK4ByIndex_dR04_(isDEBUG_)
+  , jetCleanerAK4_dR12_(1.2, isDEBUG_)
   , jetSelectorAK4_(nullptr)
   , jetSelectorAK4_btagLoose_(nullptr)
   , jetSelectorAK4_btagMedium_(nullptr)
@@ -100,6 +106,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , genMatchToJetReader_(nullptr)
   , jetReaderAK8_Hbb_(nullptr)
   , jetReaderAK8_Wjj_(nullptr)
+  , jetCleanerAK8_dR08_(0.8, isDEBUG_)
   , jetSelectorAK8_Hbb_(nullptr)
   , jetSelectorAK8_Wjj_(nullptr)
   , jetsAK8_Hbb_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg)))
@@ -115,7 +122,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , vertexReader_(nullptr)
   , vertex_supported_systematics_(make_supported_systematics(RecoVertexReader::get_supported_systematics(cfg)))
   , vertex_isInvalid_(false)
-  , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
 {
   numNominalLeptons_ = cfg.getParameter<unsigned>("numNominalLeptons");
   applyNumNominalLeptonsCut_ = cfg.getParameter<bool>("applyNumNominalLeptonsCut");
@@ -148,7 +154,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   electronReader_ = new RecoElectronReader(make_cfg(cfg, "branchName_electrons"));
   const double lep_mva_cut_e = cfg.getParameter<double>("lep_mva_cut_e");
   electronReader_->set_mvaTTH_wp(lep_mva_cut_e);
-  RecoElectronCollectionCleaner electronCleaner_(0.3, isDEBUG_);
   looseElectronSelector_ = new RecoElectronCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableElectronSelector_ = new RecoElectronCollectionSelectorFakeable(era_, -1, isDEBUG_);
   tightElectronSelector_ = new RecoElectronCollectionSelectorTight(era_, -1, isDEBUG_);
@@ -180,10 +185,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
 
   jetReaderAK4_ = new RecoJetReaderAK4(make_cfg(cfg, "branchName_jets_ak4"));
   jetCleaningByIndex_ = cfg.getParameter<bool>("jetCleaningByIndex");
-  RecoJetCollectionCleanerByIndexAK4 jetCleanerAK4ByIndex_dR04_(isDEBUG_);
-  RecoJetCollectionCleanerAK4 jetCleanerAK4_dR04_(0.4, isDEBUG_);
 
-  RecoJetCollectionCleanerAK4 jetCleanerAK4_dR12_(1.2, isDEBUG_);
   jetSelectorAK4_ = new RecoJetCollectionSelectorAK4(era_, -1, isDEBUG_);
   jetSelectorAK4_btagLoose_ = new RecoJetCollectionSelectorAK4_btagLoose(era_, -1, isDEBUG_);
   jetSelectorAK4_btagMedium_ = new RecoJetCollectionSelectorAK4_btagMedium(era_, -1, isDEBUG_);
@@ -219,7 +221,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   const int ignore_ak8_sys = get_ignore_ak8_sys(disable_ak8_corr);
   jetReaderAK8_Hbb_->ignoreSys(ignore_ak8_sys);
   jetReaderAK8_Wjj_->ignoreSys(ignore_ak8_sys);
-  RecoJetCollectionCleanerAK8 jetCleanerAK8_dR08_(0.8, isDEBUG_);
   jetSelectorAK8_Hbb_ = new RecoJetCollectionSelectorAK8_Hbb(era_, -1, isDEBUG_);
   jetSelectorAK8_Wjj_ = new RecoJetCollectionSelectorAK8_Wjj(era_, -1, isDEBUG_);
 
@@ -719,7 +720,6 @@ EventReader::read() const
     printCollection("selJetsAK8_Wjj", event_.selJetsAK8_Wjj_);
   }
   jetAK8_Wjj_isInvalid_ = false;
-
   bool isVertexSystematic = contains(vertex_supported_systematics_, current_central_or_shift_);
   bool isUpdatedVertex = false;
   bool vertex_needsUpdate = isVertexSystematic || isNewEvent || vertex_isInvalid_ || (vertex_lastSystematic_ != "central" && !isVertexSystematic);

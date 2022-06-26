@@ -125,6 +125,8 @@ class EventReader : public ReaderBase
 
   edm::ParameterSet cfg_;
 
+  bool isDEBUG_;
+
   unsigned numNominalLeptons_;
   bool applyNumNominalLeptonsCut_;
   unsigned numNominalHadTaus_;
@@ -228,7 +230,6 @@ class EventReader : public ReaderBase
   mutable std::string vertex_lastSystematic_;
   mutable bool vertex_isInvalid_;
 
-  bool isDEBUG_;
 };
 
 #endif // TallinnNtupleProducer_Readers_EventReader_h
