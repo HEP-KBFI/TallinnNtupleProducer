@@ -482,6 +482,7 @@ EventReader::read() const
   {
     event_.muons_ = muonReader_->read();
     event_.muon_ptrs_ = convert_to_ptrs(event_.muons_);
+    setFilterbits(event_.muon_ptrs_, *(event_.triggerInfo_));
     event_.looseMuonsFull_ = looseMuonSelector_->operator()(event_.muon_ptrs_, isHigherConePt<RecoMuon>);
     event_.fakeableMuonsFull_ = fakeableMuonSelector_->operator()(event_.looseMuonsFull_, isHigherConePt<RecoMuon>);
     event_.tightMuonsFull_ = tightMuonSelector_->operator()(event_.fakeableMuonsFull_, isHigherConePt<RecoMuon>);
@@ -497,6 +498,7 @@ EventReader::read() const
   {
     event_.electrons_ = electronReader_->read();
     event_.electron_ptrs_ = convert_to_ptrs(event_.electrons_);
+    setFilterbits(event_.electron_ptrs_, *(event_.triggerInfo_));
     event_.looseElectronsUncleaned_ = looseElectronSelector_->operator()(event_.electron_ptrs_, isHigherConePt<RecoElectron>);
     event_.fakeableElectronsUncleaned_ = fakeableElectronSelector_->operator()(event_.looseElectronsUncleaned_, isHigherConePt<RecoElectron>);
     event_.tightElectronsUncleaned_ = tightElectronSelector_->operator()(event_.fakeableElectronsUncleaned_, isHigherConePt<RecoElectron>);
@@ -517,7 +519,6 @@ EventReader::read() const
   {
     event_.looseLeptonsUncleaned_ = mergeLeptonCollections(event_.looseElectronsUncleaned_, event_.looseMuonsFull_, isHigherConePt<RecoLepton>);
     event_.looseLeptonsFull_ = mergeLeptonCollections(event_.looseElectronsFull_, event_.looseMuonsFull_, isHigherConePt<RecoLepton>);
-    setFilterbits(event_.looseLeptonsFull_, *(event_.triggerInfo_));
     event_.fakeableLeptonsFull_ = mergeLeptonCollections(event_.fakeableElectronsFull_, event_.fakeableMuonsFull_, isHigherConePt<RecoLepton>);
     event_.tightLeptonsFull_ = mergeLeptonCollections(event_.tightElectronsFull_, event_.tightMuonsFull_, isHigherConePt<RecoLepton>);
     event_.fakeableLeptons_ = pickFirstNobjects(event_.fakeableLeptonsFull_, numNominalLeptons_);
@@ -542,6 +543,7 @@ EventReader::read() const
   {
     event_.hadTaus_ = hadTauReader_->read();
     event_.hadTau_ptrs_ = convert_to_ptrs(event_.hadTaus_);
+    setFilterbits(event_.hadTau_ptrs_, *(event_.triggerInfo_));
     event_.fakeableHadTausUncleaned_ = fakeableHadTauSelector_->operator()(event_.hadTau_ptrs_, isHigherPt<RecoHadTau>);
     event_.tightHadTausUncleaned_ = tightHadTauSelector_->operator()(event_.fakeableHadTausUncleaned_, isHigherPt<RecoHadTau>);
     isUpdatedHadTaus = true;
@@ -549,7 +551,6 @@ EventReader::read() const
   if ( isUpdatedMuons || isUpdatedElectrons || isUpdatedHadTaus )
   {
     event_.fakeableHadTausFull_ = hadTauCleaner_(event_.fakeableHadTausUncleaned_, event_.looseMuonsFull_, event_.looseElectronsFull_);
-    setFilterbits(event_.fakeableHadTausFull_, *(event_.triggerInfo_));
     event_.tightHadTausFull_ = getIntersection(event_.fakeableHadTausFull_, event_.tightHadTausUncleaned_, isHigherPt<RecoHadTau>);
     event_.fakeableHadTaus_ = pickFirstNobjects(event_.fakeableHadTausFull_, numNominalHadTaus_);
     event_.tightHadTaus_ = getIntersection(event_.fakeableHadTaus_, event_.tightHadTausFull_, isHigherPt<RecoHadTau>);
