@@ -4,8 +4,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"             // RecoLeptonReader
-#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"
-#include "TallinnNtupleProducer/CommonTools/interface/deltaR.h"
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
 

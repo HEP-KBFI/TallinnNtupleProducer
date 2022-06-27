@@ -12,7 +12,6 @@ class GenLeptonReader;
 class GenHadTauReader;
 class GenJetReader;
 class TauESTool;
-class TriggerInfo;
 
 enum class Era;
 

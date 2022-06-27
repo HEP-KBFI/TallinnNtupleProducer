@@ -19,6 +19,7 @@ class TriggerInfoReader : public ReaderBase
    */
   std::vector<std::string>
   setBranchAddresses(TTree * tree) override;
+
   void
   setBranchNames();
 
@@ -40,6 +41,7 @@ class TriggerInfoReader : public ReaderBase
   std::vector<std::string>
   get_available_branches(TTree * tree) const;
 
+  unsigned int max_nTriggerObjects_;
   TriggerInfo triggerInfo_;
   std::string branchName_num_;
   std::string branchName_obj_;

@@ -5,10 +5,8 @@
 #include "TallinnNtupleProducer/CommonTools/interface/electronDefinitions.h"      // EGammaID, EGammaWP
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"             // RecoLeptonReader
-#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
-#include "TallinnNtupleProducer/CommonTools/interface/deltaR.h"
 
 std::map<std::string, int> RecoElectronReader::numInstances_;
 std::map<std::string, RecoElectronReader *> RecoElectronReader::instances_;

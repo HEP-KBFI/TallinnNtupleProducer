@@ -11,6 +11,7 @@ std::map<std::string, TriggerInfoReader *> TriggerInfoReader::instances_;
 
 TriggerInfoReader::TriggerInfoReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
+  , max_nTriggerObjects_(64)
   , triggerInfo_(cfg)
   , branchName_num_("")
   , branchName_obj_("")
@@ -90,10 +91,10 @@ TriggerInfoReader::setBranchAddresses(TTree * tree)
     }
   }
   bai.setBranchAddress(ntriggerObj_, branchName_num_);
-  bai.setLenVar(64).setBranchAddress(triggerObj_id_, branchName_triggerObj_id_);
-  bai.setLenVar(64).setBranchAddress(triggerObj_filterBits_, branchName_triggerObj_filterBits_);
-  bai.setLenVar(64).setBranchAddress(triggerObj_eta_, branchName_triggerObj_eta_);
-  bai.setLenVar(64).setBranchAddress(triggerObj_phi_, branchName_triggerObj_phi_);
+  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_id_, branchName_triggerObj_id_);
+  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_filterBits_, branchName_triggerObj_filterBits_);
+  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_eta_, branchName_triggerObj_eta_);
+  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_phi_, branchName_triggerObj_phi_);
   }
   return bai.getBoundBranchNames_read();
 }

@@ -11,7 +11,6 @@
 // forward declarations
 class TTree;
 class RecoLeptonReader;
-class TriggerInfo;
 
 enum class Era;
 

@@ -8,8 +8,6 @@
 #include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"              // GenLeptonReader
 #include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                 // GenJetReader
 #include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                    // TauESTool
-#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"
-#include "TallinnNtupleProducer/CommonTools/interface/deltaR.h"
 
 #include "TMath.h"
 #include "TTree.h"                                                                // TTree
