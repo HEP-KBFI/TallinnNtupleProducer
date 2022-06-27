@@ -77,7 +77,7 @@ class EventReader : public ReaderBase
       {
         trigger_index = triggerInfo.tau_trigobj_;
       }
-      for ( auto part : particles)
+      for ( const auto part : particles)
       {
         part->filterBits_ = 0;
         for (const auto & idx : trigger_index)
