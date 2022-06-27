@@ -108,8 +108,17 @@ TriggerInfoReader::read() const
   triggerInfo_.triggerObj_filterBits_.clear();
   triggerInfo_.triggerObj_eta_.clear();
   triggerInfo_.triggerObj_phi_.clear();
+
   const TriggerInfoReader * const gTrigger = instances_[branchName_obj_];
-  for (UInt_t itrig=0; itrig<gTrigger->ntriggerObj_; itrig++)
+  const UInt_t nTriggerObjects = gTrigger->ntriggerObj_;
+  if(nTriggerObjects > max_nTriggerObjects_)
+  {
+    throw cmsException(this)
+      << "Number of Trigger Objects stored in Ntuple = " << nTriggerObjects
+      << ", exceeds m = "  << max_nTriggerObjects_
+      ;
+  }
+  for (UInt_t itrig=0; itrig<nTriggerObjects; itrig++)
   {
     if ( gTrigger->triggerObj_id_[itrig] == 11 )
     {
