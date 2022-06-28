@@ -20,7 +20,7 @@ TriggerInfoReader::TriggerInfoReader(const edm::ParameterSet & cfg)
   , triggerObj_eta_(nullptr)
   , triggerObj_phi_(nullptr)
 {
-  branchName_obj_ = "TrigObj";//cfg.getParameter<std::string>("branchName"); // default = "TriObj"
+  branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "TriObj"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   setBranchNames();
 }

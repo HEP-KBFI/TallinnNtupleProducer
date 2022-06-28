@@ -26,6 +26,7 @@ import FWCore.ParameterSet.Config as cms
 triggers_2016 = cms.PSet()
 
 triggers_2017 = cms.PSet(
+    branchName = cms.string("TrigObj"),
     type_2mu = cms.PSet(
         type = cms.string("2mu"),
         hltPaths = cms.vstring(['HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8', 'HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8']),
