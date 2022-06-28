@@ -79,6 +79,12 @@ RecoHadTau::set_genJet(const GenJet * genJet)
   genJet_.reset(genJet);
 }
 
+void 
+RecoHadTau::set_filterBits(Int_t filterBits)
+{
+  filterBits_ = filterBits;
+}
+
 Double_t
 RecoHadTau::corrFactor() const
 {

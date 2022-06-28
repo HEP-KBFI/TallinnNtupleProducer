@@ -94,8 +94,8 @@ TriggerInfoWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWe
 
   std::map<int, bool> passesTriggerMap; // key = PD
 
-  const std::vector<trigger::Entry>& triggerEntries = event.triggerInfo().entries();
-  for ( const trigger::Entry& triggerEntry : triggerEntries )
+  const std::vector<trigger::Set_of_HLTPaths>& triggerEntries = event.triggerInfo().entries();
+  for ( const trigger::Set_of_HLTPaths& triggerEntry : triggerEntries )
   {
     if ( !triggerEntry.use_it() ) continue;
 

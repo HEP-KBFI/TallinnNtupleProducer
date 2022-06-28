@@ -12,6 +12,7 @@
 #include "TallinnNtupleProducer/Objects/interface/printCollection.h"              // printCollection()
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
+#include "TallinnNtupleProducer/Readers/interface/setFilterBits.h"                // setFilterBits()
 
 namespace
 {
@@ -482,8 +483,8 @@ EventReader::read() const
   if ( muon_needsUpdate )
   {
     event_.muons_ = muonReader_->read();
+    setFilterBits(event_.muons_, event_.triggerInfo());
     event_.muon_ptrs_ = convert_to_ptrs(event_.muons_);
-    setFilterbits(event_.muon_ptrs_, *(event_.triggerInfo_));
     event_.looseMuonsFull_ = looseMuonSelector_->operator()(event_.muon_ptrs_, isHigherConePt<RecoMuon>);
     event_.fakeableMuonsFull_ = fakeableMuonSelector_->operator()(event_.looseMuonsFull_, isHigherConePt<RecoMuon>);
     event_.tightMuonsFull_ = tightMuonSelector_->operator()(event_.fakeableMuonsFull_, isHigherConePt<RecoMuon>);
@@ -498,8 +499,8 @@ EventReader::read() const
   if ( electron_needsUpdate )
   {
     event_.electrons_ = electronReader_->read();
+    setFilterBits(event_.electrons_, event_.triggerInfo());
     event_.electron_ptrs_ = convert_to_ptrs(event_.electrons_);
-    setFilterbits(event_.electron_ptrs_, *(event_.triggerInfo_));
     event_.looseElectronsUncleaned_ = looseElectronSelector_->operator()(event_.electron_ptrs_, isHigherConePt<RecoElectron>);
     event_.fakeableElectronsUncleaned_ = fakeableElectronSelector_->operator()(event_.looseElectronsUncleaned_, isHigherConePt<RecoElectron>);
     event_.tightElectronsUncleaned_ = tightElectronSelector_->operator()(event_.fakeableElectronsUncleaned_, isHigherConePt<RecoElectron>);
@@ -543,8 +544,8 @@ EventReader::read() const
   if ( hadTau_needsUpdate )
   {
     event_.hadTaus_ = hadTauReader_->read();
+    setFilterBits(event_.hadTaus_, event_.triggerInfo());
     event_.hadTau_ptrs_ = convert_to_ptrs(event_.hadTaus_);
-    setFilterbits(event_.hadTau_ptrs_, *(event_.triggerInfo_));
     event_.fakeableHadTausUncleaned_ = fakeableHadTauSelector_->operator()(event_.hadTau_ptrs_, isHigherPt<RecoHadTau>);
     event_.tightHadTausUncleaned_ = tightHadTauSelector_->operator()(event_.fakeableHadTausUncleaned_, isHigherPt<RecoHadTau>);
     isUpdatedHadTaus = true;

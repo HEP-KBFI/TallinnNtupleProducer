@@ -39,7 +39,7 @@ trigger::operator<<(std::ostream & stream,
 //-------------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------------
-// Implementation of auxiliary class trigger::Entry
+// Implementation of auxiliary class trigger::Set_of_HLTPaths
 
 namespace trigger
 {
@@ -59,7 +59,7 @@ namespace trigger
   };
 }
 
-trigger::Entry::Entry(const edm::ParameterSet & cfg)
+trigger::Set_of_HLTPaths::Set_of_HLTPaths(const edm::ParameterSet & cfg)
   : type_(cfg.getParameter<std::string>("type"))
   , in_PD_(cfg.getParameter<std::string>("in_PD"))
   , use_it_(cfg.getParameter<bool>("use_it"))
@@ -112,72 +112,72 @@ trigger::Entry::Entry(const edm::ParameterSet & cfg)
   }
 }
 
-trigger::Entry::~Entry()
+trigger::Set_of_HLTPaths::~Set_of_HLTPaths()
 {}
 
 const std::string &
-trigger::Entry::type() const
+trigger::Set_of_HLTPaths::type() const
 {
   return type_;
 }
 
 const std::vector<trigger::HLTPath>&
-trigger::Entry::hltPaths() const
+trigger::Set_of_HLTPaths::hltPaths() const
 {
   return hltPaths_;
 }
 
 unsigned
-trigger::Entry::min_numElectrons() const
+trigger::Set_of_HLTPaths::min_numElectrons() const
 {
   return min_numElectrons_;
 }
 
 unsigned 
-trigger::Entry::min_numMuons() const
+trigger::Set_of_HLTPaths::min_numMuons() const
 {
   return min_numMuons_;
 }
 
 unsigned
-trigger::Entry::min_numHadTaus() const
+trigger::Set_of_HLTPaths::min_numHadTaus() const
 {
   return min_numHadTaus_;
 }
 
 const std::vector<unsigned> &
-trigger::Entry::hltFilterBits_e() const
+trigger::Set_of_HLTPaths::hltFilterBits_e() const
 {
   return hltFilterBits_e_;
 }
 
 const std::vector<unsigned> &
-trigger::Entry::hltFilterBits_mu() const
+trigger::Set_of_HLTPaths::hltFilterBits_mu() const
 {
   return hltFilterBits_mu_;
 }
  
 const std::vector<unsigned> &
-trigger::Entry::hltFilterBits_tau() const
+trigger::Set_of_HLTPaths::hltFilterBits_tau() const
 {
   return hltFilterBits_tau_;
 }
 
 const std::string &
-trigger::Entry::in_PD() const
+trigger::Set_of_HLTPaths::in_PD() const
 {
   return in_PD_;
 }
 
 bool
-trigger::Entry::use_it() const
+trigger::Set_of_HLTPaths::use_it() const
 {
   return use_it_;
 }
 
 std::ostream &
 trigger::operator<<(std::ostream & stream,
-                    const trigger::Entry & entry)
+                    const trigger::Set_of_HLTPaths & entry)
 {
   stream << entry.type() << " HLT paths:" << std::endl;
   for ( auto hltPath : entry.hltPaths() )
@@ -190,23 +190,80 @@ trigger::operator<<(std::ostream & stream,
 }
 //-------------------------------------------------------------------------------
 
+//-------------------------------------------------------------------------------
+// Implementation of auxiliary class trigger::Object
+trigger::Object::Object()
+  : is_electron_(false)
+  , is_muon_(false)
+  , is_hadTau_(false)
+  , eta_(0.)
+  , phi_(0.)
+  , filterBits_(0)
+{}
+
+trigger::Object::~Object()
+{}
+
+bool
+trigger::Object::is_electron() const
+{
+  return is_electron_;
+}
+
+bool
+trigger::Object::is_muon() const
+{
+  return is_muon_;
+}
+
+bool
+trigger::Object::is_hadTau() const
+{
+  return is_hadTau_;
+}
+    
+Float_t
+trigger::Object::eta() const
+{
+  return eta_;
+}
+
+Float_t
+trigger::Object::phi() const
+{
+  return phi_;
+}
+
+Int_t
+trigger::Object::filterBits() const
+{
+  return filterBits_;
+}
+//-------------------------------------------------------------------------------
+
 TriggerInfo::TriggerInfo(const edm::ParameterSet & cfg)
 {
   vstring entryNames = cfg.getParameterNamesForType<edm::ParameterSet>();
   for ( auto entryName : entryNames )
   {
     edm::ParameterSet cfgEntry = cfg.getParameter<edm::ParameterSet>(entryName);
-    entries_.push_back(trigger::Entry(cfgEntry));
+    entries_.push_back(trigger::Set_of_HLTPaths(cfgEntry));
   }
 }
 
 TriggerInfo::~TriggerInfo()
 {}
 
-const std::vector<trigger::Entry> &
+const std::vector<trigger::Set_of_HLTPaths> &
 TriggerInfo::entries() const
 {
   return entries_;
+}
+
+const std::vector<trigger::Object> &
+TriggerInfo::objects() const
+{
+  return objects_;
 }
 
 std::ostream &

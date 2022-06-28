@@ -47,12 +47,12 @@ namespace trigger
   //-------------------------------------------------------------------------------
 
   //-------------------------------------------------------------------------------
-  // Declaration of auxiliary class trigger::Entry
-  class Entry
+  // Declaration of auxiliary class trigger::Set_of_HLTPaths
+  class Set_of_HLTPaths
   {
    public:
-    Entry(const edm::ParameterSet & cfg);
-    ~Entry();
+    Set_of_HLTPaths(const edm::ParameterSet & cfg);
+    ~Set_of_HLTPaths();
 
     const std::string &
     type() const;
@@ -97,7 +97,45 @@ namespace trigger
 
   std::ostream &
   operator<<(std::ostream & stream,
-             const Entry & entry);
+             const Set_of_HLTPaths & entry);
+  //-------------------------------------------------------------------------------
+
+  //-------------------------------------------------------------------------------
+  // Declaration of auxiliary class trigger::Object
+  class Object
+  {
+   public:
+    Object();
+    ~Object();
+
+    bool
+    is_electron() const;
+
+    bool
+    is_muon() const;
+
+    bool
+    is_hadTau() const;
+    
+    Float_t
+    eta() const;
+
+    Float_t
+    phi() const;
+
+    Int_t
+    filterBits() const;
+
+    friend class ::TriggerInfoReader;
+
+   private:
+    bool is_electron_;
+    bool is_muon_;
+    bool is_hadTau_;
+    Float_t eta_;
+    Float_t phi_;
+    Int_t filterBits_;
+  };
   //-------------------------------------------------------------------------------
 }
 
@@ -110,20 +148,17 @@ class TriggerInfo
   TriggerInfo(const edm::ParameterSet & cfg);
   ~TriggerInfo();
 
-  const std::vector<trigger::Entry> &
+  const std::vector<trigger::Set_of_HLTPaths> &
   entries() const;
 
+  const std::vector<trigger::Object> &
+  objects() const;
+
   friend class TriggerInfoReader;
-  friend class EventReader;
 
  private:
-  std::vector<trigger::Entry> entries_;
-  mutable std::vector<unsigned int> ele_trigobj_;
-  mutable std::vector<unsigned int> muon_trigobj_;
-  mutable std::vector<unsigned int> tau_trigobj_;
-  mutable std::vector<Float_t> triggerObj_eta_;
-  mutable std::vector<Float_t> triggerObj_phi_;
-  mutable std::vector<Int_t>  triggerObj_filterBits_;
+  std::vector<trigger::Set_of_HLTPaths> entries_;
+  std::vector<trigger::Object> objects_;
 };
 
 std::ostream &

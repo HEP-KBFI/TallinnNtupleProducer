@@ -103,6 +103,12 @@ RecoLepton::set_genJet(const GenJet * genJet)
   genJet_.reset(genJet);
 }
 
+void 
+RecoLepton::set_filterBits(Int_t filterBits)
+{
+  filterBits_ = filterBits;
+}
+
 bool
 RecoLepton::is_electron() const
 {

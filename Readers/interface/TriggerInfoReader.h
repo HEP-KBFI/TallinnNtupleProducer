@@ -42,7 +42,7 @@ class TriggerInfoReader : public ReaderBase
   get_available_branches(TTree * tree) const;
 
   unsigned int max_nTriggerObjects_;
-  TriggerInfo triggerInfo_;
+  mutable TriggerInfo triggerInfo_;
   std::string branchName_num_;
   std::string branchName_obj_;
   std::string branchName_triggerObj_id_;

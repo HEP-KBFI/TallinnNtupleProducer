@@ -102,12 +102,7 @@ TriggerInfoReader::setBranchAddresses(TTree * tree)
 const TriggerInfo &
 TriggerInfoReader::read() const
 {
-  triggerInfo_.ele_trigobj_.clear();
-  triggerInfo_.muon_trigobj_.clear();
-  triggerInfo_.tau_trigobj_.clear();
-  triggerInfo_.triggerObj_filterBits_.clear();
-  triggerInfo_.triggerObj_eta_.clear();
-  triggerInfo_.triggerObj_phi_.clear();
+  triggerInfo_.objects_.clear();
 
   const TriggerInfoReader * const gTrigger = instances_[branchName_obj_];
   const UInt_t nTriggerObjects = gTrigger->ntriggerObj_;
@@ -120,22 +115,15 @@ TriggerInfoReader::read() const
   }
   for (UInt_t itrig=0; itrig<nTriggerObjects; itrig++)
   {
-    if ( gTrigger->triggerObj_id_[itrig] == 11 )
-    {
-      triggerInfo_.ele_trigobj_.push_back(itrig);
-    }
-    else if ( gTrigger->triggerObj_id_[itrig] == 13 )
-    {
-      triggerInfo_.muon_trigobj_.push_back(itrig);
-    }
-    else if ( gTrigger->triggerObj_id_[itrig] == 15 )
-    {
-      triggerInfo_.tau_trigobj_.push_back(itrig);
-    }
-    triggerInfo_.triggerObj_filterBits_.push_back(gTrigger->triggerObj_filterBits_[itrig]);
-    triggerInfo_.triggerObj_eta_.push_back(gTrigger->triggerObj_eta_[itrig]);
-    triggerInfo_.triggerObj_phi_.push_back(gTrigger->triggerObj_phi_[itrig]);
-   }
+    trigger::Object triggerObject;
+    if      ( gTrigger->triggerObj_id_[itrig] == 11 ) triggerObject.is_electron_ = true;
+    else if ( gTrigger->triggerObj_id_[itrig] == 13 ) triggerObject.is_muon_     = true;
+    else if ( gTrigger->triggerObj_id_[itrig] == 15 ) triggerObject.is_hadTau_   = true;
+    triggerObject.eta_        = gTrigger->triggerObj_eta_[itrig];
+    triggerObject.phi_        = gTrigger->triggerObj_phi_[itrig];
+    triggerObject.filterBits_ = gTrigger->triggerObj_filterBits_[itrig];
+    triggerInfo_.objects_.push_back(triggerObject);
+  }
   return triggerInfo_;
 }
 
