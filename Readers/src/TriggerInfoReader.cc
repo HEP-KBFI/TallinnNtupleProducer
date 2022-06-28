@@ -67,34 +67,35 @@ std::vector<std::string>
 TriggerInfoReader::setBranchAddresses(TTree * tree)
 {
   BranchAddressInitializer bai(tree);
-  if(instances_[branchName_obj_] == this){
-  const std::vector<std::string> available_branches = this->get_available_branches(tree);
-  std::set<std::string> used_branches;
-  for ( trigger::Entry & entry : triggerInfo_.entries_ )
+  if ( instances_[branchName_obj_] == this )
   {
-    for ( trigger::HLTPath & hltPath : entry.hltPaths_ )
+    const std::vector<std::string> available_branches = this->get_available_branches(tree);
+    std::set<std::string> used_branches;
+    for ( trigger::Set_of_HLTPaths & entry : triggerInfo_.entries_ )
     {
-      if ( std::find(available_branches.cbegin(), available_branches.cend(), hltPath.branchName()) != available_branches.cend() )
+      for ( trigger::HLTPath & hltPath : entry.hltPaths_ )
       {
-        if ( used_branches.find(hltPath.branchName_) != used_branches.end() )
-          throw cmsException(__func__, __LINE__) 
-            << "Branch '" << hltPath.branchName() << "' cannot be read more than once !!";
-        bai.setBranchAddress(hltPath.status_, hltPath.branchName_);         
-        used_branches.insert(hltPath.branchName());
-      }
-      else
-      {
-        std::cerr << "Warning in <TriggerInfoReader::setBranchAddresses>:" 
-                  << " Branch '" << hltPath.branchName_ << "' not available, defaulting to false" << std::endl;
-        hltPath.status_ = false;
+        if ( std::find(available_branches.cbegin(), available_branches.cend(), hltPath.branchName()) != available_branches.cend() )
+        {
+          if ( used_branches.find(hltPath.branchName_) != used_branches.end() )
+            throw cmsException(__func__, __LINE__) 
+              << "Branch '" << hltPath.branchName() << "' cannot be read more than once !!";
+          bai.setBranchAddress(hltPath.status_, hltPath.branchName_);         
+          used_branches.insert(hltPath.branchName());
+        }
+        else
+        {
+          std::cerr << "Warning in <TriggerInfoReader::setBranchAddresses>:" 
+                    << " Branch '" << hltPath.branchName_ << "' not available, defaulting to false" << std::endl;
+          hltPath.status_ = false;
+        }
       }
     }
-  }
-  bai.setBranchAddress(ntriggerObj_, branchName_num_);
-  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_id_, branchName_triggerObj_id_);
-  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_filterBits_, branchName_triggerObj_filterBits_);
-  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_eta_, branchName_triggerObj_eta_);
-  bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_phi_, branchName_triggerObj_phi_);
+    bai.setBranchAddress(ntriggerObj_, branchName_num_);
+    bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_id_, branchName_triggerObj_id_);
+    bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_filterBits_, branchName_triggerObj_filterBits_);
+    bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_eta_, branchName_triggerObj_eta_);
+    bai.setLenVar(max_nTriggerObjects_).setBranchAddress(triggerObj_phi_, branchName_triggerObj_phi_);
   }
   return bai.getBoundBranchNames_read();
 }
