@@ -40,7 +40,6 @@ RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   , hadTau_idDecayMode_(nullptr)
   , hadTau_idAgainstElec_(nullptr)
   , hadTau_idAgainstMu_(nullptr)
-  , hadTau_filterBits_(nullptr)
   , hadTau_jetIdx_(nullptr)
   , hadTau_genPartFlav_(nullptr)
   , hadTau_genMatchIdx_(nullptr)
@@ -92,7 +91,6 @@ RecoHadTauReader::~RecoHadTauReader()
     delete[] gInstance->hadTau_idAgainstElec_;
     delete[] gInstance->hadTau_idAgainstMu_;
     delete[] gInstance->hadTau_charge_;
-    delete[] gInstance->hadTau_filterBits_;
     delete[] gInstance->hadTau_jetIdx_;
     delete[] gInstance->hadTau_genPartFlav_;
     delete[] gInstance->hadTau_genMatchIdx_;
@@ -204,7 +202,6 @@ RecoHadTauReader::setBranchAddresses(TTree * tree)
     }
     bai.setBranchAddress(hadTau_idAgainstElec_, branchName_idAgainstElec_);
     bai.setBranchAddress(hadTau_idAgainstMu_, branchName_idAgainstMu_);
-    bai.setBranchAddress(hadTau_filterBits_, branchName_filterBits_);
     bai.setBranchAddress(hadTau_jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(hadTau_genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
     bai.setBranchAddress(hadTau_genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
@@ -261,7 +258,6 @@ RecoHadTauReader::read() const
         gInstance->hadTau_rawMVAs_.at(tauID_)[idxHadTau],
         (int)TMath::Log2(gInstance->hadTau_idAgainstElec_[idxHadTau]+1),
         (int)TMath::Log2(gInstance->hadTau_idAgainstMu_[idxHadTau]+1),
-        gInstance->hadTau_filterBits_[idxHadTau],
         gInstance->hadTau_jetIdx_[idxHadTau],
         gInstance->hadTau_genPartFlav_[idxHadTau],
         gInstance->hadTau_genMatchIdx_[idxHadTau],

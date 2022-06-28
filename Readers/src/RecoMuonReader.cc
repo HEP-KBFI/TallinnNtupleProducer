@@ -4,7 +4,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"             // RecoLeptonReader
-
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
 
@@ -101,7 +100,6 @@ RecoMuonReader::read() const
   assert(gMuonReader);
   std::vector<RecoMuon> muons;
   const UInt_t nLeptons = gLeptonReader->nLeptons_;
-  
   if(nLeptons > leptonReader_->max_nLeptons_)
   {
     throw cmsException(this)
@@ -147,6 +145,7 @@ RecoMuonReader::read() const
           gMuonReader->ptErr_[idxLepton]
             }));
         RecoMuon & muon = muons.back();
+
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

@@ -57,6 +57,40 @@ class EventReader : public ReaderBase
   void
   set_central_or_shift(const std::string& central_or_shift);
 
+  template <typename T>
+  void
+  setFilterbits(const std::vector<const T*>& particles, const TriggerInfo& triggerInfo) const
+  {
+    if ( ! particles.empty() )
+    {
+      std::vector<unsigned int> trigger_index;
+
+      if ( dynamic_cast<const RecoMuon *>(particles[0]) )
+      {
+        trigger_index = triggerInfo.muon_trigobj_;
+      }
+      else if ( dynamic_cast<const RecoElectron *>(particles[0]) )
+      {
+        trigger_index = triggerInfo.ele_trigobj_;
+      }
+      else if ( dynamic_cast<const RecoHadTau *>(particles[0]) )
+      {
+        trigger_index = triggerInfo.tau_trigobj_;
+      }
+      for ( const auto part : particles)
+      {
+        part->filterBits_ = 0;
+        for (const auto & idx : trigger_index)
+        {
+          if ( deltaR(part->eta(), part->phi(), triggerInfo.triggerObj_eta_[idx], triggerInfo.triggerObj_phi_[idx]) < 0.05 )
+          {
+            part->filterBits_ |= triggerInfo.triggerObj_filterBits_[idx];
+          }
+        }
+      }
+    }
+  }
+
   /**
    * @brief Call tree->SetBranchAddress for all particle-collection reader classes
    */
@@ -90,6 +124,8 @@ class EventReader : public ReaderBase
   clearEvent(Level level) const;
 
   edm::ParameterSet cfg_;
+
+  bool isDEBUG_;
 
   unsigned numNominalLeptons_;
   bool applyNumNominalLeptonsCut_;
@@ -194,7 +230,6 @@ class EventReader : public ReaderBase
   mutable std::string vertex_lastSystematic_;
   mutable bool vertex_isInvalid_;
 
-  bool isDEBUG_;
 };
 
 #endif // TallinnNtupleProducer_Readers_EventReader_h

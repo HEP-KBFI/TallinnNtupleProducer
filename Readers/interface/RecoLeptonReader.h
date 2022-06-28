@@ -109,7 +109,6 @@ class RecoLeptonReader : public ReaderBase
   std::string branchName_jetNDauChargedMVASel_;
   std::string branchName_tightCharge_;
   std::string branchName_charge_;
-  std::string branchName_filterBits_;
   std::string branchName_jetIdx_;
   std::string branchName_genPartFlav_;
   std::string branchName_genMatchIdx_;
@@ -134,7 +133,6 @@ class RecoLeptonReader : public ReaderBase
   Int_t * jetNDauChargedMVASel_;
   Int_t * tightCharge_;
   Int_t * charge_;
-  UInt_t * filterBits_;
   Int_t * jetIdx_;
   UChar_t * genPartFlav_;
   Int_t * genMatchIdx_;

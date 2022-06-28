@@ -250,7 +250,7 @@ RecoLepton::tightCharge() const
   return tightCharge_;
 }
 
-UInt_t
+Int_t
 RecoLepton::filterBits() const
 {
   return filterBits_;

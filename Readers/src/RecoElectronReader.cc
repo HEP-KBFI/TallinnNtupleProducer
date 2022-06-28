@@ -5,7 +5,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/electronDefinitions.h"      // EGammaID, EGammaWP
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era
 #include "TallinnNtupleProducer/Readers/interface/RecoLeptonReader.h"             // RecoLeptonReader
-
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
 
@@ -215,6 +214,7 @@ RecoElectronReader::read() const
         });
 
         RecoElectron & electron = electrons.back();
+
         for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
         {
           const double val = kv.second[idxLepton];

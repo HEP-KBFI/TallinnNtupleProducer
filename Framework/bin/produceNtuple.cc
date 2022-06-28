@@ -328,7 +328,6 @@ int main(int argc, char* argv[])
 
       eventReader->set_central_or_shift(central_or_shift);
       const Event& event = eventReader->read();
-
       // CV: skip processing events that don't contain the nominal number of leptons and hadronic taus,
       //     if the flags applyNumNominalLeptonsCut and applyNumNominalHadTausCut are enabled in the config file
       if ( event.isInvalid() )
