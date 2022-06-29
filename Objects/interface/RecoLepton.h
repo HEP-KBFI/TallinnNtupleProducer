@@ -140,7 +140,7 @@ class RecoLepton : public ChargedParticle
   const GenJet * genJet() const;
 
   void
-  setjetBtagCSV(double btag);
+  setjetBtagCSV(double btag, Btag btagAlgo=Btag::kDeepJet);
 
   bool hasJetBtagCSV(Btag btag) const;
 

@@ -233,9 +233,9 @@ RecoLepton::jetPtRel() const
 }
 
 void
-RecoLepton::setjetBtagCSV(double btag)
+RecoLepton::setjetBtagCSV(double btagscore, Btag btagAlgo)
 {
-  assocJetBtagCSVs_[Btag::kDeepJet] = btag;
+  assocJetBtagCSVs_[btagAlgo] = btagscore;
 }
 
 Double_t
