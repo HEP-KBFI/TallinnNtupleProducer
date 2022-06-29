@@ -13,21 +13,17 @@ template <typename T>
 void
 setJetBtagScore(std::vector<T> & particles, const std::vector<RecoJetAK4> & jets)
 {
-  Int_t njets = jets.size();
+  const Int_t njets = jets.size();
 
   for ( T & particle : particles )
   {
-    T * particlePtr = &particle;
-    Int_t jetIdx = particlePtr->jetIdx();
-    if ( jetIdx >=0 &&  jetIdx <njets)
+    const Int_t jetIdx = particle.jetIdx();
+    double btag = ( jetIdx >=0 &&  jetIdx <njets ) ? jets.at(jetIdx).BtagCSV() : -1;
+    if(std::isnan(btag))
     {
-      double btag = jets.at(jetIdx).BtagCSV();
-      particlePtr->setjetBtagCSV(btag);
+      btag = -2;
     }
-    else
-    {
-      particlePtr->setjetBtagCSV(-1);
-    }
+    particle.setjetBtagCSV(btag);
   }
 }
 
