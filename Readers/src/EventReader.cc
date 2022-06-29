@@ -13,6 +13,7 @@
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
 #include "TallinnNtupleProducer/Readers/interface/setFilterBits.h"                // setFilterBits()
+#include "TallinnNtupleProducer/Readers/interface/setJetBtagScore.h"
 
 namespace
 {
@@ -477,12 +478,27 @@ EventReader::read() const
   {
     event_.triggerInfo_ = &triggerInfoReader_->read();
   }
+
+  bool isJetSystematicAK4 = contains(jetsAK4_supported_systematics_, current_central_or_shift_);
+  bool isUpdatedJetsAK4 = false;
+  bool jetAK4_needsUpdate = isJetSystematicAK4 || isNewEvent || jetAK4_isInvalid_ || (jetAK4_lastSystematic_ != "central" && !isJetSystematicAK4);
+  if ( jetAK4_needsUpdate )
+  {
+    event_.jetsAK4_ = jetReaderAK4_->read();
+    event_.jet_ptrsAK4_ = convert_to_ptrs(event_.jetsAK4_);
+    event_.selJetsUncleanedAK4_ = jetSelectorAK4_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
+    event_.selJetsUncleanedAK4_btagLoose_ = jetSelectorAK4_btagLoose_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
+    event_.selJetsUncleanedAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
+    isUpdatedJetsAK4 = true;
+  }
+
   bool isMuonSystematic = contains(muon_supported_systematics_, current_central_or_shift_);
   bool isUpdatedMuons = false;
   bool muon_needsUpdate = isMuonSystematic || isNewEvent || (muon_lastSystematic_ != "central" && !isMuonSystematic);
   if ( muon_needsUpdate )
   {
     event_.muons_ = muonReader_->read();
+    setJetBtagScore(event_.muons_, event_.jetsAK4_);
     setFilterBits(event_.muons_, event_.triggerInfo());
     event_.muon_ptrs_ = convert_to_ptrs(event_.muons_);
     event_.looseMuonsFull_ = looseMuonSelector_->operator()(event_.muon_ptrs_, isHigherConePt<RecoMuon>);
@@ -499,6 +515,7 @@ EventReader::read() const
   if ( electron_needsUpdate )
   {
     event_.electrons_ = electronReader_->read();
+    setJetBtagScore(event_.electrons_, event_.jetsAK4_);
     setFilterBits(event_.electrons_, event_.triggerInfo());
     event_.electron_ptrs_ = convert_to_ptrs(event_.electrons_);
     event_.looseElectronsUncleaned_ = looseElectronSelector_->operator()(event_.electron_ptrs_, isHigherConePt<RecoElectron>);
@@ -571,18 +588,7 @@ EventReader::read() const
     clearEvent(Level::kHadTau);
     return event_;
   }
-  bool isJetSystematicAK4 = contains(jetsAK4_supported_systematics_, current_central_or_shift_);
-  bool isUpdatedJetsAK4 = false;
-  bool jetAK4_needsUpdate = isJetSystematicAK4 || isNewEvent || jetAK4_isInvalid_ || (jetAK4_lastSystematic_ != "central" && !isJetSystematicAK4);
-  if ( jetAK4_needsUpdate )
-  {
-    event_.jetsAK4_ = jetReaderAK4_->read();
-    event_.jet_ptrsAK4_ = convert_to_ptrs(event_.jetsAK4_);
-    event_.selJetsUncleanedAK4_ = jetSelectorAK4_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
-    event_.selJetsUncleanedAK4_btagLoose_ = jetSelectorAK4_btagLoose_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
-    event_.selJetsUncleanedAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
-    isUpdatedJetsAK4 = true;
-  }
+
   if ( isUpdatedMuons || isUpdatedElectrons || isUpdatedHadTaus || isUpdatedJetsAK4 )
   {
     if ( jetCleaningByIndex_ )

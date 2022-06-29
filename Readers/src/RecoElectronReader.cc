@@ -215,11 +215,6 @@ RecoElectronReader::read() const
 
         RecoElectron & electron = electrons.back();
 
-        for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
-        {
-          const double val = kv.second[idxLepton];
-          electron.assocJetBtagCSVs_[kv.first] = std::isnan(val) ? -2. : val;
-        }
         for(const auto & EGammaID_choice: gElectronReader->rawMVAs_POG_)
         {
           electron.egammaID_raws_[EGammaID_choice.first] = EGammaID_choice.second[idxLepton];

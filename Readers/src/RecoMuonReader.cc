@@ -146,11 +146,6 @@ RecoMuonReader::read() const
             }));
         RecoMuon & muon = muons.back();
 
-        for(const auto & kv: gLeptonReader->assocJetBtagCSVs_)
-        {
-          const double val = kv.second[idxLepton];
-          muon.assocJetBtagCSVs_[kv.first] = std::isnan(val) ? -2. : val;
-        }
         if(mvaTTH_wp_ > 0.)
         {
           muon.set_mvaRawTTH_cut(mvaTTH_wp_);

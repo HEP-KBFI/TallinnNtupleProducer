@@ -139,6 +139,9 @@ class RecoLepton : public ChargedParticle
   const GenPhoton * genPhoton() const;
   const GenJet * genJet() const;
 
+  void
+  setjetBtagCSV(double btag);
+
   bool hasJetBtagCSV(Btag btag) const;
 
   bool isGenMatched(bool requireChargeMatch) const;
