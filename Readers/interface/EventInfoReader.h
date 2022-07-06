@@ -52,12 +52,17 @@ class EventInfoReader : public ReaderBase
 
   RunLumiEventReader * runLumiEventReader_;
 
+  const std::string era_;
   const std::string branchName_genHiggsDecayMode_;
   const std::string branchName_genWeight_;
   const std::string branchName_LHEReweightingWeight_;
   const std::string branchName_nLHEReweightingWeight_;
   const std::string branchName_htxs_pt_;
   const std::string branchName_htxs_y_;
+  const std::string branchName_Pileup_nTrueInt_;
+  const std::string pileupFile_;
+
+  float Pileup_nTrueInt_;
 };
 
 #endif // TallinnNtupleProducer_Readers_EventInfoReader_h

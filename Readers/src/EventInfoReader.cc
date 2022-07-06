@@ -5,9 +5,10 @@
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_pileup()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                    // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
-
+#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"
 #include "TString.h"                                                              // Form()
 #include "TTree.h"                                                                // TTree
+#include "correction.h"
 
 #include <assert.h>                                                               // assert()
 
@@ -18,12 +19,15 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   , analysisConfig_(new AnalysisConfig("produceNtuple", cfg))
   , info_(new EventInfo(*analysisConfig_))
   , runLumiEventReader_(new RunLumiEventReader(cfg))
+  , era_(cfg.getParameter<std::string>("era"))
   , branchName_genHiggsDecayMode_("genHiggsDecayMode")
   , branchName_genWeight_("genWeight")
   , branchName_LHEReweightingWeight_("LHEReweightingWeight")
   , branchName_nLHEReweightingWeight_(Form("n%s", branchName_LHEReweightingWeight_.data()))
   , branchName_htxs_pt_("HTXS_Higgs_pt")
   , branchName_htxs_y_("HTXS_Higgs_y")
+  , branchName_Pileup_nTrueInt_("Pileup_nTrueInt")
+  , pileupFile_(LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/pu/%s/puWeights.json.gz", era_.data())).fullPath())
 {
   const bool isMC = cfg.getParameter<bool>("isMC");
   if ( isMC )
@@ -74,9 +78,7 @@ EventInfoReader::setBranchAddresses(TTree * inputTree)
     bai.setBranchAddress(info_->genWeight_, branchName_genWeight_);
     if(read_puWeight_)
     {
-      bai.setBranchAddress(info_->pileupWeight_, getBranchName_pileup(PUsys::central));
-      bai.setBranchAddress(info_->pileupWeightUp_, getBranchName_pileup(PUsys::up));
-      bai.setBranchAddress(info_->pileupWeightDown_, getBranchName_pileup(PUsys::down));
+      bai.setBranchAddress(Pileup_nTrueInt_, branchName_Pileup_nTrueInt_);
     }
     if(info_->analysisConfig().apply_topPtReweighting())
     {
@@ -124,6 +126,12 @@ EventInfoReader::read() const
   info_->run_ = runLumiEvent.run();
   info_->lumi_ = runLumiEvent.lumi();
   info_->event_ = runLumiEvent.event();
+  std::string era_last_two_digit = ( era_ == "2016" ) ? "16" : ( era_ == "2017" ? "17" : "18");
+  auto cset = correction::CorrectionSet::from_file(pileupFile_)->at(Form("Collisions%s_UltraLegacy_goldenJSON", era_last_two_digit.data()));
+  info_->pileupWeight_ = cset->evaluate({Pileup_nTrueInt_, "nominal"});
+  info_->pileupWeightUp_ = cset->evaluate({Pileup_nTrueInt_, "up"});
+  info_->pileupWeightDown_ = cset->evaluate({Pileup_nTrueInt_, "down"});
+  std::cout << "nominal: " << info_->pileupWeight_ << "\tup: " << info_->pileupWeightUp_ << "\tdown: " << info_->pileupWeightDown_ << std::endl;
   return *info_;
 }
 
