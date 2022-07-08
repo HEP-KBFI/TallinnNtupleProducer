@@ -27,7 +27,7 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   , branchName_htxs_pt_("HTXS_Higgs_pt")
   , branchName_htxs_y_("HTXS_Higgs_y")
   , branchName_Pileup_nTrueInt_("Pileup_nTrueInt")
-  , pileupFile_(LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/pu/%s/puWeights.json.gz", era_.data())).fullPath())
+  , pileupCorrectionSet_(LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/pu/%s/puWeights.json.gz", era_.data())).fullPath())
 {
   const bool isMC = cfg.getParameter<bool>("isMC");
   if ( isMC )
@@ -38,6 +38,8 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   const bool isMC_ttH = analysisConfig_->isMC_ttH();
   const std::vector<std::pair<std::string, int>> evt_htxs_binning = get_htxs_binning(isMC_ttH);
   info_->read_htxs(!evt_htxs_binning.empty());
+  const std::string era_last_two_digit = ( era_ == "2016" ) ? "16" : ( era_ == "2017" ? "17" : "18");
+  cset_ = correction::CorrectionSet::from_file(pileupCorrectionSet_)->at(Form("Collisions%s_UltraLegacy_goldenJSON", era_last_two_digit.data()));
 }
 
 EventInfoReader::~EventInfoReader()
@@ -126,12 +128,9 @@ EventInfoReader::read() const
   info_->run_ = runLumiEvent.run();
   info_->lumi_ = runLumiEvent.lumi();
   info_->event_ = runLumiEvent.event();
-  std::string era_last_two_digit = ( era_ == "2016" ) ? "16" : ( era_ == "2017" ? "17" : "18");
-  auto cset = correction::CorrectionSet::from_file(pileupFile_)->at(Form("Collisions%s_UltraLegacy_goldenJSON", era_last_two_digit.data()));
-  info_->pileupWeight_ = cset->evaluate({Pileup_nTrueInt_, "nominal"});
-  info_->pileupWeightUp_ = cset->evaluate({Pileup_nTrueInt_, "up"});
-  info_->pileupWeightDown_ = cset->evaluate({Pileup_nTrueInt_, "down"});
-  std::cout << "nominal: " << info_->pileupWeight_ << "\tup: " << info_->pileupWeightUp_ << "\tdown: " << info_->pileupWeightDown_ << std::endl;
+  info_->pileupWeight_ = cset_->evaluate({Pileup_nTrueInt_, "nominal"});
+  info_->pileupWeightUp_ = cset_->evaluate({Pileup_nTrueInt_, "up"});
+  info_->pileupWeightDown_ = cset_->evaluate({Pileup_nTrueInt_, "down"});
   return *info_;
 }
 
