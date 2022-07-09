@@ -38,8 +38,8 @@ EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   const bool isMC_ttH = analysisConfig_->isMC_ttH();
   const std::vector<std::pair<std::string, int>> evt_htxs_binning = get_htxs_binning(isMC_ttH);
   info_->read_htxs(!evt_htxs_binning.empty());
-  const std::string era_last_two_digit = ( era_ == "2016" ) ? "16" : ( era_ == "2017" ? "17" : "18");
-  cset_ = correction::CorrectionSet::from_file(pileupCorrectionSet_)->at(Form("Collisions%s_UltraLegacy_goldenJSON", era_last_two_digit.data()));
+  const std::string era_last_two_digit = era_.substr(era_.size()-2);
+  cset_ = correction::CorrectionSet::from_file(pileupCorrectionSet_)->at(Form("Collisions%s_goldenJSON", era_last_two_digit.data()));
 }
 
 EventInfoReader::~EventInfoReader()
