@@ -2,3 +2,12 @@ __init__.py
 __pycache__
 .gdb_history
 *.root
+.idea/
+.qtc_clangd/
+*.cflags
+*.config
+*.creator
+*.creator.user
+*.cxxflags
+*.files
+*.includes
