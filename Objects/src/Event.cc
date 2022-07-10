@@ -31,7 +31,7 @@ Event::eventInfo() const
 double
 Event::topPtRwgtSF() const
 {
-  return ::topPtRwgtSF(genParticles_);
+  return ::topPtRwgtSF(genParticles_, eventInfo_->analysisConfig().apply_topPtReweighting());
 }
 
 const TriggerInfo&

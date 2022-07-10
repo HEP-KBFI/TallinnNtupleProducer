@@ -2,8 +2,18 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h" // format_vint()
+#include "TallinnNtupleProducer/CommonTools/interface/topPtRwgt.h" // TopPtRwgtOption::
 
 #include <algorithm> // std::sort()
+
+namespace
+{
+  constexpr double
+  square(double x)
+  {
+    return x * x;
+  }
+}
 
 Int_t
 getHiggsDecayMode(const GenParticleCollection & genParticles)
@@ -132,8 +142,83 @@ getHiggsDecayMode(const GenParticleCollection & genParticles)
 }
 
 double
-topPtRwgtSF(const GenParticleCollection & genParticles)
+topPtRwgtSF(const GenParticleCollection & genParticles,
+            TopPtRwgtOption option)
 {
-  // TODO implement me!
-  return 0.;
+  // Find a top and an anti-top with two daughters
+  std::vector<int> genTopIdxs;
+  for(std::size_t genPartIdx = 0; genPartIdx < genParticles.size(); ++genPartIdx)
+  {
+    const GenParticle & topCandidate = genParticles.at(genPartIdx);
+    if(topCandidate.absPdgId() == 6)
+    {
+      const std::vector<int> dauIdxs = topCandidate.dauIdxs();
+      if(dauIdxs.size() == 2)
+      {
+        genTopIdxs.push_back(genPartIdx);
+      }
+    }
+  }
+  if(genTopIdxs.size() != 2)
+  {
+    throw cmsException(__func__, __LINE__) << "Invalid number of gen tops found: " << genTopIdxs.size();
+  }
+  const GenParticle & firstTop = genParticles.at(genTopIdxs.at(0));
+  const GenParticle & secondTop = genParticles.at(genTopIdxs.at(1));
+  if(firstTop.pdgId() * secondTop.pdgId() > 0)
+  {
+    throw cmsException(__func__, __LINE__) << "Found two tops with the same PDG ID: " << firstTop << " and " << secondTop;
+  }
+  std::vector<double> topPts = { firstTop.pt(), secondTop.pt() };
+  
+  double topPtRwgt = 1.;
+  for(double topPt: topPts)
+  {
+    switch(option)
+    {
+      case TopPtRwgtOption::TOP16011:
+      {
+        const double topPtLim = std::min(topPt, 800.);
+        const double a = 0.0615;
+        const double b = -0.0005;
+        topPtRwgt *= std::exp(a + b * topPtLim);
+        break;
+      }
+      case TopPtRwgtOption::Linear:
+      {
+        const double topPtLim = std::min(topPt, 500.);
+        const double a = 0.058;
+        const double b = -0.000466;
+        topPtRwgt *= std::exp(a + b * topPtLim);
+        break;
+      }
+      case TopPtRwgtOption::Quadratic:
+      {
+        const double topPtLim = std::min(topPt, 472.);
+        const double a = 0.088;
+        const double b = -0.00087;
+        const double c = 9.2e-07;
+        topPtRwgt *= std::exp(a + b * topPtLim + c * ::square(topPtLim));
+        break;
+      }
+      case TopPtRwgtOption::HighPt:
+      {
+        // see slide 12 of:
+        // https://indico.cern.ch/event/904971/contributions/3857701/attachments/2036949/3410728/TopPt_20.05.12.pdf
+        const double topPtLim = std::min(topPt, 3000.);
+        const double a = -2.02274e-01;
+        const double b =  1.09734e-04;
+        const double c = -1.30088e-07;
+        const double d =  5.83494e+01;
+        const double e =  1.96252e+02;
+        topPtRwgt *= std::exp(a + b * topPtLim + c * ::square(topPtLim) + d / (topPtLim + e));
+        break;
+      }
+      // just do nothing
+      case TopPtRwgtOption::Disable: __attribute__((fallthrough));
+      default: ;
+    }
+  }
+  assert(topPtRwgt > 0.);
+  return std::sqrt(topPtRwgt);
 }
