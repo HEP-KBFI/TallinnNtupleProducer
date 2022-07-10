@@ -44,6 +44,7 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
   , assocJet_p4_(assocJet_pt_, eta_, phi_, mass_)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
+  , genPhoton_(nullptr)
   , genJet_(nullptr)
   , isCMSPOG_(false)
   , isLoose_(false)
