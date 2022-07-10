@@ -2,6 +2,8 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
 
+#include <algorithm> // std::find()
+
 GenPhotonFilter::GenPhotonFilter(const std::string & mode,
                                  double minPt,
                                  double maxAbsEta,
@@ -9,6 +11,7 @@ GenPhotonFilter::GenPhotonFilter(const std::string & mode,
   : minPt_(minPt)
   , maxAbsEta_(maxAbsEta)
   , minDeltaR_(minDeltaR)
+  , hardProcessPdgIds_({ 1, 2, 3, 4, 5, 11, 13, 15, 21 })
 {
   if      ( mode == "disabled" ) mode_ = Mode::kDisabled;
   else if ( mode == "enabled"  ) mode_ = Mode::kEnabled;
@@ -20,19 +23,21 @@ GenPhotonFilter::~GenPhotonFilter()
 {}
 
 int
-GenPhotonFilter::getNumPassingPhotons(const std::vector<GenParticle> & genPhotons,
-                                      const std::vector<GenParticle> & genFromHardProcess) const
+GenPhotonFilter::getNumPassingPhotons(const std::vector<const GenParticle *> & genPhotons,
+                                      const std::vector<const GenParticle *> & genFromHardProcess) const
 {
   int numSelPhotons = 0;
-  for(const GenParticle & genPhoton: genPhotons)
+  for(const GenParticle * genPhoton: genPhotons)
   {
     double deltaR = +1e6;
-    for(const GenParticle & genParticle: genFromHardProcess)
+    for(const GenParticle * genParticle: genFromHardProcess)
     {
-      deltaR = std::min(deltaR, genPhoton.deltaR(genParticle));
+      deltaR = std::min(deltaR, genPhoton->deltaR(*genParticle));
     }
-    // see https://github.com/HEP-KBFI/hh-multilepton/issues/36
-    if(genPhoton.checkStatusFlag(StatusFlag::isPrompt) && genPhoton.pt() > minPt_ && genPhoton.absEta() < maxAbsEta_ && deltaR > minDeltaR_)
+    if(genPhoton->checkStatusFlag(StatusFlag::isPrompt) &&
+       genPhoton->pt() > minPt_ &&
+       genPhoton->absEta() < maxAbsEta_ &&
+       deltaR > minDeltaR_)
     {
       ++numSelPhotons;
     }
@@ -44,15 +49,37 @@ bool
 GenPhotonFilter::operator()(const std::vector<GenParticle> & genParticles) const
 {
   if ( mode_ == Mode::kDisabled ) return true;
-  
-  std::vector<GenParticle> genPhotons;
-  std::vector<GenParticle> genProxyPhotons;
-  std::vector<GenParticle> genFromHardProcess;
-  
-  //TODO implement me!
 
+  std::vector<const GenParticle *> genFromHardProcess;
+  std::vector<const GenParticle *> genPromptPhotons;
+  std::vector<int> genPromptLeptons;
+
+  for(std::size_t genPartIdx = 0; genPartIdx < genParticles.size(); ++genPartIdx)
+  {
+    const GenParticle & genParticle = genParticles.at(genPartIdx);
+    if(genParticle.checkStatusFlag(StatusFlag::isHardProcess) &&
+       std::find(hardProcessPdgIds_.begin(), hardProcessPdgIds_.end(), genParticle.absPdgId()) != hardProcessPdgIds_.end() &&
+       ((genParticle.absPdgId() == 21 || genParticle.absPdgId() < 6) ? genParticle.status() != 21 : true))
+    {
+      genFromHardProcess.push_back(&genParticle);
+    }
+    else if(genParticle.checkStatusFlag(StatusFlag::isPrompt))
+    {
+      if(genParticle.absPdgId() == 22)
+      {
+        genPromptPhotons.push_back(&genParticle);
+      }
+      else
+      {
+        genPromptLeptons.push_back(genPartIdx);
+      }
+    }
+  }
+  //TODO still need to implement the proxy photons
+
+  std::vector<const GenParticle *> genProxyPhotons;
   const int numSelPhotons =
-    getNumPassingPhotons(genPhotons, genFromHardProcess) +
+    getNumPassingPhotons(genPromptPhotons, genFromHardProcess) +
     getNumPassingPhotons(genProxyPhotons, genFromHardProcess)
   ;
 
