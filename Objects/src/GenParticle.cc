@@ -12,7 +12,8 @@ PdgTable::get_charge(int pdgId)
   static std::map<int, int> ids;
   if(ids.find(pdgId) == ids.end())
   {
-    ids[pdgId] = TDatabasePDG::Instance()->GetParticle(pdgId)->Charge();
+    const TParticlePDG * const pdgParticle = TDatabasePDG::Instance()->GetParticle(pdgId);
+    ids[pdgId] = pdgParticle ? pdgParticle->Charge() : 0; // assume neutral if not available in DB
   }
   return ids.at(pdgId);
 }
@@ -29,7 +30,8 @@ PdgTable::get_mass(double mass,
   {
     if(masses.find(absPdgId) == masses.end())
     {
-      masses[absPdgId] = TDatabasePDG::Instance()->GetParticle(pdgId)->Mass();
+      const TParticlePDG * const pdgParticle = TDatabasePDG::Instance()->GetParticle(pdgId);
+      masses[absPdgId] = pdgParticle ? pdgParticle->Mass() : 0; // assume massless if not available in DB
     }
     return masses.at(absPdgId);
   }
