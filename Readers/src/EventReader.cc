@@ -298,11 +298,6 @@ EventReader::setBranchAddresses(TTree * inputTree)
   const std::vector<std::string> genHadTauBranches = genHadTauReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(inputTree);
 
-  std::vector<std::string> genMatchToMuonBranches;
-  std::vector<std::string> genMatchToElectronBranches;
-  std::vector<std::string> genMatchToHadTauBranches;
-  std::vector<std::string> genMatchToJetBranches;
-
   const std::vector<std::string> jetBranchesAK8_Hbb = jetReaderAK8_Hbb_->setBranchAddresses(inputTree);
   const std::vector<std::string> jetBranchesAK8_Wjj = jetReaderAK8_Wjj_->setBranchAddresses(inputTree);
   const std::vector<std::string> metBranches = metReader_->setBranchAddresses(inputTree);
@@ -321,10 +316,6 @@ EventReader::setBranchAddresses(TTree * inputTree)
   bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
   bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
 
-  bound_branches.insert(bound_branches.end(), genMatchToMuonBranches.begin(), genMatchToMuonBranches.end());
-  bound_branches.insert(bound_branches.end(), genMatchToElectronBranches.begin(), genMatchToElectronBranches.end());
-  bound_branches.insert(bound_branches.end(), genMatchToHadTauBranches.begin(), genMatchToHadTauBranches.end());
-  bound_branches.insert(bound_branches.end(), genMatchToJetBranches.begin(), genMatchToJetBranches.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Hbb.begin(), jetBranchesAK8_Hbb.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Wjj.begin(), jetBranchesAK8_Wjj.end());
   bound_branches.insert(bound_branches.end(), metBranches.begin(), metBranches.end());
