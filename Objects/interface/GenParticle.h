@@ -26,6 +26,10 @@ class PdgTable {
 public:
   static int
   get_charge(int pdgId);
+  
+  static double
+  get_mass(double mass,
+           int pdgId);
 };
 
 class GenParticle : public ChargedParticle
@@ -37,10 +41,6 @@ class GenParticle : public ChargedParticle
               Double_t eta,
               Double_t phi,
               Double_t mass,
-              Int_t pdgId,
-              Int_t status = -1,
-              Int_t statusFlags = -1);
-  GenParticle(const math::PtEtaPhiMLorentzVector & p4,
               Int_t pdgId,
               Int_t status = -1,
               Int_t statusFlags = -1);

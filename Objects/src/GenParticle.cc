@@ -15,6 +15,25 @@ PdgTable::get_charge(int pdgId)
   return ids.at(pdgId);
 }
 
+double
+PdgTable::get_mass(double mass,
+                   int pdgId)
+{
+  static std::map<int, double> masses;
+  const int absPdgId = std::abs(pdgId);
+  // https://github.com/cms-sw/cmssw/blob/CMSSW_12_3_1/PhysicsTools/NanoAOD/python/genparticles_cff.py#L44
+  if((absPdgId>=1 && absPdgId<=5) || (absPdgId>=11 && absPdgId<=16) || pdgId==21 || pdgId==111 ||
+     absPdgId==211 || absPdgId==421 || absPdgId==411 || (pdgId==22 && mass<1))
+  {
+    if(masses.find(absPdgId) == masses.end())
+    {
+      masses[absPdgId] = TDatabasePDG::Instance()->GetParticle(pdgId)->Mass();
+    }
+    return masses.at(absPdgId);
+  }
+  return mass;
+}
+
 GenParticle::GenParticle()
   : GenParticle(0., 0., 0., 0., 0, -1, -1)
 {}
@@ -38,17 +57,7 @@ GenParticle::GenParticle(Double_t pt,
                          Int_t pdgId,
                          Int_t status,
                          Int_t statusFlags)
-  : ChargedParticle(pt, eta, phi, mass, pdgId, PdgTable::get_charge(pdgId))
-  , status_(status)
-  , statusFlags_(statusFlags)
-  , isMatchedToReco_(false)
-{}
-
-GenParticle::GenParticle(const math::PtEtaPhiMLorentzVector & p4,
-                         Int_t pdgId,
-                         Int_t status,
-                         Int_t statusFlags)
-  : ChargedParticle(p4, pdgId, PdgTable::get_charge(pdgId))
+  : ChargedParticle(pt, eta, phi, PdgTable::get_mass(mass, pdgId), pdgId, PdgTable::get_charge(pdgId))
   , status_(status)
   , statusFlags_(statusFlags)
   , isMatchedToReco_(false)
