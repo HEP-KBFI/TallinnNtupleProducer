@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
-#include "TallinnNtupleProducer/CommonTools/interface/genTools.h"                 // getHiggsDecayMode()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/get_ignore_ak8_sys.h"       // get_ignore_ak8_sys()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // get_tau_id_wp_int()
@@ -583,11 +582,6 @@ EventReader::read() const
       event_.genParticles_ = genParticleReader_->read();
       event_.genHadTaus_ = genHadTauReader_->read();
       event_.genJets_ = genJetReader_->read();
-      
-      if(event_.eventInfo_->analysisConfig().isMC_H() || event_.eventInfo_->analysisConfig().isMC_HH())
-      {
-        event_.genHiggsDecayMode_ = getHiggsDecayMode(event_.genParticles_);
-      }
     }
 
     // CV: performing the gen-matching on the muon_ptrs, electron_ptrs, and hadTau_ptrs collections

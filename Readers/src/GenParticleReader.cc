@@ -19,6 +19,7 @@ GenParticleReader::GenParticleReader(const edm::ParameterSet & cfg)
   , particle_pdgId_(nullptr)
   , particle_status_(nullptr)
   , particle_statusFlags_(nullptr)
+  , particle_genPartIdxMother_(nullptr)
 {
   branchName_obj_ = cfg.getParameter<std::string>("branchName");
   branchName_num_ = Form("n%s", branchName_obj_.data());
@@ -41,6 +42,7 @@ GenParticleReader::~GenParticleReader()
     delete[] gInstance->particle_pdgId_;
     delete[] gInstance->particle_status_;
     delete[] gInstance->particle_statusFlags_;
+    delete[] gInstance->particle_genPartIdxMother_;
     instances_[branchName_obj_] = nullptr;
   }
 }
@@ -57,6 +59,7 @@ GenParticleReader::setBranchNames()
     branchName_pdgId_ = Form("%s_%s", branchName_obj_.data(), "pdgId");
     branchName_status_ = Form("%s_%s", branchName_obj_.data(), "status");
     branchName_statusFlags_ = Form("%s_%s", branchName_obj_.data(), "statusFlags");
+    branchName_genPartIdxMother_ = Form("%s_%s", branchName_obj_.data(), "genPartIdxMother");
     instances_[branchName_obj_] = this;
   }
   else
@@ -87,12 +90,13 @@ GenParticleReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(particle_pdgId_, branchName_pdgId_);
     bai.setBranchAddress(particle_status_, branchName_status_);
     bai.setBranchAddress(particle_statusFlags_, branchName_statusFlags_);
+    bai.setBranchAddress(particle_genPartIdxMother_, branchName_genPartIdxMother_);
     return bai.getBoundBranchNames_read();
   }
   return {};
 }
 
-std::vector<GenParticle>
+GenParticleCollection
 GenParticleReader::read() const
 {
   const GenParticleReader * const gInstance = instances_[branchName_obj_];
@@ -100,12 +104,12 @@ GenParticleReader::read() const
 
   const UInt_t nParticles = gInstance->nParticles_;
   if ( nParticles > max_nParticles_ ) {
-    throw cmsException(this)
+    throw cmsException(this, __func__, __LINE__)
       << "Number of particles stored in Ntuple = " << nParticles << "," 
-         " exceeds max_nParticles = " << max_nParticles_ << " !!\n";
+         " exceeds max_nParticles = " << max_nParticles_;
   }
 
-  std::vector<GenParticle> particles;
+  GenParticleCollection particles;
   if(nParticles > 0)
   {
     particles.reserve(nParticles);
@@ -119,8 +123,22 @@ GenParticleReader::read() const
         gInstance->particle_pdgId_[idxParticle],
         gInstance->particle_status_[idxParticle],
         gInstance->particle_statusFlags_[idxParticle],
+        gInstance->particle_genPartIdxMother_[idxParticle],
       });
     }
-  } 
+  }
+
+  // loop over the gen particles in order to establish complete mapping between the mother-daughter particles
+  const int nof_particles = static_cast<int>(particles.size());
+  for(std::size_t genPartIdx = 0; genPartIdx < particles.size(); ++genPartIdx)
+  {
+    const int genPartIdxMother = particles.at(genPartIdx).momIdx();
+    assert(genPartIdxMother < nof_particles);
+    if(genPartIdxMother >= 0)
+    {
+      particles.at(genPartIdxMother).addDaughter(genPartIdx);
+    }
+  }
+
   return particles;
 }

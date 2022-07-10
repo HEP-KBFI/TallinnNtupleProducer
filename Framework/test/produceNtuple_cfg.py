@@ -10,6 +10,7 @@ from TallinnNtupleProducer.Writers.EvtReweightWriter_tH_cfi import evtReweight_t
 from TallinnNtupleProducer.Writers.EvtWeightWriter_cfi import evtWeight as writers_evtWeight
 from TallinnNtupleProducer.Writers.GenHHKinematicsWriter_cfi import genHHKinematics as writers_genHHKinematics
 from TallinnNtupleProducer.Writers.GenPhotonFilterWriter_cfi import genPhotonFilter as writers_genPhotonFilter
+from TallinnNtupleProducer.Writers.EvtInfoWriter_cfi import evtInfo as writers_evtInfo
 from TallinnNtupleProducer.Writers.HtoZZto4lVetoWriter_cfi import HtoZZto4lVeto as writers_HtoZZto4lVeto
 from TallinnNtupleProducer.Writers.LowMassLeptonPairVetoWriter_cfi import lowMassLeptonPairVeto as writers_lowMassLeptonPairVeto
 from TallinnNtupleProducer.Writers.MEtFilterWriter_cfi import metFilters as writers_metFilters
@@ -169,6 +170,7 @@ process.produceNtuple = cms.PSet(
         # CV: GenPhotonFilterWriter plugin can be run for some MC samples only,
         #     because the collection "GenPhotonCandidate" does not exist in all MC samples !!
         #writers_genPhotonFilter,
+        writers_evtInfo,
         writers_hadTauMultiplicity,
         writers_leptonMultiplicity,
         writers_lowMassLeptonPairVeto,

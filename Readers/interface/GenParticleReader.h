@@ -1,7 +1,7 @@
 #ifndef TallinnNtupleProducer_Readers_GenParticleReader_h
 #define TallinnNtupleProducer_Readers_GenParticleReader_h
 
-#include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle, GenParticleCollection
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"  // ReaderBase
 
 #include <map>                                                   // std::map
@@ -25,7 +25,7 @@ class GenParticleReader : public ReaderBase
    * @brief Read branches from tree and use information to fill collection of GenParticle objects
    * @return Collection of GenParticle objects
    */
-  std::vector<GenParticle>
+  GenParticleCollection
   read() const;
 
  protected:
@@ -46,6 +46,7 @@ class GenParticleReader : public ReaderBase
   std::string branchName_pdgId_;
   std::string branchName_status_;
   std::string branchName_statusFlags_;
+  std::string branchName_genPartIdxMother_;
 
   UInt_t nParticles_;
   Float_t * particle_pt_;
@@ -55,6 +56,7 @@ class GenParticleReader : public ReaderBase
   Int_t * particle_pdgId_;
   Int_t * particle_status_;
   Int_t * particle_statusFlags_;
+  Int_t * particle_genPartIdxMother_;
 
   // CV: make sure that only one GenParticleReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

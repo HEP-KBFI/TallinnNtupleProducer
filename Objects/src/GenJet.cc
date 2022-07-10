@@ -13,7 +13,7 @@ GenJet::GenJet(Double_t pt,
                Double_t mass,
                Int_t partonFlavour,
                Int_t hadronFlavour)
-  : GenParticle(pt, eta, phi, mass, 0, -1, -1)
+  : GenParticle(pt, eta, phi, mass, 0, -1, -1, -1)
   , partonFlav_(partonFlavour)
   , hadronFlav_(hadronFlavour)
 {}

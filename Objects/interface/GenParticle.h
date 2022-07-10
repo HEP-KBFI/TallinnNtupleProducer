@@ -42,8 +42,9 @@ class GenParticle : public ChargedParticle
               Double_t phi,
               Double_t mass,
               Int_t pdgId,
-              Int_t status = -1,
-              Int_t statusFlags = -1);
+              Int_t status,
+              Int_t statusFlags,
+              Int_t momIdx);
   virtual ~GenParticle() {}
 
   /**
@@ -68,6 +69,18 @@ class GenParticle : public ChargedParticle
    */
   Int_t
   statusFlags() const;
+  
+  /**
+   * @brief Get index of mother particle
+   */
+  Int_t
+  momIdx() const;
+
+  /**
+   * @brief Get the list of indices to daughter particles
+   */
+  std::vector<int>
+  dauIdxs() const;
 
   /**
    * @brief Sets the variable isMatchedToReco_ to true, indicating that
@@ -92,17 +105,25 @@ class GenParticle : public ChargedParticle
   bool
   checkStatusFlag(StatusFlag statusFlag) const;
 
+  /**
+   * @brief Record the index to its direct daughter particle
+   * @param idx
+   */
+  void
+  addDaughter(int idx);
+
  protected:
   
-  Int_t status_;        ///< particle status (1 = stable)
-  Int_t statusFlags_;   ///< gen status flags stored bitwise
-  UChar_t genPartFlav_; ///< parton flavor of the gen particle
+  Int_t status_;             ///< particle status (1 = stable)
+  Int_t statusFlags_;        ///< gen status flags stored bitwise
+  UChar_t genPartFlav_;      ///< parton flavor of the gen particle
+  Int_t momIdx_;             ///< index to mother particle
+  std::vector<int> dauIdxs_; ///< indices to daughter particles
 
   bool isMatchedToReco_; ///< true, if the gen object is already matched to a reco object
 };
 
 typedef std::vector<GenParticle> GenParticleCollection;
-typedef std::vector<const GenParticle*> GenParticlePtrCollection;
 
 std::ostream &
 operator<<(std::ostream & stream,

@@ -1,6 +1,6 @@
 #include "TallinnNtupleProducer/Objects/interface/Event.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/genTools.h" // topPtRwgtSF()
+#include "TallinnNtupleProducer/Objects/interface/genTools.h" // ::topPtRwgtSF()
 
 #include <TString.h> // TString
 
@@ -15,7 +15,6 @@ Event::Event()
 Event::Event(const EventInfo& eventInfo, const TriggerInfo& triggerInfo)
   : eventInfo_(&eventInfo)
   , triggerInfo_(&triggerInfo)
-  , genHiggsDecayMode_(0)
   , isValid_(false)
 {}
 
@@ -191,13 +190,6 @@ Event::genParticles() const
 {
   return genParticles_;
 }
-
-Int_t
-Event::genHiggsDecayMode() const
-{
-  return genHiggsDecayMode_;
-}
-
 
 namespace
 {

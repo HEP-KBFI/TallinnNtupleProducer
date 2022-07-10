@@ -1,5 +1,5 @@
-#ifndef TallinnNtupleProducer_Writers_GenPhotonFilterWriter_h
-#define TallinnNtupleProducer_Writers_GenPhotonFilterWriter_h
+#ifndef TallinnNtupleProducer_Writers_EvtInfoWriter_h
+#define TallinnNtupleProducer_Writers_EvtInfoWriter_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                       // edm::ParameterSet
 
@@ -8,14 +8,13 @@
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"               // WriterBase
 
 // forward declarations
-class GenPhotonFilter;
 class TTree;
 
-class GenPhotonFilterWriter : public WriterBase
+class EvtInfoWriter : public WriterBase
 {
  public:
-  GenPhotonFilterWriter(const edm::ParameterSet & cfg);
-  ~GenPhotonFilterWriter();
+  EvtInfoWriter(const edm::ParameterSet & cfg);
+  ~EvtInfoWriter();
 
   /**
    * @brief Call tree->Branch for all branches
@@ -38,12 +37,9 @@ class GenPhotonFilterWriter : public WriterBase
            const EvtWeightRecorder & evtWeightRecorder);
 
   /// name of branch in outputTree
-  std::string branchName_;
-
-  GenPhotonFilter * genPhotonFilter_;
-  bool apply_genPhotonFilter_;
-
-  bool passesGenPhotonFilter_;
+  std::string branchName_genHiggsDecayMode_;
+  
+  int genHiggsDecayMode_;
 };
 
-#endif // TallinnNtupleProducer_Writers_GenPhotonFilterFilterWriter_h
+#endif // TallinnNtupleProducer_Writers_EvtInfoWriter_h

@@ -1,5 +1,7 @@
 #include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle, Particle
 
+#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h" // format_vint()
+
 #include "TDatabasePDG.h" // TDatabasePDG
 
 #include <map> // std::map<,>
@@ -35,7 +37,7 @@ PdgTable::get_mass(double mass,
 }
 
 GenParticle::GenParticle()
-  : GenParticle(0., 0., 0., 0., 0, -1, -1)
+  : GenParticle(0., 0., 0., 0., 0, -1, -1, -1)
 {}
 
 GenParticle::GenParticle(const GenParticle & genParticle)
@@ -47,6 +49,7 @@ GenParticle::GenParticle(const GenParticle & genParticle)
     , genParticle.pdgId_
     , genParticle.status_
     , genParticle.statusFlags_
+    , genParticle.momIdx_
   )
 {}
 
@@ -56,10 +59,12 @@ GenParticle::GenParticle(Double_t pt,
                          Double_t mass,
                          Int_t pdgId,
                          Int_t status,
-                         Int_t statusFlags)
+                         Int_t statusFlags,
+                         Int_t momIdx)
   : ChargedParticle(pt, eta, phi, PdgTable::get_mass(mass, pdgId), pdgId, PdgTable::get_charge(pdgId))
   , status_(status)
   , statusFlags_(statusFlags)
+  , momIdx_(momIdx)
   , isMatchedToReco_(false)
 {}
 
@@ -73,6 +78,18 @@ Int_t
 GenParticle::statusFlags() const
 {
   return statusFlags_;
+}
+
+Int_t
+GenParticle::momIdx() const
+{
+  return momIdx_;
+}
+
+std::vector<int>
+GenParticle::dauIdxs() const
+{
+  return dauIdxs_;
 }
 
 void
@@ -93,13 +110,21 @@ GenParticle::checkStatusFlag(StatusFlag statusFlag) const
   return statusFlags_ < 0 ? false : statusFlags_ & (1 << static_cast<int>(statusFlag));
 }
 
+void
+GenParticle::addDaughter(int idx)
+{
+  dauIdxs_.push_back(idx);
+}
+
 std::ostream &
 operator<<(std::ostream & stream,
            const GenParticle & particle)
 {
   stream << static_cast<const ChargedParticle &>(particle)                << ","
             " status = "      << particle.status()                        << ","
-            " statusFlags = " << particle.statusFlags()
+            " statusFlags = " << particle.statusFlags()                   << ","
+            " momIdx = "      << particle.momIdx()                        << ","
+            " dauIdxs = "     << format_vint(particle.dauIdxs())
   ;
   return stream;
 }

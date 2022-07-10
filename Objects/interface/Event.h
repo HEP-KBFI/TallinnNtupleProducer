@@ -68,7 +68,6 @@ class Event
   const RecoVertex& vertex() const;
   
   const GenParticleCollection& genParticles() const;
-  Int_t genHiggsDecayMode() const;
 
   bool isInvalid() const;
 
@@ -145,8 +144,6 @@ class Event
   MEtFilter metFilters_;
 
   RecoVertex vertex_;
-  
-  Int_t genHiggsDecayMode_; // H, HH
 
   bool isValid_;
 };
