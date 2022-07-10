@@ -82,6 +82,7 @@ getHiggsDecayMode(const GenParticleCollection & genParticles)
         }
         // sort the indices in ascending order
         std::sort(currentHiggsDaughterPdgIds.begin(), currentHiggsDaughterPdgIds.end());
+        higgsDaughterPdgIds.push_back(currentHiggsDaughterPdgIds);
       }
       else
       {
@@ -97,8 +98,9 @@ getHiggsDecayMode(const GenParticleCollection & genParticles)
   // ii) compute final code from individual Higgses:
   // ii.a) if there are no Higgses
   // ii.b) if there's just one Higgs, return the code itself
-  // ii.c) if there are two Higgses, sort them in ascending order and return (smaller code) * 10000 + larger code
-  // ii.d) if there are more than two Higgses, then this could be extended to eg (smallest code) * 100000000 + (medium code) * 10000 + largest code
+  // ii.c) if there are two Higgs that have the same DM, then return just one code
+  // ii.d) if there are two Higgses but wit different codes, sort them in ascending order and return (smaller code) * 10000 + larger code
+  // ii.e) if there are more than two Higgses, then this could be extended to eg (smallest code) * 100000000 + (medium code) * 10000 + largest code
   //       but we're going to throw an error here
   //
   // This yields the following mapping to Higgs decay modes:
@@ -131,7 +133,14 @@ getHiggsDecayMode(const GenParticleCollection & genParticles)
   }
   else if(codes.size() == 2)
   {
-    return codes.at(0) * 10000 + codes.at(1);
+    if(codes.at(0) != codes.at(1))
+    {
+      return codes.at(0) * 10000 + codes.at(1);
+    }
+    else
+    {
+      return codes.at(0);
+    }
   }
   else if(codes.size() > 2)
   {
