@@ -166,6 +166,7 @@ operator<<(std::ostream & stream,
            const RecoJetAK4 & jet)
 {
   stream << static_cast<const RecoJetBase &>(jet)                            << ",\n"
+            " genPartIdx = "      << jet.genPartIdx()                        << ","
             " CSV = "             << jet.BtagCSV()                           << ","
             " jet ID = "          << jet.jetId()                             << ","
             " PU ID = "           << jet.puId()                              << ","

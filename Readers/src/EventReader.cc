@@ -503,12 +503,6 @@ EventReader::read() const
     event_.tightLeptons_ = getIntersection(event_.fakeableLeptons_, event_.tightLeptonsFull_, isHigherConePt<RecoLepton>);
     isUpdatedLeptons = true;
   }
-  if ( isDEBUG_ )
-  {
-    printCollection("looseLeptonsUncleaned", event_.looseLeptonsUncleaned_);
-    printCollection("fakeableLeptonsFull", event_.fakeableLeptonsFull_);
-    printCollection("tightLeptonsFull", event_.tightLeptonsFull_);
-  }
   if ( applyNumNominalLeptonsCut_ && event_.fakeableLeptons_.size() < numNominalLeptons_ )
   {
     clearEvent(Level::kLepton);
@@ -535,12 +529,6 @@ EventReader::read() const
     isUpdatedHadTaus = true;
     hadTau_lastSystematic_ = ( isHadTauSystematic ) ? current_central_or_shift_ : "central";
   }
-  if ( isDEBUG_ )
-  {
-    printCollection("fakeableHadTausUncleaned", event_.fakeableHadTausUncleaned_);
-    printCollection("fakeableHadTausFull", event_.fakeableHadTausFull_);
-    printCollection("tightHadTausFull", event_.tightHadTausFull_);
-  }
   hadTau_isInvalid_ = false;
   if ( applyNumNominalHadTausCut_ && event_.fakeableHadTaus_.size() < numNominalHadTaus_ )
   {
@@ -564,13 +552,6 @@ EventReader::read() const
     }
     isUpdatedJetsAK4 = true;
     jetAK4_lastSystematic_ = ( isJetSystematicAK4 ) ? current_central_or_shift_ : "central";
-  }
-  if ( isDEBUG_ )
-  {
-    printCollection("selJetsUncleanedAK4", event_.selJetsUncleanedAK4_);
-    printCollection("selJetsAK4", event_.selJetsAK4_);
-    printCollection("selJetsAK4_btagLoose", event_.selJetsAK4_btagLoose_);
-    printCollection("selJetsAK4_btagMedium", event_.selJetsAK4_btagMedium_);
   }
   jetAK4_isInvalid_ = false;
 
@@ -614,6 +595,22 @@ EventReader::read() const
       jetGenMatcherAK4_->addGenHadTauMatch(event_.jet_ptrsAK4_, event_.genHadTaus_);
       jetGenMatcherAK4_->addGenJetMatchByIdx(event_.jet_ptrsAK4_, event_.genJets_);
     }
+  }
+  if ( isDEBUG_ )
+  {
+    // print the collections *after* we've gen-matched everything
+    printCollection("looseLeptonsUncleaned", event_.looseLeptonsUncleaned_);
+    printCollection("fakeableLeptonsFull", event_.fakeableLeptonsFull_);
+    printCollection("tightLeptonsFull", event_.tightLeptonsFull_);
+
+    printCollection("fakeableHadTausUncleaned", event_.fakeableHadTausUncleaned_);
+    printCollection("fakeableHadTausFull", event_.fakeableHadTausFull_);
+    printCollection("tightHadTausFull", event_.tightHadTausFull_);
+
+    printCollection("selJetsUncleanedAK4", event_.selJetsUncleanedAK4_);
+    printCollection("selJetsAK4", event_.selJetsAK4_);
+    printCollection("selJetsAK4_btagLoose", event_.selJetsAK4_btagLoose_);
+    printCollection("selJetsAK4_btagMedium", event_.selJetsAK4_btagMedium_);
   }
   bool isJetSystematicAK8_Hbb = contains(jetsAK8_Hbb_supported_systematics_, current_central_or_shift_);
   bool isUpdatedJetsAK8_Hbb = false;

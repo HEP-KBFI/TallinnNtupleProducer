@@ -395,10 +395,11 @@ operator<<(std::ostream & stream,
             " relIso = "              << lepton.relIso()                        << ","
             " pfRelIso03All = "       << lepton.pfRelIso03All()                 << ",\n"
             " genPartFlav = "         << static_cast<int>(lepton.genPartFlav()) << ", "
-            " tightCharge = "         << lepton.tightCharge()                   << ","
-            " jetRelIso = "          << lepton.jetRelIso()                    << ","
-            " jetPtRel = "            << lepton.jetPtRel()                      << ",\n"
-    " jetBtagCSV() = " << lepton.jetBtagCSV()
+            " genPartIdx = "          << lepton.genPartIdx()                    << ", "
+            " tightCharge = "         << lepton.tightCharge()                   << ",\n"
+            " jetRelIso = "           << lepton.jetRelIso()                     << ","
+            " jetPtRel = "            << lepton.jetPtRel()                      << ","
+            " jetBtagCSV() = "        << lepton.jetBtagCSV()                    << ",\n"
   ;
   std::cout << ", jetBtagCSV(DeepJet) = ";
   if(lepton.hasJetBtagCSV(Btag::kDeepJet)) stream << lepton.jetBtagCSV(Btag::kDeepJet); else stream << "N/A";

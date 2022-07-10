@@ -256,6 +256,7 @@ operator<<(std::ostream & stream,
             " id_mva = "           << hadTau.id_mva()                         <<
             " (raw = "             << hadTau.raw_mva()                        << "),\n"
             " genPartFlav = "      << static_cast<int>(hadTau.genPartFlav())  << ", "
+            " genPartIdx = "       << hadTau.genPartIdx()                     << ","
             " antiElectron = "     << hadTau.id_mva(TauID::DeepTau2017v2VSe)  << ","
             " antiMuon = "         << hadTau.id_mva(TauID::DeepTau2017v2VSmu) << ",\n"
             " is loose/fakeable/tight = " << hadTau.isLoose()                 << '/'
