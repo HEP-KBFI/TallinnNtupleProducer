@@ -17,19 +17,19 @@ RecoJetBase::~RecoJetBase()
 void
 RecoJetBase::set_genLepton(const GenParticle * genLepton)
 {
-  genLepton_.reset(genLepton);
+  genLepton_ = genLepton;
 }
 
 void
 RecoJetBase::set_genHadTau(const GenHadTau *  genHadTau)
 {
-  genHadTau_.reset(genHadTau);
+  genHadTau_ = genHadTau;
 }
 
 void
 RecoJetBase::set_genJet(const GenJet * genJet)
 {
-  genJet_.reset(genJet);
+  genJet_ = genJet;
 }
 
 UInt_t
@@ -41,19 +41,19 @@ RecoJetBase::idx() const
 const GenParticle *
 RecoJetBase::genLepton() const
 {
-  return genLepton_.get();
+  return genLepton_;
 }
 
 const GenHadTau *
 RecoJetBase::genHadTau() const
 {
-  return genHadTau_.get();
+  return genHadTau_;
 }
 
 const GenJet *
 RecoJetBase::genJet() const
 {
-  return genJet_.get();
+  return genJet_;
 }
 
 bool

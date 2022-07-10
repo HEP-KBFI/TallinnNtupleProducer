@@ -173,6 +173,7 @@ int main(int argc, char* argv[])
     case Era::k2016: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2016(cfg_dataToMCcorrectionInterface); break;
     case Era::k2017: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2017(cfg_dataToMCcorrectionInterface); break;
     case Era::k2018: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2018(cfg_dataToMCcorrectionInterface); break;
+    case Era::kUndefined: __attribute__((fallthrough));
     default: throw cmsException("produceNtuple", __LINE__) << "Invalid era = " << static_cast<int>(era);
   }
   const ChargeMisIdRateInterface chargeMisIdRateInterface(era);

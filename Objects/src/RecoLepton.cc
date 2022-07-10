@@ -81,25 +81,25 @@ RecoLepton::set_isTight() const
 void
 RecoLepton::set_genLepton(const GenParticle * genLepton)
 {
-  genLepton_.reset(genLepton);
+  genLepton_ = genLepton;
 }
 
 void
 RecoLepton::set_genHadTau(const GenHadTau * genHadTau)
 {
-  genHadTau_.reset(genHadTau);
+  genHadTau_ = genHadTau;
 }
 
 void
 RecoLepton::set_genPhoton(const GenParticle * genPhoton)
 {
-  genPhoton_.reset(genPhoton);
+  genPhoton_ = genPhoton;
 }
 
 void
 RecoLepton::set_genJet(const GenJet * genJet)
 {
-  genJet_.reset(genJet);
+  genJet_ = genJet;
 }
 
 void 
@@ -288,25 +288,25 @@ RecoLepton::genPartIdx() const
 const GenParticle *
 RecoLepton::genLepton() const
 {
-  return genLepton_.get();
+  return genLepton_;
 }
 
 const GenHadTau *
 RecoLepton::genHadTau() const
 {
-  return genHadTau_.get();
+  return genHadTau_;
 }
 
 const GenParticle *
 RecoLepton::genPhoton() const
 {
-  return genPhoton_.get();
+  return genPhoton_;
 }
 
 const GenJet *
 RecoLepton::genJet() const
 {
-  return genJet_.get();
+  return genJet_;
 }
 
 bool

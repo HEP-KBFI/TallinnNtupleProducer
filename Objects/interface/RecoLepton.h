@@ -196,10 +196,10 @@ class RecoLepton : public ChargedParticle
   Particle::LorentzVector assocJet_p4_;
 
 //--- matching to generator level particles
-  std::shared_ptr<const GenParticle> genLepton_;
-  std::shared_ptr<const GenHadTau> genHadTau_;
-  std::shared_ptr<const GenParticle> genPhoton_;
-  std::shared_ptr<const GenJet> genJet_;
+  const GenParticle * genLepton_;
+  const GenHadTau * genHadTau_;
+  const GenParticle * genPhoton_;
+  const GenJet * genJet_;
 
 //--- flags indicating whether or not lepton passes CMS POG ID, loose, fakeable and/or tight selection criteria
   mutable bool isCMSPOG_;

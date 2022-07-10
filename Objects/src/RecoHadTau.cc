@@ -63,19 +63,19 @@ RecoHadTau::set_isTight() const
 void
 RecoHadTau::set_genLepton(const GenParticle * genLepton)
 {
-  genLepton_.reset(genLepton);
+  genLepton_ = genLepton;
 }
 
 void
 RecoHadTau::set_genHadTau(const GenHadTau * genHadTau)
 {
-  genHadTau_.reset(genHadTau);
+  genHadTau_ = genHadTau;
 }
 
 void
 RecoHadTau::set_genJet(const GenJet * genJet)
 {
-  genJet_.reset(genJet);
+  genJet_ = genJet;
 }
 
 void 
@@ -189,19 +189,19 @@ RecoHadTau::genPartIdx() const
 const GenParticle *
 RecoHadTau::genLepton() const
 {
-  return genLepton_.get();
+  return genLepton_;
 }
 
 const GenHadTau *
 RecoHadTau::genHadTau() const
 {
-  return genHadTau_.get();
+  return genHadTau_;
 }
 
 const GenJet *
 RecoHadTau::genJet() const
 {
-  return genJet_.get();
+  return genJet_;
 }
 
 bool

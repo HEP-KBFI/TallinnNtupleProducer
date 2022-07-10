@@ -92,7 +92,7 @@ class ParticleCollectionGenMatcher
    */
   void
   addGenJetMatchByIdx(const std::vector<const Trec *> & recParticles,
-                        const std::vector<GenJet> & genJets) const
+                      const std::vector<GenJet> & genJets) const
   {
     const int genJetSize = genJets.size();
     for(const Trec * recParticle: recParticles)
@@ -108,9 +108,11 @@ class ParticleCollectionGenMatcher
       {
         if(genJetIdx >= genJetSize)
         {
-          throw cmsException(this, __func__, __LINE__)
-            << "Expected gen matching index = " << genJetIdx << " but gen collection has size of " << genJetSize
-          ;
+          // In NanoAOD, matching is done before the pT threshold is applied to GenJets
+          // See https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3311.html?inline=-1
+          // And NanoAOD documentation: https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookNanoAOD#The_Events_TTree
+          // We could perhaps replace the actual gen jet with just a boolean that basically tells if the recojet is from PU
+          continue;
         }
         GenJet * genMatch = const_cast<GenJet *>(&genJets.at(genJetIdx));
         Trec * recParticle_nonconst = const_cast<Trec *>(recParticle);
@@ -320,12 +322,6 @@ class ParticleCollectionGenMatcher
   {
     void operator()(Trec & recParticle,
                     const GenJet * genJet) const
-    {
-      recParticle.set_genJet(new GenJet(*genJet));
-    }
-
-    void operator()(Trec & recParticle,
-                    const GenParticle * genJet) const
     {
       recParticle.set_genJet(new GenJet(*genJet));
     }

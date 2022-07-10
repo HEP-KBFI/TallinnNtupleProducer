@@ -53,9 +53,9 @@ class RecoJetBase : public GenJet
   UInt_t idx_; ///< index of jet in the ntuple
 
 //--- matching to generator level particles
-  std::shared_ptr<const GenParticle> genLepton_;
-  std::shared_ptr<const GenHadTau> genHadTau_;
-  std::shared_ptr<const GenJet> genJet_;
+  const GenParticle * genLepton_;
+  const GenHadTau * genHadTau_;
+  const GenJet * genJet_;
 };
 
 std::ostream &

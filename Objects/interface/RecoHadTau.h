@@ -101,9 +101,9 @@ class RecoHadTau : public GenHadTau
   Int_t genPartIdx_;   ///< index to matched gen particle (-1 if no match)
 
 //--- matching to generator level particles
-  std::shared_ptr<const GenParticle> genLepton_;
-  std::shared_ptr<const GenHadTau> genHadTau_;
-  std::shared_ptr<const GenJet> genJet_;
+  const GenParticle * genLepton_;
+  const GenHadTau * genHadTau_;
+  const GenJet * genJet_;
 
 //--- flags indicating whether or not lepton passes loose, fakeable and/or tight selection criteria
   mutable bool isLoose_;
