@@ -1,5 +1,7 @@
 #include "TallinnNtupleProducer/Objects/interface/Event.h"
 
+#include "TallinnNtupleProducer/CommonTools/interface/genTools.h" // topPtRwgtSF()
+
 #include <TString.h> // TString
 
 #include <string>    // std::string
@@ -13,6 +15,7 @@ Event::Event()
 Event::Event(const EventInfo& eventInfo, const TriggerInfo& triggerInfo)
   : eventInfo_(&eventInfo)
   , triggerInfo_(&triggerInfo)
+  , genHiggsDecayMode_(0)
   , isValid_(false)
 {}
 
@@ -24,6 +27,12 @@ Event::eventInfo() const
 {
   assert(eventInfo_);
   return *eventInfo_;
+}
+
+double
+Event::topPtRwgtSF() const
+{
+  return ::topPtRwgtSF(genParticles_);
 }
 
 const TriggerInfo&
@@ -176,6 +185,19 @@ Event::vertex() const
 {
   return vertex_;
 }
+
+const GenParticleCollection&
+Event::genParticles() const
+{
+  return genParticles_;
+}
+
+Int_t
+Event::genHiggsDecayMode() const
+{
+  return genHiggsDecayMode_;
+}
+
 
 namespace
 {

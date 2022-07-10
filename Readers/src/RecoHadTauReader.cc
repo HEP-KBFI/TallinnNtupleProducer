@@ -4,9 +4,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // TauID
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"              // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"              // GenLeptonReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                 // GenJetReader
 #include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                    // TauESTool
 
 #include "TMath.h"
@@ -23,10 +20,6 @@ RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   , branchName_num_("")
   , branchName_obj_("")
   , isMC_(false)
-  , genLeptonReader_(nullptr)
-  , genHadTauReader_(nullptr)
-  , genJetReader_(nullptr)
-  , readGenMatching_(false)
   , tauID_(TauID::DeepTau2017v2VSjet)
   , tauESTool_(nullptr)
   , hadTau_pt_(nullptr)
@@ -42,26 +35,13 @@ RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   , hadTau_idAgainstMu_(nullptr)
   , hadTau_jetIdx_(nullptr)
   , hadTau_genPartFlav_(nullptr)
-  , hadTau_genMatchIdx_(nullptr)
+  , hadTau_genPartIdx_(nullptr)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Tau"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   isMC_ = cfg.getParameter<bool>("isMC");
-  readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
   tauESTool_ = ( isMC_ ) ? new TauESTool(era_, tauID_, kHadTauPt_central, false) : nullptr;
-  if(readGenMatching_)
-  {
-    edm::ParameterSet cfg_genLepton = makeReader_cfg(era_, Form("%s_genLepton", branchName_obj_.data()), true);
-    cfg_genLepton.addParameter<unsigned int>("max_nLeptons", max_nHadTaus_);
-    genLeptonReader_ = new GenLeptonReader(cfg_genLepton);
-    edm::ParameterSet cfg_genTau = makeReader_cfg(era_, Form("%s_genTau", branchName_obj_.data()), true);
-    cfg_genTau.addParameter<unsigned int>("max_nHadTaus", max_nHadTaus_);
-    genHadTauReader_ = new GenHadTauReader(cfg_genTau);
-    edm::ParameterSet cfg_genJet = makeReader_cfg(era_, Form("%s_genJet", branchName_obj_.data()), true);
-    cfg_genJet.addParameter<unsigned int>("max_nJets", max_nHadTaus_);
-    genJetReader_ = new GenJetReader(cfg_genJet);
-  }
   setBranchNames();
 }
 
@@ -77,9 +57,6 @@ RecoHadTauReader::~RecoHadTauReader()
     RecoHadTauReader * const gInstance = instances_[branchName_obj_];
     assert(gInstance);
 
-    delete gInstance->genLeptonReader_;
-    delete gInstance->genHadTauReader_;
-    delete gInstance->genJetReader_;
     delete[] gInstance->hadTau_pt_;
     delete[] gInstance->hadTau_eta_;
     delete[] gInstance->hadTau_phi_;
@@ -93,7 +70,7 @@ RecoHadTauReader::~RecoHadTauReader()
     delete[] gInstance->hadTau_charge_;
     delete[] gInstance->hadTau_jetIdx_;
     delete[] gInstance->hadTau_genPartFlav_;
-    delete[] gInstance->hadTau_genMatchIdx_;
+    delete[] gInstance->hadTau_genPartIdx_;
 
     for(auto & kv: gInstance->hadTau_idMVAs_)
     {
@@ -151,7 +128,7 @@ RecoHadTauReader::setBranchNames()
     branchName_idAgainstMu_ = Form("%s_%s", branchName_obj_.data(), "idAntiMu");
     branchName_jetIdx_ = Form("%s_%s", branchName_obj_.data(), "jetIdx");
     branchName_genPartFlav_ = Form("%s_%s", branchName_obj_.data(), "genPartFlav");
-    branchName_genMatchIdx_ = Form("%s_%s", branchName_obj_.data(), "genMatchIdx");
+    branchName_genPartIdx_ = Form("%s_%s", branchName_obj_.data(), "genPartIdx");
     instances_[branchName_obj_] = this;
   }
   else
@@ -174,16 +151,6 @@ RecoHadTauReader::setBranchAddresses(TTree * tree)
   std::vector<std::string> bound_branches;
   if(instances_[branchName_obj_] == this)
   {
-    if(readGenMatching_)
-    {
-      const std::vector<std::string> genLeptonBranches = genLeptonReader_->setBranchAddresses(tree);
-      const std::vector<std::string> genHadTauBranches = genHadTauReader_->setBranchAddresses(tree);
-      const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(tree);
-
-      bound_branches.insert(bound_branches.end(), genLeptonBranches.begin(), genLeptonBranches.end());
-      bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
-      bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
-    }
     BranchAddressInitializer bai(tree, max_nHadTaus_);
     bai.setBranchAddress(nHadTaus_, branchName_num_);
     bai.setBranchAddress(hadTau_pt_, branchName_pt_);
@@ -204,7 +171,7 @@ RecoHadTauReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(hadTau_idAgainstMu_, branchName_idAgainstMu_);
     bai.setBranchAddress(hadTau_jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(hadTau_genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
-    bai.setBranchAddress(hadTau_genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
+    bai.setBranchAddress(hadTau_genPartIdx_, isMC_ ? branchName_genPartIdx_ : "");
 
     const std::vector<std::string> recoHadTauBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoHadTauBranches.begin(), recoHadTauBranches.end());
@@ -260,7 +227,7 @@ RecoHadTauReader::read() const
         (int)TMath::Log2(gInstance->hadTau_idAgainstMu_[idxHadTau]+1),
         gInstance->hadTau_jetIdx_[idxHadTau],
         gInstance->hadTau_genPartFlav_[idxHadTau],
-        gInstance->hadTau_genMatchIdx_[idxHadTau],
+        gInstance->hadTau_genPartIdx_[idxHadTau],
       });
 
       RecoHadTau & hadTau = hadTaus.back();
@@ -275,42 +242,8 @@ RecoHadTauReader::read() const
         hadTau.tauID_raws_[kv.first] = gInstance->hadTau_rawMVAs_.at(kv.first)[idxHadTau];
       }
     }
-    readGenMatching(hadTaus);
   }
   return hadTaus;
-}
-
-void
-RecoHadTauReader::readGenMatching(std::vector<RecoHadTau> & hadTaus) const
-{
-  if(readGenMatching_)
-  {
-    assert(genLeptonReader_ && genHadTauReader_ && genJetReader_);
-    const std::size_t nHadTaus = hadTaus.size();
-
-    std::vector<GenLepton> matched_genLeptons = genLeptonReader_->read();
-    assert(matched_genLeptons.size() == nHadTaus);
-
-    std::vector<GenHadTau> matched_genHadTaus = genHadTauReader_->read();
-    assert(matched_genHadTaus.size() == nHadTaus);
-
-    std::vector<GenJet> matched_genJets = genJetReader_->read();
-    assert(matched_genJets.size() == nHadTaus);
-
-    for(std::size_t idxHadTau = 0; idxHadTau < nHadTaus; ++idxHadTau)
-    {
-      RecoHadTau & hadTau = hadTaus[idxHadTau];
-
-      const GenLepton & matched_genLepton = matched_genLeptons[idxHadTau];
-      if(matched_genLepton.isValid()) hadTau.set_genLepton(new GenLepton(matched_genLepton));
-
-      const GenHadTau & matched_genHadTau = matched_genHadTaus[idxHadTau];
-      if(matched_genHadTau.isValid()) hadTau.set_genHadTau(new GenHadTau(matched_genHadTau));
-
-      const GenJet & matched_genJet = matched_genJets[idxHadTau];
-      if(matched_genJet.isValid()) hadTau.set_genJet(new GenJet(matched_genJet));
-    }
-  }
 }
 
 std::vector<std::string>

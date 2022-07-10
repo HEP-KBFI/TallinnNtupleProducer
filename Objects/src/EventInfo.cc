@@ -13,29 +13,6 @@
 
 #define EPS 1E-2
 
-const std::map<std::string, Int_t> EventInfo::gDecayMode_idString_singleHiggs =
-{
-  { "hww",     24 },
-  { "hzz",     23 },
-  { "htt",     15 },
-  { "hzg", 220023 },
-  { "hmm",     13 },
-  { "hbb",      5 },
-};
-
-const std::map<std::string, Int_t> EventInfo::gDecayMode_idString_diHiggs =
-{
-  { "tttt",       15 },
-  { "zzzz",       23 },
-  { "wwww",       24 },
-  { "bbtt",  5000015 },
-  { "bbzz",  5000023 },
-  { "bbww",  5000024 },
-  { "ttzz", 15000023 },
-  { "ttww", 15000024 },
-  { "zzww", 23000024 },
-};
-
 const std::map<Int_t, std::string> EventInfo::gProductionMode_idString_singleHiggs = {
   { 23000025, "ZH" },
   { 24000025, "WH" },
@@ -48,11 +25,8 @@ EventInfo::EventInfo()
   , run_(0)
   , lumi_(0)
   , event_(0)
-  , genHiggsDecayMode_(-1)
   , genWeight_(1.)
   , pileupWeight_(1.)
-  , genDiHiggsDecayMode_(-1)
-  , topPtRwgtSF_(-1.)
   , nLHEReweightingWeight_(0)
   , LHEReweightingWeight_(nullptr)
   , LHEReweightingWeight_max_(69)
@@ -99,10 +73,7 @@ EventInfo::copy(const EventInfo & eventInfo)
   run_ = eventInfo.run_;
   lumi_ = eventInfo.lumi_;
   event_ = eventInfo.event_;
-  genHiggsDecayMode_ = eventInfo.genHiggsDecayMode_;
   genWeight_ = eventInfo.genWeight_;
-  genDiHiggsDecayMode_ = eventInfo.genDiHiggsDecayMode_;
-  topPtRwgtSF_ = eventInfo.topPtRwgtSF_;
   nLHEReweightingWeight_ = eventInfo.nLHEReweightingWeight_;
   if(eventInfo.LHEReweightingWeight_)
   {
@@ -148,12 +119,6 @@ EventInfo::event() const
   return event_;
 }
 
-Int_t
-EventInfo::genHiggsDecayMode() const
-{
-  return genHiggsDecayMode_;
-}
-
 Float_t
 EventInfo::genWeight() const
 {
@@ -176,18 +141,6 @@ Float_t
 EventInfo::pileupWeightDown() const
 {
   return pileupWeightDown_;
-}
-
-Int_t
-EventInfo::genDiHiggsDecayMode() const
-{
-  return genDiHiggsDecayMode_;
-}
-
-Float_t
-EventInfo::topPtRwgtSF() const
-{
-  return topPtRwgtSF_;
 }
 
 const AnalysisConfig &
@@ -357,34 +310,6 @@ EventInfo::is_initialized() const
 }
 
 std::string
-EventInfo::getDecayModeString() const
-{
-  assert(analysisConfig_);
-  if(! analysisConfig_->isMC_H())
-  {
-    throw cmsException(this, __func__, __LINE__)
-      << "The event " << *this << " is not a H signal event => request "
-         "for a decay mode as a string is not applicable\n"
-    ;
-  }
-  return EventInfo::getDecayModeString(gDecayMode_idString_singleHiggs);
-}
-
-std::string
-EventInfo::getDiHiggsDecayModeString() const
-{
-  assert(analysisConfig_);
-  if(! analysisConfig_->isMC_HH())
-  {
-    throw cmsException(this, __func__, __LINE__)
-      << "The event " << *this << " is not a HH signal event => request "
-         "for a decay mode as a string is not applicable\n"
-    ;
-  }
-  return EventInfo::getDecayModeString(gDecayMode_idString_diHiggs);
-}
-
-std::string
 EventInfo::getProductionModeString() const
 {
   assert(analysisConfig_);
@@ -400,40 +325,6 @@ EventInfo::getProductionModeString() const
     gProductionMode_idString_singleHiggs.at(productionMode_)    :
     ""
   ;
-}
-
-std::string
-EventInfo::getDecayModeString(const std::map<std::string, Int_t> & decayMode_idString) const
-{
-  for(const auto & kv: decayMode_idString)
-  {
-    if(genHiggsDecayMode_ == kv.second)
-    {
-      return kv.first;
-    }
-  }
-  return ""; // unrecognizable decay mode
-}
-
-std::vector<std::string>
-EventInfo::getDecayModes()
-{
-  return getDecayModes(gDecayMode_idString_singleHiggs);
-}
-
-std::vector<std::string>
-EventInfo::getDiHiggsDecayModes()
-{
-  return getDecayModes(gDecayMode_idString_diHiggs);
-}
-
-std::vector<std::string>
-EventInfo::getDecayModes(const std::map<std::string, Int_t> & decayMode_idString)
-{
-  std::vector<std::string> decayModes;
-  decayModes.reserve(decayMode_idString.size());
-  boost::copy(decayMode_idString | boost::adaptors::map_keys, std::back_inserter(decayModes));
-  return decayModes;
 }
 
 void

@@ -4,7 +4,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"       // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"  // TauID
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"                 // GenJet
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"              // GenLepton
 
 RecoHadTau::RecoHadTau(const GenHadTau & particle,
                        Double_t corrFactor,
@@ -18,7 +17,7 @@ RecoHadTau::RecoHadTau(const GenHadTau & particle,
                        Int_t antiMuon,
                        Int_t jetIdx,
                        UChar_t  genPartFlav,
-                       Int_t genMatchIdx)
+                       Int_t genPartIdx)
   : GenHadTau(particle)
   , corrFactor_(corrFactor)
   , dxy_(dxy)
@@ -31,7 +30,7 @@ RecoHadTau::RecoHadTau(const GenHadTau & particle,
   , antiMuon_(antiMuon)
   , jetIdx_(jetIdx)
   , genPartFlav_(genPartFlav)
-  , genMatchIdx_(genMatchIdx)
+  , genPartIdx_(genPartIdx)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
   , genJet_(nullptr)
@@ -62,7 +61,7 @@ RecoHadTau::set_isTight() const
 }
 
 void
-RecoHadTau::set_genLepton(const GenLepton * genLepton)
+RecoHadTau::set_genLepton(const GenParticle * genLepton)
 {
   genLepton_.reset(genLepton);
 }
@@ -182,12 +181,12 @@ RecoHadTau::genPartFlav() const
 }
 
 Int_t
-RecoHadTau::genMatchIdx() const
+RecoHadTau::genPartIdx() const
 {
-  return genMatchIdx_;
+  return genPartIdx_;
 }
 
-const GenLepton *
+const GenParticle *
 RecoHadTau::genLepton() const
 {
   return genLepton_.get();

@@ -18,11 +18,6 @@ RecoLeptonReader::RecoLeptonReader(const edm::ParameterSet & cfg)
   , branchName_obj_("")
   , isMC_(false)
   , era_(Era::kUndefined)
-  , genLeptonReader_(nullptr)
-  , genHadTauReader_(nullptr)
-  , genPhotonReader_(nullptr)
-  , genJetReader_(nullptr)
-  , readGenMatching_(false)
   , pt_(nullptr)
   , eta_(nullptr)
   , phi_(nullptr)
@@ -42,28 +37,12 @@ RecoLeptonReader::RecoLeptonReader(const edm::ParameterSet & cfg)
   , charge_(nullptr)
   , jetIdx_(nullptr)
   , genPartFlav_(nullptr)
-  , genMatchIdx_(nullptr)
+  , genPartIdx_(nullptr)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   branchName_obj_ = cfg.getParameter<std::string>("branchName");
   branchName_num_ = Form("n%s", branchName_obj_.data());
   isMC_ = cfg.getParameter<bool>("isMC");
-  readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
-  if(readGenMatching_)
-  {
-    edm::ParameterSet cfg_genLepton = makeReader_cfg(era_, Form("%s_genLepton", branchName_obj_.data()), true);
-    cfg_genLepton.addParameter<unsigned int>("max_nLeptons", max_nLeptons_);
-    genLeptonReader_ = new GenLeptonReader(cfg_genLepton);
-    edm::ParameterSet cfg_genTau = makeReader_cfg(era_, Form("%s_genTau", branchName_obj_.data()), true);
-    cfg_genTau.addParameter<unsigned int>("max_nHadTaus", max_nLeptons_);
-    genHadTauReader_ = new GenHadTauReader(cfg_genTau);
-    edm::ParameterSet cfg_genPhoton = makeReader_cfg(era_, Form("%s_genPhoton", branchName_obj_.data()), true);
-    cfg_genPhoton.addParameter<unsigned int>("max_nPhotons", max_nLeptons_);
-    genPhotonReader_ = new GenPhotonReader(cfg_genPhoton);
-    edm::ParameterSet cfg_genJet = makeReader_cfg(era_, Form("%s_genJet", branchName_obj_.data()), true);
-    cfg_genJet.addParameter<unsigned int>("max_nJets", max_nLeptons_);
-    genJetReader_ = new GenJetReader(cfg_genJet);
-  }
   setBranchNames();
 }
 
@@ -76,10 +55,6 @@ RecoLeptonReader::~RecoLeptonReader()
   {
     RecoLeptonReader * const gInstance = instances_[branchName_obj_];
     assert(gInstance);
-    delete gInstance->genLeptonReader_;
-    delete gInstance->genHadTauReader_;
-    delete gInstance->genPhotonReader_;
-    delete gInstance->genJetReader_;
     delete[] gInstance->pt_;
     delete[] gInstance->eta_;
     delete[] gInstance->phi_;
@@ -99,7 +74,7 @@ RecoLeptonReader::~RecoLeptonReader()
     delete[] gInstance->charge_;
     delete[] gInstance->jetIdx_;
     delete[] gInstance->genPartFlav_;
-    delete[] gInstance->genMatchIdx_;
+    delete[] gInstance->genPartIdx_;
 
     instances_[branchName_obj_] = nullptr;
   }
@@ -129,7 +104,7 @@ RecoLeptonReader::setBranchNames()
     branchName_charge_ = Form("%s_%s", branchName_obj_.data(), "charge");
     branchName_jetIdx_ = Form("%s_%s", branchName_obj_.data(), "jetIdx");
     branchName_genPartFlav_ = Form("%s_%s", branchName_obj_.data(), "genPartFlav");
-    branchName_genMatchIdx_ = Form("%s_%s", branchName_obj_.data(), "genMatchIdx");
+    branchName_genPartIdx_ = Form("%s_%s", branchName_obj_.data(), "genPartIdx");
     instances_[branchName_obj_] = this;
   }
   else
@@ -152,18 +127,6 @@ RecoLeptonReader::setBranchAddresses(TTree * tree)
   std::vector<std::string> bound_branches;
   if(instances_[branchName_obj_] == this)
   {
-    if(readGenMatching_)
-    {
-      const std::vector<std::string> genLeptonBranches = genLeptonReader_->setBranchAddresses(tree);
-      const std::vector<std::string> genHadTauBranches = genHadTauReader_->setBranchAddresses(tree);
-      const std::vector<std::string> genPhotonBranches = genPhotonReader_->setBranchAddresses(tree);
-      const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(tree);
-
-      bound_branches.insert(bound_branches.end(), genLeptonBranches.begin(), genLeptonBranches.end());
-      bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
-      bound_branches.insert(bound_branches.end(), genPhotonBranches.begin(), genPhotonBranches.end());
-      bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
-    }
     BranchAddressInitializer bai(tree, max_nLeptons_);
     bai.setBranchAddress(nLeptons_, branchName_num_);
     bai.setBranchAddress(pt_, branchName_pt_);
@@ -183,7 +146,7 @@ RecoLeptonReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(charge_, branchName_charge_);
     bai.setBranchAddress(jetIdx_, branchName_jetIdx_);
     bai.setBranchAddress(genPartFlav_, isMC_ ? branchName_genPartFlav_ : "");
-    bai.setBranchAddress(genMatchIdx_, isMC_ ? branchName_genMatchIdx_ : "");
+    bai.setBranchAddress(genPartIdx_, isMC_ ? branchName_genPartIdx_ : "");
 
     const std::vector<std::string> recoLeptonBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoLeptonBranches.begin(), recoLeptonBranches.end());

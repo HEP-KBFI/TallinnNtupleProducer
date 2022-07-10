@@ -22,6 +22,12 @@ enum class StatusFlag
   isLastCopyBeforeFSR                = 14,
 };
 
+class PdgTable {
+public:
+  static int
+  get_charge(int pdgId);
+};
+
 class GenParticle : public ChargedParticle
 {
  public:
@@ -32,16 +38,12 @@ class GenParticle : public ChargedParticle
               Double_t phi,
               Double_t mass,
               Int_t pdgId,
-              Int_t charge,
               Int_t status = -1,
-              Int_t statusFlags = -1,
-              UChar_t genPartFlav = 0);
+              Int_t statusFlags = -1);
   GenParticle(const math::PtEtaPhiMLorentzVector & p4,
               Int_t pdgId,
-              Int_t charge,
               Int_t status = -1,
-              Int_t statusFlags = -1,
-              UChar_t genPartFlav = 0);
+              Int_t statusFlags = -1);
   virtual ~GenParticle() {}
 
   /**
@@ -68,35 +70,6 @@ class GenParticle : public ChargedParticle
   statusFlags() const;
 
   /**
-   * @brief Get parton flavor of the gen particle
-   * @return Code for the parton flavor
-   *
-   * The nomencalture is different for each type of gen particle:
-   * - gen muons:
-   *     1  - prompt muon (including gamma* -> mu mu)
-   *     3  - muon from light or unknown
-   *     4  - muon from c
-   *     5  - muon from b
-   *     15 - muon from prompt tau
-   * - gen electrons:
-   *     1  - prompt electron (including gamma* -> e e)
-   *     3  - electron from light or unknown
-   *     4  - electron from c
-   *     5  - electron from b
-   *     15 - electron from prompt tau
-   *     22 - prompt photon (likely conversion)
-   * - gen taus:
-   *     1 - prompt electron
-   *     2 - prompt muon
-   *     3 - tau -> e decay
-   *     4 - tau -> mu decay
-   *     5 - hadronic tau decay
-   * 0 universally means that the gen particle does has no parton flavor
-   */
-  UChar_t
-  genPartFlav() const;
-
-  /**
    * @brief Sets the variable isMatchedToReco_ to true, indicating that
    *        the gen lvl object is now matched to a reco object
    */
@@ -120,6 +93,7 @@ class GenParticle : public ChargedParticle
   checkStatusFlag(StatusFlag statusFlag) const;
 
  protected:
+  
   Int_t status_;        ///< particle status (1 = stable)
   Int_t statusFlags_;   ///< gen status flags stored bitwise
   UChar_t genPartFlav_; ///< parton flavor of the gen particle

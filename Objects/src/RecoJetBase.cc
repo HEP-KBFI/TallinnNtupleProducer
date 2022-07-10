@@ -1,6 +1,5 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoJetBase.h"
 
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h" // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h" // GenHadTau
 #include <iostream>
 RecoJetBase::RecoJetBase(const GenJet & jet,
@@ -16,7 +15,7 @@ RecoJetBase::~RecoJetBase()
 {}
 
 void
-RecoJetBase::set_genLepton(const GenLepton * genLepton)
+RecoJetBase::set_genLepton(const GenParticle * genLepton)
 {
   genLepton_.reset(genLepton);
 }
@@ -39,7 +38,7 @@ RecoJetBase::idx() const
   return idx_;
 }
 
-const GenLepton *
+const GenParticle *
 RecoJetBase::genLepton() const
 {
   return genLepton_.get();

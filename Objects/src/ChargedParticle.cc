@@ -30,6 +30,12 @@ ChargedParticle::pdgId() const
 }
 
 Int_t
+ChargedParticle::absPdgId() const
+{
+  return std::abs(pdgId());
+}
+
+Int_t
 ChargedParticle::charge() const
 {
   return charge_;

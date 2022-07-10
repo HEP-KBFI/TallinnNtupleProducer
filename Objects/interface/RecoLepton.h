@@ -8,9 +8,8 @@
 #include <map>                                                       // std::map
 
 // forward declarations
-class GenLepton;
+class GenParticle;
 class GenHadTau;
-class GenPhoton;
 class GenJet;
 
 enum class Btag;
@@ -31,7 +30,7 @@ class RecoLepton : public ChargedParticle
              Int_t    tightCharge,
              Int_t    jetIdx,
              UChar_t  genPartFlav,
-             Int_t    genMatchIdx);
+             Int_t    genPartIdx);
 
   virtual ~RecoLepton();
 
@@ -46,9 +45,9 @@ class RecoLepton : public ChargedParticle
   /**
    * @brief Set links to generator level particles (matched by dR)
    */
-  void set_genLepton(const GenLepton * genLepton);
+  void set_genLepton(const GenParticle * genLepton);
   void set_genHadTau(const GenHadTau * genHadTau);
-  void set_genPhoton(const GenPhoton * genPhoton);
+  void set_genPhoton(const GenParticle * genPhoton);
   void set_genJet(const GenJet * genJet);
 
   /**
@@ -132,11 +131,11 @@ class RecoLepton : public ChargedParticle
   Int_t filterBits() const;
   Int_t jetIdx() const;
   UChar_t genPartFlav() const;
-  Int_t genMatchIdx() const;
+  Int_t genPartIdx() const;
 
-  const GenLepton * genLepton() const;
+  const GenParticle * genLepton() const;
   const GenHadTau * genHadTau() const;
-  const GenPhoton * genPhoton() const;
+  const GenParticle * genPhoton() const;
   const GenJet * genJet() const;
 
   void
@@ -188,7 +187,7 @@ class RecoLepton : public ChargedParticle
   Int_t filterBits_;           ///< bitmask of matching with trigger objects
   Int_t jetIdx_;               ///< index of jet from initial jet collection that the lepton is constituent of (-1 if no match)
   UChar_t genPartFlav_;        ///< generator-level parton flavor
-  Int_t genMatchIdx_;          ///< index to matched gen particle (-1 if no match)
+  Int_t genPartIdx_;          ///< index to matched gen particle (-1 if no match)
   Double_t mvaRawTTH_cut_;     ///< cut on prompt lepton MVA score
 
   std::map<Btag, Double_t> assocJetBtagCSVs_; ///< CSV b-tagging discriminator values of nearby jet found via jetIdx branch
@@ -197,9 +196,9 @@ class RecoLepton : public ChargedParticle
   Particle::LorentzVector assocJet_p4_;
 
 //--- matching to generator level particles
-  std::shared_ptr<const GenLepton> genLepton_;
+  std::shared_ptr<const GenParticle> genLepton_;
   std::shared_ptr<const GenHadTau> genHadTau_;
-  std::shared_ptr<const GenPhoton> genPhoton_;
+  std::shared_ptr<const GenParticle> genPhoton_;
   std::shared_ptr<const GenJet> genJet_;
 
 //--- flags indicating whether or not lepton passes CMS POG ID, loose, fakeable and/or tight selection criteria

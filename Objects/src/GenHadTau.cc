@@ -6,7 +6,7 @@ GenHadTau::GenHadTau(Double_t pt,
                      Double_t mass,
                      Int_t charge,
                      Int_t status)
-  : GenParticle(pt, eta, phi, mass, 0, charge, status, -1)
+  : GenParticle(pt, eta, phi, mass, -15 * charge, status, -1)
 {}
 
 std::ostream &

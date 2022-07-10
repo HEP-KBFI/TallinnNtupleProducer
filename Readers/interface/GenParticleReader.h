@@ -28,13 +28,6 @@ class GenParticleReader : public ReaderBase
   std::vector<GenParticle>
   read() const;
 
-  /**
-   * @brief enable/disable read genPartFlav branch
-   * @param flag If true, reads genPartFlav branch; if false, does not read genPartFlav branch
-   */
-  void
-  readGenPartFlav(bool flag);
-
  protected:
  /**
    * @brief Initialize names of branches to be read from tree
@@ -46,17 +39,13 @@ class GenParticleReader : public ReaderBase
   std::string branchName_num_;
   std::string branchName_obj_;
 
-  bool readGenPartFlav_;
-
   std::string branchName_pt_;
   std::string branchName_eta_;
   std::string branchName_phi_;
   std::string branchName_mass_;
   std::string branchName_pdgId_;
-  std::string branchName_charge_;
   std::string branchName_status_;
   std::string branchName_statusFlags_;
-  std::string branchName_genPartFlav_;
 
   UInt_t nParticles_;
   Float_t * particle_pt_;
@@ -64,10 +53,8 @@ class GenParticleReader : public ReaderBase
   Float_t * particle_phi_;
   Float_t * particle_mass_;
   Int_t * particle_pdgId_;
-  Int_t * particle_charge_;
   Int_t * particle_status_;
   Int_t * particle_statusFlags_;
-  UChar_t * particle_genPartFlav_;
 
   // CV: make sure that only one GenParticleReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

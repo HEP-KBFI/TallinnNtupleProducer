@@ -2,14 +2,7 @@
 #define TallinnNtupleProducer_Readers_RecoLeptonReader_h
 
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"      // RecoLepton
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h" // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"    // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h" // GenLeptonReader
-#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h" // GenPhotonReader
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"      // ReaderBase
-
-#include <map>                                                       // std::map
-#include <string>                                                    // std::string
 
 // forward declarations
 enum class Btag;
@@ -43,55 +36,6 @@ class RecoLeptonReader : public ReaderBase
   bool isMC_;
   Era era_;
 
-  /**
-   * @brief Read branches containing information on matching of RecoElectrons and RecoMuons
-   *        to generator level electrons, muons, hadronic taus, and jets from tree
-   *        and add this information to collection of RecoElectron and RecoMuon objects given as function argument
-   */
-  template<typename T,
-           typename = std::enable_if<std::is_base_of<RecoLepton, T>::value>>
-  void
-  readGenMatching(std::vector<T> & leptons) const
-  {
-    if(readGenMatching_)
-    {
-      assert(genLeptonReader_ && genHadTauReader_ && genPhotonReader_ && genJetReader_);
-
-      const std::size_t nLeptons = leptons.size();
-      std::vector<GenLepton> matched_genLeptons = genLeptonReader_->read();
-      assert(matched_genLeptons.size() == nLeptons);
-      std::vector<GenHadTau> matched_genHadTaus = genHadTauReader_->read();
-      assert(matched_genHadTaus.size() == nLeptons);
-      std::vector<GenPhoton> matched_genPhotons = genPhotonReader_->read(true);
-      assert(matched_genPhotons.size() == nLeptons);
-      std::vector<GenJet> matched_genJets = genJetReader_->read();
-      assert(matched_genJets.size() == nLeptons);
-
-      for(std::size_t idxLepton = 0; idxLepton < nLeptons; ++idxLepton)
-      {
-        T & lepton = leptons[idxLepton];
-
-        const GenLepton & matched_genLepton = matched_genLeptons[idxLepton];
-        if(matched_genLepton.isValid()) lepton.set_genLepton(new GenLepton(matched_genLepton));
-
-        const GenHadTau & matched_genHadTau = matched_genHadTaus[idxLepton];
-        if(matched_genHadTau.isValid()) lepton.set_genHadTau(new GenHadTau(matched_genHadTau));
-
-        const GenPhoton & matched_genPhoton = matched_genPhotons[idxLepton];
-        if(matched_genPhoton.isValid()) lepton.set_genPhoton(new GenPhoton(matched_genPhoton));
-
-        const GenJet & matched_genJet = matched_genJets[idxLepton];
-        if(matched_genJet.isValid()) lepton.set_genJet(new GenJet(matched_genJet));
-      }
-    }
-  }
-
-  GenLeptonReader * genLeptonReader_;
-  GenHadTauReader * genHadTauReader_;
-  GenPhotonReader * genPhotonReader_;
-  GenJetReader * genJetReader_;
-  bool readGenMatching_;
-
   std::string branchName_pt_;
   std::string branchName_eta_;
   std::string branchName_phi_;
@@ -111,7 +55,7 @@ class RecoLeptonReader : public ReaderBase
   std::string branchName_charge_;
   std::string branchName_jetIdx_;
   std::string branchName_genPartFlav_;
-  std::string branchName_genMatchIdx_;
+  std::string branchName_genPartIdx_;
 
   std::map<Btag, std::string> branchNames_assocJetBtagCSV_;
 
@@ -135,7 +79,7 @@ class RecoLeptonReader : public ReaderBase
   Int_t * charge_;
   Int_t * jetIdx_;
   UChar_t * genPartFlav_;
-  Int_t * genMatchIdx_;
+  Int_t * genPartIdx_;
 
   std::map<Btag, Float_t *> assocJetBtagCSVs_;
 

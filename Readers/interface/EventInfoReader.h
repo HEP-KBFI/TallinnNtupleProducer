@@ -22,12 +22,6 @@ class EventInfoReader : public ReaderBase
   void
   set_central_or_shift(const std::string& central_or_shift);
 
-  void
-  setTopPtRwgtBranchName(const std::string & branchName);
-
-  std::string
-  getTopPtRwgtBranchName() const;
-
   /**
    * @brief Read branches from tree and use information to fill EventInfo object
    * @return reference to EventInfo object
@@ -43,18 +37,14 @@ class EventInfoReader : public ReaderBase
   get_supported_systematics(const edm::ParameterSet & cfg);
 
  protected:
-  bool read_genHiggsDecayMode_;
   bool read_puWeight_;
 
   const AnalysisConfig * analysisConfig_;
   EventInfo * info_;
 
-  std::string branchName_topPtRwgt_;
-
   RunLumiEventReader * runLumiEventReader_;
 
   const std::string era_;
-  const std::string branchName_genHiggsDecayMode_;
   const std::string branchName_genWeight_;
   const std::string branchName_LHEReweightingWeight_;
   const std::string branchName_nLHEReweightingWeight_;

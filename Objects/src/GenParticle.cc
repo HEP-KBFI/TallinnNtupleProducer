@@ -1,7 +1,22 @@
 #include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle, Particle
 
+#include "TDatabasePDG.h" // TDatabasePDG
+
+#include <map> // std::map<,>
+
+int
+PdgTable::get_charge(int pdgId)
+{
+  static std::map<int, int> ids;
+  if(ids.find(pdgId) == ids.end())
+  {
+    ids[pdgId] = TDatabasePDG::Instance()->GetParticle(pdgId)->Charge();
+  }
+  return ids.at(pdgId);
+}
+
 GenParticle::GenParticle()
-  : GenParticle(0., 0., 0., 0., 0, 0, -1, -1, 0)
+  : GenParticle(0., 0., 0., 0., 0, -1, -1)
 {}
 
 GenParticle::GenParticle(const GenParticle & genParticle)
@@ -11,10 +26,8 @@ GenParticle::GenParticle(const GenParticle & genParticle)
     , genParticle.phi_
     , genParticle.mass_
     , genParticle.pdgId_
-    , genParticle.charge_
     , genParticle.status_
     , genParticle.statusFlags_
-    , genParticle.genPartFlav_
   )
 {}
 
@@ -23,27 +36,21 @@ GenParticle::GenParticle(Double_t pt,
                          Double_t phi,
                          Double_t mass,
                          Int_t pdgId,
-                         Int_t charge,
                          Int_t status,
-                         Int_t statusFlags,
-                         UChar_t genPartFlav)
-  : ChargedParticle(pt, eta, phi, mass, pdgId, charge)
+                         Int_t statusFlags)
+  : ChargedParticle(pt, eta, phi, mass, pdgId, PdgTable::get_charge(pdgId))
   , status_(status)
   , statusFlags_(statusFlags)
-  , genPartFlav_(genPartFlav)
   , isMatchedToReco_(false)
 {}
 
 GenParticle::GenParticle(const math::PtEtaPhiMLorentzVector & p4,
                          Int_t pdgId,
-                         Int_t charge,
                          Int_t status,
-                         Int_t statusFlags,
-                         UChar_t genPartFlav)
-  : ChargedParticle(p4, pdgId, charge)
+                         Int_t statusFlags)
+  : ChargedParticle(p4, pdgId, PdgTable::get_charge(pdgId))
   , status_(status)
   , statusFlags_(statusFlags)
-  , genPartFlav_(genPartFlav)
   , isMatchedToReco_(false)
 {}
 
@@ -57,12 +64,6 @@ Int_t
 GenParticle::statusFlags() const
 {
   return statusFlags_;
-}
-
-UChar_t
-GenParticle::genPartFlav() const
-{
-  return genPartFlav_;
 }
 
 void
@@ -89,8 +90,7 @@ operator<<(std::ostream & stream,
 {
   stream << static_cast<const ChargedParticle &>(particle)                << ","
             " status = "      << particle.status()                        << ","
-            " statusFlags = " << particle.statusFlags()                   << ","
-            " genPartFlav = " << static_cast<int>(particle.genPartFlav())
+            " statusFlags = " << particle.statusFlags()
   ;
   return stream;
 }

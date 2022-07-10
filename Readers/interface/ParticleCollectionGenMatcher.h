@@ -6,8 +6,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"        // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"           // GenJet
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"        // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"        // GenPhoton
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h"      // GenParticle
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h"     // RecoElectron
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"       // RecoHadTau
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"       // RecoJetAK4
@@ -32,31 +31,106 @@ class ParticleCollectionGenMatcher
     : isDEBUG_(isDEBUG)
   {}
   ~ParticleCollectionGenMatcher() {}
+  
+  /**
+   * @brief Matches reconstructed electrons, muons and taus to gen particles as designated by NanoAOD
+   *        Ignoring matches to gen quarks
+   */
+  void
+  addGenMatchByIdx(const std::vector<const Trec *> & recParticles,
+                   const std::vector<GenParticle> & genParticles) const
+  {
+    const int genParticleSize = genParticles.size();
+    for(const Trec * recParticle: recParticles)
+    {
+      if(recParticle->hasAnyGenMatch())
+      {
+        // the reco particle has already been matched to a gen particle
+        continue;
+      }
+
+      const UChar_t genPartFlav = recParticle->genPartFlav();
+      if(((typeid(Trec) == typeid(RecoMuon) || typeid(Trec) == typeid(RecoElectron)) && (genPartFlav != 1 || genPartFlav != 15)) ||
+         genPartFlav == 0)
+      {
+        // ignore reco lepton matches to generator-level quarks
+        continue;
+      }
+      const int genPartIdx = recParticle->genPartIdx();
+
+      if(genPartIdx >= 0)
+      {
+        if(genPartIdx >= genParticleSize)
+        {
+          throw cmsException(this, __func__, __LINE__)
+            << "Expected gen matching index = " << genPartIdx << " but gen collection has size of " << genParticleSize
+          ;
+        }
+        GenParticle * genMatch = const_cast<GenParticle *>(&genParticles.at(genPartIdx));
+        Trec * recParticle_nonconst = const_cast<Trec *>(recParticle);
+
+        const int genPart_absPdgId = genMatch->absPdgId();
+        if(genPart_absPdgId == 11 || genPart_absPdgId == 13)
+        {
+          genLeptonLinker_(*recParticle_nonconst, genMatch);
+        }
+        else if(genPart_absPdgId == 22)
+        {
+          genPhotonLinker_(*recParticle_nonconst, genMatch, std::is_same<Trec, RecoElectron>());
+        }
+        else
+        {
+          throw cmsException(this, __func__, __LINE__) << "Found gen particle with unexpected abs(PDG ID) = " << genPart_absPdgId;
+        }
+      }
+    }
+  }
+  
+  /**
+   * @brief Matches reco jets to gen jets
+   *        Could also be used to match AK8 reco jets to AK8 gen jets
+   */
+  void
+  addGenJetMatchByIdx(const std::vector<const Trec *> & recParticles,
+                        const std::vector<GenJet> & genJets) const
+  {
+    const int genJetSize = genJets.size();
+    for(const Trec * recParticle: recParticles)
+    {
+      if(recParticle->hasAnyGenMatch())
+      {
+        // the reco particle has already been matched to a gen particle
+        continue;
+      }
+
+      const int genJetIdx = recParticle->genPartIdx();
+      if(genJetIdx >= 0)
+      {
+        if(genJetIdx >= genJetSize)
+        {
+          throw cmsException(this, __func__, __LINE__)
+            << "Expected gen matching index = " << genJetIdx << " but gen collection has size of " << genJetSize
+          ;
+        }
+        GenJet * genMatch = const_cast<GenJet *>(&genJets.at(genJetIdx));
+        Trec * recParticle_nonconst = const_cast<Trec *>(recParticle);
+        genJetLinker_(*recParticle_nonconst, genMatch);
+      }
+    }
+  }
 
   /**
    * @brief Match reconstructed particles to generator level electrons and muons by dR
    */
   void
   addGenLeptonMatch(const std::vector<const Trec *> & recParticles,
-                    const std::vector<GenLepton> & genLeptons,
+                    const std::vector<GenParticle> & genParticles,
                     double dRmax = 0.3,
                     double minDPtRel = -0.5,
                     double maxDPtRel = +0.5,
                     int status = 1) const
   {
-    return addGenMatch<GenLepton, GenLeptonLinker>(recParticles, genLeptons, dRmax, minDPtRel, maxDPtRel, genLeptonLinker_, status);
-  }
-
-  void
-  addGenLeptonMatchByIndex(const std::vector<const Trec *> & recParticles,
-                           const std::vector<GenParticle> & genParticles,
-                           GenParticleType genParticleType) const
-  {
-    if(genParticleType == GenParticleType::kGenPhoton)
-    {
-      throw cmsException(this, __func__, __LINE__) << "Cannot match to gen photons in this function";
-    }
-    return addGenMatchByIndex<GenLeptonLinker>(recParticles, genParticles, genLeptonLinker_, genParticleType);
+    return addGenMatch<GenParticle, GenLeptonLinker>(recParticles, genParticles, dRmax, minDPtRel, maxDPtRel, genLeptonLinker_, status);
   }
 
   /**
@@ -78,19 +152,12 @@ class ParticleCollectionGenMatcher
 
   void
   addGenPhotonMatch(const std::vector<const Trec *> & recParticles,
-                    const std::vector<GenPhoton> & genPhotons,
+                    const std::vector<GenParticle> & genPhotons,
                     double dRmax = 0.3,
                     double maxDPtRel = 1.0, // 0 < pt(reco) < 2 * pt(gen)
                     int status = 1) const
   {
-    return addGenMatch<GenPhoton, GenPhotonLinker>(recParticles, genPhotons, dRmax, maxDPtRel, genPhotonLinker_, status);
-  }
-
-  void
-  addGenPhotonMatchByIndex(const std::vector<const Trec *> & recParticles,
-                           const std::vector<GenParticle> & genParticles) const
-  {
-    return addGenMatchByIndex<GenPhotonLinker>(recParticles, genParticles, genPhotonLinker_, GenParticleType::kGenPhoton);
+    return addGenMatch<GenParticle, GenPhotonLinker>(recParticles, genPhotons, dRmax, maxDPtRel, genPhotonLinker_, status);
   }
 
   /**
@@ -103,13 +170,6 @@ class ParticleCollectionGenMatcher
                  double maxDPtRel = 0.5) const
   {
     return addGenMatch<GenJet, GenJetLinker>(recParticles, genJets, dRmax, maxDPtRel, genJetLinker_);
-  }
-
-  void
-  addGenJetMatchByIndex(const std::vector<const Trec *> & recParticles,
-                        const std::vector<GenParticle> & genJets) const
-  {
-    return addGenMatchByIndex<GenJetLinker>(recParticles, genJets, genJetLinker_, GenParticleType::kGenAny);
   }
 
  protected:
@@ -162,13 +222,10 @@ class ParticleCollectionGenMatcher
           recParticle->eta(), recParticle->phi(), genParticle.eta(), genParticle.phi()
         );
         const double dPtRel = std::fabs(recParticle->pt() - genParticle.pt()) / genParticle.pt();
-        bool passesConstraints = minDPtRel < dPtRel && dPtRel < maxDPtRel;
-        if(passesConstraints && typeid(Trec) != typeid(RecoJetAK4) && ! genPartFlavs.empty())
-        {
-          passesConstraints &=
-            std::find(genPartFlavs.begin(), genPartFlavs.end(), recParticle->genPartFlav()) != genPartFlavs.end()
-          ;
-        }
+        bool passesConstraints =
+          minDPtRel < dPtRel && dPtRel < maxDPtRel && 
+          checkPartonFlavs(recParticle, genPartFlavs, std::is_same<Trec, RecoJetAK4>())
+        ;
         if(status > 0)
         {
           passesConstraints &= genParticle.status() == status;
@@ -206,132 +263,29 @@ class ParticleCollectionGenMatcher
     }
   }
 
-  template <typename Tlinker,
-            typename Tgen = GenParticle>
-  void
-  addGenMatchByIndex(const std::vector<const Trec *> & recParticles,
-                     const std::vector<Tgen> & genParticles,
-                     const Tlinker & linker,
-                     GenParticleType genParticleType) const
+  bool
+  checkPartonFlavs(const Trec * recParticle,
+                   const std::vector<unsigned char> & genPartFlavs,
+                   std::false_type) const
   {
-    const int genParticleSize = genParticles.size();
-    for(const Trec * recParticle: recParticles)
-    {
-      if(recParticle->hasAnyGenMatch())
-      {
-        // the reco particle has already been matched to a gen particle
-        continue;
-      }
+    return std::find(genPartFlavs.begin(), genPartFlavs.end(), recParticle->genPartFlav()) != genPartFlavs.end();
+  }
 
-      const int genMatchIdx = recParticle->genMatchIdx();
-
-      if(genMatchIdx >= 0)
-      {
-        if(genMatchIdx >= genParticleSize)
-        {
-          throw cmsException(this, __func__, __LINE__)
-            << "Expected gen matching index = " << genMatchIdx << " but gen collection has size of " << genParticleSize
-          ;
-        }
-        Tgen * genMatch = const_cast<Tgen *>(&genParticles.at(genMatchIdx));
-        if(genMatch->genPartFlav() != recParticle->genPartFlav())
-        {
-          throw cmsException(this, __func__, __LINE__)
-            << "Parton flavor of generator level object = " << static_cast<int>(genMatch->genPartFlav())
-            << " does not equal to parton flavor of reconstructed object = " << static_cast<int>(recParticle->genPartFlav())
-          ;
-        }
-
-        std::vector<unsigned int> genAbsPdgIds;
-        std::vector<unsigned int> genPartFlavs;
-        if(typeid(Trec) == typeid(RecoMuon) && genParticleType == GenParticleType::kGenMuon)
-        {
-          genPartFlavs = { 1, 15 };
-        }
-        else if(typeid(Trec) == typeid(RecoElectron))
-        {
-          if(genParticleType == GenParticleType::kGenPhoton)
-          {
-            genPartFlavs = { 22 };
-          }
-          else if(genParticleType == GenParticleType::kGenElectron)
-          {
-            genPartFlavs = { 1, 15 };
-          }
-        }
-        else if(typeid(Trec) == typeid(RecoHadTau))
-        {
-          if(genParticleType == GenParticleType::kGenMuon)
-          {
-            genPartFlavs = { 2, 4 };
-          }
-          else if(genParticleType == GenParticleType::kGenElectron)
-          {
-            genPartFlavs = { 1, 3 };
-          }
-          else if(genParticleType == GenParticleType::kGenAnyLepton)
-          {
-            genPartFlavs = { 1, 2, 3, 4 };
-          }
-        }
-        switch(genParticleType)
-        {
-          case GenParticleType::kGenElectron:  genAbsPdgIds = { 11 };     break;
-          case GenParticleType::kGenMuon:      genAbsPdgIds = { 13 };     break;
-          case GenParticleType::kGenAnyLepton: genAbsPdgIds = { 11, 13 }; break;
-          case GenParticleType::kGenPhoton:    genAbsPdgIds = { 22 };     break;
-          case GenParticleType::kGenAny:                                  break;
-        }
-
-        const bool hasGenAbsPdgIdMatch = genAbsPdgIds.empty() || (
-          ! genAbsPdgIds.empty() &&
-          std::find(genAbsPdgIds.begin(), genAbsPdgIds.end(), std::abs(genMatch->pdgId())) != genAbsPdgIds.end()
-        );
-        const bool hasGenPartFlavMatch = genPartFlavs.empty() || (
-          ! genPartFlavs.empty() &&
-          std::find(genPartFlavs.begin(), genPartFlavs.end(), std::abs(genMatch->genPartFlav())) != genPartFlavs.end()
-        );
-
-        if(hasGenAbsPdgIdMatch && hasGenPartFlavMatch)
-        {
-          if(isDEBUG_)
-          {
-            const double dR_bestMatch = deltaR(recParticle->eta(), recParticle->phi(), genMatch->eta(), genMatch->phi());
-            const double dPtRel_bestMatch = std::fabs(recParticle->pt() - genMatch->pt()) / genMatch->pt();
-            std::cout
-              << "Found gen match with dR = " << dR_bestMatch << " and dPtRel = " << dPtRel_bestMatch << " between "
-                 "reconstructed object...\n" << recParticle << "\n... and generator level object...\n" << *genMatch
-              << '\n'
-            ;
-          }
-          Trec * recParticle_nonconst = const_cast<Trec *>(recParticle);
-          linker(*recParticle_nonconst, genMatch);
-        }
-        else if(isDEBUG_)
-        {
-          std::cout
-            << "Did not find gen match for reconstructed object in gen particle collection '" << typeid (Tgen).name()
-            << "' (size = " << genParticles.size() << ":\n" << *recParticle << '\n'
-          ;
-        }
-      }
-    }
+  bool
+  checkPartonFlavs(const Trec * recParticle,
+                   const std::vector<unsigned char> & genPartFlavs,
+                   std::true_type) const
+  {
+    return true;
   }
 
   struct GenLeptonLinker
   {
     void
     operator()(Trec & recParticle,
-               const GenLepton * genLepton) const
+               const GenParticle * genParticle) const
     {
-      recParticle.set_genLepton(new GenLepton(*genLepton));
-    }
-
-    void
-    operator()(Trec & recParticle,
-               const GenParticle * genLepton) const
-    {
-      recParticle.set_genLepton(new GenLepton(*genLepton));
+      recParticle.set_genLepton(genParticle);
     }
   };
   GenLeptonLinker genLeptonLinker_;
@@ -349,16 +303,16 @@ class ParticleCollectionGenMatcher
   struct GenPhotonLinker
   {
     void operator()(Trec & recParticle,
-                    const GenPhoton * genPhoton) const
+                    const GenParticle * genPhoton,
+                    std::true_type) const
     {
-      recParticle.set_genPhoton(new GenPhoton(*genPhoton));
+      recParticle.set_genPhoton(genPhoton);
     }
-
+    
     void operator()(Trec & recParticle,
-                    const GenParticle * genPhoton) const
-    {
-      recParticle.set_genPhoton(new GenPhoton(*genPhoton));
-    }
+                    const GenParticle * genPhoton,
+                    std::false_type) const
+    {}
   };
   GenPhotonLinker genPhotonLinker_;
 

@@ -131,16 +131,9 @@ process.produceNtuple = cms.PSet(
     branchName_vertex = cms.string('PV'),
 
     # generator level information
-    branchName_muonGenMatch = cms.string('MuonGenMatch'),
-    branchName_electronGenMatch = cms.string('ElectronGenMatch'),
-    branchName_hadTauGenMatch = cms.string('TauGenMatch'),
-    branchName_jetGenMatch = cms.string('JetGenMatch'),
-
-    branchName_genLeptons = cms.string('GenLep'),
+    branchName_genPart = cms.string('GenPart'),
     branchName_genHadTaus = cms.string('GenVisTau'),
-    branchName_genPhotons = cms.string('GenPhoton'),
     branchName_genJets = cms.string('GenJet'),
-    branchName_genHiggses = cms.string('GenHiggs'),
 
     # PS weights
     branchName_PSweights = cms.string('PSWeight'),

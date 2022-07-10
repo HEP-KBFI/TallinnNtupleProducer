@@ -14,7 +14,7 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Int_t jetId,
                        Int_t puId,
                        UInt_t idx,
-                       Int_t genMatchIdx,
+                       Int_t genPartIdx,
                        Btag btag,
                        Int_t central_or_shift)
 : RecoJetBase(jet, idx)
@@ -26,7 +26,7 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
   , bRegRes_(bRegRes)
   , jetId_(jetId)
   , puId_(puId)
-  , genMatchIdx_(genMatchIdx)
+  , genPartIdx_(genPartIdx)
   , btag_(btag)
   , isBJet_loose_(false)
   , isBJet_medium_(false)
@@ -130,9 +130,9 @@ RecoJetAK4::puId() const
 }
 
 Int_t
-RecoJetAK4::genMatchIdx() const
+RecoJetAK4::genPartIdx() const
 {
-  return genMatchIdx_;
+  return genPartIdx_;
 }
 
 bool

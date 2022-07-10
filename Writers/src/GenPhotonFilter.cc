@@ -20,11 +20,11 @@ GenPhotonFilter::~GenPhotonFilter()
 {}
 
 int
-GenPhotonFilter::getNumPassingPhotons(const std::vector<GenPhoton> & genPhotons,
+GenPhotonFilter::getNumPassingPhotons(const std::vector<GenParticle> & genPhotons,
                                       const std::vector<GenParticle> & genFromHardProcess) const
 {
   int numSelPhotons = 0;
-  for(const GenPhoton & genPhoton: genPhotons)
+  for(const GenParticle & genPhoton: genPhotons)
   {
     double deltaR = +1e6;
     for(const GenParticle & genParticle: genFromHardProcess)
@@ -41,11 +41,15 @@ GenPhotonFilter::getNumPassingPhotons(const std::vector<GenPhoton> & genPhotons,
 }
 
 bool
-GenPhotonFilter::operator()(const std::vector<GenPhoton> & genPhotons,
-                            const std::vector<GenPhoton> & genProxyPhotons,
-                            const std::vector<GenParticle> & genFromHardProcess) const
+GenPhotonFilter::operator()(const std::vector<GenParticle> & genParticles) const
 {
   if ( mode_ == Mode::kDisabled ) return true;
+  
+  std::vector<GenParticle> genPhotons;
+  std::vector<GenParticle> genProxyPhotons;
+  std::vector<GenParticle> genFromHardProcess;
+  
+  //TODO implement me!
 
   const int numSelPhotons =
     getNumPassingPhotons(genPhotons, genFromHardProcess) +

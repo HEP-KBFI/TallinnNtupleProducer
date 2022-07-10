@@ -24,6 +24,7 @@ public:
    * @return Values of data-members
    */
   Int_t pdgId() const;
+  Int_t absPdgId() const;
   Int_t charge() const;
 
 protected:

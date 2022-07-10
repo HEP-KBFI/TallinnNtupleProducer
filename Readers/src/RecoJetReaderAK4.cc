@@ -6,9 +6,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_jetMET(), getBranchName_bTagWeight(), getBranchName_jetPtMass()
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"              // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"              // GenLeptonReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                 // GenJetReader
 
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
@@ -23,10 +20,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , max_nJets_(256)
   , branchName_num_("")
   , branchName_obj_("")
-  , genLeptonReader_(nullptr)
-  , genHadTauReader_(nullptr)
-  , genJetReader_(nullptr)
-  , readGenMatching_(false)
   , btag_(Btag::kDeepJet)
   , btag_central_or_shift_(kBtag_central)
   , ptMassOption_central_(-1)
@@ -40,7 +33,7 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , jet_BtagScore_(nullptr)
   , jet_jetId_(nullptr)
   , jet_puId_(nullptr)
-  , jet_genMatchIdx_(nullptr)
+  , jet_genJetIdx_(nullptr)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Jet"
@@ -48,19 +41,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   isMC_ = cfg.getParameter<bool>("isMC");
   ptMassOption_central_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
   ptMassOption_ = ptMassOption_central_;
-  readGenMatching_ = isMC_ && !cfg.getParameter<bool>("redoGenMatching");
-  if(readGenMatching_)
-  {
-    edm::ParameterSet cfg_genLepton = makeReader_cfg(era_, Form("%s_genLepton", branchName_obj_.data()), true);
-    cfg_genLepton.addParameter<unsigned int>("max_nLeptons", max_nJets_);
-    genLeptonReader_ = new GenLeptonReader(cfg_genLepton);
-    edm::ParameterSet cfg_genTau = makeReader_cfg(era_, Form("%s_genTau", branchName_obj_.data()), true);
-    cfg_genTau.addParameter<unsigned int>("max_nHadTaus", max_nJets_);
-    genHadTauReader_ = new GenHadTauReader(cfg_genTau);
-    edm::ParameterSet cfg_genJet = makeReader_cfg(era_, Form("%s_genJet", branchName_obj_.data()), true);
-    cfg_genJet.addParameter<unsigned int>("max_nJets", max_nJets_);
-    genJetReader_ = new GenJetReader(cfg_genJet);
-  }
   setBranchNames();
 }
 
@@ -72,9 +52,6 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
   {
     RecoJetReaderAK4 * const gInstance = instances_[branchName_obj_];
     assert(gInstance);
-    delete gInstance->genLeptonReader_;
-    delete gInstance->genHadTauReader_;
-    delete gInstance->genJetReader_;
     delete[] gInstance->jet_eta_;
     delete[] gInstance->jet_phi_;
     delete[] gInstance->jet_charge_;
@@ -84,7 +61,7 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_BtagScore_;
     delete[] gInstance->jet_jetId_;
     delete[] gInstance->jet_puId_;
-    delete[] gInstance->jet_genMatchIdx_;
+    delete[] gInstance->jet_genJetIdx_;
     for(auto & kv: gInstance->jet_pt_systematics_)
     {
       delete[] kv.second;
@@ -187,7 +164,7 @@ RecoJetReaderAK4::setBranchNames()
     branchName_BtagScore_ = Form("%s_%s", branchName_obj_.data(), "btagDeepFlavB");
     branchName_jetId_ = Form("%s_%s", branchName_obj_.data(), "jetId");
     branchName_puId_ = Form("%s_%s", branchName_obj_.data(), "puId");
-    branchName_genMatchIdx_ = Form("%s_%s", branchName_obj_.data(), "genMatchIdx");
+    branchName_genJetIdx_ = Form("%s_%s", branchName_obj_.data(), "genJetIdx");
     instances_[branchName_obj_] = this;
   }
   else
@@ -211,16 +188,6 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
   if(instances_[branchName_obj_] == this)
   {
     BranchAddressInitializer bai(tree, max_nJets_);
-    if(readGenMatching_)
-    {
-      const std::vector<std::string> genLeptonBranches = genLeptonReader_->setBranchAddresses(tree);
-      const std::vector<std::string> genHadTauBranches = genHadTauReader_->setBranchAddresses(tree);
-      const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(tree);
-
-      bound_branches.insert(bound_branches.end(), genLeptonBranches.begin(), genLeptonBranches.end());
-      bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
-      bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
-    }
     for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_jerForwardHighPtDown; ++idxShift)
     {
       if( (idxShift == ptMassOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
@@ -253,7 +220,7 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_BtagScore_, branchName_BtagScore_);
     bai.setBranchAddress(jet_jetId_, branchName_jetId_);
     bai.setBranchAddress(jet_puId_, branchName_puId_);
-    bai.setBranchAddress(jet_genMatchIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genMatchIdx_ : "", -1);
+    bai.setBranchAddress(jet_genJetIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genJetIdx_ : "", -1);
 
     const std::vector<std::string> recoJetBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoJetBranches.begin(), recoJetBranches.end());
@@ -323,7 +290,7 @@ RecoJetReaderAK4::read() const
         jet_id,
         gInstance->jet_puId_[idxJet],
         idxJet,
-        gInstance->jet_genMatchIdx_[idxJet],
+        gInstance->jet_genJetIdx_[idxJet],
         btag_,
         ptMassOption_,
       });
@@ -342,43 +309,8 @@ RecoJetReaderAK4::read() const
         } // jet_BtagWeights_systematics_
       } // isMC_
     } // idxJet
-
-    readGenMatching(jets);
   } // nJets > 0
   return jets;
-}
-
-void
-RecoJetReaderAK4::readGenMatching(std::vector<RecoJetAK4> & jets) const
-{
-  if(readGenMatching_)
-  {
-    assert(genLeptonReader_ && genHadTauReader_ && genJetReader_);
-    std::size_t nJets = jets.size();
-
-    std::vector<GenLepton> matched_genLeptons = genLeptonReader_->read();
-    assert(matched_genLeptons.size() == nJets);
-
-    std::vector<GenHadTau> matched_genHadTaus = genHadTauReader_->read();
-    assert(matched_genHadTaus.size() == nJets);
-
-    std::vector<GenJet> matched_genJets = genJetReader_->read();
-    assert(matched_genJets.size() == nJets);
-
-    for(std::size_t idxJet = 0; idxJet < nJets; ++idxJet)
-    {
-      RecoJetAK4 & jet = jets[idxJet];
-
-      const GenLepton & matched_genLepton = matched_genLeptons[idxJet];
-      if(matched_genLepton.isValid()) jet.set_genLepton(new GenLepton(matched_genLepton));
-
-      const GenHadTau & matched_genHadTau = matched_genHadTaus[idxJet];
-      if(matched_genHadTau.isValid()) jet.set_genHadTau(new GenHadTau(matched_genHadTau));
-
-      const GenJet & matched_genJet = matched_genJets[idxJet];
-      if(matched_genJet.isValid()) jet.set_genJet(new GenJet(matched_genJet));
-    }
-  }
 }
 
 std::vector<std::string>

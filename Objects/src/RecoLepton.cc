@@ -4,8 +4,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException()
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"          // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"             // GenJet
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"          // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"          // GenPhoton
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h"        // GenLepton
 
 Double_t
 RecoLepton::get_assocJet_pt(Double_t reco_pt,
@@ -26,7 +25,7 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
                        Int_t    tightCharge,
                        Int_t    jetIdx,
                        UChar_t  genPartFlav,
-                       Int_t    genMatchIdx)
+                       Int_t    genPartIdx)
   : ChargedParticle(lepton)
   , dxy_(dxy)
   , dz_(dz)
@@ -39,7 +38,7 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
   , tightCharge_(tightCharge)
   , jetIdx_(jetIdx)
   , genPartFlav_(genPartFlav)
-  , genMatchIdx_(genMatchIdx)
+  , genPartIdx_(genPartIdx)
   , mvaRawTTH_cut_(-1.)
   , assocJet_pt_(get_assocJet_pt(pt_, jetRelIso_))
   , assocJet_p4_(assocJet_pt_, eta_, phi_, mass_)
@@ -80,7 +79,7 @@ RecoLepton::set_isTight() const
 }
 
 void
-RecoLepton::set_genLepton(const GenLepton * genLepton)
+RecoLepton::set_genLepton(const GenParticle * genLepton)
 {
   genLepton_.reset(genLepton);
 }
@@ -92,7 +91,7 @@ RecoLepton::set_genHadTau(const GenHadTau * genHadTau)
 }
 
 void
-RecoLepton::set_genPhoton(const GenPhoton * genPhoton)
+RecoLepton::set_genPhoton(const GenParticle * genPhoton)
 {
   genPhoton_.reset(genPhoton);
 }
@@ -281,12 +280,12 @@ RecoLepton::genPartFlav() const
 }
 
 Int_t
-RecoLepton::genMatchIdx() const
+RecoLepton::genPartIdx() const
 {
-  return genMatchIdx_;
+  return genPartIdx_;
 }
 
-const GenLepton *
+const GenParticle *
 RecoLepton::genLepton() const
 {
   return genLepton_.get();
@@ -298,7 +297,7 @@ RecoLepton::genHadTau() const
   return genHadTau_.get();
 }
 
-const GenPhoton *
+const GenParticle *
 RecoLepton::genPhoton() const
 {
   return genPhoton_.get();

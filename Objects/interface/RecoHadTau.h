@@ -7,7 +7,6 @@
 #include <map>                                                 // std::map
 
 // forward declarations
-class GenLepton;
 class GenJet;
 
 enum class TauID;
@@ -28,7 +27,7 @@ class RecoHadTau : public GenHadTau
              Int_t antiMuon,
              Int_t jetIdx,
              UChar_t genPartFlav,
-             Int_t genMatchIdx);
+             Int_t genPartIdx);
 
   virtual ~RecoHadTau();
 
@@ -42,7 +41,7 @@ class RecoHadTau : public GenHadTau
   /**
    * @brief Set links to generator level particles (matched by dR)
    */
-  void set_genLepton(const GenLepton * genLepton);
+  void set_genLepton(const GenParticle * genLepton);
   void set_genHadTau(const GenHadTau * genHadTau);
   void set_genJet(const GenJet * genJet);
 
@@ -69,9 +68,9 @@ class RecoHadTau : public GenHadTau
   Int_t filterBits() const;
   Int_t jetIdx() const;
   UChar_t genPartFlav() const;
-  Int_t genMatchIdx() const;
+  Int_t genPartIdx() const;
 
-  const GenLepton * genLepton() const;
+  const GenParticle * genLepton() const;
   const GenHadTau * genHadTau() const;
   const GenJet * genJet() const;
 
@@ -99,10 +98,10 @@ class RecoHadTau : public GenHadTau
   Int_t jetIdx_;        ///< index of the matched jet from initial jet collection (-1 if no match)
   UChar_t genPartFlav_; ///< generator-level parton flavor (1 = prompt electron, 2 = prompt muon, 3 = tau->e decay,
                         ///<                                4 = tau->mu decay, 5 = hadronic tau decay, 0 = unknown/no match)
-  Int_t genMatchIdx_;   ///< index to matched gen particle (-1 if no match)
+  Int_t genPartIdx_;   ///< index to matched gen particle (-1 if no match)
 
 //--- matching to generator level particles
-  std::shared_ptr<const GenLepton> genLepton_;
+  std::shared_ptr<const GenParticle> genLepton_;
   std::shared_ptr<const GenHadTau> genHadTau_;
   std::shared_ptr<const GenJet> genJet_;
 

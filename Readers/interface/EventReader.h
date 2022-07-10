@@ -9,9 +9,7 @@
 #include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"                          // EventInfoReader
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                          // GenHadTauReader
 #include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                             // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"                          // GenLeptonReader
-#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"                          // GenPhotonReader
-#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"
+#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"                        // GenParticleReader
 #include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"                          // MEtFilterReader
 #include "TallinnNtupleProducer/Readers/interface/ParticleCollectionGenMatcher.h"             // RecoElectronCollectionGenMatcher, RecoMuonCollectionGenMatcher, RecoHadTauCollectionGenMatcher, RecoJetCollectionGenMatcher
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                               // ReaderBase
@@ -155,19 +153,13 @@ class EventReader : public ReaderBase
   mutable std::string jetAK4_lastSystematic_;
   mutable bool jetAK4_isInvalid_;
 
-  GenLeptonReader * genLeptonReader_;
+  GenParticleReader * genParticleReader_;
   GenHadTauReader * genHadTauReader_;
-  GenPhotonReader * genPhotonReader_;
   GenJetReader * genJetReader_;
   RecoMuonCollectionGenMatcher * muonGenMatcher_;
   RecoElectronCollectionGenMatcher * electronGenMatcher_;
   RecoHadTauCollectionGenMatcher * hadTauGenMatcher_;
   RecoJetCollectionGenMatcherAK4 * jetGenMatcherAK4_;
-
-  GenParticleReader * genMatchToMuonReader_;
-  GenParticleReader * genMatchToElectronReader_;
-  GenParticleReader * genMatchToHadTauReader_;
-  GenParticleReader * genMatchToJetReader_;
 
   RecoJetReaderAK8 * jetReaderAK8_Hbb_;
   RecoJetReaderAK8 * jetReaderAK8_Wjj_;

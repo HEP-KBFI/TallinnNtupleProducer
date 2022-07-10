@@ -7,12 +7,8 @@
 #include "TallinnNtupleProducer/Objects/interface/Event.h"                    // Event
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"               // WriterBase
 
-#include <string>                                                             // std::string
-#include <vector>                                                             // std::vector
-
 // forward declarations
 class GenParticleReader;
-class GenPhotonReader;
 class GenPhotonFilter;
 class TTree;
 class TTreeWrapper;
@@ -22,13 +18,6 @@ class GenPhotonFilterWriter : public WriterBase
  public:
   GenPhotonFilterWriter(const edm::ParameterSet & cfg);
   ~GenPhotonFilterWriter();
-
-  /**
-   * @brief Call inputTree->registerReader(reader)
-   *        for "private" GenPhotonReader and GenParticleReader instances
-   */
-  void
-  registerReaders(TTreeWrapper * inputTree);
 
   /**
    * @brief Call tree->Branch for all branches
@@ -51,15 +40,6 @@ class GenPhotonFilterWriter : public WriterBase
 
   /// name of branch in outputTree
   std::string branchName_;
-
-  /// names of branches in inputTree
-  std::string branchName_genPhotons_; 
-  std::string branchName_genProxyPhotons_;
-  std::string branchName_genParticlesFromHardProcess_;
-
-  GenPhotonReader * genPhotonReader_;
-  GenPhotonReader * genProxyPhotonReader_;
-  GenParticleReader * genParticlesFromHardProcessReader_;
 
   GenPhotonFilter * genPhotonFilter_;
   bool apply_genPhotonFilter_;

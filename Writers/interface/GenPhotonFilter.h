@@ -1,14 +1,14 @@
 #ifndef TallinnNtupleProducer_Writers_GenPhotonFilter_h
 #define TallinnNtupleProducer_Writers_GenPhotonFilter_h
 
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h" // GenPhoton
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle
 
 /*
   Resolve overlap between MC events contained in W+jets samples with either ISR or FSR
   and MC events contained in W+gamma sample, as discussed in this Hypernews thread:
     https://hypernews.cern.ch/HyperNews/CMS/get/generators/4947.html
-  When processing the W+jets sample, set the mode parameter to kInverted,
-  when processing the W+gamma sample, set the mode parameter to kEnabled,
+  When processing the X+jets sample, set the mode parameter to kInverted,
+  when processing the X+gamma sample, set the mode parameter to kEnabled,
   and when processing any other MC sample (or data), set it to kDisabled.
   The return value is true (false) if the event passes (fails) the filter.
 */
@@ -25,13 +25,11 @@ class GenPhotonFilter
   ~GenPhotonFilter();
 
   bool
-  operator()(const std::vector<GenPhoton> & genPhotons,
-             const std::vector<GenPhoton> & genProxyPhotons,
-             const std::vector<GenParticle> & genFromHardProcess) const;
+  operator()(const std::vector<GenParticle> & genParticles) const;
 
  private:
   int
-  getNumPassingPhotons(const std::vector<GenPhoton> & genPhotons,
+  getNumPassingPhotons(const std::vector<GenParticle> & genPhotons,
                        const std::vector<GenParticle> & genFromHardProcess) const;
 
   Mode mode_;

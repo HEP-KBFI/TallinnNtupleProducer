@@ -3,7 +3,7 @@
 <use   name="TallinnNtupleProducer/CommonTools"/>
 <use   name="boost" />
 <use   name="root"/>
-<use   name="roottmva"/>
+<use   name="rooteg"/>
 <export>
   <lib   name="1"/>
 </export>

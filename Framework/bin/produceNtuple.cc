@@ -39,16 +39,12 @@
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                  // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                                  // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"                                     // GenJet
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                                  // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                                  // GenPhoton
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                               // RunLumiEvent
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"                                // TriggerInfo
 #include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                // EventReader
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                            // GenHadTauReader
 #include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                               // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"                            // GenLeptonReader
 #include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"                          // GenParticleReader
-#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"                            // GenPhotonReader
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                    // L1PreFiringWeightReader
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                              // LHEInfoReader
 #include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
@@ -346,7 +342,7 @@ int main(int argc, char* argv[])
           evtWeightRecorder.record_auxWeight(eventWeightManager);
         }
         if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
-        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.eventInfo().topPtRwgtSF());
+        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.topPtRwgtSF());
         lheInfoReader->read();
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);

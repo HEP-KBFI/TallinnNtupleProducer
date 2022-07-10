@@ -1,9 +1,8 @@
 #include "TallinnNtupleProducer/Framework/interface/leptonGenMatchingAuxFunctions.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"        // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"        // GenPhoton
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"       // RecoLepton
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h"      // GenParticle
 
 #include <iostream> // std::ostream
 

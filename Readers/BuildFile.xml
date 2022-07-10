@@ -2,7 +2,7 @@
 <use   name="TallinnNtupleProducer/CommonTools"/>
 <use   name="TallinnNtupleProducer/Objects"/>
 <use   name="TallinnNtupleProducer/Selectors"/>
-<use name="correctionlib"/>
+<use   name="correctionlib"/>
 <use   name="boost" />
 <use   name="root"/>
 <use   name="roottmva"/>

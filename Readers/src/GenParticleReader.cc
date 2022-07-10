@@ -11,17 +11,14 @@ std::map<std::string, GenParticleReader *> GenParticleReader::instances_;
 
 GenParticleReader::GenParticleReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
-  , max_nParticles_(32)
-  , readGenPartFlav_(false)
+  , max_nParticles_(512)
   , particle_pt_(nullptr)
   , particle_eta_(nullptr)
   , particle_phi_(nullptr)
   , particle_mass_(nullptr)
   , particle_pdgId_(nullptr)
-  , particle_charge_(nullptr)
   , particle_status_(nullptr)
   , particle_statusFlags_(nullptr)
-  , particle_genPartFlav_(nullptr)
 {
   branchName_obj_ = cfg.getParameter<std::string>("branchName");
   branchName_num_ = Form("n%s", branchName_obj_.data());
@@ -42,18 +39,10 @@ GenParticleReader::~GenParticleReader()
     delete[] gInstance->particle_phi_;
     delete[] gInstance->particle_mass_;
     delete[] gInstance->particle_pdgId_;
-    delete[] gInstance->particle_charge_;
     delete[] gInstance->particle_status_;
     delete[] gInstance->particle_statusFlags_;
-    delete[] gInstance->particle_genPartFlav_;
     instances_[branchName_obj_] = nullptr;
   }
-}
-
-void
-GenParticleReader::readGenPartFlav(bool flag)
-{
-  readGenPartFlav_ = flag;
 }
 
 void
@@ -66,10 +55,8 @@ GenParticleReader::setBranchNames()
     branchName_phi_ = Form("%s_%s", branchName_obj_.data(), "phi");
     branchName_mass_ = Form("%s_%s", branchName_obj_.data(), "mass");
     branchName_pdgId_ = Form("%s_%s", branchName_obj_.data(), "pdgId");
-    branchName_charge_ = Form("%s_%s", branchName_obj_.data(), "charge");
     branchName_status_ = Form("%s_%s", branchName_obj_.data(), "status");
     branchName_statusFlags_ = Form("%s_%s", branchName_obj_.data(), "statusFlags");
-    branchName_genPartFlav_ = Form("%s_%s", branchName_obj_.data(), "genPartFlav");
     instances_[branchName_obj_] = this;
   }
   else
@@ -98,9 +85,7 @@ GenParticleReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(particle_phi_, branchName_phi_);
     bai.setBranchAddress(particle_mass_, branchName_mass_);
     bai.setBranchAddress(particle_pdgId_, branchName_pdgId_);
-    bai.setBranchAddress(particle_charge_, branchName_charge_);
     bai.setBranchAddress(particle_status_, branchName_status_);
-    bai.setBranchAddress(particle_genPartFlav_, readGenPartFlav_ ? branchName_genPartFlav_ : "");
     bai.setBranchAddress(particle_statusFlags_, branchName_statusFlags_);
     return bai.getBoundBranchNames_read();
   }
@@ -132,10 +117,8 @@ GenParticleReader::read() const
         gInstance->particle_phi_[idxParticle],
         gInstance->particle_mass_[idxParticle],
         gInstance->particle_pdgId_[idxParticle],
-        gInstance->particle_charge_[idxParticle],
         gInstance->particle_status_[idxParticle],
         gInstance->particle_statusFlags_[idxParticle],
-        gInstance->particle_genPartFlav_[idxParticle],
       });
     }
   } 

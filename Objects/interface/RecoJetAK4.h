@@ -31,7 +31,7 @@ class RecoJetAK4 : public RecoJetBase
              Int_t jetId,
              Int_t puId,
              UInt_t idx,
-             Int_t genMatchIdx,
+             Int_t genPartIdx,
              Btag btag,
              Int_t central_or_shift);
 
@@ -59,7 +59,7 @@ class RecoJetAK4 : public RecoJetBase
   Double_t bRegRes() const;
   Int_t jetId() const;
   Int_t puId() const;
-  Int_t genMatchIdx() const;
+  Int_t genPartIdx() const;
 
   bool passesPUID(pileupJetID puIdWP) const;
   bool is_PUID_taggable() const;
@@ -78,7 +78,7 @@ class RecoJetAK4 : public RecoJetBase
   Double_t bRegRes_;    ///< resolution on pT corrected with b-jet regression
   Int_t jetId_;         ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   Int_t puId_;          ///< pileup jet ID, as explained in https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
-  Int_t genMatchIdx_;   ///< index to gen jet
+  Int_t genPartIdx_;   ///< index to gen jet
   Btag btag_;           ///< default b-tagging discriminant
 
   std::map<Btag, std::map<int, Double_t>> BtagWeight_systematics_;

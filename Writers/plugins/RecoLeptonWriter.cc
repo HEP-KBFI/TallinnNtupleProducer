@@ -4,8 +4,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                    // GenHadTau
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                    // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                    // GenPhoton
 #include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"           // RecoElectronReader::get_supported_systematics()
 #include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"               // RecoMuonReader::get_supported_systematics()
 

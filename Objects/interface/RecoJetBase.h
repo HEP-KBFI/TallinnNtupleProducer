@@ -18,7 +18,6 @@
 #include <memory>                                           // std::shared_ptr
 
 // forward declarations
-class GenLepton;
 class GenHadTau;
 
 class RecoJetBase : public GenJet
@@ -33,7 +32,7 @@ class RecoJetBase : public GenJet
   /**
    * @brief Set links to generator level particles (matched by dR)
    */
-  void set_genLepton(const GenLepton * genLepton);
+  void set_genLepton(const GenParticle * genLepton);
   void set_genHadTau(const GenHadTau * genHadTau);
   void set_genJet(const GenJet * genJet);
 
@@ -43,7 +42,7 @@ class RecoJetBase : public GenJet
    */
   UInt_t idx() const;
 
-  const GenLepton * genLepton() const;
+  const GenParticle * genLepton() const;
   const GenHadTau * genHadTau() const;
   const GenJet * genJet() const;
 
@@ -54,7 +53,7 @@ class RecoJetBase : public GenJet
   UInt_t idx_; ///< index of jet in the ntuple
 
 //--- matching to generator level particles
-  std::shared_ptr<const GenLepton> genLepton_;
+  std::shared_ptr<const GenParticle> genLepton_;
   std::shared_ptr<const GenHadTau> genHadTau_;
   std::shared_ptr<const GenJet> genJet_;
 };

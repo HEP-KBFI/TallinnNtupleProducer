@@ -84,10 +84,6 @@ typedef ParticleCollectionCleaner<RecoElectron> RecoElectronCollectionCleaner;
 
 typedef ParticleCollectionCleaner<RecoMuon> RecoMuonCollectionCleaner;
 
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"
-
-typedef ParticleCollectionCleaner<GenLepton> GenLeptonCollectionCleaner;
-
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"
 
 typedef ParticleCollectionCleaner<RecoHadTau> RecoHadTauCollectionCleaner;
@@ -95,10 +91,6 @@ typedef ParticleCollectionCleaner<RecoHadTau> RecoHadTauCollectionCleaner;
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"
 
 typedef ParticleCollectionCleaner<RecoJetAK4> RecoJetCollectionCleanerAK4;
-
-#include "TallinnNtupleProducer/Objects/interface/GenJet.h"
-
-typedef ParticleCollectionCleaner<GenJet> GenJetCollectionCleaner;
 
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"
 
