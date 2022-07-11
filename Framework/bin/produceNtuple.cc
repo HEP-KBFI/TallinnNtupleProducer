@@ -291,10 +291,6 @@ int main(int argc, char* argv[])
     bool skipEvent = false;
     for ( const auto & central_or_shift : systematic_shifts )
     {
-      if ( isDEBUG || run_lumi_eventSelector )
-      {
-        std::cout << "Processing central_or_shift = '" << central_or_shift << "'" << std::endl;
-      }
       const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
       if ( central_or_shift == "central" )
       {
@@ -313,6 +309,10 @@ int main(int argc, char* argv[])
       {
         skipEvent = true;
         continue;
+      }
+      if ( isDEBUG || run_lumi_eventSelector )
+      {
+        std::cout << "Processing central_or_shift = '" << central_or_shift << "'" << std::endl;
       }
       if ( central_or_shift == "central" && (isDEBUG || run_lumi_eventSelector) )
       {
