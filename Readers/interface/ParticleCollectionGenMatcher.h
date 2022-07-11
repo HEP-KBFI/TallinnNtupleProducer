@@ -74,10 +74,14 @@ class ParticleCollectionGenMatcher
         if(genPart_absPdgId == 11 || genPart_absPdgId == 13)
         {
           genLeptonLinker_(*recParticle_nonconst, genMatch);
+          //assert(! genMatch->isMatchedToReco()); // should not happen ...
+          genMatch->setMatchedToReco();
         }
         else if(genPart_absPdgId == 22)
         {
           genPhotonLinker_(*recParticle_nonconst, genMatch, std::is_same<Trec, RecoElectron>());
+          //assert(! genMatch->isMatchedToReco());
+          genMatch->setMatchedToReco();
         }
         else
         {
@@ -118,6 +122,8 @@ class ParticleCollectionGenMatcher
         GenJet * genMatch = const_cast<GenJet *>(&genJets.at(genJetIdx));
         Trec * recParticle_nonconst = const_cast<Trec *>(recParticle);
         genJetLinker_(*recParticle_nonconst, genMatch);
+        //assert(! genMatch->isMatchedToReco());
+        genMatch->setMatchedToReco();
       }
     }
   }
@@ -133,7 +139,7 @@ class ParticleCollectionGenMatcher
                     double maxDPtRel = +0.5,
                     int status = 1) const
   {
-    return addGenMatch<GenParticle, GenLeptonLinker>(recParticles, genParticles, dRmax, minDPtRel, maxDPtRel, genLeptonLinker_, status);
+    return addGenMatch<GenParticle, GenLeptonLinker>(recParticles, genParticles, dRmax, minDPtRel, maxDPtRel, genLeptonLinker_, status, { 11, 13 });
   }
 
   /**
@@ -221,19 +227,32 @@ class ParticleCollectionGenMatcher
 
       for(const Tgen & genParticle: genParticles)
       {
+        if(! checkPartonFlavs(genParticle, genPartFlavs, std::is_same<Trec, RecoJetAK4>()))
+        {
+          continue;
+        }
+        if(genParticle.status() != status)
+        {
+          continue;
+        }
+        if(! genParticle.isMatchedToReco())
+        {
+          continue;
+        }
+        if(! checkPartonFlavs(recParticle, genPartFlavs, std::is_same<Trec, RecoJetAK4>()))
+        {
+          continue;
+        }
+        const double dPtRel = std::fabs(recParticle->pt() - genParticle.pt()) / genParticle.pt();
+        if(! (minDPtRel < dPtRel && dPtRel < maxDPtRel))
+        {
+          continue;
+        }
+
         const double dR = deltaR(
           recParticle->eta(), recParticle->phi(), genParticle.eta(), genParticle.phi()
         );
-        const double dPtRel = std::fabs(recParticle->pt() - genParticle.pt()) / genParticle.pt();
-        bool passesConstraints =
-          minDPtRel < dPtRel && dPtRel < maxDPtRel && 
-          checkPartonFlavs(recParticle, genPartFlavs, std::is_same<Trec, RecoJetAK4>())
-        ;
-        if(status > 0)
-        {
-          passesConstraints &= genParticle.status() == status;
-        }
-        if(dR < dRmax && dR < dR_bestMatch && passesConstraints && ! genParticle.isMatchedToReco())
+        if(dR < dRmax && dR < dR_bestMatch)
         {
           bestMatch = const_cast<Tgen *>(&genParticle);
           dR_bestMatch = dR;
@@ -280,6 +299,24 @@ class ParticleCollectionGenMatcher
                    std::true_type) const
   {
     return true;
+  }
+
+  template <typename Tgen>
+  bool
+  checkPartonFlavs(const Tgen & genParticle,
+                   const std::vector<unsigned char> & genPartFlavs,
+                   std::false_type) const
+  {
+    return true;
+  }
+
+  template <typename Tgen>
+  bool
+  checkPartonFlavs(const Tgen & genParticle,
+                   const std::vector<unsigned char> & genPartFlavs,
+                   std::true_type) const
+  {
+    return std::find(genPartFlavs.begin(), genPartFlavs.end(), genParticle.absPdgId()) != genPartFlavs.end();
   }
 
   struct GenLeptonLinker
