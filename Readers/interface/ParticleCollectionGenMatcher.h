@@ -51,7 +51,8 @@ class ParticleCollectionGenMatcher
 
       const UChar_t genPartFlav = recParticle->genPartFlav();
       if(genPartFlav == 0 ||
-         ((typeid(Trec) == typeid(RecoMuon) || typeid(Trec) == typeid(RecoElectron)) && (genPartFlav != 1 && genPartFlav != 15)) ||
+         ((typeid(Trec) == typeid(RecoMuon) || typeid(Trec) == typeid(RecoElectron)) &&
+          (genPartFlav != 1 && genPartFlav != 15 && genPartFlav != 22)) ||
          (typeid(Trec) == typeid(RecoHadTau) && genPartFlav == 5))
       {
         // ignore reco lepton matches to generator-level quarks
