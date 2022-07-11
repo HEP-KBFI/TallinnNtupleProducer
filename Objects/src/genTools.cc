@@ -24,73 +24,25 @@ getHiggsDecayMode(const GenParticleCollection & genParticles)
   //
   // (protons) -> H -> H -> (descendants)
   //
-  // The issue is more complicated in HH events, which have two genuine Higgs bosons at the gen level.
-  // AFAICT, the off-shell Higgs in HH events is not recorded, only the initial state protons are.
-  // The solution is thus divided into two parts:
-  //
-  // 1) find the unique list of Higgs bosons that do not have Higgs as a parent
-  // 2) for each such unique Higgs bosons, check its decscendants recursively until you'll find non-Higgs particles
-  //
-  // An integer code is built from the descendants of all Higgs bosons
+  // The solution is to find all Higgs bosons that have two daughters, and use the PDG ID of
+  // the daughters to construct the code.
 
-  // 1)
-  std::vector<int> firstHiggsCopies;
+  std::vector<std::vector<int>> higgsDaughterPdgIds;
   for(std::size_t genPartIdx = 0; genPartIdx < genParticles.size(); ++genPartIdx)
   {
     const GenParticle & genPart = genParticles.at(genPartIdx);
-    if(genPart.absPdgId() == 25 && genPart.momIdx() >= 0 && genParticles.at(genPart.momIdx()).absPdgId() != 25)
+    if(genPart.absPdgId() == 25 && genPart.dauIdxs().size() == 2)
     {
-      // record the Higgs if its parent is not a Higgs (which is guaranteed to exist in Higgs samples)
-      firstHiggsCopies.push_back(genPartIdx);
+      const std::vector<int> & dauIdxs = genPart.dauIdxs();
+      std::vector<int> higgsDaughterPdgId {
+        genParticles.at(dauIdxs.at(0)).absPdgId(),
+        genParticles.at(dauIdxs.at(1)).absPdgId(),
+      };
+      std::sort(higgsDaughterPdgId.begin(), higgsDaughterPdgId.end());
+      higgsDaughterPdgIds.push_back(higgsDaughterPdgId);
     }
   }
-  
-  // 2)
-  std::vector<std::vector<int>> higgsDaughterPdgIds;
-  for(int firstHiggsCopy: firstHiggsCopies)
-  {
-    int currentHiggsIdx = firstHiggsCopy;
-    while(currentHiggsIdx >= 0)
-    {
-      const GenParticle & currentHiggs = genParticles.at(currentHiggsIdx);
-      currentHiggsIdx = -1;
-      
-      const std::vector<int> & currentHiggsDaughterIdxs = currentHiggs.dauIdxs();
-      std::vector<int> currentHiggsDaughterPdgIds;
-      for(int currentHiggsDaughterIdx: currentHiggsDaughterIdxs)
-      {
-        assert(currentHiggsDaughterIdx != currentHiggsIdx); // to avoid accidental infinite loop
-        currentHiggsDaughterPdgIds.push_back(genParticles.at(currentHiggsDaughterIdx).absPdgId());
-      }
-      
-      if(currentHiggsDaughterPdgIds.size() == 1)
-      {
-        if(currentHiggsDaughterPdgIds.at(0) == 25)
-        {
-          currentHiggsIdx = currentHiggsDaughterIdxs.at(0);
-        }
-        else
-        {
-          throw cmsException(__func__, __LINE__) << "Found a Higgs with only one non-Higgs descendant: " << currentHiggs;
-        }
-      }
-      else if(currentHiggsDaughterPdgIds.size() == 2)
-      {
-        if(currentHiggsDaughterPdgIds.at(0) == 25 || currentHiggsDaughterPdgIds.at(1) == 25)
-        {
-          throw cmsException(__func__, __LINE__) << "Found a Higgs with two daughters, one of which is Higgs: " << currentHiggs;
-        }
-        // sort the indices in ascending order
-        std::sort(currentHiggsDaughterPdgIds.begin(), currentHiggsDaughterPdgIds.end());
-        higgsDaughterPdgIds.push_back(currentHiggsDaughterPdgIds);
-      }
-      else
-      {
-        throw cmsException(__func__, __LINE__) << "Found a Higgs with invalid number of daughters: " << currentHiggs;
-      }
-    }
-  }
-  
+
   // Construct the code with the following algorithm:
   // i) For each pair of Higgs daughters, figure out its code:
   // i.a) if it decays into the same particles (modulo electric charge), assign a single number
@@ -144,7 +96,7 @@ getHiggsDecayMode(const GenParticleCollection & genParticles)
   }
   else if(codes.size() > 2)
   {
-    throw cmsException(__func__, __LINE__) << "Too many Higgs bosons found (indices): " << format_vint(firstHiggsCopies);
+    throw cmsException(__func__, __LINE__) << "Too many Higgs bosons found: " << codes.size();
   }
   
   return 0;
@@ -158,10 +110,14 @@ topPtRwgtSF(const GenParticleCollection & genParticles,
   std::vector<int> genTopIdxs;
   for(std::size_t genPartIdx = 0; genPartIdx < genParticles.size(); ++genPartIdx)
   {
+    if(genTopIdxs.size() == 2)
+    {
+      break; // can break early because the SF is supposed to be applied only to ttbar, so at two tops
+    }
     const GenParticle & topCandidate = genParticles.at(genPartIdx);
     if(topCandidate.absPdgId() == 6)
     {
-      const std::vector<int> dauIdxs = topCandidate.dauIdxs();
+      const std::vector<int> & dauIdxs = topCandidate.dauIdxs();
       if(dauIdxs.size() == 2)
       {
         genTopIdxs.push_back(genPartIdx);
