@@ -100,6 +100,7 @@ class EventReader : public ReaderBase
   bool isMC_;
   bool readGenMatching_;
   bool jetCleaningByIndex_;
+  bool genMatchRecoJets_;
 
   mutable UInt_t lastRun_;
   mutable UInt_t lastLumi_;

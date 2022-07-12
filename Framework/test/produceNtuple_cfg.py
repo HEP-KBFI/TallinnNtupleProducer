@@ -155,6 +155,7 @@ process.produceNtuple = cms.PSet(
     redoGenMatching = cms.bool(False),
     genMatchingByIndex = cms.bool(True),
     jetCleaningByIndex = cms.bool(True),
+    genMatchRecoJets = cms.bool(False),
 
     writerPlugins = cms.VPSet(
         writers_bdtVariables_HH_2lss,

@@ -175,6 +175,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
 
   jetReaderAK4_ = new RecoJetReaderAK4(make_cfg(cfg, "branchName_jets_ak4"));
   jetCleaningByIndex_ = cfg.getParameter<bool>("jetCleaningByIndex");
+  genMatchRecoJets_ = cfg.getParameter<bool>("genMatchRecoJets");
 
   jetSelectorAK4_ = new RecoJetCollectionSelectorAK4(era_, -1, isDEBUG_);
   jetSelectorAK4_btagLoose_ = new RecoJetCollectionSelectorAK4_btagLoose(era_, -1, isDEBUG_);
@@ -580,7 +581,7 @@ EventReader::read() const
     
     // CV: performing the gen-matching on the jet_ptrsAK4 collection
     //     adds gen-matching information to three collections of AK4 jets at once (selJetsAK4, selJetsAK4_btagLoose, selJetsAK4_btagMedium)
-    if ( isUpdatedJetsAK4 )
+    if ( genMatchRecoJets_ && isUpdatedJetsAK4 )
     {
       jetGenMatcherAK4_->addGenLeptonMatch(event_.jet_ptrsAK4_, event_.genParticles_);
       jetGenMatcherAK4_->addGenHadTauMatch(event_.jet_ptrsAK4_, event_.genHadTaus_);
