@@ -308,11 +308,11 @@ int main(int argc, char* argv[])
       if ( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) )
       {
         skipEvent = true;
-        continue;
+        break; // skip to the next event
       }
       if ( isDEBUG || run_lumi_eventSelector )
       {
-        std::cout << "Processing central_or_shift = '" << central_or_shift << "'" << std::endl;
+        std::cout << "Processing central_or_shift = '" << central_or_shift << "'\n";
       }
       if ( central_or_shift == "central" && (isDEBUG || run_lumi_eventSelector) )
       {
@@ -445,6 +445,10 @@ int main(int argc, char* argv[])
               << " not supported for categories with " << numNominalLeptons << " lepton(s) and " << numNominalHadTaus << " hadronic tau(s) !!";
           }
         }
+      }
+      if(isDEBUG)
+      {
+        std::cout << evtWeightRecorder << '\n';
       }
 
       for ( auto & writer : writers )
