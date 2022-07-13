@@ -13,7 +13,8 @@ PdgTable::get_charge(int pdgId)
   if(ids.find(pdgId) == ids.end())
   {
     const TParticlePDG * const pdgParticle = TDatabasePDG::Instance()->GetParticle(pdgId);
-    ids[pdgId] = pdgParticle ? pdgParticle->Charge() : 0; // assume neutral if not available in DB
+    const int charge = static_cast<int>(pdgParticle ? pdgParticle->Charge() : 0); // assume neutral if not available in DB
+    ids[pdgId] = (charge > 0) - (charge < 0); // keep only the sign (otherwise it is given in units of |e|/3)
   }
   return ids.at(pdgId);
 }
