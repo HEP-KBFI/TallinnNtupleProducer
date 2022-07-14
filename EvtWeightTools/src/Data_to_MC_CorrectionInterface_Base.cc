@@ -42,7 +42,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , era_(era)
   , hadTauSelection_(-1)
   , hadTauId_(TauID::DeepTau2017v2VSjet)
-  , tauIdSFs_(nullptr)
+  , tauCorrectionSetFile_(LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", get_era(era_).data())).fullPath())
   , applyHadTauSF_(true)
   , isDEBUG_(cfg.exists("isDEBUG") ? cfg.getParameter<bool>("isDEBUG") : false)
   , pileupJetId_(pileupJetID::kPileupJetID_disabled)
@@ -57,6 +57,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , numHadTaus_(0)
   , numJets_(0)
 {
+  tau_cset_ = correction::CorrectionSet::from_file(tauCorrectionSetFile_);
   const std::string hadTauSelection_string = cfg.getParameter<std::string>("hadTauSelection_againstJets");
   applyHadTauSF_ = hadTauSelection_string != "disabled";
   if(applyHadTauSF_)
@@ -94,7 +95,6 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
       }
     }
   }
-
   if(applyHadTauSF_)
   {
     if(hadTauId_ == TauID::DeepTau2017v2VSjet)
@@ -242,18 +242,6 @@ Data_to_MC_CorrectionInterface_Base::~Data_to_MC_CorrectionInterface_Base()
   for(auto & kv: inputFiles_)
   {
     delete kv.second;
-  }
-  if(applyHadTauSF_)
-  {
-    delete tauIdSFs_;
-    for(auto & kv: tauIDSFs_antiEle_)
-    {
-      delete kv.second;
-    }
-    for(auto & kv: tauIDSFs_antiMu_)
-    {
-      delete kv.second;
-    }
   }
   delete effPileupJetID_;
   delete sfPileupJetID_eff_;
@@ -451,31 +439,6 @@ Data_to_MC_CorrectionInterface_Base::getSF_leptonID_and_Iso(std::size_t numLepto
     sf *= sf_tmp * corrFactor;
   }
   return sf;
-}
-
-void
-Data_to_MC_CorrectionInterface_Base::initAntiEle_tauIDSFs(const std::string & era_str)
-{
-  return init_tauIDSFs(era_str, tauIDSFs_antiEle_, "antiEleMVA6", 5);
-}
-
-void
-Data_to_MC_CorrectionInterface_Base::initAntiMu_tauIDSFs(const std::string & era_str)
-{
-  return init_tauIDSFs(era_str, tauIDSFs_antiMu_, "antiMu3", 2);
-}
-
-void
-Data_to_MC_CorrectionInterface_Base::init_tauIDSFs(const std::string & era_str,
-                                                   std::map<int, TauIDSFTool *> & tauIDSF_map,
-                                                   const std::string & tauID_str,
-                                                   int nof_levels)
-{
-  const std::vector<std::string> levels = TauID_level_strings.at(nof_levels);
-  for(int level = 0; level < nof_levels; ++level)
-  {
-    tauIDSF_map[level + 1] = new TauIDSFTool(era_str, tauID_str, levels.at(level), false);
-  }
 }
 
 bool
@@ -813,9 +776,9 @@ Data_to_MC_CorrectionInterface_Base::getSF_hadTauID_and_Iso(TauIDSFsys central_o
         // because we use looser anti-e/mu DeepTau ID WPs compared to the WPs used in the tau ID SF measurement,
         // we have to add additional 3% or 15% uncertainty to the tau ID SF depending on the tau pT, as explained here:
         // https://indico.cern.ch/event/880308/contributions/3708888/attachments/1972379/3281439/NewsRun2SFsRecommendation.pdf
-        const double sf_central = tauIdSFs_->getSFvsPT(hadTau_pt_[idxHadTau]);
-        const double sf_up      = tauIdSFs_->getSFvsPT(hadTau_pt_[idxHadTau], "Up");
-        const double sf_down    = tauIdSFs_->getSFvsPT(hadTau_pt_[idxHadTau], "Down");
+        const double sf_central = tau_cset_->at(tauIDSF_str_)->evaluate({hadTau_pt_[idxHadTau], 0, 5, tauIDSF_level_str_, "nom", "pt"});
+        const double sf_up      = tau_cset_->at(tauIDSF_str_)->evaluate({hadTau_pt_[idxHadTau], 0, 5, tauIDSF_level_str_, "up", "pt"});
+        const double sf_down    = tau_cset_->at(tauIDSF_str_)->evaluate({hadTau_pt_[idxHadTau], 0, 5, tauIDSF_level_str_, "down", "pt"});
         const double sf_unc = hadTau_pt_[idxHadTau] > 100. ? 0.15 : 0.03;
         const double sf_unc_up   = std::sqrt(square(sf_up   / sf_central - 1.) + square(sf_unc));
         const double sf_unc_down = std::sqrt(square(sf_down / sf_central - 1.) + square(sf_unc));
@@ -843,17 +806,12 @@ Data_to_MC_CorrectionInterface_Base::getSF_eToTauFakeRate(FRet central_or_shift)
       const int hadTau_genPdgId = std::abs(hadTau_genPdgId_[idxHadTau]);
       if(hadTauSelection_antiElectron > 0 && hadTau_genPdgId  == 11)
       {
-        if(! tauIDSFs_antiEle_.count(hadTauSelection_antiElectron))
-        {
-          throw cmsException(this, __func__, __LINE__) << "Anti-e SFs not initalized for WP " << hadTauSelection_antiElectron;
-        }
-        const TauIDSFTool * const tauIDSF_antiEle = tauIDSFs_antiEle_.at(hadTauSelection_antiElectron);
-
+        const std::string wp = TauID_level_strings.at(5).at(hadTauSelection_antiElectron);
         switch(central_or_shift)
         {
-          case FRet::shiftUp:   sf *= tauIDSF_antiEle->getSFvsEta(hadTau_absEta_[idxHadTau], 1, "Up");   break;
-          case FRet::shiftDown: sf *= tauIDSF_antiEle->getSFvsEta(hadTau_absEta_[idxHadTau], 1, "Down"); break;
-          case FRet::central:   sf *= tauIDSF_antiEle->getSFvsEta(hadTau_absEta_[idxHadTau], 1);         break;
+        case FRet::shiftUp:   sf *= tau_cset_->at("antiEleMVA6")->evaluate({hadTau_absEta_[idxHadTau], 1, wp, "up"}); break;
+        case FRet::shiftDown: sf *= tau_cset_->at("antiEleMVA6")->evaluate({hadTau_absEta_[idxHadTau], 1, wp, "down"}); break;
+        case FRet::central:   sf *= tau_cset_->at("antiEleMVA6")->evaluate({hadTau_absEta_[idxHadTau], 1, wp, "nom"}); break;
         }
       }
     }
@@ -873,17 +831,12 @@ Data_to_MC_CorrectionInterface_Base::getSF_muToTauFakeRate(FRmt central_or_shift
       const int hadTau_genPdgId = std::abs(hadTau_genPdgId_[idxHadTau]);
       if(hadTauSelection_antiMuon > 0 && hadTau_genPdgId  == 13)
       {
-        if(! tauIDSFs_antiMu_.count(hadTauSelection_antiMuon))
-        {
-          throw cmsException(this, __func__, __LINE__) << "Anti-mu SFs not initalized for WP " << hadTauSelection_antiMuon;
-        }
-        const TauIDSFTool * const tauIDSF_antiMu = tauIDSFs_antiMu_.at(hadTauSelection_antiMuon);
-
+        const std::string wp = TauID_level_strings.at(2).at(hadTauSelection_antiMuon);
         switch(central_or_shift)
         {
-          case FRmt::shiftUp:   sf *= tauIDSF_antiMu->getSFvsEta(hadTau_absEta_[idxHadTau], 2, "Up");   break;
-          case FRmt::shiftDown: sf *= tauIDSF_antiMu->getSFvsEta(hadTau_absEta_[idxHadTau], 2, "Down"); break;
-          case FRmt::central:   sf *= tauIDSF_antiMu->getSFvsEta(hadTau_absEta_[idxHadTau], 2);         break;
+        case FRmt::shiftUp:   sf *= tau_cset_->at("antiMu3")->evaluate({hadTau_absEta_[idxHadTau], 2, wp, "up"}); break;
+        case FRmt::shiftDown: sf *= tau_cset_->at("antiMu3")->evaluate({hadTau_absEta_[idxHadTau], 2, wp, "down"}); break;
+        case FRmt::central:   sf *= tau_cset_->at("antiMu3")->evaluate({hadTau_absEta_[idxHadTau], 2, wp, "nom"}); break;
         }
       }
     }

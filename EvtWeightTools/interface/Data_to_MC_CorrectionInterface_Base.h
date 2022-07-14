@@ -7,6 +7,7 @@
 
 #include <string>                                                         // std::string
 #include <vector>                                                         // std::vector
+#include "correction.h"
 
 // forward declarations
 class lutWrapperBase;
@@ -99,19 +100,6 @@ class Data_to_MC_CorrectionInterface_Base
                          const std::vector<lutWrapperBase *> & corrections,
                          int error_shift,
                          double recompSF) const;
-
-  void
-  initAntiEle_tauIDSFs(const std::string & era_str);
-
-  void
-  initAntiMu_tauIDSFs(const std::string & era_str);
-
-  void
-  init_tauIDSFs(const std::string & era_str,
-                std::map<int, TauIDSFTool *> & tauIDSF_map,
-                const std::string & tauID_str,
-                int nof_levels);
-
   bool
   check_triggerSFsys_opt(TriggerSFsys central_or_shift) const;
 
@@ -167,9 +155,9 @@ class Data_to_MC_CorrectionInterface_Base
   int hadTauSelection_antiElectron_[4];
   int hadTauSelection_antiMuon_[4];
 
-  TauIDSFTool * tauIdSFs_;
-  std::map<int, TauIDSFTool *> tauIDSFs_antiEle_;
-  std::map<int, TauIDSFTool *> tauIDSFs_antiMu_;
+  const std::string tauCorrectionSetFile_;
+  std::unique_ptr<correction::CorrectionSet> tau_cset_;
+
   bool applyHadTauSF_;
   bool isDEBUG_;
 
