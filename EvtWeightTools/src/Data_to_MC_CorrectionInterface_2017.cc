@@ -110,13 +110,6 @@ Data_to_MC_CorrectionInterface_2017::Data_to_MC_CorrectionInterface_2017(const e
   aux::loadTriggerEff_1e_2017(effTrigger_1e_data_, effTrigger_1e_mc_, inputFiles_);
   aux::loadTriggerEff_1m_2017(effTrigger_1m_data_, effTrigger_1m_mc_, inputFiles_);
 
-  if(applyHadTauSF_)
-  {
-    const std::string tauIDSFTool_era = "2017ReReco";
-    tauIdSFs_ = new TauIDSFTool(tauIDSFTool_era, tauIDSF_str_, tauIDSF_level_str_, false);
-    initAntiEle_tauIDSFs(tauIDSFTool_era);
-    initAntiMu_tauIDSFs(tauIDSFTool_era);
-  }
 }
 
 Data_to_MC_CorrectionInterface_2017::~Data_to_MC_CorrectionInterface_2017()
