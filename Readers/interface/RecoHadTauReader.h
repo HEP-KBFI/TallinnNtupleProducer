@@ -8,9 +8,6 @@
 
 // forward declarations
 class TTree;
-class GenLeptonReader;
-class GenHadTauReader;
-class GenJetReader;
 class TauESTool;
 
 enum class Era;
@@ -60,19 +57,6 @@ class RecoHadTauReader : public ReaderBase
   std::string branchName_obj_;
   bool isMC_;
 
-  /**
-   * @brief Read branches containing information on matching of RecoHadTau objects
-   *        to generator level electrons, muons, hadronic taus, and jets from tree
-   *        and add this information to collection of RecoHadTau objects given as function argument
-   */
-  void
-  readGenMatching(std::vector<RecoHadTau> & hadTaus) const;
-
-  GenLeptonReader * genLeptonReader_;
-  GenHadTauReader * genHadTauReader_;
-  GenJetReader * genJetReader_;
-  bool readGenMatching_;
-
   std::string branchName_pt_;
   std::string branchName_eta_;
   std::string branchName_phi_;
@@ -87,7 +71,7 @@ class RecoHadTauReader : public ReaderBase
   std::string branchName_filterBits_;
   std::string branchName_jetIdx_;
   std::string branchName_genPartFlav_;
-  std::string branchName_genMatchIdx_;
+  std::string branchName_genPartIdx_;
 
   std::map<TauID, std::string> branchNames_idMVA_;
   std::map<TauID, std::string> branchNames_rawMVA_;
@@ -110,7 +94,7 @@ class RecoHadTauReader : public ReaderBase
   UInt_t * hadTau_filterBits_;
   Int_t * hadTau_jetIdx_;
   UChar_t * hadTau_genPartFlav_;
-  Int_t * hadTau_genMatchIdx_;
+  Int_t * hadTau_genPartIdx_;
 
   std::map<TauID, UChar_t *> hadTau_idMVAs_;
   std::map<TauID, Float_t *> hadTau_rawMVAs_;

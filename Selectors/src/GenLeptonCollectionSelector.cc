@@ -62,7 +62,7 @@ GenLeptonSelector::get_max_absEta_electron() const
 }
 
 bool
-GenLeptonSelector::operator()(const GenLepton & lepton) const
+GenLeptonSelector::operator()(const GenParticle & lepton) const
 {
   if(debug_)
   {
@@ -70,12 +70,12 @@ GenLeptonSelector::operator()(const GenLepton & lepton) const
   }
 
   double min_pt, max_absEta;
-  if(lepton.is_muon())
+  if(lepton.absPdgId() == 13)
   {
      min_pt = min_pt_muon_;
      max_absEta = max_absEta_muon_;
   } 
-  else if(lepton.is_electron())
+  else if(lepton.absPdgId() == 11)
   {
      min_pt = min_pt_electron_;
      max_absEta = max_absEta_electron_;

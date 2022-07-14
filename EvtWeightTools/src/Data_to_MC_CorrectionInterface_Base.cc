@@ -8,7 +8,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/leptonTypes.h"                            // kElectron, kMuon
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::clearCollection(), aux::compSF(), aux::getHadTauIdxLabel()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"                     // get_from_lut()
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                                  // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h"                               // RecoElectron
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"                                 // RecoJetAK4

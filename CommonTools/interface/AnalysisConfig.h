@@ -14,6 +14,9 @@
 #include <vector>
 #include <string>
 
+// forward declarations
+enum class TopPtRwgtOption;
+
 class AnalysisConfig
 {
  public:
@@ -53,7 +56,7 @@ class AnalysisConfig
 
   virtual bool isHH_rwgt_allowed() const;
 
-  virtual bool apply_topPtReweighting() const;
+  virtual TopPtRwgtOption apply_topPtReweighting() const;
 
  protected:
   std::string analysis_string_;
@@ -89,7 +92,7 @@ class AnalysisConfig
 
   bool isHH_rwgt_allowed_;
 
-  bool apply_topPtReweighting_;
+  TopPtRwgtOption apply_topPtReweighting_;
 };
 
 #endif // TallinnNtupleProducer_Framework_AnalysisConfig_h

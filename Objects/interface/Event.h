@@ -3,9 +3,7 @@
 
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"    // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"    // GenHadTauCollection
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"    // GenLeptonCollection
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"       // GenJetCollection
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"    // GenPhotonCollection
 #include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"    // MEtFilter
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"  // TriggerInfo
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h" // RecoElectronCollection, RecoElectronPtrCollection
@@ -30,6 +28,7 @@ class Event
    * @return Collections of particles
    */
   const EventInfo& eventInfo() const;
+  double topPtRwgtSF() const;
 
   const TriggerInfo& triggerInfo() const;
 
@@ -67,6 +66,8 @@ class Event
   const MEtFilter& metFilters() const;
 
   const RecoVertex& vertex() const;
+  
+  const GenParticleCollection& genParticles() const;
 
   bool isInvalid() const;
 
@@ -80,7 +81,7 @@ class Event
   const TriggerInfo * triggerInfo_;
 
   // CV: non-Ptr collections of RecoMuons, RecoElectrons, RecoHadTaus, RecoJetsAK4, RecoJetsAK8
-  //     and of GenLeptons, GenHadTaus, GenPhotons, and GenJets need to be stored in the Event,
+  //     and of GenParts, GenHadTaus and GenJets need to be stored in the Event,
   //     so that these objects don get out of scope and the Ptr collections become invalid !!
 
   RecoMuonCollection muons_;
@@ -127,17 +128,9 @@ class Event
   RecoJetPtrCollectionAK4 selJetsAK4_btagLoose_;
   RecoJetPtrCollectionAK4 selJetsAK4_btagMedium_;
 
-  GenLeptonCollection genLeptons_;
-  GenLeptonCollection genElectrons_;
-  GenLeptonCollection genMuons_;
+  GenParticleCollection genParticles_;
   GenHadTauCollection genHadTaus_;
-  GenPhotonCollection genPhotons_;
   GenJetCollection genJets_;
-
-  GenParticleCollection muonGenMatch_;
-  GenParticleCollection electronGenMatch_;
-  GenParticleCollection hadTauGenMatch_;
-  GenParticleCollection jetGenMatch_;
 
   RecoJetCollectionAK8 jetsAK8_Hbb_;
   RecoJetPtrCollectionAK8 jet_ptrsAK8_Hbb_;

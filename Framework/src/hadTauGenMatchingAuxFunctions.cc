@@ -1,7 +1,6 @@
 #include "TallinnNtupleProducer/Framework/interface/hadTauGenMatchingAuxFunctions.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"        // GenLepton
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"       // RecoHadTau
 
 #include <iostream> // std::ostream

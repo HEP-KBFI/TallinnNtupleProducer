@@ -10,6 +10,7 @@ from TallinnNtupleProducer.Writers.EvtReweightWriter_tH_cfi import evtReweight_t
 from TallinnNtupleProducer.Writers.EvtWeightWriter_cfi import evtWeight as writers_evtWeight
 from TallinnNtupleProducer.Writers.GenHHKinematicsWriter_cfi import genHHKinematics as writers_genHHKinematics
 from TallinnNtupleProducer.Writers.GenPhotonFilterWriter_cfi import genPhotonFilter as writers_genPhotonFilter
+from TallinnNtupleProducer.Writers.EvtInfoWriter_cfi import evtInfo as writers_evtInfo
 from TallinnNtupleProducer.Writers.HtoZZto4lVetoWriter_cfi import HtoZZto4lVeto as writers_HtoZZto4lVeto
 from TallinnNtupleProducer.Writers.LowMassLeptonPairVetoWriter_cfi import lowMassLeptonPairVeto as writers_lowMassLeptonPairVeto
 from TallinnNtupleProducer.Writers.MEtFilterWriter_cfi import metFilters as writers_metFilters
@@ -131,16 +132,9 @@ process.produceNtuple = cms.PSet(
     branchName_vertex = cms.string('PV'),
 
     # generator level information
-    branchName_muonGenMatch = cms.string('MuonGenMatch'),
-    branchName_electronGenMatch = cms.string('ElectronGenMatch'),
-    branchName_hadTauGenMatch = cms.string('TauGenMatch'),
-    branchName_jetGenMatch = cms.string('JetGenMatch'),
-
-    branchName_genLeptons = cms.string('GenLep'),
+    branchName_genPart = cms.string('GenPart'),
     branchName_genHadTaus = cms.string('GenVisTau'),
-    branchName_genPhotons = cms.string('GenPhoton'),
     branchName_genJets = cms.string('GenJet'),
-    branchName_genHiggses = cms.string('GenHiggs'),
 
     # PS weights
     branchName_PSweights = cms.string('PSWeight'),
@@ -161,6 +155,7 @@ process.produceNtuple = cms.PSet(
     redoGenMatching = cms.bool(False),
     genMatchingByIndex = cms.bool(True),
     jetCleaningByIndex = cms.bool(True),
+    genMatchRecoJets = cms.bool(False),
 
     writerPlugins = cms.VPSet(
         writers_bdtVariables_HH_2lss,
@@ -176,6 +171,7 @@ process.produceNtuple = cms.PSet(
         # CV: GenPhotonFilterWriter plugin can be run for some MC samples only,
         #     because the collection "GenPhotonCandidate" does not exist in all MC samples !!
         #writers_genPhotonFilter,
+        writers_evtInfo,
         writers_hadTauMultiplicity,
         writers_leptonMultiplicity,
         writers_lowMassLeptonPairVeto,

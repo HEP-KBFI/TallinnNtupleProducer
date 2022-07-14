@@ -15,6 +15,8 @@
 std::map<std::string, int> LHEInfoReader::numInstances_;
 std::map<std::string, LHEInfoReader*> LHEInfoReader::instances_;
 
+// TODO do not read envelope weights, keep only the individual variations
+
 LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
   , max_scale_nWeights_(9)

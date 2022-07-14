@@ -1,5 +1,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/AnalysisConfig.h"
 
+#include "TallinnNtupleProducer/CommonTools/interface/topPtRwgt.h" // TopPtRwgtOption::, get_topPtRwgtOpt()
+
 #include <TPRegexp.h>                           // TPRegexp
 #include <TObjString.h>                         // TObjString
 #include <TObjArray.h>                          // TObjArray
@@ -11,6 +13,7 @@ AnalysisConfig::AnalysisConfig(const std::string & analysis, const edm::Paramete
   , process_string_(cfg.getParameter<std::string>("process"))
   , process_string_hh_(cfg.exists("process_hh") ? cfg.getParameter<std::string>("process_hh") : process_string_)
   , mass_HH_resonant_(-1.)
+  , apply_topPtReweighting_(TopPtRwgtOption::Disable)
 {
   assert(boost::starts_with(process_string_hh_, process_string_) || process_string_.find("signal") != std::string::npos || process_string_ == "HH");
   isMC_       = cfg.getParameter<bool>("isMC");
@@ -56,8 +59,8 @@ AnalysisConfig::AnalysisConfig(const std::string & analysis, const edm::Paramete
     boost::starts_with(process_string_, "signal_ggf_nonresonant_") && process_string_.find("cHHH") == std::string::npos
   ) || process_string_ == "HH";
 
-  std::string apply_topPtReweighting_string = cfg.exists("apply_topPtReweighting") ? cfg.getParameter<std::string>("apply_topPtReweighting") : "";
-  apply_topPtReweighting_ = !apply_topPtReweighting_string.empty();
+  const std::string apply_topPtReweighting_string = cfg.exists("apply_topPtReweighting") ? cfg.getParameter<std::string>("apply_topPtReweighting") : "";
+  apply_topPtReweighting_ = get_topPtRwgtOpt(apply_topPtReweighting_string);
 }
 
 AnalysisConfig::~AnalysisConfig()
@@ -225,7 +228,7 @@ AnalysisConfig::isHH_rwgt_allowed() const
   return isHH_rwgt_allowed_;
 }
 
-bool
+TopPtRwgtOption
 AnalysisConfig::apply_topPtReweighting() const
 {
   return apply_topPtReweighting_;

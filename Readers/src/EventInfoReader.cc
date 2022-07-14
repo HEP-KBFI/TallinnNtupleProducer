@@ -14,13 +14,11 @@
 
 EventInfoReader::EventInfoReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
-  , read_genHiggsDecayMode_(true)
   , read_puWeight_(true)
   , analysisConfig_(new AnalysisConfig("produceNtuple", cfg))
   , info_(new EventInfo(*analysisConfig_))
   , runLumiEventReader_(new RunLumiEventReader(cfg))
   , era_(cfg.getParameter<std::string>("era"))
-  , branchName_genHiggsDecayMode_("genHiggsDecayMode")
   , branchName_genWeight_("genWeight")
   , branchName_LHEReweightingWeight_("LHEReweightingWeight")
   , branchName_nLHEReweightingWeight_(Form("n%s", branchName_LHEReweightingWeight_.data()))
@@ -68,23 +66,12 @@ EventInfoReader::setBranchAddresses(TTree * inputTree)
       bai.setBranchAddress(info_->htxs_.y_, branchName_htxs_y_);
     }
   }
-  if(info_->analysisConfig().isMC_H() || info_->analysisConfig().isMC_HH())
-  {
-    if(read_genHiggsDecayMode_)
-    {
-      bai.setBranchAddress(info_->genHiggsDecayMode_, branchName_genHiggsDecayMode_);
-    }
-  }
   if(info_->analysisConfig().isMC())
   {
     bai.setBranchAddress(info_->genWeight_, branchName_genWeight_);
     if(read_puWeight_)
     {
       bai.setBranchAddress(Pileup_nTrueInt_, branchName_Pileup_nTrueInt_);
-    }
-    if(info_->analysisConfig().apply_topPtReweighting())
-    {
-      bai.setBranchAddress(info_->topPtRwgtSF_, branchName_topPtRwgt_);
     }
   }
   if(info_->analysisConfig().isMC() && ! info_->tH_sf_.empty())
@@ -107,18 +94,6 @@ void
 EventInfoReader::set_central_or_shift(const std::string& central_or_shift)
 {
   info_->set_central_or_shift(central_or_shift);
-}
-
-void
-EventInfoReader::setTopPtRwgtBranchName(const std::string & branchName)
-{
-  branchName_topPtRwgt_ = Form("topPtRwgt_%s", branchName.data());
-}
-
-std::string
-EventInfoReader::getTopPtRwgtBranchName() const
-{
-  return branchName_topPtRwgt_;
 }
 
 const EventInfo &

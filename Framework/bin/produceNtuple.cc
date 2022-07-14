@@ -39,16 +39,12 @@
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                  // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                                  // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"                                     // GenJet
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                                  // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"                                  // GenPhoton
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                               // RunLumiEvent
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"                                // TriggerInfo
 #include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                // EventReader
 #include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                            // GenHadTauReader
 #include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                               // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/GenLeptonReader.h"                            // GenLeptonReader
 #include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"                          // GenParticleReader
-#include "TallinnNtupleProducer/Readers/interface/GenPhotonReader.h"                            // GenPhotonReader
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                    // L1PreFiringWeightReader
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                              // LHEInfoReader
 #include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
@@ -177,6 +173,7 @@ int main(int argc, char* argv[])
     case Era::k2016: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2016(cfg_dataToMCcorrectionInterface); break;
     case Era::k2017: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2017(cfg_dataToMCcorrectionInterface); break;
     case Era::k2018: dataToMCcorrectionInterface = new Data_to_MC_CorrectionInterface_2018(cfg_dataToMCcorrectionInterface); break;
+    case Era::kUndefined: __attribute__((fallthrough));
     default: throw cmsException("produceNtuple", __LINE__) << "Invalid era = " << static_cast<int>(era);
   }
   const ChargeMisIdRateInterface chargeMisIdRateInterface(era);
@@ -294,10 +291,6 @@ int main(int argc, char* argv[])
     bool skipEvent = false;
     for ( const auto & central_or_shift : systematic_shifts )
     {
-      if ( isDEBUG || run_lumi_eventSelector )
-      {
-        std::cout << "Processing central_or_shift = '" << central_or_shift << "'" << std::endl;
-      }
       const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
       if ( central_or_shift == "central" )
       {
@@ -315,7 +308,11 @@ int main(int argc, char* argv[])
       if ( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) )
       {
         skipEvent = true;
-        continue;
+        break; // skip to the next event
+      }
+      if ( isDEBUG || run_lumi_eventSelector )
+      {
+        std::cout << "Processing central_or_shift = '" << central_or_shift << "'\n";
       }
       if ( central_or_shift == "central" && (isDEBUG || run_lumi_eventSelector) )
       {
@@ -346,7 +343,7 @@ int main(int argc, char* argv[])
           evtWeightRecorder.record_auxWeight(eventWeightManager);
         }
         if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
-        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.eventInfo().topPtRwgtSF());
+        if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.topPtRwgtSF());
         lheInfoReader->read();
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
@@ -448,6 +445,10 @@ int main(int argc, char* argv[])
               << " not supported for categories with " << numNominalLeptons << " lepton(s) and " << numNominalHadTaus << " hadronic tau(s) !!";
           }
         }
+      }
+      if(isDEBUG)
+      {
+        std::cout << evtWeightRecorder << '\n';
       }
 
       for ( auto & writer : writers )

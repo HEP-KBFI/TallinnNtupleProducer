@@ -4,8 +4,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException()
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"          // GenHadTau
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"             // GenJet
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"          // GenLepton
-#include "TallinnNtupleProducer/Objects/interface/GenPhoton.h"          // GenPhoton
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h"        // GenLepton
 
 Double_t
 RecoLepton::get_assocJet_pt(Double_t reco_pt,
@@ -26,7 +25,7 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
                        Int_t    tightCharge,
                        Int_t    jetIdx,
                        UChar_t  genPartFlav,
-                       Int_t    genMatchIdx)
+                       Int_t    genPartIdx)
   : ChargedParticle(lepton)
   , dxy_(dxy)
   , dz_(dz)
@@ -39,12 +38,13 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
   , tightCharge_(tightCharge)
   , jetIdx_(jetIdx)
   , genPartFlav_(genPartFlav)
-  , genMatchIdx_(genMatchIdx)
+  , genPartIdx_(genPartIdx)
   , mvaRawTTH_cut_(-1.)
   , assocJet_pt_(get_assocJet_pt(pt_, jetRelIso_))
   , assocJet_p4_(assocJet_pt_, eta_, phi_, mass_)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
+  , genPhoton_(nullptr)
   , genJet_(nullptr)
   , isCMSPOG_(false)
   , isLoose_(false)
@@ -80,27 +80,27 @@ RecoLepton::set_isTight() const
 }
 
 void
-RecoLepton::set_genLepton(const GenLepton * genLepton)
+RecoLepton::set_genLepton(const GenParticle * genLepton)
 {
-  genLepton_.reset(genLepton);
+  genLepton_ = genLepton;
 }
 
 void
 RecoLepton::set_genHadTau(const GenHadTau * genHadTau)
 {
-  genHadTau_.reset(genHadTau);
+  genHadTau_ = genHadTau;
 }
 
 void
-RecoLepton::set_genPhoton(const GenPhoton * genPhoton)
+RecoLepton::set_genPhoton(const GenParticle * genPhoton)
 {
-  genPhoton_.reset(genPhoton);
+  genPhoton_ = genPhoton;
 }
 
 void
 RecoLepton::set_genJet(const GenJet * genJet)
 {
-  genJet_.reset(genJet);
+  genJet_ = genJet;
 }
 
 void 
@@ -281,33 +281,33 @@ RecoLepton::genPartFlav() const
 }
 
 Int_t
-RecoLepton::genMatchIdx() const
+RecoLepton::genPartIdx() const
 {
-  return genMatchIdx_;
+  return genPartIdx_;
 }
 
-const GenLepton *
+const GenParticle *
 RecoLepton::genLepton() const
 {
-  return genLepton_.get();
+  return genLepton_;
 }
 
 const GenHadTau *
 RecoLepton::genHadTau() const
 {
-  return genHadTau_.get();
+  return genHadTau_;
 }
 
-const GenPhoton *
+const GenParticle *
 RecoLepton::genPhoton() const
 {
-  return genPhoton_.get();
+  return genPhoton_;
 }
 
 const GenJet *
 RecoLepton::genJet() const
 {
-  return genJet_.get();
+  return genJet_;
 }
 
 bool
@@ -395,10 +395,11 @@ operator<<(std::ostream & stream,
             " relIso = "              << lepton.relIso()                        << ","
             " pfRelIso03All = "       << lepton.pfRelIso03All()                 << ",\n"
             " genPartFlav = "         << static_cast<int>(lepton.genPartFlav()) << ", "
-            " tightCharge = "         << lepton.tightCharge()                   << ","
-            " jetRelIso = "          << lepton.jetRelIso()                    << ","
-            " jetPtRel = "            << lepton.jetPtRel()                      << ",\n"
-    " jetBtagCSV() = " << lepton.jetBtagCSV()
+            " genPartIdx = "          << lepton.genPartIdx()                    << ", "
+            " tightCharge = "         << lepton.tightCharge()                   << ",\n"
+            " jetRelIso = "           << lepton.jetRelIso()                     << ","
+            " jetPtRel = "            << lepton.jetPtRel()                      << ","
+            " jetBtagCSV() = "        << lepton.jetBtagCSV()                    << ",\n"
   ;
   std::cout << ", jetBtagCSV(DeepJet) = ";
   if(lepton.hasJetBtagCSV(Btag::kDeepJet)) stream << lepton.jetBtagCSV(Btag::kDeepJet); else stream << "N/A";

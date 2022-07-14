@@ -1,7 +1,7 @@
 #ifndef TallinnNtupleProducer_Readers_GenParticleReader_h
 #define TallinnNtupleProducer_Readers_GenParticleReader_h
 
-#include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticle, GenParticleCollection
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"  // ReaderBase
 
 #include <map>                                                   // std::map
@@ -25,15 +25,8 @@ class GenParticleReader : public ReaderBase
    * @brief Read branches from tree and use information to fill collection of GenParticle objects
    * @return Collection of GenParticle objects
    */
-  std::vector<GenParticle>
+  GenParticleCollection
   read() const;
-
-  /**
-   * @brief enable/disable read genPartFlav branch
-   * @param flag If true, reads genPartFlav branch; if false, does not read genPartFlav branch
-   */
-  void
-  readGenPartFlav(bool flag);
 
  protected:
  /**
@@ -46,17 +39,14 @@ class GenParticleReader : public ReaderBase
   std::string branchName_num_;
   std::string branchName_obj_;
 
-  bool readGenPartFlav_;
-
   std::string branchName_pt_;
   std::string branchName_eta_;
   std::string branchName_phi_;
   std::string branchName_mass_;
   std::string branchName_pdgId_;
-  std::string branchName_charge_;
   std::string branchName_status_;
   std::string branchName_statusFlags_;
-  std::string branchName_genPartFlav_;
+  std::string branchName_genPartIdxMother_;
 
   UInt_t nParticles_;
   Float_t * particle_pt_;
@@ -64,10 +54,9 @@ class GenParticleReader : public ReaderBase
   Float_t * particle_phi_;
   Float_t * particle_mass_;
   Int_t * particle_pdgId_;
-  Int_t * particle_charge_;
   Int_t * particle_status_;
   Int_t * particle_statusFlags_;
-  UChar_t * particle_genPartFlav_;
+  Int_t * particle_genPartIdxMother_;
 
   // CV: make sure that only one GenParticleReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

@@ -10,9 +10,6 @@
 
 // forward declarations
 class TTree;
-class GenLeptonReader;
-class GenHadTauReader;
-class GenJetReader;
 
 enum class Btag;
 enum class Era;
@@ -64,19 +61,6 @@ class RecoJetReaderAK4 : public ReaderBase
   unsigned int max_nJets_;
   std::string branchName_num_;
   std::string branchName_obj_;
-
-  /**
-   * @brief Read branches containing information on matching of RecoJet objects
-   *        to generator level electrons, muons, hadronic taus, and jets from tree
-   *        and add this information to collection of RecoJet objects given as function argument
-   */
-  void
-  readGenMatching(std::vector<RecoJetAK4> & jets) const;
-
-  GenLeptonReader * genLeptonReader_;
-  GenHadTauReader * genHadTauReader_;
-  GenJetReader * genJetReader_;
-  bool readGenMatching_;
  
   std::string branchName_eta_;
   std::string branchName_phi_;
@@ -87,7 +71,7 @@ class RecoJetReaderAK4 : public ReaderBase
   std::string branchName_BtagScore_;
   std::string branchName_jetId_;
   std::string branchName_puId_;
-  std::string branchName_genMatchIdx_;
+  std::string branchName_genJetIdx_;
 
   std::map<int, std::string> branchNames_pt_systematics_;
   std::map<int, std::string> branchNames_mass_systematics_;
@@ -109,7 +93,7 @@ class RecoJetReaderAK4 : public ReaderBase
   Float_t * jet_BtagScore_;
   Int_t * jet_jetId_;
   Int_t * jet_puId_;
-  Int_t * jet_genMatchIdx_;
+  Int_t * jet_genJetIdx_;
 
   std::map<int, Float_t *> jet_pt_systematics_;
   std::map<int, Float_t *> jet_mass_systematics_;

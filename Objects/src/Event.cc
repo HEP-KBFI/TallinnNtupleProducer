@@ -1,5 +1,7 @@
 #include "TallinnNtupleProducer/Objects/interface/Event.h"
 
+#include "TallinnNtupleProducer/Objects/interface/genTools.h" // ::topPtRwgtSF()
+
 #include <TString.h> // TString
 
 #include <string>    // std::string
@@ -24,6 +26,12 @@ Event::eventInfo() const
 {
   assert(eventInfo_);
   return *eventInfo_;
+}
+
+double
+Event::topPtRwgtSF() const
+{
+  return ::topPtRwgtSF(genParticles_, eventInfo_->analysisConfig().apply_topPtReweighting());
 }
 
 const TriggerInfo&
@@ -175,6 +183,12 @@ const RecoVertex&
 Event::vertex() const
 {
   return vertex_;
+}
+
+const GenParticleCollection&
+Event::genParticles() const
+{
+  return genParticles_;
 }
 
 namespace

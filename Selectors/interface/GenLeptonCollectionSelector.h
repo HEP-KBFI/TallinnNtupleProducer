@@ -2,7 +2,7 @@
 #define TallinnNtupleProducer_Selectors_GenLeptonCollectionSelector_h
 
 #include "TallinnNtupleProducer/Selectors/interface/ParticleCollectionSelector.h" // ParticleCollectionSelector
-#include "TallinnNtupleProducer/Objects/interface/GenLepton.h"                    // GenLepton
+#include "TallinnNtupleProducer/Objects/interface/GenParticle.h"                  // GenParticle
 
 enum class Era;
 
@@ -35,7 +35,7 @@ class GenLeptonSelector
    * @return True if lepton passes selection; false otherwise
    */
   bool
-  operator()(const GenLepton & lepton) const;
+  operator()(const GenParticle & lepton) const;
 
  protected:
   Era era_;
@@ -46,7 +46,7 @@ class GenLeptonSelector
   bool debug_;
 };
 
-typedef ParticleCollectionSelector<GenLepton, GenLeptonSelector> GenLeptonCollectionSelector;
+typedef ParticleCollectionSelector<GenParticle, GenLeptonSelector> GenLeptonCollectionSelector;
 
 #endif // TallinnNtupleProducer_Selectors_GenLeptonCollectionSelector_h
 
