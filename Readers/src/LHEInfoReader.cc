@@ -25,8 +25,6 @@ LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
   , max_pdf_nWeights_(103)
   , branchName_pdf_nWeights_("nLHEPdfWeight")
   , branchName_pdf_weights_("LHEPdfWeight")
-  , branchName_envelope_weight_up_("LHEEnvelopeWeightUp")
-  , branchName_envelope_weight_down_("LHEEnvelopeWeightDown")
   , scale_nWeights_(0)
   , scale_weights_(nullptr)
   , pdf_nWeights_(0)
@@ -38,8 +36,6 @@ LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
   , weight_scale_yDown_(1.)
   , weight_scale_xyUp_(1.)
   , weight_scale_xyDown_(1.)
-  , weight_scale_Up_(1.)
-  , weight_scale_Down_(1.)
   , has_LHE_weights_(false)
   , correctiveFactor_(1.)
   , has_pdf_weights_(false)
@@ -114,8 +110,6 @@ LHEInfoReader::setBranchAddresses(TTree * tree)
     {
       bai.setBranchAddress(scale_nWeights_, branchName_scale_nWeights_);
       bai.setLenVar(max_scale_nWeights_).setBranchAddress(scale_weights_, branchName_scale_weights_);
-      bai.setBranchAddress(weight_scale_Up_, branchName_envelope_weight_up_, 1.);
-      bai.setBranchAddress(weight_scale_Down_, branchName_envelope_weight_down_, 1.);
     }
     if(has_pdf_weights_)
     {
@@ -186,8 +180,6 @@ LHEInfoReader::read() const
     weight_scale_xUp_     = 1.; // muR=1.0 muF=2.0
     weight_scale_yUp_     = 1.; // muR=2.0 muF=1.0
     weight_scale_xyUp_    = 1.; // muR=2.0 muF=2.0
-    weight_scale_Up_      = 1.; // envelope
-    weight_scale_Down_    = 1.; // envelope
     std::cerr << "Unexpected number of LHE scale weights: " << gInstance->scale_nWeights_ << '\n';
     return;
   }
@@ -283,20 +275,6 @@ LHEInfoReader::getWeight_scale_xyDown() const
 }
 
 double
-LHEInfoReader::getWeight_scale_Up() const
-{
-  // the envelope values already take the corrective factor into account
-  return getWeight(weight_scale_Up_, false);
-}
-
-double
-LHEInfoReader::getWeight_scale_Down() const
-{
-  // the envelope values already take the corrective factor into account
-  return getWeight(weight_scale_Down_, false);
-}
-
-double
 LHEInfoReader::getWeight_scale(int central_or_shift) const
 {
   switch(central_or_shift)
@@ -308,8 +286,6 @@ LHEInfoReader::getWeight_scale(int central_or_shift) const
     case kLHE_scale_yUp:     return getWeight_scale_yUp();
     case kLHE_scale_xyDown:  return getWeight_scale_xyDown();
     case kLHE_scale_xyUp:    return getWeight_scale_xyUp();
-    case kLHE_scale_Down:    return getWeight_scale_Down();
-    case kLHE_scale_Up:      return getWeight_scale_Up();
     default: throw cmsException(this, __func__, __LINE__)
                << "Invalid LHE scale systematics option: " << central_or_shift;
   }

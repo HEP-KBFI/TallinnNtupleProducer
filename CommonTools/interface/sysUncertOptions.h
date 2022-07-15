@@ -186,7 +186,6 @@ enum
   kLHE_scale_xUp,  kLHE_scale_xDown,  // factorization scale
   kLHE_scale_yUp,  kLHE_scale_yDown,  // renormalization scale
   kLHE_scale_xyUp, kLHE_scale_xyDown, // simultaneous factorization and renormalization scales
-  kLHE_scale_Up,   kLHE_scale_Down,   // envelope (Swiss cross + both up + both down)
 };
 
 enum
