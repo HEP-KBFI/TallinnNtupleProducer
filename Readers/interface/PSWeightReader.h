@@ -33,8 +33,6 @@ class PSWeightReader : public ReaderBase
   double getWeight_ps_ISRDown() const;
   double getWeight_ps_FSRUp() const;
   double getWeight_ps_FSRDown() const;
-  double getWeight_ps_Up() const;
-  double getWeight_ps_Down() const;
 
   double getWeight_ps(int central_or_shift) const;
 
@@ -60,8 +58,6 @@ class PSWeightReader : public ReaderBase
    mutable double weight_ps_ISRDown_;
    mutable double weight_ps_FSRUp_;
    mutable double weight_ps_FSRDown_;
-   mutable double weight_ps_Up_;
-   mutable double weight_ps_Down_;
 
    bool has_PS_weights_;
    bool apply_LHE_nom_;

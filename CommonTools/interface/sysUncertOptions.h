@@ -2,6 +2,7 @@
 #define TallinnNtupleProducer_CommonTools_sysUncertOptions_h
 
 #include <string> // std::string
+#include <map> // std::map<,>
 
 enum class Btag;
 enum class Era;
@@ -107,13 +108,6 @@ enum
   kFatJet_jmrUp,                   kFatJet_jmrDown, // mass resolution
 };
 
-enum class METSyst
-{
-  central,
-  respUp, respDown,
-  resolUp, resolDown,
-};
-
 enum
 {
   kHadTauPt_uncorrected,
@@ -193,7 +187,6 @@ enum
   kPartonShower_central,
   kPartonShower_ISRUp, kPartonShower_ISRDown, // ISR -- initial state radiation
   kPartonShower_FSRUp, kPartonShower_FSRDown, // FSR -- final state radiation
-  kPartonShower_Up,    kPartonShower_Down, // envelope from the variations of both ISR and FSR
 };
 
 enum
@@ -257,11 +250,6 @@ enum
   kDYMCNormScaleFactors_shiftUp, kDYMCNormScaleFactors_shiftDown
 };
 
-enum class MEMsys
-{
-  nominal, up, down
-};
-
 enum class EWKJetSys
 {
   central,
@@ -292,8 +280,45 @@ enum class SubjetBtagSys
   up, down,
 };
 
-bool
-isTTbarSys(const std::string & central_or_shift);
+extern const std::map<std::string, int> btagWeightSysMap;
+extern const std::map<std::string, pileupJetIDSFsys> pileupJetIDSysMap;
+
+extern const std::map<std::string, int> jesAK4SysMap;
+extern const std::map<std::string, int> jesSplitAK4SysMap;
+extern const std::map<std::string, int> jerAK4SysMap;
+extern const std::map<std::string, int> jerSplitAK4SysMap;
+
+extern const std::map<std::string, int> metSysMap;
+
+extern const std::map<std::string, int> jesAK8SysMap;
+extern const std::map<std::string, int> jesSplitAK8SysMap;
+extern const std::map<std::string, int> jerAK8SysMap;
+extern const std::map<std::string, int> jerSplitAK8SysMap;
+extern const std::map<std::string, int> jmsAK8SysMap;
+extern const std::map<std::string, int> jmrAK8SysMap;
+
+extern const std::map<std::string, int> hadTauESSysMap;
+extern const std::map<std::string, int> jetToTauFRSysMap;
+extern const std::map<std::string, FRet> eToTauFRSysMap;
+extern const std::map<std::string, FRmt> mToTauFRSysMap;
+extern const std::map<std::string, LeptonIDSFsys> leptonIDSFSysMap;
+extern const std::map<std::string, TauIDSFsys> tauIDSFSysMap;
+extern const std::map<std::string, TriggerSFsys> triggerSFSysMap;
+extern const std::map<std::string, int> lheScaleSysMap;
+extern const std::map<std::string, int> psSysMap;
+extern const std::map<std::string, ElectronPtSys> ePtSysMap;
+extern const std::map<std::string, MuonPtSys> mPtSysMap;
+extern const std::map<std::string, int> jetToLeptonFRSysMap;
+extern const std::map<std::string, PUsys> puSysMap;
+extern const std::map<std::string, L1PreFiringWeightSys> l1prefireSysMap;
+extern const std::map<std::string, int> dyMCRwgtSysMap;
+extern const std::map<std::string, int> dyMCNormSysMap;
+extern const std::map<std::string, int> topPtRwgtSysMap;
+extern const std::map<std::string, EWKJetSys> ewkJetSysMap;
+extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap;
+extern const std::map<std::string, PDFSys> pdfSysMap;
+extern const std::map<std::string, LHEVptSys> lheVptSysMap;
+extern const std::map<std::string, SubjetBtagSys> subjetBtagSysMap;
 
 bool
 isValidJESsource(Era era,
@@ -304,10 +329,6 @@ bool
 isValidFatJetAttribute(int central_or_shift,
                        const std::string & attribute_name);
 
-/**
- * @brief Return branchName to read weights that need to be applied, per jet, to MC events
- *       in order to correct for data/MC differences in b-tagging efficiency and mistag rates
- */
 int
 getBTagWeight_option(const std::string & central_or_shift);
 
@@ -321,9 +342,6 @@ getJet_option(const std::string & central_or_shift,
 int
 getMET_option(const std::string & central_or_shift,
               bool isMC);
-
-METSyst
-getMETsyst_option(const std::string & central_or_shift);
 
 int
 getFatJet_option(const std::string & central_or_shift,
@@ -383,9 +401,6 @@ getDYMCNormScaleFactors_option(const std::string & central_or_shift);
 int
 getTopPtReweighting_option(const std::string & central_or_shift);
 
-MEMsys
-getMEMsys_option(const std::string & central_or_shift);
-
 EWKJetSys
 getEWKJetSys_option(const std::string & central_or_shift);
 
@@ -395,14 +410,14 @@ getEWKBJetSys_option(const std::string & central_or_shift);
 PDFSys
 getPDFSys_option(const std::string & central_or_shift);
 
-bool
-isPDFsys_member(const std::string & central_or_shift);
-
 LHEVptSys
 getLHEVptSys_option(const std::string & central_or_shift);
 
 SubjetBtagSys
 getSubjetBtagSys_option(const std::string & central_or_shift);
+
+bool
+isPDFsys_member(const std::string & central_or_shift);
 
 void
 checkOptionValidity(const std::string & central_or_shift,
@@ -430,11 +445,5 @@ getBranchName_fatJet(const std::string & default_branchName,
                      Era era,
                      const std::string & attribute_name,
                      int central_or_shift);
-
-/**
- * @brief Return branch name to read PU weights
- */
-std::string
-getBranchName_pileup(PUsys puSys_option);
 
 #endif // TallinnNtupleProducer_CommonTools_sysUncertOptions_h

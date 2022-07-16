@@ -2,6 +2,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // TauID
 #include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                    // TauESTool
@@ -249,5 +250,10 @@ RecoHadTauReader::read() const
 std::vector<std::string>
 RecoHadTauReader::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return { "CMS_ttHl_tauESUp", "CMS_ttHl_tauESDown" };
+  static std::vector<std::string> supported_systematics;
+  if(supported_systematics.empty())
+  {
+    supported_systematics = map_keys(hadTauESSysMap);
+  }
+  return supported_systematics;
 }

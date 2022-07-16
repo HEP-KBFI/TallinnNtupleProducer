@@ -26,8 +26,6 @@ PSWeightReader::PSWeightReader(const edm::ParameterSet & cfg)
   , weight_ps_ISRDown_(1.)
   , weight_ps_FSRUp_(1.)
   , weight_ps_FSRDown_(1.)
-  , weight_ps_Up_(1.)
-  , weight_ps_Down_(1.)
   , has_PS_weights_(false)
   , apply_LHE_nom_(false)
 {
@@ -108,8 +106,6 @@ PSWeightReader::read() const
       weight_ps_ISRDown_ = gInstance->ps_weights_[0] * corrFactor;
       weight_ps_FSRUp_   = gInstance->ps_weights_[3] * corrFactor;
       weight_ps_FSRDown_ = gInstance->ps_weights_[1] * corrFactor;
-      weight_ps_Up_      = std::max({ weight_ps_ISRUp_, weight_ps_ISRDown_, weight_ps_FSRUp_, weight_ps_FSRDown_ });
-      weight_ps_Down_    = std::min({ weight_ps_ISRUp_, weight_ps_ISRDown_, weight_ps_FSRUp_, weight_ps_FSRDown_ });
     }
     else
     {
@@ -117,8 +113,6 @@ PSWeightReader::read() const
       weight_ps_ISRDown_ = 1.;
       weight_ps_FSRUp_   = 1.;
       weight_ps_FSRDown_ = 1.;
-      weight_ps_Up_      = 1.;
-      weight_ps_Down_    = 1.;
       std::cerr << "Unexpected number of PS weights: " << gInstance->ps_nWeights_ << '\n';
       return;
     }
@@ -150,18 +144,6 @@ PSWeightReader::getWeight_ps_FSRDown() const
 }
 
 double
-PSWeightReader::getWeight_ps_Up() const
-{
-  return clip(weight_ps_Up_);
-}
-
-double
-PSWeightReader::getWeight_ps_Down() const
-{
-  return clip(weight_ps_Down_);
-}
-
-double
 PSWeightReader::getWeight_ps(int central_or_shift) const
 {
   switch(central_or_shift)
@@ -171,8 +153,6 @@ PSWeightReader::getWeight_ps(int central_or_shift) const
     case kPartonShower_ISRUp:   return getWeight_ps_ISRUp();
     case kPartonShower_FSRDown: return getWeight_ps_FSRDown();
     case kPartonShower_FSRUp:   return getWeight_ps_FSRUp();
-    case kPartonShower_Down:    return getWeight_ps_Down();
-    case kPartonShower_Up:      return getWeight_ps_Up();
     default: throw cmsException(this, __func__, __LINE__)
                << "Invalid PS systematics option: " << central_or_shift;
   }

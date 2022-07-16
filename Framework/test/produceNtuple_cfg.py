@@ -105,7 +105,9 @@ process.produceNtuple = cms.PSet(
     #apply_hadTauFakeRateSF = cms.bool(False),
     #apply_genPhotonFilter = cms.string("disabled"),
     disable_ak8_corr = cms.vstring(['JMS', 'JMR', 'PUPPI']),
-    apply_chargeMisIdRate = cms.bool(True), # CV: set to True for 2lss and 2lss+1tau channels, and to False for all other channels 
+    apply_chargeMisIdRate = cms.bool(True), # CV: set to True for 2lss and 2lss+1tau channels, and to False for all other channels
+    split_jes = cms.bool(True),
+    split_jer = cms.bool(False),
 
     evtWeight = cms.PSet(
         apply = cms.bool(False),

@@ -16,7 +16,7 @@ EvtWeightWriter::EvtWeightWriter(const edm::ParameterSet & cfg)
   merge_systematic_shifts(supported_systematics_, EvtWeightWriter::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
   for ( auto central_or_shift : supported_systematics_ )
-  {    
+  {
     central_or_shiftEntry it;
     it.evtWeight_ = 0.;
     central_or_shiftEntries_[central_or_shift] = it;

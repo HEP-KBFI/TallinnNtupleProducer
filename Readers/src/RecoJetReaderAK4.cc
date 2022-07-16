@@ -5,6 +5,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_jetMET(), getBranchName_bTagWeight(), getBranchName_jetPtMass()
 
 #include "TTree.h"                                                                // TTree
@@ -316,25 +317,36 @@ RecoJetReaderAK4::read() const
 std::vector<std::string>
 RecoJetReaderAK4::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  std::vector<std::string> supported_systematics = {  
-    "CMS_ttHl_JESAbsoluteUp",           "CMS_ttHl_JESAbsoluteDown",
-    "CMS_ttHl_JESAbsolute_EraUp",       "CMS_ttHl_JESAbsolute_EraDown",
-    "CMS_ttHl_JESBBEC1Up",              "CMS_ttHl_JESBBEC1Down",
-    "CMS_ttHl_JESBBEC1_EraUp",          "CMS_ttHl_JESBBEC1_EraDown",
-    "CMS_ttHl_JESEC2Up",                "CMS_ttHl_JESEC2Down",
-    "CMS_ttHl_JESEC2_EraUp",            "CMS_ttHl_JESEC2_EraDown",
-    "CMS_ttHl_JESFlavorQCDUp",          "CMS_ttHl_JESFlavorQCDDown",
-    "CMS_ttHl_JESHFUp",                 "CMS_ttHl_JESHFDown",
-    "CMS_ttHl_JESHF_EraUp",             "CMS_ttHl_JESHF_EraDown",
-    "CMS_ttHl_JESRelativeBalUp",        "CMS_ttHl_JESRelativeBalDown",
-    "CMS_ttHl_JESRelativeSample_EraUp", "CMS_ttHl_JESRelativeSample_EraDown"
-  };
-  Era era = get_era(cfg.getParameter<std::string>("era"));
-  if ( era == Era::k2018 ) 
+  static std::vector<std::string> supported_systematics;
+  if(supported_systematics.empty())
   {
-    // KE: add systematic uncertainty on jet energy correction that addresses the HEM15/16 issue,
-    //     cf. https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
-    supported_systematics.push_back("CMS_ttHl_JESHEMDown");
+    merge_systematic_shifts(supported_systematics, map_keys(jesAK4SysMap));
+    merge_systematic_shifts(supported_systematics, map_keys(jerAK4SysMap));
+    const bool split_jes = cfg.getParameter<bool>("split_jes");
+    if(split_jes)
+    {
+      std::vector<std::string> jesSplitAK4SysStrs = map_keys(jesSplitAK4SysMap);
+      const Era era = get_era(cfg.getParameter<std::string>("era"));
+      if ( era != Era::k2018 ) 
+      {
+        // KE: add systematic uncertainty on jet energy correction that addresses the HEM15/16 issue,
+        //     cf. https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
+        jesSplitAK4SysStrs.erase(
+          std::remove_if(
+            jesSplitAK4SysStrs.begin(), jesSplitAK4SysStrs.end(),
+            [](const std::string & sysStr) -> bool {
+              return sysStr.find("HEM") != std::string::npos;
+            }
+          ), jesSplitAK4SysStrs.end()
+        );
+      }
+      merge_systematic_shifts(supported_systematics, jesSplitAK4SysStrs);
+    }
+    const bool split_jer = cfg.getParameter<bool>("split_jer");
+    if(split_jer)
+    {
+      merge_systematic_shifts(supported_systematics, map_keys(jerSplitAK4SysMap));
+    }
   }
   return supported_systematics;
 }

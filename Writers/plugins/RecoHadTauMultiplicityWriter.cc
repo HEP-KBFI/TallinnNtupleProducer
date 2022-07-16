@@ -18,7 +18,7 @@ RecoHadTauMultiplicityWriter::RecoHadTauMultiplicityWriter(const edm::ParameterS
 {
   merge_systematic_shifts(supported_systematics_, RecoHadTauMultiplicityWriter::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : supported_systematics_ )
+  for ( const std::string & central_or_shift : supported_systematics_ )
   {    
     central_or_shiftEntry it;
     it.nFakeableHadTausFull_ = 0;
@@ -45,7 +45,7 @@ void
 RecoHadTauMultiplicityWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  for ( auto central_or_shift : supported_systematics_ )
+  for ( const std::string & central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());

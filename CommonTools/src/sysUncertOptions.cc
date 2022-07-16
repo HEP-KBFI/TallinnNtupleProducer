@@ -10,33 +10,348 @@
 
 #include <assert.h>                                                     // assert()
 
-namespace 
-{
-  std::string
-  era_str(Era era)
-  {
-    switch(era)
-    {
-      case Era::kUndefined: throw cmsException(__func__, __LINE__) << "Undefined era!";
-      case Era::k2016 : return "2016";
-      case Era::k2017 : return "2017";
-      case Era::k2018 : return "2018";
-      default: throw cmsException(__func__, __LINE__) << "Invalid era: " << static_cast<int>(era);
-    }
-  }
-}
+const std::map<std::string, int> btagWeightSysMap = {
+  { "CMS_ttHl_btag_HFUp",                 kBtag_hfUp                      },
+  { "CMS_ttHl_btag_HFDown",               kBtag_hfDown                    },
+  { "CMS_ttHl_btag_HFStats1Up",           kBtag_hfStats1Up                },
+  { "CMS_ttHl_btag_HFStats1Down",         kBtag_hfStats1Down              },
+  { "CMS_ttHl_btag_HFStats2Up",           kBtag_hfStats2Up                },
+  { "CMS_ttHl_btag_HFStats2Down",         kBtag_hfStats2Down              },
+  { "CMS_ttHl_btag_LFUp",                 kBtag_lfUp                      },
+  { "CMS_ttHl_btag_LFDown",               kBtag_lfDown                    },
+  { "CMS_ttHl_btag_LFStats1Up",           kBtag_lfStats1Up                },
+  { "CMS_ttHl_btag_LFStats1Down",         kBtag_lfStats1Down              },
+  { "CMS_ttHl_btag_LFStats2Up",           kBtag_lfStats2Up                },
+  { "CMS_ttHl_btag_LFStats2Down",         kBtag_lfStats2Down              },
+  { "CMS_ttHl_btag_cErr1Up",              kBtag_cErr1Up                   },
+  { "CMS_ttHl_btag_cErr1Down",            kBtag_cErr1Down                 },
+  { "CMS_ttHl_btag_cErr2Up",              kBtag_cErr2Up                   },
+  { "CMS_ttHl_btag_cErr2Down",            kBtag_cErr2Down                 },
+  { "CMS_ttHl_JESUp",                     kBtag_jesTotalUp                },
+  { "CMS_ttHl_JESDown",                   kBtag_jesTotalDown              },
+  { "CMS_ttHl_JESAbsoluteUp",             kBtag_jesAbsoluteUp             },
+  { "CMS_ttHl_JESAbsoluteDown",           kBtag_jesAbsoluteDown           },
+  { "CMS_ttHl_JESAbsolute_EraUp",         kBtag_jesAbsolute_EraUp         },
+  { "CMS_ttHl_JESAbsolute_EraDown",       kBtag_jesAbsolute_EraDown       },
+  { "CMS_ttHl_JESBBEC1Up",                kBtag_jesBBEC1Up                },
+  { "CMS_ttHl_JESBBEC1Down",              kBtag_jesBBEC1Down              },
+  { "CMS_ttHl_JESBBEC1_EraUp",            kBtag_jesBBEC1_EraUp            },
+  { "CMS_ttHl_JESBBEC1_EraDown",          kBtag_jesBBEC1_EraDown          },
+  { "CMS_ttHl_JESEC2Up",                  kBtag_jesEC2Up                  },
+  { "CMS_ttHl_JESEC2Down",                kBtag_jesEC2Down                },
+  { "CMS_ttHl_JESEC2_EraUp",              kBtag_jesEC2_EraUp              },
+  { "CMS_ttHl_JESEC2_EraDown",            kBtag_jesEC2_EraDown            },
+  { "CMS_ttHl_JESFlavorQCDUp",            kBtag_jesFlavorQCDUp            },
+  { "CMS_ttHl_JESFlavorQCDDown",          kBtag_jesFlavorQCDDown          },
+  { "CMS_ttHl_JESHFUp",                   kBtag_jesHFUp                   },
+  { "CMS_ttHl_JESHFDown",                 kBtag_jesHFDown                 },
+  { "CMS_ttHl_JESHF_EraUp",               kBtag_jesHF_EraUp               },
+  { "CMS_ttHl_JESHF_EraDown",             kBtag_jesHF_EraDown             },
+  { "CMS_ttHl_JESRelativeBalUp",          kBtag_jesRelativeBalUp          },
+  { "CMS_ttHl_JESRelativeBalDown",        kBtag_jesRelativeBalDown        },
+  { "CMS_ttHl_JESRelativeSample_EraUp",   kBtag_jesRelativeSample_EraUp   },
+  { "CMS_ttHl_JESRelativeSample_EraDown", kBtag_jesRelativeSample_EraDown },
+};
 
-bool
-isTTbarSys(const std::string & central_or_shift)
-{
-  return
-    central_or_shift == "QCDbased"               ||
-    central_or_shift == "GluonMove"              ||
-    central_or_shift == "erdON"                  ||
-    boost::starts_with(central_or_shift, "mtop") ||
-    boost::starts_with(central_or_shift, "widthx")
-  ;
-}
+const std::map<std::string, pileupJetIDSFsys> pileupJetIDSysMap = {
+  { "CMS_ttHl_puJetIDEffUp",      pileupJetIDSFsys::effUp      },
+  { "CMS_ttHl_puJetIDEffDown",    pileupJetIDSFsys::effDown    },
+  { "CMS_ttHl_puJetIDMistagUp",   pileupJetIDSFsys::mistagUp   },
+  { "CMS_ttHl_puJetIDMistagDown", pileupJetIDSFsys::mistagDown },
+};
+
+const std::map<std::string, int> jesAK4SysMap = {
+  { "CMS_ttHl_JESUp",                     kJetMET_jesUp                     },
+  { "CMS_ttHl_JESDown",                   kJetMET_jesDown                   },
+};
+
+const std::map<std::string, int> jesSplitAK4SysMap = {
+  { "CMS_ttHl_JESAbsoluteUp",             kJetMET_jesAbsoluteUp             },
+  { "CMS_ttHl_JESAbsoluteDown",           kJetMET_jesAbsoluteDown           },
+  { "CMS_ttHl_JESAbsolute_EraUp",         kJetMET_jesAbsolute_EraUp         },
+  { "CMS_ttHl_JESAbsolute_EraDown",       kJetMET_jesAbsolute_EraDown       },
+  { "CMS_ttHl_JESBBEC1Up",                kJetMET_jesBBEC1Up                },
+  { "CMS_ttHl_JESBBEC1Down",              kJetMET_jesBBEC1Down              },
+  { "CMS_ttHl_JESBBEC1_EraUp",            kJetMET_jesBBEC1_EraUp            },
+  { "CMS_ttHl_JESBBEC1_EraDown",          kJetMET_jesBBEC1_EraDown          },
+  { "CMS_ttHl_JESEC2Up",                  kJetMET_jesEC2Up                  },
+  { "CMS_ttHl_JESEC2Down",                kJetMET_jesEC2Down                },
+  { "CMS_ttHl_JESEC2_EraUp",              kJetMET_jesEC2_EraUp              },
+  { "CMS_ttHl_JESEC2_EraDown",            kJetMET_jesEC2_EraDown            },
+  { "CMS_ttHl_JESFlavorQCDUp",            kJetMET_jesFlavorQCDUp            },
+  { "CMS_ttHl_JESFlavorQCDDown",          kJetMET_jesFlavorQCDDown          },
+  { "CMS_ttHl_JESHFUp",                   kJetMET_jesHFUp                   },
+  { "CMS_ttHl_JESHFDown",                 kJetMET_jesHFDown                 },
+  { "CMS_ttHl_JESHF_EraUp",               kJetMET_jesHF_EraUp               },
+  { "CMS_ttHl_JESHF_EraDown",             kJetMET_jesHF_EraDown             },
+  { "CMS_ttHl_JESRelativeBalUp",          kJetMET_jesRelativeBalUp          },
+  { "CMS_ttHl_JESRelativeBalDown",        kJetMET_jesRelativeBalDown        },
+  { "CMS_ttHl_JESRelativeSample_EraUp",   kJetMET_jesRelativeSample_EraUp   },
+  { "CMS_ttHl_JESRelativeSample_EraDown", kJetMET_jesRelativeSample_EraDown },
+  { "CMS_ttHl_JESHEMUp",                  kJetMET_jesHEMUp                  },
+  { "CMS_ttHl_JESHEMDown",                kJetMET_jesHEMDown                },
+};
+
+const std::map<std::string, int> jerAK4SysMap = {
+  { "CMS_ttHl_JERUp",                     kJetMET_jerUp                     },
+  { "CMS_ttHl_JERDown",                   kJetMET_jerDown                   },
+};
+
+const std::map<std::string, int> jerSplitAK4SysMap = {  
+  { "CMS_ttHl_JERBarrelUp",               kJetMET_jerBarrelUp               },
+  { "CMS_ttHl_JERBarrelDown",             kJetMET_jerBarrelDown             },
+  { "CMS_ttHl_JEREndcap1Up",              kJetMET_jerEndcap1Up              },
+  { "CMS_ttHl_JEREndcap1Down",            kJetMET_jerEndcap1Down            },
+  { "CMS_ttHl_JEREndcap2LowPtUp",         kJetMET_jerEndcap2LowPtUp         },
+  { "CMS_ttHl_JEREndcap2LowPtDown",       kJetMET_jerEndcap2LowPtDown       },
+  { "CMS_ttHl_JEREndcap2HighPtUp",        kJetMET_jerEndcap2HighPtUp        },
+  { "CMS_ttHl_JEREndcap2HighPtDown",      kJetMET_jerEndcap2HighPtDown      },
+  { "CMS_ttHl_JERForwardLowPtUp",         kJetMET_jerForwardLowPtUp         },
+  { "CMS_ttHl_JERForwardLowPtDown",       kJetMET_jerForwardLowPtDown       },
+  { "CMS_ttHl_JERForwardHighPtUp",        kJetMET_jerForwardHighPtUp        },
+  { "CMS_ttHl_JERForwardHighPtDown",      kJetMET_jerForwardHighPtDown      },
+};
+
+const std::map<std::string, int> metSysMap = {
+  { "CMS_ttHl_UnclusteredEnUp",   kJetMET_UnclusteredEnUp   },
+  { "CMS_ttHl_UnclusteredEnDown", kJetMET_UnclusteredEnDown },
+};
+
+const std::map<std::string, int> jesAK8SysMap = {
+  { "CMS_ttHl_JESUp",                     kFatJet_jesUp                     },
+  { "CMS_ttHl_JESDown",                   kFatJet_jesDown                   },
+};
+
+const std::map<std::string, int> jesSplitAK8SysMap = {
+  { "CMS_ttHl_JESAbsoluteUp",             kFatJet_jesAbsoluteUp             },
+  { "CMS_ttHl_JESAbsoluteDown",           kFatJet_jesAbsoluteDown           },
+  { "CMS_ttHl_JESAbsolute_EraUp",         kFatJet_jesAbsolute_EraUp         },
+  { "CMS_ttHl_JESAbsolute_EraDown",       kFatJet_jesAbsolute_EraDown       },
+  { "CMS_ttHl_JESBBEC1Up",                kFatJet_jesBBEC1Up                },
+  { "CMS_ttHl_JESBBEC1Down",              kFatJet_jesBBEC1Down              },
+  { "CMS_ttHl_JESBBEC1_EraUp",            kFatJet_jesBBEC1_EraUp            },
+  { "CMS_ttHl_JESBBEC1_EraDown",          kFatJet_jesBBEC1_EraDown          },
+  { "CMS_ttHl_JESEC2Up",                  kFatJet_jesEC2Up                  },
+  { "CMS_ttHl_JESEC2Down",                kFatJet_jesEC2Down                },
+  { "CMS_ttHl_JESEC2_EraUp",              kFatJet_jesEC2_EraUp              },
+  { "CMS_ttHl_JESEC2_EraDown",            kFatJet_jesEC2_EraDown            },
+  { "CMS_ttHl_JESFlavorQCDUp",            kFatJet_jesFlavorQCDUp            },
+  { "CMS_ttHl_JESFlavorQCDDown",          kFatJet_jesFlavorQCDDown          },
+  { "CMS_ttHl_JESHFUp",                   kFatJet_jesHFUp                   },
+  { "CMS_ttHl_JESHFDown",                 kFatJet_jesHFDown                 },
+  { "CMS_ttHl_JESHF_EraUp",               kFatJet_jesHF_EraUp               },
+  { "CMS_ttHl_JESHF_EraDown",             kFatJet_jesHF_EraDown             },
+  { "CMS_ttHl_JESRelativeBalUp",          kFatJet_jesRelativeBalUp          },
+  { "CMS_ttHl_JESRelativeBalDown",        kFatJet_jesRelativeBalDown        },
+  { "CMS_ttHl_JESRelativeSample_EraUp",   kFatJet_jesRelativeSample_EraUp   },
+  { "CMS_ttHl_JESRelativeSample_EraDown", kFatJet_jesRelativeSample_EraDown },
+  { "CMS_ttHl_JESHEMUp",                  kFatJet_jesHEMUp                  },
+  { "CMS_ttHl_JESHEMDown",                kFatJet_jesHEMDown                },
+};
+
+const std::map<std::string, int> jerAK8SysMap = {
+  { "CMS_ttHl_AK8JERUp",                  kFatJet_jerUp                     },
+  { "CMS_ttHl_AK8JERDown",                kFatJet_jerDown                   },
+};
+
+const std::map<std::string, int> jerSplitAK8SysMap = {
+//  { "CMS_ttHl_AK8JERBarrelUp",            kFatJet_jerBarrelUp               },
+//  { "CMS_ttHl_AK8JERBarrelDown",          kFatJet_jerBarrelDown             },
+//  { "CMS_ttHl_AK8JEREndcap1Up",           kFatJet_jerEndcap1Up              },
+//  { "CMS_ttHl_AK8JEREndcap1Down",         kFatJet_jerEndcap1Down            },
+//  { "CMS_ttHl_AK8JEREndcap2LowPtUp",      kFatJet_jerEndcap2LowPtUp         },
+//  { "CMS_ttHl_AK8JEREndcap2LowPtDown",    kFatJet_jerEndcap2LowPtDown       },
+//  { "CMS_ttHl_AK8JEREndcap2HighPtUp",     kFatJet_jerEndcap2HighPtUp        },
+//  { "CMS_ttHl_AK8JEREndcap2HighPtDown",   kFatJet_jerEndcap2HighPtDown      },
+//  { "CMS_ttHl_AK8JERForwardLowPtUp",      kFatJet_jerForwardLowPtUp         },
+//  { "CMS_ttHl_AK8JERForwardLowPtDown",    kFatJet_jerForwardLowPtDown       },
+//  { "CMS_ttHl_AK8JERForwardHighPtUp",     kFatJet_jerForwardHighPtUp        },
+//  { "CMS_ttHl_AK8JERForwardHighPtDown",   kFatJet_jerForwardHighPtDown      },
+};
+
+const std::map<std::string, int> jmsAK8SysMap = {
+  { "CMS_ttHl_AK8JMSUp",                  kFatJet_jmsUp                     },
+  { "CMS_ttHl_AK8JMSDown",                kFatJet_jmsDown                   },
+};
+
+const std::map<std::string, int> jmrAK8SysMap = {
+  { "CMS_ttHl_AK8JMRUp",                  kFatJet_jmrUp                     },
+  { "CMS_ttHl_AK8JMRDown",                kFatJet_jmrDown                   },
+};
+
+const std::map<std::string, int> hadTauESSysMap = {
+  { "CMS_ttHl_tauESUp",   kHadTauPt_shiftUp   },
+  { "CMS_ttHl_tauESDown", kHadTauPt_shiftDown },
+};
+
+const std::map<std::string, int> jetToTauFRSysMap = {
+  { "CMS_ttHl_FRjt_normUp",    kFRjt_normUp    },
+  { "CMS_ttHl_FRjt_normDown",  kFRjt_normDown  },
+  { "CMS_ttHl_FRjt_shapeUp",   kFRjt_shapeUp   },
+  { "CMS_ttHl_FRjt_shapeDown", kFRjt_shapeDown },
+};
+
+const std::map<std::string, FRet> eToTauFRSysMap = {
+  { "CMS_ttHl_FRet_shiftUp",   FRet::shiftUp   },
+  { "CMS_ttHl_FRet_shiftDown", FRet::shiftDown },
+};
+
+const std::map<std::string, FRmt> mToTauFRSysMap = {
+  { "CMS_ttHl_FRmt_shiftUp",   FRmt::shiftUp   },
+  { "CMS_ttHl_FRmt_shiftDown", FRmt::shiftDown },
+};
+
+const std::map<std::string, LeptonIDSFsys> leptonIDSFSysMap = {
+  { "CMS_ttHl_lepEff_eltightUp",         LeptonIDSFsys::elTightUp         },
+  { "CMS_ttHl_lepEff_eltightDown",       LeptonIDSFsys::elTightDown       },
+  { "CMS_ttHl_lepEff_mutightUp",         LeptonIDSFsys::muTightUp         },
+  { "CMS_ttHl_lepEff_mutightDown",       LeptonIDSFsys::muTightDown       },
+  { "CMS_ttHl_lepEff_ellooseUp",         LeptonIDSFsys::elLooseUp         },
+  { "CMS_ttHl_lepEff_ellooseDown",       LeptonIDSFsys::elLooseDown       },
+  { "CMS_ttHl_lepEff_mulooseUp",         LeptonIDSFsys::muLooseUp         },
+  { "CMS_ttHl_lepEff_mulooseDown",       LeptonIDSFsys::muLooseDown       },
+  { "CMS_ttHl_lepEff_eltightRecompUp",   LeptonIDSFsys::elTightRecompUp   },
+  { "CMS_ttHl_lepEff_eltightRecompDown", LeptonIDSFsys::elTightRecompDown },
+  { "CMS_ttHl_lepEff_mutightRecompUp",   LeptonIDSFsys::muTightRecompUp   },
+  { "CMS_ttHl_lepEff_mutightRecompDown", LeptonIDSFsys::muTightRecompDown },
+};
+
+const std::map<std::string, TauIDSFsys> tauIDSFSysMap = {
+  { "CMS_ttHl_tauIDSFUp",   TauIDSFsys::shiftUp   },
+  { "CMS_ttHl_tauIDSFDown", TauIDSFsys::shiftDown },
+};
+
+const std::map<std::string, TriggerSFsys> triggerSFSysMap = {
+  { "CMS_ttHl_triggerUp",            TriggerSFsys::shiftUp            },
+  { "CMS_ttHl_triggerDown",          TriggerSFsys::shiftDown          },
+  { "CMS_ttHl_trigger_2lssUp",       TriggerSFsys::shift_2lssUp       },
+  { "CMS_ttHl_trigger_2lssDown",     TriggerSFsys::shift_2lssDown     },
+  { "CMS_ttHl_trigger_2lssEEUp",     TriggerSFsys::shift_2lssEEUp     },
+  { "CMS_ttHl_trigger_2lssEEDown",   TriggerSFsys::shift_2lssEEDown   },
+  { "CMS_ttHl_trigger_2lssEMuUp",    TriggerSFsys::shift_2lssEMuUp    },
+  { "CMS_ttHl_trigger_2lssEMuDown",  TriggerSFsys::shift_2lssEMuDown  },
+  { "CMS_ttHl_trigger_2lssMuMuUp",   TriggerSFsys::shift_2lssMuMuUp   },
+  { "CMS_ttHl_trigger_2lssMuMuDown", TriggerSFsys::shift_2lssMuMuDown },
+  { "CMS_ttHl_trigger_3lUp",         TriggerSFsys::shift_3lUp         },
+  { "CMS_ttHl_trigger_3lDown",       TriggerSFsys::shift_3lDown       },
+  { "CMS_ttHl_trigger_1l2tauUp",     TriggerSFsys::shift_1l2tauUp     },
+  { "CMS_ttHl_trigger_1l2tauDown",   TriggerSFsys::shift_1l2tauDown   },
+  { "CMS_ttHl_trigger_1l1tauUp",     TriggerSFsys::shift_1l1tauUp     },
+  { "CMS_ttHl_trigger_1l1tauDown",   TriggerSFsys::shift_1l1tauDown   },
+  { "CMS_ttHl_trigger_0l2tauUp",     TriggerSFsys::shift_0l2tauUp     },
+  { "CMS_ttHl_trigger_0l2tauDown",   TriggerSFsys::shift_0l2tauDown   },
+  { "CMS_ttHl_trigger_1lEUp",        TriggerSFsys::shift_1lEUp        },
+  { "CMS_ttHl_trigger_1lEDown",      TriggerSFsys::shift_1lEDown      },
+  { "CMS_ttHl_trigger_1lMuUp",       TriggerSFsys::shift_1lMuUp       },
+  { "CMS_ttHl_trigger_1lMuDown",     TriggerSFsys::shift_1lMuDown     },
+};
+
+const std::map<std::string, int> lheScaleSysMap = {
+  { "CMS_ttHl_thu_shape_x1y1Up",   kLHE_scale_xyUp   },
+  { "CMS_ttHl_thu_shape_x1y1Down", kLHE_scale_xyDown },
+  { "CMS_ttHl_thu_shape_x1Up",     kLHE_scale_xUp    },
+  { "CMS_ttHl_thu_shape_x1Down",   kLHE_scale_xDown  },
+  { "CMS_ttHl_thu_shape_y1Up",     kLHE_scale_yUp    },
+  { "CMS_ttHl_thu_shape_y1Down",   kLHE_scale_yDown  },
+};
+
+const std::map<std::string, int> psSysMap = {
+  { "CMS_ttHl_PS_ISRDown", kPartonShower_ISRDown },
+  { "CMS_ttHl_PS_ISRUp",   kPartonShower_ISRUp   },
+  { "CMS_ttHl_PS_FSRDown", kPartonShower_FSRDown },
+  { "CMS_ttHl_PS_FSRUp",   kPartonShower_FSRUp   },
+};
+
+const std::map<std::string, ElectronPtSys> ePtSysMap = {
+  { "CMS_ttHl_electronESBarrelUp",   ElectronPtSys::scaleUp_barrel   },
+  { "CMS_ttHl_electronESBarrelDown", ElectronPtSys::scaleDown_barrel },
+  { "CMS_ttHl_electronESEndcapUp",   ElectronPtSys::scaleUp_endcap   },
+  { "CMS_ttHl_electronESEndcapDown", ElectronPtSys::scaleDown_endcap },
+  { "CMS_ttHl_electronERUp",         ElectronPtSys::resUp            },
+  { "CMS_ttHl_electronERDown",       ElectronPtSys::resDown          },
+};
+
+const std::map<std::string, MuonPtSys> mPtSysMap = {
+  { "CMS_ttHl_muonERUp",          MuonPtSys::ERUp          },
+  { "CMS_ttHl_muonERDown",        MuonPtSys::ERDown        },
+  { "CMS_ttHl_muonESBarrel1Up",   MuonPtSys::ESBarrel1Up   },
+  { "CMS_ttHl_muonESBarrel1Down", MuonPtSys::ESBarrel1Down },
+  { "CMS_ttHl_muonESBarrel2Up",   MuonPtSys::ESBarrel2Up   },
+  { "CMS_ttHl_muonESBarrel2Down", MuonPtSys::ESBarrel2Down },
+  { "CMS_ttHl_muonESEndcap1Up",   MuonPtSys::ESEndcap1Up   },
+  { "CMS_ttHl_muonESEndcap1Down", MuonPtSys::ESEndcap1Down },
+  { "CMS_ttHl_muonESEndcap2Up",   MuonPtSys::ESEndcap2Up   },
+  { "CMS_ttHl_muonESEndcap2Down", MuonPtSys::ESEndcap2Down },
+};
+
+const std::map<std::string, int> jetToLeptonFRSysMap = {
+  { "CMS_ttHl_FRe_shape_ptUp",           kFRe_shape_ptUp           },
+  { "CMS_ttHl_FRe_shape_ptDown",         kFRe_shape_ptDown         },
+  { "CMS_ttHl_FRe_shape_normUp",         kFRe_shape_normUp         },
+  { "CMS_ttHl_FRe_shape_normDown",       kFRe_shape_normDown       },
+  { "CMS_ttHl_FRe_shape_eta_barrelUp",   kFRe_shape_eta_barrelUp   },
+  { "CMS_ttHl_FRe_shape_eta_barrelDown", kFRe_shape_eta_barrelDown },
+  { "CMS_ttHl_FRe_shape_corrUp",         kFRe_shape_corrUp         },
+  { "CMS_ttHl_FRe_shape_corrDown",       kFRe_shape_corrDown       },
+  { "CMS_ttHl_FRm_shape_ptUp",           kFRm_shape_ptUp           },
+  { "CMS_ttHl_FRm_shape_ptDown",         kFRm_shape_ptDown         },
+  { "CMS_ttHl_FRm_shape_normUp",         kFRm_shape_normUp         },
+  { "CMS_ttHl_FRm_shape_normDown",       kFRm_shape_normDown       },
+  { "CMS_ttHl_FRm_shape_eta_barrelUp",   kFRm_shape_eta_barrelUp   },
+  { "CMS_ttHl_FRm_shape_eta_barrelDown", kFRm_shape_eta_barrelDown },
+  { "CMS_ttHl_FRm_shape_corrUp",         kFRm_shape_corrUp         },
+  { "CMS_ttHl_FRm_shape_corrDown",       kFRm_shape_corrDown       },
+};
+
+const std::map<std::string, PUsys> puSysMap = {
+  { "CMS_ttHl_pileupUp",   PUsys::up   },
+  { "CMS_ttHl_pileupDown", PUsys::down },
+};
+
+const std::map<std::string, L1PreFiringWeightSys> l1prefireSysMap = {
+  { "CMS_ttHl_l1PreFireUp",   L1PreFiringWeightSys::up   },
+  { "CMS_ttHl_l1PreFireDown", L1PreFiringWeightSys::down },  
+};
+
+const std::map<std::string, int> dyMCRwgtSysMap = {
+  { "CMS_ttHl_DYMCReweightingUp",   kDYMCReweighting_shiftUp   },
+  { "CMS_ttHl_DYMCReweightingDown", kDYMCReweighting_shiftDown },
+};
+
+const std::map<std::string, int> dyMCNormSysMap = {
+  { "CMS_ttHl_DYMCNormScaleFactorsUp",   kDYMCNormScaleFactors_shiftUp   },
+  { "CMS_ttHl_DYMCNormScaleFactorsDown", kDYMCNormScaleFactors_shiftDown },
+};
+
+const std::map<std::string, int> topPtRwgtSysMap = {
+  { "CMS_ttHl_topPtReweightingUp",   kTopPtReweighting_shiftUp   },
+  { "CMS_ttHl_topPtReweightingDown", kTopPtReweighting_shiftDown },
+};
+
+const std::map<std::string, EWKJetSys> ewkJetSysMap = {
+  { "CMS_ttHl_EWK_jetUp",   EWKJetSys::up   },
+  { "CMS_ttHl_EWK_jetDown", EWKJetSys::down },
+};
+
+const std::map<std::string, EWKBJetSys> ewkBJetSysMap = {
+  { "CMS_ttHl_EWK_btagUp",   EWKBJetSys::up   },
+  { "CMS_ttHl_EWK_btagDown", EWKBJetSys::down },
+};
+
+const std::map<std::string, PDFSys> pdfSysMap = {
+  { "CMS_ttHl_PDF_shape_Up",   PDFSys::up   },
+  { "CMS_ttHl_PDF_shape_Down", PDFSys::down },  
+};
+
+const std::map<std::string, LHEVptSys> lheVptSysMap = {
+  { "Vpt_nloUp",   LHEVptSys::up   },
+  { "Vpt_nloDown", LHEVptSys::down },
+};
+
+const std::map<std::string, SubjetBtagSys> subjetBtagSysMap = {
+  { "CMS_btag_subjetUp",   SubjetBtagSys::up   },
+  { "CMS_btag_subjetDown", SubjetBtagSys::down },
+};
 
 bool
 isValidJESsource(Era era,
@@ -71,246 +386,142 @@ isValidFatJetAttribute(int central_or_shift,
 int
 getBTagWeight_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kBtag_central;
-  if     (central_or_shift == "CMS_ttHl_btag_HFUp"                ) central_or_shift_int = kBtag_hfUp;
-  else if(central_or_shift == "CMS_ttHl_btag_HFDown"              ) central_or_shift_int = kBtag_hfDown;
-  else if(central_or_shift == "CMS_ttHl_btag_HFStats1Up"          ) central_or_shift_int = kBtag_hfStats1Up;
-  else if(central_or_shift == "CMS_ttHl_btag_HFStats1Down"        ) central_or_shift_int = kBtag_hfStats1Down;
-  else if(central_or_shift == "CMS_ttHl_btag_HFStats2Up"          ) central_or_shift_int = kBtag_hfStats2Up;
-  else if(central_or_shift == "CMS_ttHl_btag_HFStats2Down"        ) central_or_shift_int = kBtag_hfStats2Down;
-  else if(central_or_shift == "CMS_ttHl_btag_LFUp"                ) central_or_shift_int = kBtag_lfUp;
-  else if(central_or_shift == "CMS_ttHl_btag_LFDown"              ) central_or_shift_int = kBtag_lfDown;
-  else if(central_or_shift == "CMS_ttHl_btag_LFStats1Up"          ) central_or_shift_int = kBtag_lfStats1Up;
-  else if(central_or_shift == "CMS_ttHl_btag_LFStats1Down"        ) central_or_shift_int = kBtag_lfStats1Down;
-  else if(central_or_shift == "CMS_ttHl_btag_LFStats2Up"          ) central_or_shift_int = kBtag_lfStats2Up;
-  else if(central_or_shift == "CMS_ttHl_btag_LFStats2Down"        ) central_or_shift_int = kBtag_lfStats2Down;
-  else if(central_or_shift == "CMS_ttHl_btag_cErr1Up"             ) central_or_shift_int = kBtag_cErr1Up;
-  else if(central_or_shift == "CMS_ttHl_btag_cErr1Down"           ) central_or_shift_int = kBtag_cErr1Down;
-  else if(central_or_shift == "CMS_ttHl_btag_cErr2Up"             ) central_or_shift_int = kBtag_cErr2Up;
-  else if(central_or_shift == "CMS_ttHl_btag_cErr2Down"           ) central_or_shift_int = kBtag_cErr2Down;
-  else if(central_or_shift == "CMS_ttHl_JESUp"                    ) central_or_shift_int = kBtag_jesTotalUp;
-  else if(central_or_shift == "CMS_ttHl_JESDown"                  ) central_or_shift_int = kBtag_jesTotalDown;
-  else if(central_or_shift == "CMS_ttHl_JESAbsoluteUp"            ) central_or_shift_int = kBtag_jesAbsoluteUp;
-  else if(central_or_shift == "CMS_ttHl_JESAbsoluteDown"          ) central_or_shift_int = kBtag_jesAbsoluteDown;
-  else if(central_or_shift == "CMS_ttHl_JESAbsolute_EraUp"        ) central_or_shift_int = kBtag_jesAbsolute_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESAbsolute_EraDown"      ) central_or_shift_int = kBtag_jesAbsolute_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1Up"               ) central_or_shift_int = kBtag_jesBBEC1Up;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1Down"             ) central_or_shift_int = kBtag_jesBBEC1Down;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1_EraUp"           ) central_or_shift_int = kBtag_jesBBEC1_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1_EraDown"         ) central_or_shift_int = kBtag_jesBBEC1_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESEC2Up"                 ) central_or_shift_int = kBtag_jesEC2Up;
-  else if(central_or_shift == "CMS_ttHl_JESEC2Down"               ) central_or_shift_int = kBtag_jesEC2Down;
-  else if(central_or_shift == "CMS_ttHl_JESEC2_EraUp"             ) central_or_shift_int = kBtag_jesEC2_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESEC2_EraDown"           ) central_or_shift_int = kBtag_jesEC2_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESFlavorQCDUp"           ) central_or_shift_int = kBtag_jesFlavorQCDUp;
-  else if(central_or_shift == "CMS_ttHl_JESFlavorQCDDown"         ) central_or_shift_int = kBtag_jesFlavorQCDDown;
-  else if(central_or_shift == "CMS_ttHl_JESHFUp"                  ) central_or_shift_int = kBtag_jesHFUp;
-  else if(central_or_shift == "CMS_ttHl_JESHFDown"                ) central_or_shift_int = kBtag_jesHFDown;
-  else if(central_or_shift == "CMS_ttHl_JESHF_EraUp"              ) central_or_shift_int = kBtag_jesHF_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESHF_EraDown"            ) central_or_shift_int = kBtag_jesHF_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeBalUp"         ) central_or_shift_int = kBtag_jesRelativeBalUp;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeBalDown"       ) central_or_shift_int = kBtag_jesRelativeBalDown;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeSample_EraUp"  ) central_or_shift_int = kBtag_jesRelativeSample_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeSample_EraDown") central_or_shift_int = kBtag_jesRelativeSample_EraDown;
-  return central_or_shift_int;
+  const auto kv = btagWeightSysMap.find(central_or_shift);
+  if(kv != btagWeightSysMap.end())
+  {
+    return kv->second;
+  }
+  return kBtag_central;
 }
 
 pileupJetIDSFsys
 getPileupJetIDSFsys_option(const std::string & central_or_shift)
 {
-  pileupJetIDSFsys central_or_shift_int = pileupJetIDSFsys::central;
-  if     (central_or_shift == "CMS_ttHl_puJetIDEffUp"     ) central_or_shift_int = pileupJetIDSFsys::effUp;
-  else if(central_or_shift == "CMS_ttHl_puJetIDEffDown"   ) central_or_shift_int = pileupJetIDSFsys::effDown;
-  else if(central_or_shift == "CMS_ttHl_puJetIDMistagUp"  ) central_or_shift_int = pileupJetIDSFsys::mistagUp;
-  else if(central_or_shift == "CMS_ttHl_puJetIDMistagDown") central_or_shift_int = pileupJetIDSFsys::mistagDown;
-  return central_or_shift_int;
+  const auto kv = pileupJetIDSysMap.find(central_or_shift);
+  if(kv != pileupJetIDSysMap.end())
+  {
+    return kv->second;
+  }
+  return pileupJetIDSFsys::central;
 }
 
 int
 getJet_option(const std::string & central_or_shift,
               bool isMC)
 {
-  int central_or_shift_int = isMC ? kJetMET_central : kJetMET_central_nonNominal;
-  if     (central_or_shift == "CMS_ttHl_JESUp"                    ) central_or_shift_int = kJetMET_jesUp;
-  else if(central_or_shift == "CMS_ttHl_JESDown"                  ) central_or_shift_int = kJetMET_jesDown;
-  else if(central_or_shift == "CMS_ttHl_JERUp"                    ) central_or_shift_int = kJetMET_jerUp;
-  else if(central_or_shift == "CMS_ttHl_JERDown"                  ) central_or_shift_int = kJetMET_jerDown;
-  else if(central_or_shift == "CMS_ttHl_JESAbsoluteUp"            ) central_or_shift_int = kJetMET_jesAbsoluteUp;
-  else if(central_or_shift == "CMS_ttHl_JESAbsoluteDown"          ) central_or_shift_int = kJetMET_jesAbsoluteDown;
-  else if(central_or_shift == "CMS_ttHl_JESAbsolute_EraUp"        ) central_or_shift_int = kJetMET_jesAbsolute_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESAbsolute_EraDown"      ) central_or_shift_int = kJetMET_jesAbsolute_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1Up"               ) central_or_shift_int = kJetMET_jesBBEC1Up;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1Down"             ) central_or_shift_int = kJetMET_jesBBEC1Down;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1_EraUp"           ) central_or_shift_int = kJetMET_jesBBEC1_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1_EraDown"         ) central_or_shift_int = kJetMET_jesBBEC1_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESEC2Up"                 ) central_or_shift_int = kJetMET_jesEC2Up;
-  else if(central_or_shift == "CMS_ttHl_JESEC2Down"               ) central_or_shift_int = kJetMET_jesEC2Down;
-  else if(central_or_shift == "CMS_ttHl_JESEC2_EraUp"             ) central_or_shift_int = kJetMET_jesEC2_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESEC2_EraDown"           ) central_or_shift_int = kJetMET_jesEC2_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESFlavorQCDUp"           ) central_or_shift_int = kJetMET_jesFlavorQCDUp;
-  else if(central_or_shift == "CMS_ttHl_JESFlavorQCDDown"         ) central_or_shift_int = kJetMET_jesFlavorQCDDown;
-  else if(central_or_shift == "CMS_ttHl_JESHFUp"                  ) central_or_shift_int = kJetMET_jesHFUp;
-  else if(central_or_shift == "CMS_ttHl_JESHFDown"                ) central_or_shift_int = kJetMET_jesHFDown;
-  else if(central_or_shift == "CMS_ttHl_JESHF_EraUp"              ) central_or_shift_int = kJetMET_jesHF_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESHF_EraDown"            ) central_or_shift_int = kJetMET_jesHF_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeBalUp"         ) central_or_shift_int = kJetMET_jesRelativeBalUp;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeBalDown"       ) central_or_shift_int = kJetMET_jesRelativeBalDown;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeSample_EraUp"  ) central_or_shift_int = kJetMET_jesRelativeSample_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeSample_EraDown") central_or_shift_int = kJetMET_jesRelativeSample_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JERBarrelUp"              ) central_or_shift_int = kJetMET_jerBarrelUp;
-  else if(central_or_shift == "CMS_ttHl_JERBarrelDown"            ) central_or_shift_int = kJetMET_jerBarrelDown;
-  else if(central_or_shift == "CMS_ttHl_JEREndcap1Up"             ) central_or_shift_int = kJetMET_jerEndcap1Up;
-  else if(central_or_shift == "CMS_ttHl_JEREndcap1Down"           ) central_or_shift_int = kJetMET_jerEndcap1Down;
-  else if(central_or_shift == "CMS_ttHl_JEREndcap2LowPtUp"        ) central_or_shift_int = kJetMET_jerEndcap2LowPtUp;
-  else if(central_or_shift == "CMS_ttHl_JEREndcap2LowPtDown"      ) central_or_shift_int = kJetMET_jerEndcap2LowPtDown;
-  else if(central_or_shift == "CMS_ttHl_JEREndcap2HighPtUp"       ) central_or_shift_int = kJetMET_jerEndcap2HighPtUp;
-  else if(central_or_shift == "CMS_ttHl_JEREndcap2HighPtDown"     ) central_or_shift_int = kJetMET_jerEndcap2HighPtDown;
-  else if(central_or_shift == "CMS_ttHl_JERForwardLowPtUp"        ) central_or_shift_int = kJetMET_jerForwardLowPtUp;
-  else if(central_or_shift == "CMS_ttHl_JERForwardLowPtDown"      ) central_or_shift_int = kJetMET_jerForwardLowPtDown;
-  else if(central_or_shift == "CMS_ttHl_JERForwardHighPtUp"       ) central_or_shift_int = kJetMET_jerForwardHighPtUp;
-  else if(central_or_shift == "CMS_ttHl_JERForwardHighPtDown"     ) central_or_shift_int = kJetMET_jerForwardHighPtDown;
-  else if(central_or_shift == "CMS_ttHl_JESHEMUp"                 ) central_or_shift_int = kJetMET_jesHEMUp;
-  else if(central_or_shift == "CMS_ttHl_JESHEMDown"               ) central_or_shift_int = kJetMET_jesHEMDown;
-  return central_or_shift_int;
+  if(isMC)
+  {
+    for(const auto & map: { jesAK4SysMap, jesSplitAK4SysMap, jerAK4SysMap, jerSplitAK4SysMap })
+    {
+      const auto kv = map.find(central_or_shift);
+      if(kv != map.end())
+      {
+        return kv->second;
+      }
+    }
+    return kJetMET_central;
+  }
+  return kJetMET_central_nonNominal;
 }
 
 int
 getMET_option(const std::string & central_or_shift,
               bool isMC)
 {
-  int central_or_shift_int = isMC ? getJet_option(central_or_shift, isMC) : kJetMET_central_nonNominal;
-  if     (central_or_shift == "CMS_ttHl_UnclusteredEnUp"  ) central_or_shift_int = kJetMET_UnclusteredEnUp;
-  else if(central_or_shift == "CMS_ttHl_UnclusteredEnDown") central_or_shift_int = kJetMET_UnclusteredEnDown;
-  return central_or_shift_int;
-}
-
-METSyst
-getMETsyst_option(const std::string & central_or_shift)
-{
-  METSyst central_or_shift_int = METSyst::central;
-  if     (central_or_shift == "MET_RespUp")    central_or_shift_int = METSyst::respUp;
-  else if(central_or_shift == "MET_RespDown")  central_or_shift_int = METSyst::respDown;
-  else if(central_or_shift == "MET_ResolUp")   central_or_shift_int = METSyst::resolUp;
-  else if(central_or_shift == "MET_ResolDown") central_or_shift_int = METSyst::resolDown;
-  return central_or_shift_int;
+  if(isMC)
+  {
+    const auto kv = metSysMap.find(central_or_shift);
+    if(kv != metSysMap.end())
+    {
+      return kv->second;
+    }
+  }
+  return getJet_option(central_or_shift, isMC);
 }
 
 int
 getFatJet_option(const std::string & central_or_shift,
                  bool isMC)
 {
-  int central_or_shift_int = isMC ? kFatJet_central : kFatJet_central_nonNominal;
-  if     (central_or_shift == "CMS_ttHl_JESUp"                    ) central_or_shift_int = kFatJet_jesUp;
-  else if(central_or_shift == "CMS_ttHl_JESDown"                  ) central_or_shift_int = kFatJet_jesDown;
-  else if(central_or_shift == "CMS_ttHl_JESAbsoluteUp"            ) central_or_shift_int = kFatJet_jesAbsoluteUp;
-  else if(central_or_shift == "CMS_ttHl_JESAbsoluteDown"          ) central_or_shift_int = kFatJet_jesAbsoluteDown;
-  else if(central_or_shift == "CMS_ttHl_JESAbsolute_EraUp"        ) central_or_shift_int = kFatJet_jesAbsolute_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESAbsolute_EraDown"      ) central_or_shift_int = kFatJet_jesAbsolute_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1Up"               ) central_or_shift_int = kFatJet_jesBBEC1Up;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1Down"             ) central_or_shift_int = kFatJet_jesBBEC1Down;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1_EraUp"           ) central_or_shift_int = kFatJet_jesBBEC1_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESBBEC1_EraDown"         ) central_or_shift_int = kFatJet_jesBBEC1_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESEC2Up"                 ) central_or_shift_int = kFatJet_jesEC2Up;
-  else if(central_or_shift == "CMS_ttHl_JESEC2Down"               ) central_or_shift_int = kFatJet_jesEC2Down;
-  else if(central_or_shift == "CMS_ttHl_JESEC2_EraUp"             ) central_or_shift_int = kFatJet_jesEC2_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESEC2_EraDown"           ) central_or_shift_int = kFatJet_jesEC2_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESFlavorQCDUp"           ) central_or_shift_int = kFatJet_jesFlavorQCDUp;
-  else if(central_or_shift == "CMS_ttHl_JESFlavorQCDDown"         ) central_or_shift_int = kFatJet_jesFlavorQCDDown;
-  else if(central_or_shift == "CMS_ttHl_JESHFUp"                  ) central_or_shift_int = kFatJet_jesHFUp;
-  else if(central_or_shift == "CMS_ttHl_JESHFDown"                ) central_or_shift_int = kFatJet_jesHFDown;
-  else if(central_or_shift == "CMS_ttHl_JESHF_EraUp"              ) central_or_shift_int = kFatJet_jesHF_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESHF_EraDown"            ) central_or_shift_int = kFatJet_jesHF_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeBalUp"         ) central_or_shift_int = kFatJet_jesRelativeBalUp;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeBalDown"       ) central_or_shift_int = kFatJet_jesRelativeBalDown;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeSample_EraUp"  ) central_or_shift_int = kFatJet_jesRelativeSample_EraUp;
-  else if(central_or_shift == "CMS_ttHl_JESRelativeSample_EraDown") central_or_shift_int = kFatJet_jesRelativeSample_EraDown;
-  else if(central_or_shift == "CMS_ttHl_JESHEMUp"                 ) central_or_shift_int = kFatJet_jesHEMUp;
-  else if(central_or_shift == "CMS_ttHl_JESHEMDown"               ) central_or_shift_int = kFatJet_jesHEMDown;
-  else if(central_or_shift == "CMS_ttHl_AK8JERUp"                 ) central_or_shift_int = kFatJet_jerUp;
-  else if(central_or_shift == "CMS_ttHl_AK8JERDown"               ) central_or_shift_int = kFatJet_jerDown;
-//  else if(central_or_shift == "CMS_ttHl_AK8JERBarrelUp"           ) central_or_shift_int = kFatJet_jerBarrelUp;
-//  else if(central_or_shift == "CMS_ttHl_AK8JERBarrelDown"         ) central_or_shift_int = kFatJet_jerBarrelDown;
-//  else if(central_or_shift == "CMS_ttHl_AK8JEREndcap1Up"          ) central_or_shift_int = kFatJet_jerEndcap1Up;
-//  else if(central_or_shift == "CMS_ttHl_AK8JEREndcap1Down"        ) central_or_shift_int = kFatJet_jerEndcap1Down;
-//  else if(central_or_shift == "CMS_ttHl_AK8JEREndcap2LowPtUp"     ) central_or_shift_int = kFatJet_jerEndcap2LowPtUp;
-//  else if(central_or_shift == "CMS_ttHl_AK8JEREndcap2LowPtDown"   ) central_or_shift_int = kFatJet_jerEndcap2LowPtDown;
-//  else if(central_or_shift == "CMS_ttHl_AK8JEREndcap2HighPtUp"    ) central_or_shift_int = kFatJet_jerEndcap2HighPtUp;
-//  else if(central_or_shift == "CMS_ttHl_AK8JEREndcap2HighPtDown"  ) central_or_shift_int = kFatJet_jerEndcap2HighPtDown;
-//  else if(central_or_shift == "CMS_ttHl_AK8JERForwardLowPtUp"     ) central_or_shift_int = kFatJet_jerForwardLowPtUp;
-//  else if(central_or_shift == "CMS_ttHl_AK8JERForwardLowPtDown"   ) central_or_shift_int = kFatJet_jerForwardLowPtDown;
-//  else if(central_or_shift == "CMS_ttHl_AK8JERForwardHighPtUp"    ) central_or_shift_int = kFatJet_jerForwardHighPtUp;
-//  else if(central_or_shift == "CMS_ttHl_AK8JERForwardHighPtDown"  ) central_or_shift_int = kFatJet_jerForwardHighPtDown;
-  else if(central_or_shift == "CMS_ttHl_AK8JMSUp"                 ) central_or_shift_int = kFatJet_jmsUp;
-  else if(central_or_shift == "CMS_ttHl_AK8JMSDown"               ) central_or_shift_int = kFatJet_jmsDown;
-  else if(central_or_shift == "CMS_ttHl_AK8JMRUp"                 ) central_or_shift_int = kFatJet_jmrUp;
-  else if(central_or_shift == "CMS_ttHl_AK8JMRDown"               ) central_or_shift_int = kFatJet_jmrDown;
-  return central_or_shift_int;
+  if(isMC)
+  {
+    for(const auto & map: { jesAK8SysMap, jesSplitAK8SysMap, jerAK8SysMap, jerSplitAK8SysMap, jmsAK8SysMap, jmrAK8SysMap })
+    {
+      const auto kv = map.find(central_or_shift);
+      if(kv != map.end())
+      {
+        return kv->second;
+      }
+    }
+    return kFatJet_central;
+  }
+  return kFatJet_central_nonNominal;
 }
 
 int
 getHadTauPt_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kHadTauPt_central;
-  if     (central_or_shift == "CMS_ttHl_tauESUp"  ) central_or_shift_int = kHadTauPt_shiftUp;
-  else if(central_or_shift == "CMS_ttHl_tauESDown") central_or_shift_int = kHadTauPt_shiftDown;
-  return central_or_shift_int;
+  const auto kv = hadTauESSysMap.find(central_or_shift);
+  if(kv != hadTauESSysMap.end())
+  {
+    return kv->second;
+  }
+  return kHadTauPt_central;
 }
 
 int
 getJetToTauFR_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kFRjt_central;
-  if     (central_or_shift == "CMS_ttHl_FRjt_normUp"   ) central_or_shift_int = kFRjt_normUp;
-  else if(central_or_shift == "CMS_ttHl_FRjt_normDown" ) central_or_shift_int = kFRjt_normDown;
-  else if(central_or_shift == "CMS_ttHl_FRjt_shapeUp"  ) central_or_shift_int = kFRjt_shapeUp;
-  else if(central_or_shift == "CMS_ttHl_FRjt_shapeDown") central_or_shift_int = kFRjt_shapeDown;
-  return central_or_shift_int;
+  const auto kv = jetToTauFRSysMap.find(central_or_shift);
+  if(kv != jetToTauFRSysMap.end())
+  {
+    return kv->second;
+  }
+  return kFRjt_central;
 }
 
 FRet
 getEToTauFR_option(const std::string & central_or_shift)
 {
-  FRet central_or_shift_int = FRet::central;
-  if     (central_or_shift == "CMS_ttHl_FRet_shiftUp"  ) central_or_shift_int = FRet::shiftUp;
-  else if(central_or_shift == "CMS_ttHl_FRet_shiftDown") central_or_shift_int = FRet::shiftDown;
-  return central_or_shift_int;
+  const auto kv = eToTauFRSysMap.find(central_or_shift);
+  if(kv != eToTauFRSysMap.end())
+  {
+    return kv->second;
+  }
+  return FRet::central;
 }
 
 FRmt
 getMuToTauFR_option(const std::string & central_or_shift)
 {
-  FRmt central_or_shift_int = FRmt::central;
-  if     (central_or_shift == "CMS_ttHl_FRmt_shiftUp"  ) central_or_shift_int = FRmt::shiftUp;
-  else if(central_or_shift == "CMS_ttHl_FRmt_shiftDown") central_or_shift_int = FRmt::shiftDown;
-  return central_or_shift_int;
+  const auto kv = mToTauFRSysMap.find(central_or_shift);
+  if(kv != mToTauFRSysMap.end())
+  {
+    return kv->second;
+  }
+  return FRmt::central;
 }
 
 LeptonIDSFsys
 getLeptonIDSFsys_option(const std::string & central_or_shift)
 {
-  LeptonIDSFsys central_or_shift_int = LeptonIDSFsys::central;
-  if     (central_or_shift == "CMS_ttHl_lepEff_eltightUp"        ) central_or_shift_int = LeptonIDSFsys::elTightUp;
-  else if(central_or_shift == "CMS_ttHl_lepEff_eltightDown"      ) central_or_shift_int = LeptonIDSFsys::elTightDown;
-  else if(central_or_shift == "CMS_ttHl_lepEff_mutightUp"        ) central_or_shift_int = LeptonIDSFsys::muTightUp;
-  else if(central_or_shift == "CMS_ttHl_lepEff_mutightDown"      ) central_or_shift_int = LeptonIDSFsys::muTightDown;
-  else if(central_or_shift == "CMS_ttHl_lepEff_ellooseUp"        ) central_or_shift_int = LeptonIDSFsys::elLooseUp;
-  else if(central_or_shift == "CMS_ttHl_lepEff_ellooseDown"      ) central_or_shift_int = LeptonIDSFsys::elLooseDown;
-  else if(central_or_shift == "CMS_ttHl_lepEff_mulooseUp"        ) central_or_shift_int = LeptonIDSFsys::muLooseUp;
-  else if(central_or_shift == "CMS_ttHl_lepEff_mulooseDown"      ) central_or_shift_int = LeptonIDSFsys::muLooseDown;
-  else if(central_or_shift == "CMS_ttHl_lepEff_eltightRecompUp"  ) central_or_shift_int = LeptonIDSFsys::elTightRecompUp;
-  else if(central_or_shift == "CMS_ttHl_lepEff_eltightRecompDown") central_or_shift_int = LeptonIDSFsys::elTightRecompDown;
-  else if(central_or_shift == "CMS_ttHl_lepEff_mutightRecompUp"  ) central_or_shift_int = LeptonIDSFsys::muTightRecompUp;
-  else if(central_or_shift == "CMS_ttHl_lepEff_mutightRecompDown") central_or_shift_int = LeptonIDSFsys::muTightRecompDown;
-  return central_or_shift_int;
+  const auto kv = leptonIDSFSysMap.find(central_or_shift);
+  if(kv != leptonIDSFSysMap.end())
+  {
+    return kv->second;
+  }
+  return LeptonIDSFsys::central;
 }
 
 TauIDSFsys
 getTauIDSFsys_option(const std::string & central_or_shift)
 {
-  TauIDSFsys central_or_shift_int = TauIDSFsys::central;
-  if     (central_or_shift == "CMS_ttHl_tauIDSFUp"  ) central_or_shift_int = TauIDSFsys::shiftUp;
-  else if(central_or_shift == "CMS_ttHl_tauIDSFDown") central_or_shift_int = TauIDSFsys::shiftDown;
-  return central_or_shift_int;
+  const auto kv = tauIDSFSysMap.find(central_or_shift);
+  if(kv != tauIDSFSysMap.end())
+  {
+    return kv->second;
+  }
+  return TauIDSFsys::central;
 }
 
 TriggerSFsys
@@ -320,214 +531,192 @@ getTriggerSF_option(const std::string & central_or_shift,
   const bool isLeptonCompatible = choice == TriggerSFsysChoice::any || choice == TriggerSFsysChoice::leptonOnly;
   const bool isHadTauCompatible = choice == TriggerSFsysChoice::any || choice == TriggerSFsysChoice::hadTauOnly;
   const bool isAnyCompatible = isLeptonCompatible || isHadTauCompatible;
-  TriggerSFsys central_or_shift_int = TriggerSFsys::central;
-  if     (central_or_shift == "CMS_ttHl_triggerUp"            && isAnyCompatible   ) central_or_shift_int = TriggerSFsys::shiftUp;
-  else if(central_or_shift == "CMS_ttHl_triggerDown"          && isAnyCompatible   ) central_or_shift_int = TriggerSFsys::shiftDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssUp"       && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssDown"     && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssEEUp"     && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssEEUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssEEDown"   && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssEEDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssEMuUp"    && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssEMuUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssEMuDown"  && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssEMuDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssMuMuUp"   && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssMuMuUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_2lssMuMuDown" && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_2lssMuMuDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_3lUp"         && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_3lUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_3lDown"       && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_3lDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_1l2tauUp"     && isHadTauCompatible) central_or_shift_int = TriggerSFsys::shift_1l2tauUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_1l2tauDown"   && isHadTauCompatible) central_or_shift_int = TriggerSFsys::shift_1l2tauDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_1l1tauUp"     && isHadTauCompatible) central_or_shift_int = TriggerSFsys::shift_1l1tauUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_1l1tauDown"   && isHadTauCompatible) central_or_shift_int = TriggerSFsys::shift_1l1tauDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_0l2tauUp"     && isHadTauCompatible) central_or_shift_int = TriggerSFsys::shift_0l2tauUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_0l2tauDown"   && isHadTauCompatible) central_or_shift_int = TriggerSFsys::shift_0l2tauDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_1lEUp"        && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_1lEUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_1lEDown"      && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_1lEDown;
-  else if(central_or_shift == "CMS_ttHl_trigger_1lMuUp"       && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_1lMuUp;
-  else if(central_or_shift == "CMS_ttHl_trigger_1lMuDown"     && isLeptonCompatible) central_or_shift_int = TriggerSFsys::shift_1lMuDown;
-  return central_or_shift_int;
+
+  const auto kv = triggerSFSysMap.find(central_or_shift);
+  if(kv != triggerSFSysMap.end())
+  {
+    const TriggerSFsys central_or_shift_int = kv->second;
+    if(((central_or_shift_int == TriggerSFsys::shiftUp || central_or_shift_int == TriggerSFsys::shiftDown) && isAnyCompatible) ||
+       (central_or_shift.find("tau") == std::string::npos && isLeptonCompatible) ||
+       (central_or_shift.find("tau") != std::string::npos && isHadTauCompatible))
+    {
+      return central_or_shift_int;
+    }
+  }
+  return TriggerSFsys::central;
 }
 
 int
 getLHEscale_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kLHE_scale_central;
-  if(boost::starts_with(central_or_shift, "CMS_ttHl_thu_shape"))
+  const auto kv = lheScaleSysMap.find(central_or_shift);
+  if(kv != lheScaleSysMap.end())
   {
-    if     (boost::ends_with(central_or_shift, "x1y1Up")  ) central_or_shift_int = kLHE_scale_xyUp;
-    else if(boost::ends_with(central_or_shift, "x1y1Down")) central_or_shift_int = kLHE_scale_xyDown;
-    else if(boost::ends_with(central_or_shift, "x1Up")    ) central_or_shift_int = kLHE_scale_xUp;
-    else if(boost::ends_with(central_or_shift, "x1Down")  ) central_or_shift_int = kLHE_scale_xDown;
-    else if(boost::ends_with(central_or_shift, "y1Up")    ) central_or_shift_int = kLHE_scale_yUp;
-    else if(boost::ends_with(central_or_shift, "y1Down")  ) central_or_shift_int = kLHE_scale_yDown;
-    else throw cmsException(__func__, __LINE__)
-           << "Invalid option to LHE systematics: " << central_or_shift;
+    return kv->second;
   }
-  return central_or_shift_int;
+  return kLHE_scale_central;
 }
 
 int
 getPartonShower_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kPartonShower_central;
-  if(boost::starts_with(central_or_shift, "CMS_ttHl_PS_"))
+  const auto kv = psSysMap.find(central_or_shift);
+  if(kv != psSysMap.end())
   {
-    if     (boost::ends_with(central_or_shift, "ISRDown")) central_or_shift_int = kPartonShower_ISRDown;
-    else if(boost::ends_with(central_or_shift, "ISRUp")  ) central_or_shift_int = kPartonShower_ISRUp;
-    else if(boost::ends_with(central_or_shift, "FSRDown")) central_or_shift_int = kPartonShower_FSRDown;
-    else if(boost::ends_with(central_or_shift, "FSRUp")  ) central_or_shift_int = kPartonShower_FSRUp;
-    else if(boost::ends_with(central_or_shift, "Down")   ) central_or_shift_int = kPartonShower_Down;
-    else if(boost::ends_with(central_or_shift, "Up")     ) central_or_shift_int = kPartonShower_Up;
-    else throw cmsException(__func__, __LINE__)
-           << "Invalid option to LHE systematics: " << central_or_shift;
+    return kv->second;
   }
-  return central_or_shift_int;
+  return kPartonShower_central;
 }
 
 ElectronPtSys
 getElectronPt_option(const std::string & central_or_shift,
                      bool isMC)
 {
-  ElectronPtSys central_or_shift_int = ElectronPtSys::central;
-  if     (central_or_shift == "CMS_ttHl_electronESBarrelUp"  ) central_or_shift_int = ElectronPtSys::scaleUp_barrel;
-  else if(central_or_shift == "CMS_ttHl_electronESBarrelDown") central_or_shift_int = ElectronPtSys::scaleDown_barrel;
-  else if(central_or_shift == "CMS_ttHl_electronESEndcapUp"  ) central_or_shift_int = ElectronPtSys::scaleUp_endcap;
-  else if(central_or_shift == "CMS_ttHl_electronESEndcapDown") central_or_shift_int = ElectronPtSys::scaleDown_endcap;
-  else if(central_or_shift == "CMS_ttHl_electronERUp"        ) central_or_shift_int = ElectronPtSys::resUp;
-  else if(central_or_shift == "CMS_ttHl_electronERDown"      ) central_or_shift_int = ElectronPtSys::resDown;
-  assert((central_or_shift_int == ElectronPtSys::central && ! isMC) || isMC);
-  return central_or_shift_int;
+  if(isMC)
+  {
+    const auto kv = ePtSysMap.find(central_or_shift);
+    if(kv != ePtSysMap.end())
+    {
+      return kv->second;
+    }
+  }
+  return ElectronPtSys::central;
 }
 
 MuonPtSys
 getMuon_option(const std::string & central_or_shift,
                bool isMC)
 {
-  MuonPtSys central_or_shift_int = MuonPtSys::central;
-  if     (central_or_shift == "CMS_ttHl_muonERUp"         ) central_or_shift_int = MuonPtSys::ERUp;
-  else if(central_or_shift == "CMS_ttHl_muonERDown"       ) central_or_shift_int = MuonPtSys::ERDown;
-  else if(central_or_shift == "CMS_ttHl_muonESBarrel1Up"  ) central_or_shift_int = MuonPtSys::ESBarrel1Up;
-  else if(central_or_shift == "CMS_ttHl_muonESBarrel1Down") central_or_shift_int = MuonPtSys::ESBarrel1Down;
-  else if(central_or_shift == "CMS_ttHl_muonESBarrel2Up"  ) central_or_shift_int = MuonPtSys::ESBarrel2Up;
-  else if(central_or_shift == "CMS_ttHl_muonESBarrel2Down") central_or_shift_int = MuonPtSys::ESBarrel2Down;
-  else if(central_or_shift == "CMS_ttHl_muonESEndcap1Up"  ) central_or_shift_int = MuonPtSys::ESEndcap1Up;
-  else if(central_or_shift == "CMS_ttHl_muonESEndcap1Down") central_or_shift_int = MuonPtSys::ESEndcap1Down;
-  else if(central_or_shift == "CMS_ttHl_muonESEndcap2Up"  ) central_or_shift_int = MuonPtSys::ESEndcap2Up;
-  else if(central_or_shift == "CMS_ttHl_muonESEndcap2Down") central_or_shift_int = MuonPtSys::ESEndcap2Down;
-  assert((central_or_shift_int == MuonPtSys::central && ! isMC) || isMC);
-  return central_or_shift_int;
+  if(isMC)
+  {
+    const auto kv = mPtSysMap.find(central_or_shift);
+    if(kv != mPtSysMap.end())
+    {
+      return kv->second;
+    }
+  }
+  return MuonPtSys::central;
 }
 
 int
 getJetToLeptonFR_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kFRl_central;
-  if     (central_or_shift == "CMS_ttHl_FRe_shape_ptUp"          ) central_or_shift_int = kFRe_shape_ptUp;
-  else if(central_or_shift == "CMS_ttHl_FRe_shape_ptDown"        ) central_or_shift_int = kFRe_shape_ptDown;
-  else if(central_or_shift == "CMS_ttHl_FRe_shape_normUp"        ) central_or_shift_int = kFRe_shape_normUp;
-  else if(central_or_shift == "CMS_ttHl_FRe_shape_normDown"      ) central_or_shift_int = kFRe_shape_normDown;
-  else if(central_or_shift == "CMS_ttHl_FRe_shape_eta_barrelUp"  ) central_or_shift_int = kFRe_shape_eta_barrelUp;
-  else if(central_or_shift == "CMS_ttHl_FRe_shape_eta_barrelDown") central_or_shift_int = kFRe_shape_eta_barrelDown;
-  else if(central_or_shift == "CMS_ttHl_FRe_shape_corrUp"        ) central_or_shift_int = kFRe_shape_corrUp;
-  else if(central_or_shift == "CMS_ttHl_FRe_shape_corrDown"      ) central_or_shift_int = kFRe_shape_corrDown;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_ptUp"          ) central_or_shift_int = kFRm_shape_ptUp;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_ptDown"        ) central_or_shift_int = kFRm_shape_ptDown;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_normUp"        ) central_or_shift_int = kFRm_shape_normUp;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_normDown"      ) central_or_shift_int = kFRm_shape_normDown;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_eta_barrelUp"  ) central_or_shift_int = kFRm_shape_eta_barrelUp;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_eta_barrelDown") central_or_shift_int = kFRm_shape_eta_barrelDown;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_corrUp"        ) central_or_shift_int = kFRm_shape_corrUp;
-  else if(central_or_shift == "CMS_ttHl_FRm_shape_corrDown"      ) central_or_shift_int = kFRm_shape_corrDown;
-  return central_or_shift_int;
+  const auto kv = jetToLeptonFRSysMap.find(central_or_shift);
+  if(kv != jetToLeptonFRSysMap.end())
+  {
+    return kv->second;
+  }
+  return kFRl_central;
 }
 
 PUsys
 getPUsys_option(const std::string & central_or_shift)
 {
-  PUsys central_or_shift_int = PUsys::central;
-  if     (central_or_shift == "CMS_ttHl_pileupUp"  ) central_or_shift_int = PUsys::up;
-  else if(central_or_shift == "CMS_ttHl_pileupDown") central_or_shift_int = PUsys::down;
-  return central_or_shift_int;
+  const auto kv = puSysMap.find(central_or_shift);
+  if(kv != puSysMap.end())
+  {
+    return kv->second;
+  }
+  return PUsys::central;
 }
-
 
 L1PreFiringWeightSys
 getL1PreFiringWeightSys_option(const std::string & central_or_shift)
 {
-  L1PreFiringWeightSys central_or_shift_int = L1PreFiringWeightSys::nominal;
-  if     (central_or_shift == "CMS_ttHl_l1PreFireUp")   central_or_shift_int = L1PreFiringWeightSys::up;
-  else if(central_or_shift == "CMS_ttHl_l1PreFireDown") central_or_shift_int = L1PreFiringWeightSys::down;
-  return central_or_shift_int;
+  const auto kv = l1prefireSysMap.find(central_or_shift);
+  if(kv != l1prefireSysMap.end())
+  {
+    return kv->second;
+  }
+  return L1PreFiringWeightSys::nominal;
 }
 
 int
 getDYMCReweighting_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kDYMCReweighting_central;
-  if     (central_or_shift == "CMS_ttHl_DYMCReweightingUp"  ) central_or_shift_int = kDYMCReweighting_shiftUp;
-  else if(central_or_shift == "CMS_ttHl_DYMCReweightingDown") central_or_shift_int = kDYMCReweighting_shiftDown;
-  return central_or_shift_int;
+  const auto kv = dyMCRwgtSysMap.find(central_or_shift);
+  if(kv != dyMCRwgtSysMap.end())
+  {
+    return kv->second;
+  }
+  return kDYMCReweighting_central;
 }
 
 int
 getDYMCNormScaleFactors_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kDYMCNormScaleFactors_central;
-  if     (central_or_shift == "CMS_ttHl_DYMCNormScaleFactorsUp"  ) central_or_shift_int = kDYMCNormScaleFactors_shiftUp;
-  else if(central_or_shift == "CMS_ttHl_DYMCNormScaleFactorsDown") central_or_shift_int = kDYMCNormScaleFactors_shiftDown;
-  return central_or_shift_int;
+  const auto kv = dyMCNormSysMap.find(central_or_shift);
+  if(kv != dyMCNormSysMap.end())
+  {
+    return kv->second;
+  }
+  return kDYMCNormScaleFactors_central;
 }
 
 int
 getTopPtReweighting_option(const std::string & central_or_shift)
 {
-  int central_or_shift_int = kTopPtReweighting_central;
-  if     (central_or_shift == "CMS_ttHl_topPtReweightingUp"  ) central_or_shift_int = kTopPtReweighting_shiftUp;
-  else if(central_or_shift == "CMS_ttHl_topPtReweightingDown") central_or_shift_int = kTopPtReweighting_shiftDown;
-  return central_or_shift_int;
-}
-
-MEMsys
-getMEMsys_option(const std::string & central_or_shift)
-{
-  MEMsys central_or_shift_int = MEMsys::nominal;
-  if(boost::starts_with(central_or_shift, "CMS_ttHl_MEM"))
+  const auto kv = topPtRwgtSysMap.find(central_or_shift);
+  if(kv != topPtRwgtSysMap.end())
   {
-    if     (boost::ends_with(central_or_shift, "Up")  ) central_or_shift_int = MEMsys::up;
-    else if(boost::ends_with(central_or_shift, "Down")) central_or_shift_int = MEMsys::down;
+    return kv->second;
   }
-  return central_or_shift_int;
+  return kTopPtReweighting_central;
 }
 
 EWKJetSys
 getEWKJetSys_option(const std::string & central_or_shift)
 {
-  EWKJetSys central_or_shift_int = EWKJetSys::central;
-  if     (central_or_shift == "CMS_ttHl_EWK_jetUp"  ) central_or_shift_int = EWKJetSys::up;
-  else if(central_or_shift == "CMS_ttHl_EWK_jetDown") central_or_shift_int = EWKJetSys::down;
-  return central_or_shift_int;
+  const auto kv = ewkJetSysMap.find(central_or_shift);
+  if(kv != ewkJetSysMap.end())
+  {
+    return kv->second;
+  }
+  return EWKJetSys::central;
 }
 
 EWKBJetSys
 getEWKBJetSys_option(const std::string & central_or_shift)
 {
-  EWKBJetSys central_or_shift_int = EWKBJetSys::central;
-  if     (central_or_shift == "CMS_ttHl_EWK_btagUp"  ) central_or_shift_int = EWKBJetSys::up;
-  else if(central_or_shift == "CMS_ttHl_EWK_btagDown") central_or_shift_int = EWKBJetSys::down;
-  return central_or_shift_int;
+  const auto kv = ewkBJetSysMap.find(central_or_shift);
+  if(kv != ewkBJetSysMap.end())
+  {
+    return kv->second;
+  }
+  return EWKBJetSys::central;
 }
 
 PDFSys
 getPDFSys_option(const std::string & central_or_shift)
 {
-  PDFSys central_or_shift_int = PDFSys::central;
-  if(boost::starts_with(central_or_shift, "CMS_ttHl_PDF_shape") &&
-     ! isPDFsys_member(central_or_shift))
+  const auto kv = pdfSysMap.find(central_or_shift);
+  if(kv != pdfSysMap.end())
   {
-    if     (boost::ends_with(central_or_shift, "Up")  ) central_or_shift_int = PDFSys::up;
-    else if(boost::ends_with(central_or_shift, "Down")) central_or_shift_int = PDFSys::down;
-    else throw cmsException(__func__, __LINE__)
-           << "Invalid option to PDF systematics: " << central_or_shift;
+    return kv->second;
   }
-  return central_or_shift_int;
+  return PDFSys::central;
+}
+
+LHEVptSys
+getLHEVptSys_option(const std::string & central_or_shift)
+{
+  const auto kv = lheVptSysMap.find(central_or_shift);
+  if(kv != lheVptSysMap.end())
+  {
+    return kv->second;
+  }
+  return LHEVptSys::central;
+}
+
+SubjetBtagSys
+getSubjetBtagSys_option(const std::string & central_or_shift)
+{
+  const auto kv = subjetBtagSysMap.find(central_or_shift);
+  if(kv != subjetBtagSysMap.end())
+  {
+    return kv->second;
+  }
+  return SubjetBtagSys::central;
 }
 
 bool
@@ -537,24 +726,6 @@ isPDFsys_member(const std::string & central_or_shift)
     boost::starts_with(central_or_shift, "CMS_ttHl_PDF_shape") &&
     central_or_shift.find("Member") != std::string::npos
   ;
-}
-
-LHEVptSys
-getLHEVptSys_option(const std::string & central_or_shift)
-{
-  LHEVptSys central_or_shift_int = LHEVptSys::central;
-  if     (central_or_shift == "Vpt_nloUp"  ) central_or_shift_int = LHEVptSys::up;
-  else if(central_or_shift == "Vpt_nloDown") central_or_shift_int = LHEVptSys::down;
-  return central_or_shift_int;
-}
-
-SubjetBtagSys
-getSubjetBtagSys_option(const std::string & central_or_shift)
-{
-  SubjetBtagSys central_or_shift_int = SubjetBtagSys::central;
-  if     (central_or_shift == "CMS_btag_subjetUp"  ) central_or_shift_int = SubjetBtagSys::up;
-  else if(central_or_shift == "CMS_btag_subjetDown") central_or_shift_int = SubjetBtagSys::down;
-  return central_or_shift_int;
 }
 
 void
@@ -568,7 +739,6 @@ checkOptionValidity(const std::string & central_or_shift,
       throw cmsException(__func__, __LINE__) << "Non-empty or non-central systematics option passed to data";
     }
     if(isMC && ! (boost::ends_with(central_or_shift, "Up") || boost::ends_with(central_or_shift, "Down")) &&
-       ! isTTbarSys(central_or_shift) &&
        ! isPDFsys_member(central_or_shift))
     {
       throw cmsException(__func__, __LINE__) << "Non-central MC systematics option not ending with Up or Down: " << central_or_shift;
@@ -590,7 +760,7 @@ getBranchName_bTagWeight(Btag btag,
     case Btag::kDeepCSV: discrName = "deepcsv"; break;
     case Btag::kCSVv2:   discrName = "csvv2";   break;
   }
-  const std::string era_str = ::era_str(era);
+  const std::string era_str = get_era(era);
   branchNames_bTagWeight[kBtag_central] = Form("%s_btagSF_%s_shape", default_collectionName.data(), discrName.data());
   branchNames_bTagWeight[kBtag_hfUp]                      = branchNames_bTagWeight[kBtag_central] + "_up_hf";
   branchNames_bTagWeight[kBtag_hfDown]                    = branchNames_bTagWeight[kBtag_central] + "_down_hf";
@@ -645,7 +815,7 @@ getBranchName_jetMET(const std::string & default_branchName,
   static std::map<int, std::string> branchNames_sys;
   const bool isJet = boost::starts_with(default_branchName, "Jet");
   const bool isMET = default_branchName == "MET";
-  const std::string era_str = ::era_str(era);
+  const std::string era_str = get_era(era);
   if(! isJet && ! isMET)
   {
     throw cmsException(__func__, __LINE__) << "Invalid branch name provided: " << default_branchName;
@@ -716,7 +886,7 @@ getBranchName_fatJet(const std::string & default_branchName,
                      int central_or_shift)
 {
   assert(boost::starts_with(default_branchName, "FatJet"));
-  const std::string era_str = ::era_str(era);
+  const std::string era_str = get_era(era);
   static std::map<int, std::string> branchNames_sys;
   branchNames_sys[kFatJet_central_nonNominal] = Form(
     "%s_%s", default_branchName.data(), attribute_name.data()
@@ -772,16 +942,4 @@ getBranchName_fatJet(const std::string & default_branchName,
   assert(isValidJESsource(era, central_or_shift, false));
   assert(isValidFatJetAttribute(central_or_shift, attribute_name));
   return branchNames_sys.at(central_or_shift);
-}
-
-std::string
-getBranchName_pileup(PUsys puSys_option)
-{
-  switch(puSys_option)
-  {
-    case PUsys::central: return "puWeight";
-    case PUsys::up:      return "puWeightUp";
-    case PUsys::down:    return "puWeightDown";
-    default: throw cmsException(__func__, __LINE__) << "Invalid option = " << static_cast<int>(puSys_option);
-  }
 }

@@ -4,6 +4,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_jetMET(), kJetMET_*
 #include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"             // METXYCorr_Met_MetPhi()
 
@@ -187,8 +188,11 @@ RecoMEtReader::read() const
 std::vector<std::string>
 RecoMEtReader::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  std::vector<std::string> systematic_shifts;
-  merge_systematic_shifts(systematic_shifts, RecoJetReaderAK4::get_supported_systematics(cfg));
-  merge_systematic_shifts(systematic_shifts, { "CMS_ttHl_UnclusteredEnUp", "CMS_ttHl_UnclusteredEnDown" });
-  return systematic_shifts;
+  static std::vector<std::string> supported_systematics;
+  if(supported_systematics.empty())
+  {
+    merge_systematic_shifts(supported_systematics, RecoJetReaderAK4::get_supported_systematics(cfg));
+    merge_systematic_shifts(supported_systematics, map_keys(metSysMap));
+  }
+  return supported_systematics;
 }

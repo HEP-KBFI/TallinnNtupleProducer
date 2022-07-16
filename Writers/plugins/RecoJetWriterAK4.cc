@@ -30,8 +30,8 @@ RecoJetWriterAK4::RecoJetWriterAK4(const edm::ParameterSet & cfg)
   assert(max_nJets_ >= 1);
   merge_systematic_shifts(supported_systematics_, RecoJetWriterAK4::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : supported_systematics_ )
-  {    
+  for ( const std::string & central_or_shift : supported_systematics_ )
+  {
     central_or_shiftEntry it;
     it.nJets_ = 0;
     it.pt_ = new Float_t[max_nJets_];
@@ -86,7 +86,7 @@ void
 RecoJetWriterAK4::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  for ( auto central_or_shift : supported_systematics_ )
+  for ( const std::string & central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());

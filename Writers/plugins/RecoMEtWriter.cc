@@ -22,7 +22,7 @@ RecoMEtWriter::RecoMEtWriter(const edm::ParameterSet & cfg)
 {
   merge_systematic_shifts(supported_systematics_, RecoMEtWriter::get_supported_systematics(cfg));
   merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : supported_systematics_ )
+  for ( const std::string & central_or_shift : supported_systematics_ )
   {    
     central_or_shiftEntry it;
     it.metPt_ = 0.;
@@ -61,7 +61,7 @@ void
 RecoMEtWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  for ( auto central_or_shift : supported_systematics_ )
+  for ( const std::string & central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());
