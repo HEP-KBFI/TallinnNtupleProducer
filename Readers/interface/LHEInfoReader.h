@@ -30,6 +30,9 @@ class LHEInfoReader : public ReaderBase
    */
   void
   read() const;
+  
+  bool
+  has_LHE_weights() const;
 
   void
   set_pdfNorm(const edm::ParameterSet & cfg);

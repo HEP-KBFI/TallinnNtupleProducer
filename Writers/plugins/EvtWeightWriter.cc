@@ -2,7 +2,9 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts.()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // *SysMap
 
 #include "TString.h"                                                              // Form()
 #include "TTree.h"                                                                // TTree
@@ -14,8 +16,7 @@ EvtWeightWriter::EvtWeightWriter(const edm::ParameterSet & cfg)
   : WriterBase(cfg)
 {
   merge_systematic_shifts(supported_systematics_, EvtWeightWriter::get_supported_systematics(cfg));
-  merge_systematic_shifts(supported_systematics_, { "central" }); // CV: add central value
-  for ( auto central_or_shift : supported_systematics_ )
+  for ( const std::string & central_or_shift : supported_systematics_ )
   {
     central_or_shiftEntry it;
     it.evtWeight_ = 0.;
@@ -41,7 +42,7 @@ void
 EvtWeightWriter::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  for ( auto central_or_shift : supported_systematics_ )
+  for ( const std::string & central_or_shift : supported_systematics_ )
   {
     auto it = central_or_shiftEntries_.find(central_or_shift);
     assert(it != central_or_shiftEntries_.end());
@@ -76,7 +77,21 @@ EvtWeightWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWeig
 std::vector<std::string>
 EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
 {
-  return std::vector<std::string>(); // CV: to be implemented !!
+  // TODO use AnalysisConfig instead of ParameterSet?
+  static std::vector<std::string> supported_systematics;
+  if(supported_systematics.empty())
+  {
+    merge_systematic_shifts(supported_systematics, { "central" }); // CV: add central value
+    if(cfg.getParameter<bool>("apply_topPtReweighting"))
+    {
+      merge_systematic_shifts(supported_systematics, map_keys(topPtRwgtSysMap));
+    }
+    if(cfg.getParameter<bool>("has_LHE_weights"))
+    {
+      merge_systematic_shifts(supported_systematics, map_keys(lheScaleSysMap));
+    }
+  }
+  return supported_systematics;
 }
 
 DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtWeightWriter, "EvtWeightWriter");

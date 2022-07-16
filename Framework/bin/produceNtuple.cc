@@ -265,6 +265,8 @@ int main(int argc, char* argv[])
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
     cfg_writer.addParameter<std::string>("process", process);
+    cfg_writer.addParameter<bool>("apply_topPtReweighting", apply_topPtReweighting);
+    cfg_writer.addParameter<bool>("has_LHE_weights", lheInfoReader && lheInfoReader->has_LHE_weights());
     std::unique_ptr<WriterBase> writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
     writer->registerReaders(inputTree);
     writer->setBranches(outputTree);
@@ -277,7 +279,7 @@ int main(int argc, char* argv[])
   {
     for ( auto & writer : writers )
     {
-      merge_systematic_shifts(systematic_shifts, writer->get_supported_systematics(cfg_produceNtuple));
+      merge_systematic_shifts(systematic_shifts, writer->get_supported_systematics(cfg_produceNtuple)); // TODO passing cfg here should have no effect b/c branches already created
     }
   }
   // CV: add central value (for data and MC)

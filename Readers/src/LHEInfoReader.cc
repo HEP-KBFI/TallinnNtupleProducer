@@ -192,6 +192,12 @@ LHEInfoReader::read() const
   }
 }
 
+bool
+LHEInfoReader::has_LHE_weights() const
+{
+  return has_LHE_weights_;
+}
+
 void
 LHEInfoReader::set_pdfNorm(const edm::ParameterSet & cfg)
 {

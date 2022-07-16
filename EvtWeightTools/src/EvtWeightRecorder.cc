@@ -1181,7 +1181,7 @@ EvtWeightRecorder::record_jetToTauFakeRate(const HadTauFakeRateInterface * const
 {
   assert(hadTauFakeRateInterface);
   weights_jetToTauFakeRate_.clear();
-  for ( auto central_or_shift : central_or_shifts_ )
+  for ( const std::string & central_or_shift : central_or_shifts_ )
   {
     const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
     if ( weights_jetToTauFakeRate_.count(jetToTauFakeRate_option) )
@@ -1211,7 +1211,7 @@ EvtWeightRecorder::record_jetToTauSF(const HadTauFakeRateInterface * const hadTa
 {
   assert(hadTauFakeRateInterface);
   weights_jetToTauSF_.clear();
-  for ( auto central_or_shift : central_or_shifts_ )
+  for ( const std::string & central_or_shift : central_or_shifts_ )
   {
     const int jetToTauFakeRate_option = getJetToTauFR_option(central_or_shift);
     if ( weights_jetToTauSF_.count(jetToTauFakeRate_option) )
@@ -1241,7 +1241,7 @@ EvtWeightRecorder::record_jetToLeptonFakeRate(const LeptonFakeRateInterface * co
 {
   assert(leptonFakeRateInterface);
   weights_jetToLeptonFakeRate_.clear();
-  for ( auto central_or_shift : central_or_shifts_ )
+  for ( const std::string & central_or_shift : central_or_shifts_ )
   {
     const int jetToLeptonFakeRate_option = getJetToLeptonFR_option(central_or_shift);
     if ( weights_jetToLeptonFakeRate_.count(jetToLeptonFakeRate_option) )
