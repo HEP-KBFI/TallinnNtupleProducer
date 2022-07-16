@@ -694,6 +694,12 @@ EventReader::read() const
   return event_;
 }
 
+void
+EventReader::set_tauEScset(correction::Correction::Ref cset)
+{
+  hadTauReader_->set_tauEScset(cset);
+}
+
 std::vector<std::string>
 EventReader::get_supported_systematics(const edm::ParameterSet & cfg)
 {

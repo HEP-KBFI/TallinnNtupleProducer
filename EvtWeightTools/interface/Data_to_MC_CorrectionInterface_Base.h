@@ -32,6 +32,16 @@ class Data_to_MC_CorrectionInterface_Base
   // overwrite configuration parameters (needed by analyze_jetToTauFakeRate.cc)
   void
   setHadTauSelection(const std::string & hadTauSelection);
+
+  void
+  set_hadTauID_and_Iso_cset(correction::Correction::Ref cset);
+
+  void
+  set_eToTauFakeRate_cset(correction::Correction::Ref cset);
+
+  void
+  set_muToTauFakeRate_cset(correction::Correction::Ref cset);
+
   //-----------------------------------------------------------------------------
 
   //-----------------------------------------------------------------------------
@@ -155,8 +165,9 @@ class Data_to_MC_CorrectionInterface_Base
   int hadTauSelection_antiElectron_[4];
   int hadTauSelection_antiMuon_[4];
 
-  const std::string tauCorrectionSetFile_;
-  std::unique_ptr<correction::CorrectionSet> tau_cset_;
+  correction::Correction::Ref hadTauID_and_Iso_cset_;
+  correction::Correction::Ref eToTauFakeRate_cset_;
+  correction::Correction::Ref muToTauFakeRate_cset_;
 
   bool applyHadTauSF_;
   bool isDEBUG_;

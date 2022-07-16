@@ -82,6 +82,9 @@ class EventReader : public ReaderBase
   std::vector<std::string>
   get_supported_systematics(const edm::ParameterSet & cfg);
 
+  void
+  set_tauEScset(correction::Correction::Ref);
+
  protected:
   enum Level { kLepton, kHadTau };
   void

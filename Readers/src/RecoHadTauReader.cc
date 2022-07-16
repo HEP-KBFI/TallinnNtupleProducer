@@ -5,6 +5,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // TauID
 #include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                    // TauESTool
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"
 
 #include "TMath.h"
 #include "TTree.h"                                                                // TTree
@@ -21,7 +22,6 @@ RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   , branchName_obj_("")
   , isMC_(false)
   , tauID_(TauID::DeepTau2017v2VSjet)
-  , tauESTool_(nullptr)
   , hadTau_pt_(nullptr)
   , hadTau_eta_(nullptr)
   , hadTau_phi_(nullptr)
@@ -41,7 +41,6 @@ RecoHadTauReader::RecoHadTauReader(const edm::ParameterSet & cfg)
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Tau"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   isMC_ = cfg.getParameter<bool>("isMC");
-  tauESTool_ = ( isMC_ ) ? new TauESTool(era_, tauID_, kHadTauPt_central, false) : nullptr;
   setBranchNames();
 }
 
@@ -88,9 +87,12 @@ RecoHadTauReader::~RecoHadTauReader()
 void
 RecoHadTauReader::setHadTauPt_central_or_shift(int hadTauPt_option)
 {
-  if(tauESTool_)
+  switch ( hadTauPt_option )
   {
-    tauESTool_->set_central_or_shift(hadTauPt_option);
+  case kHadTauPt_central: systematic_ = "nom"; break;
+  case kHadTauPt_shiftUp: systematic_ = "up"; break;
+  case kHadTauPt_shiftDown: systematic_ = "down"; break;
+  default: throw cmsException("RecoHadTauReader", __LINE__) << "Invalid systematic shift = " << hadTauPt_option;
   }
 }
 
@@ -98,10 +100,12 @@ void
 RecoHadTauReader::set_default_tauID(TauID tauId)
 {
   tauID_ = tauId;
-  if(tauESTool_)
-  {
-    tauESTool_->set_tauID(tauID_);
-  }
+}
+
+void
+RecoHadTauReader::set_tauEScset(correction::Correction::Ref cset)
+{
+  tauEScset_ = cset;
 }
 
 void
@@ -199,12 +203,16 @@ RecoHadTauReader::read() const
     hadTaus.reserve(nHadTaus);
     for(UInt_t idxHadTau = 0; idxHadTau < nHadTaus; ++idxHadTau)
     {
-      const double corrFactor = tauESTool_ ? tauESTool_->getTES(
-          gInstance->hadTau_pt_[idxHadTau],
-          gInstance->hadTau_decayMode_[idxHadTau],
-          gInstance->hadTau_genPartFlav_[idxHadTau]
-        ) : 1.
-      ;
+      bool valid_dm = ( (gInstance->hadTau_decayMode_[idxHadTau] >=0 && gInstance->hadTau_decayMode_[idxHadTau] <=2) || (gInstance->hadTau_decayMode_[idxHadTau] == 10 || gInstance->hadTau_decayMode_[idxHadTau] ==11) ) ? true : false;
+      const double corrFactor = (valid_dm) ? tauEScset_->evaluate({
+              gInstance->hadTau_pt_[idxHadTau],
+              gInstance->hadTau_eta_[idxHadTau],
+              gInstance->hadTau_decayMode_[idxHadTau],
+              gInstance->hadTau_genPartFlav_[idxHadTau],
+              "DeepTau2017v2p1",
+              "nom"
+                }) : 1
+        ;
       const double hadTau_pt   = gInstance->hadTau_pt_  [idxHadTau] * corrFactor;
       const double hadTau_mass = gInstance->hadTau_mass_[idxHadTau] * corrFactor;
 

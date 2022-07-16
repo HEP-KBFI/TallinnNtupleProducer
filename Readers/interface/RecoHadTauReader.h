@@ -5,6 +5,7 @@
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h" // ReaderBase
 
 #include <map>                                                  // std::map
+#include "correction.h"
 
 // forward declarations
 class TTree;
@@ -23,6 +24,9 @@ class RecoHadTauReader : public ReaderBase
 
   void
   set_default_tauID(TauID tauId);
+
+  void
+  set_tauEScset(correction::Correction::Ref cset);
 
   /**
    * @brief Call tree->SetBranchAddress for all RecoHadTau branches
@@ -78,6 +82,7 @@ class RecoHadTauReader : public ReaderBase
 
   TauID tauID_;
   TauESTool * tauESTool_;
+  std::string systematic_;
 
   UInt_t nHadTaus_;
   Float_t * hadTau_pt_;
@@ -98,7 +103,7 @@ class RecoHadTauReader : public ReaderBase
 
   std::map<TauID, UChar_t *> hadTau_idMVAs_;
   std::map<TauID, Float_t *> hadTau_rawMVAs_;
-
+  correction::Correction::Ref tauEScset_;
   // CV: make sure that only one RecoHadronicTauReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.
   static std::map<std::string, int> numInstances_;
