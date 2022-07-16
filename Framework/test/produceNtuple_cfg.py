@@ -30,7 +30,7 @@ process = cms.PSet()
 
 process.fwliteInput = cms.PSet(
     fileNames = cms.vstring(),
-    maxEvents = cms.int32(-1),
+    maxEvents = cms.int32(1000),
     #maxEvents = cms.int32(10000),
     outputEvery = cms.uint32(1000)
 )
@@ -227,11 +227,23 @@ process.produceNtuple.lumiScale                                      = cms.VPSet
     central_or_shift = cms.string('central'),
     lumi = cms.double(0.00018092350036)
 ), cms.PSet(
-    central_or_shift = cms.string('CMS_ttHl_thu_shape_HHUp'),
-    lumi = cms.double(0.000141651207997)
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_x1y1Up'),
+    lumi = cms.double(0.00022758482348244583)
 ), cms.PSet(
-    central_or_shift = cms.string('CMS_ttHl_thu_shape_HHDown'),
-    lumi = cms.double(0.000227213083089)
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_x1y1Down'),
+    lumi = cms.double(0.00014137135174667993)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_x1Up'),
+    lumi = cms.double(0.0001915793492110972)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_x1Down'),
+    lumi = cms.double(0.00017078853584880804)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_y1Up'),
+    lumi = cms.double(0.00021488143889971005)
+), cms.PSet(
+    central_or_shift = cms.string('CMS_ttHl_thu_shape_y1Down'),
+    lumi = cms.double(0.00014971928985888286)
 ), cms.PSet(
     central_or_shift = cms.string('CMS_ttHl_pileupUp'),
     lumi = cms.double(0.000180930084191)
