@@ -854,14 +854,17 @@ EvtWeightRecorder::record_pdfWeight(const LHEInfoReader * const lheInfoReader)
 {
   assert(isMC_);
   weights_pdf_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
+  if(lheInfoReader->has_PDF_weights())
   {
-    const PDFSys pdf_option = getPDFSys_option(central_or_shift);
-    if(weights_pdf_.count(pdf_option))
+    for(const std::string & central_or_shift: central_or_shifts_)
     {
-      continue;
+      const PDFSys pdf_option = getPDFSys_option(central_or_shift);
+      if(weights_pdf_.count(pdf_option))
+      {
+        continue;
+      }
+      weights_pdf_[pdf_option] = lheInfoReader->getWeight_pdf((unsigned int)pdf_option);
     }
-    weights_pdf_[pdf_option] = lheInfoReader->getWeight_pdf((unsigned int)pdf_option);
   }
 }
 
@@ -871,9 +874,12 @@ EvtWeightRecorder::record_pdfMembers(const LHEInfoReader * const lheInfoReader,
 {
   assert(isMC_);
   weights_pdf_members_.clear();
-  for(const auto & kv: pdf_map)
+  if(lheInfoReader->saveAllPdfMembers())
   {
-    weights_pdf_members_[kv.first] = lheInfoReader->getWeightNorm_pdf(kv.second);
+    for(const auto & kv: pdf_map)
+    {
+      weights_pdf_members_[kv.first] = lheInfoReader->getWeightNorm_pdf(kv.second);
+    }
   }
 }
 

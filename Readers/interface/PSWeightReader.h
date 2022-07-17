@@ -28,6 +28,8 @@ class PSWeightReader : public ReaderBase
    */
   void
   read() const;
+  
+  bool has_PS_weights() const;
 
   double getWeight_ps_ISRUp() const;
   double getWeight_ps_ISRDown() const;

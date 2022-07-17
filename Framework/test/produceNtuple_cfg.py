@@ -150,7 +150,12 @@ process.produceNtuple = cms.PSet(
     branchName_envelope_weight_up = cms.string('LHEEnvelopeWeightUp'),
     branchName_envelope_weight_down = cms.string('LHEEnvelopeWeightDown'),
     has_LHE_weights = cms.bool(False),
-    has_pdf_weights = cms.bool(False),
+    has_pdf_weights = cms.bool(False), # when set to True, reads the PDF weights
+    pdfSettings = cms.PSet(
+        lhaid = cms.uint32(0),
+        norm = cms.vdouble(), # ratio of event sum with PDF weights over nominal event sum; when populated, derives PDF envelope
+        saveAllMembers = cms.bool(False), # when set to True, saves the PDF weights of all its members
+    ),
 
     branchName_LHE_particle = cms.string('LHEPart'),
 
@@ -303,6 +308,9 @@ process.produceNtuple.blacklist.inputFileNames                       = cms.vstri
 process.produceNtuple.blacklist.sampleName                           = cms.string('signal_ggf_nonresonant_node_sm_hh_4v')
 process.produceNtuple.disable_ak8_corr                               = cms.vstring(['JMS', 'JMR', 'PUPPI'])
 process.produceNtuple.has_pdf_weights                                = cms.bool(False)
+process.produceNtuple.pdfSettings.lhaid                              = cms.uint32(306000)
+process.produceNtuple.pdfSettings.norm                               = cms.vdouble([ 1. ] * 103) # for the sake of argument
+process.produceNtuple.pdfSettings.saveAllMembers                     = cms.bool(False)
 process.produceNtuple.btagSFRatio                                    = cms.PSet(
   central = cms.vdouble(1.0, 0.983850754831, 0.970806608203, 0.95589515666, 0.941090355157, 0.919510668991, 0.896747198034, 0.869121413881, 0.843409507134, 0.788891130366),
 )

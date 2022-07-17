@@ -280,6 +280,19 @@ enum class SubjetBtagSys
   up, down,
 };
 
+extern const std::string pdfSysStr;
+
+// theory uncertainties
+extern const std::map<std::string, int> lheScaleSysMap;
+extern const std::map<std::string, int> psSysMap;
+extern const std::map<std::string, PDFSys> pdfSysMap;
+
+// experimental uncertainties
+extern const std::map<std::string, L1PreFiringWeightSys> l1prefireSysMap;
+extern const std::map<std::string, PUsys> puSysMap;
+extern const std::map<std::string, TriggerSFsys> triggerSFSysMap;
+
+// AK4 jet uncertainties
 extern const std::map<std::string, int> btagWeightSysMap;
 extern const std::map<std::string, pileupJetIDSFsys> pileupJetIDSysMap;
 
@@ -288,37 +301,42 @@ extern const std::map<std::string, int> jesSplitAK4SysMap;
 extern const std::map<std::string, int> jerAK4SysMap;
 extern const std::map<std::string, int> jerSplitAK4SysMap;
 
+// MET uncertainties
 extern const std::map<std::string, int> metSysMap;
 
+// AK8 jet uncertainties
 extern const std::map<std::string, int> jesAK8SysMap;
 extern const std::map<std::string, int> jesSplitAK8SysMap;
 extern const std::map<std::string, int> jerAK8SysMap;
 extern const std::map<std::string, int> jerSplitAK8SysMap;
 extern const std::map<std::string, int> jmsAK8SysMap;
 extern const std::map<std::string, int> jmrAK8SysMap;
+extern const std::map<std::string, SubjetBtagSys> subjetBtagSysMap;
 
+// tau uncertainties
 extern const std::map<std::string, int> hadTauESSysMap;
 extern const std::map<std::string, int> jetToTauFRSysMap;
 extern const std::map<std::string, FRet> eToTauFRSysMap;
 extern const std::map<std::string, FRmt> mToTauFRSysMap;
-extern const std::map<std::string, LeptonIDSFsys> leptonIDSFSysMap;
 extern const std::map<std::string, TauIDSFsys> tauIDSFSysMap;
-extern const std::map<std::string, TriggerSFsys> triggerSFSysMap;
-extern const std::map<std::string, int> lheScaleSysMap;
-extern const std::map<std::string, int> psSysMap;
+
+// lepton uncertainties
+extern const std::map<std::string, LeptonIDSFsys> leptonIDSFSysMap;
+extern const std::map<std::string, int> jetToLeptonFRSysMap;
 extern const std::map<std::string, ElectronPtSys> ePtSysMap;
 extern const std::map<std::string, MuonPtSys> mPtSysMap;
-extern const std::map<std::string, int> jetToLeptonFRSysMap;
-extern const std::map<std::string, PUsys> puSysMap;
-extern const std::map<std::string, L1PreFiringWeightSys> l1prefireSysMap;
+
+// DY uncertainties
 extern const std::map<std::string, int> dyMCRwgtSysMap;
 extern const std::map<std::string, int> dyMCNormSysMap;
+
+// top uncertainties
 extern const std::map<std::string, int> topPtRwgtSysMap;
+
+// EWK uncertainties
 extern const std::map<std::string, EWKJetSys> ewkJetSysMap;
 extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap;
-extern const std::map<std::string, PDFSys> pdfSysMap;
 extern const std::map<std::string, LHEVptSys> lheVptSysMap;
-extern const std::map<std::string, SubjetBtagSys> subjetBtagSysMap;
 
 bool
 isValidJESsource(Era era,
@@ -418,6 +436,9 @@ getSubjetBtagSys_option(const std::string & central_or_shift);
 
 bool
 isPDFsys_member(const std::string & central_or_shift);
+
+std::string
+getPDFsys_str(int memberIdx);
 
 void
 checkOptionValidity(const std::string & central_or_shift,

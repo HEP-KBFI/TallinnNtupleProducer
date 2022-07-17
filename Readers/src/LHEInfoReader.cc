@@ -36,15 +36,14 @@ LHEInfoReader::LHEInfoReader(const edm::ParameterSet & cfg)
   , weight_scale_yDown_(1.)
   , weight_scale_xyUp_(1.)
   , weight_scale_xyDown_(1.)
-  , has_LHE_weights_(false)
+  , has_LHE_weights_(cfg.getParameter<bool>("has_LHE_weights"))
   , correctiveFactor_(1.)
-  , has_pdf_weights_(false)
+  , has_PDF_weights_(cfg.getParameter<bool>("has_pdf_weights"))
+  , save_all_pdf_members_(false)
   , nof_pdf_members_(0)
   , nof_alphaS_members_(0)
   , pdf_is_replicas_(false)
 {
-  has_LHE_weights_ = cfg.getParameter<bool>("has_LHE_weights");
-  has_pdf_weights_ = cfg.getParameter<bool>("has_pdf_weights");
   setBranchNames();
 }
 
@@ -85,7 +84,7 @@ LHEInfoReader::setBranchNames()
           << " does not match previous association 'branchName_scale_weights' = " << gInstance->branchName_scale_weights_;
       }
     }
-    if(has_pdf_weights_)
+    if(has_PDF_weights_)
     {
       if(branchName_pdf_nWeights_   != gInstance->branchName_pdf_nWeights_ ||
          branchName_pdf_weights_    != gInstance->branchName_pdf_weights_   )
@@ -111,7 +110,7 @@ LHEInfoReader::setBranchAddresses(TTree * tree)
       bai.setBranchAddress(scale_nWeights_, branchName_scale_nWeights_);
       bai.setLenVar(max_scale_nWeights_).setBranchAddress(scale_weights_, branchName_scale_weights_);
     }
-    if(has_pdf_weights_)
+    if(has_PDF_weights_)
     {
       bai.setBranchAddress(pdf_nWeights_, branchName_pdf_nWeights_);
       bai.setLenVar(max_pdf_nWeights_).setBranchAddress(pdf_weights_, branchName_pdf_weights_);
@@ -126,7 +125,7 @@ LHEInfoReader::read() const
 {
   const LHEInfoReader * const gInstance = instances_[branchName_scale_weights_];
   assert(gInstance);
-  if(! has_LHE_weights_ && ! has_pdf_weights_)
+  if(! has_LHE_weights_ && ! has_PDF_weights_)
   {
     return;
   }
@@ -184,7 +183,7 @@ LHEInfoReader::read() const
     return;
   }
 
-  if(gInstance->has_pdf_weights_ && gInstance->pdfNorms_.size() != gInstance->pdf_nWeights_)
+  if(gInstance->has_PDF_weights_ && gInstance->pdfNorms_.size() != gInstance->pdf_nWeights_)
   {
     throw cmsException(this)
       << "Number of PDF weights stored in Ntuple = " << gInstance->pdf_nWeights_
@@ -198,16 +197,29 @@ LHEInfoReader::has_LHE_weights() const
   return has_LHE_weights_;
 }
 
+bool
+LHEInfoReader::has_PDF_weights() const
+{
+  return has_PDF_weights_;
+}
+
+bool
+LHEInfoReader::saveAllPdfMembers() const
+{
+  return save_all_pdf_members_;
+}
+
 void
-LHEInfoReader::set_pdfNorm(const edm::ParameterSet & cfg)
+LHEInfoReader::set_pdf_settings(const edm::ParameterSet & cfg)
 {
   pdfNorms_ = cfg.getParameter<std::vector<double>>("norm");
+  save_all_pdf_members_ = cfg.getParameter<bool>("saveAllMembers");
   if(pdfNorms_.empty())
   {
     return;
   }
-  has_pdf_weights_ = true;
-  const int pdf_lhaid = cfg.getParameter<int>("lhaid");
+  has_PDF_weights_ = true;
+  const unsigned pdf_lhaid = cfg.getParameter<unsigned>("lhaid");
   switch(pdf_lhaid)
   {
     case 91400:  nof_pdf_members_ = 33;                           nof_alphaS_members_ = 2; break; // https://lhapdfsets.web.cern.ch/current/PDF4LHC15_nnlo_30_pdfas/PDF4LHC15_nnlo_30_pdfas.info
@@ -325,7 +337,7 @@ LHEInfoReader::getNumWeights_pdf() const
   //        alphas(MZ)=0.130. mem=0 => average on replicas; mem=1-100 => PDF replicas
   //
   // In order to find out which PDF error set the sample has, open the Ntuple, read the LHEPDFweight array branch and look for LHEID in the title of the branch.
-  return has_pdf_weights_ ? pdf_nWeights_ : 0;
+  return has_PDF_weights_ ? pdf_nWeights_ : 0;
 }
 
 int
@@ -337,7 +349,7 @@ LHEInfoReader::getPdfSize() const
 double
 LHEInfoReader::getWeight_pdf(unsigned int idx) const
 {
-  if(! has_pdf_weights_)
+  if(! has_PDF_weights_)
   {
     return 1.;
   }
@@ -381,7 +393,7 @@ namespace
 double
 LHEInfoReader::comp_pdf_unc() const
 {
-  assert(has_pdf_weights_);
+  assert(has_PDF_weights_);
   double pdf_unc_stat = 0.;
   const int first_member = pdfNorms_.size() == nof_pdf_members_ ? 1 : 0; // skip the 1st member if possible
   const int last_member = getPdfSize() - nof_alphaS_members_;

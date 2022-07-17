@@ -232,9 +232,21 @@ int main(int argc, char* argv[])
   LHEInfoReader* lheInfoReader = nullptr;
   PSWeightReader* psWeightReader = nullptr;
   LHEParticleReader* lheParticleReader = nullptr;
+  bool has_PDF_weights = false;
+  std::map<std::string, int> pdf_map;
   if ( isMC )
   {
     lheInfoReader = new LHEInfoReader(cfg_produceNtuple);
+    has_PDF_weights = lheInfoReader->has_PDF_weights();
+    if(has_PDF_weights)
+    {
+      lheInfoReader->set_pdf_settings(cfg_produceNtuple.getParameter<edm::ParameterSet>("pdfSettings"));
+      for(int pdf_member_idx = 0; pdf_member_idx < lheInfoReader->getPdfSize(); ++pdf_member_idx)
+      {
+        const std::string pdf_member_str = getPDFsys_str(pdf_member_idx);
+        pdf_map[pdf_member_str] = pdf_member_idx;
+      }
+    }
     inputTree->registerReader(lheInfoReader);
     psWeightReader = new PSWeightReader(cfg_produceNtuple);
     inputTree->registerReader(psWeightReader);
@@ -267,6 +279,12 @@ int main(int argc, char* argv[])
     cfg_writer.addParameter<std::string>("process", process);
     cfg_writer.addParameter<bool>("apply_topPtReweighting", apply_topPtReweighting);
     cfg_writer.addParameter<bool>("has_LHE_weights", lheInfoReader && lheInfoReader->has_LHE_weights());
+    cfg_writer.addParameter<bool>("has_PS_weights", psWeightReader && psWeightReader->has_PS_weights());
+    cfg_writer.addParameter<bool>("has_PDF_weight", has_PDF_weights);
+    if(has_PDF_weights)
+    {
+      cfg_writer.addParameter<int>("nof_PDF_members", lheInfoReader->saveAllPdfMembers() ? lheInfoReader->getPdfSize() : 0);
+    }
     std::unique_ptr<WriterBase> writer = WriterPluginFactory::get()->create(pluginType, cfg_writer);
     writer->registerReaders(inputTree);
     writer->setBranches(outputTree);
@@ -349,6 +367,8 @@ int main(int argc, char* argv[])
         lheInfoReader->read();
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
+        evtWeightRecorder.record_pdfWeight(lheInfoReader);
+        evtWeightRecorder.record_pdfMembers(lheInfoReader, pdf_map);
         evtWeightRecorder.record_psWeight(psWeightReader);
         if ( analysisConfig.isHH_rwgt_allowed() )
         {

@@ -34,8 +34,14 @@ class LHEInfoReader : public ReaderBase
   bool
   has_LHE_weights() const;
 
+  bool
+  has_PDF_weights() const;
+
+  bool
+  saveAllPdfMembers() const;
+
   void
-  set_pdfNorm(const edm::ParameterSet & cfg);
+  set_pdf_settings(const edm::ParameterSet & cfg);
 
   double getWeight_scale_nominal() const;
   double getWeight_scale_xUp() const;
@@ -90,7 +96,8 @@ class LHEInfoReader : public ReaderBase
   bool has_LHE_weights_;
   mutable double correctiveFactor_;
 
-  bool has_pdf_weights_;
+  bool has_PDF_weights_;
+  bool save_all_pdf_members_;
   std::vector<double> pdfNorms_;
   unsigned int nof_pdf_members_;
   unsigned int nof_alphaS_members_;

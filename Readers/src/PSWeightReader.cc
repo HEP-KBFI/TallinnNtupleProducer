@@ -119,6 +119,12 @@ PSWeightReader::read() const
   }
 }
 
+bool
+PSWeightReader::has_PS_weights() const
+{
+  return has_PS_weights_;
+}
+
 double
 PSWeightReader::getWeight_ps_ISRUp() const
 {

@@ -82,13 +82,32 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   if(supported_systematics.empty())
   {
     merge_systematic_shifts(supported_systematics, { "central" }); // CV: add central value
-    if(cfg.getParameter<bool>("apply_topPtReweighting"))
+    if(cfg.getParameter<bool>("isMC"))
     {
-      merge_systematic_shifts(supported_systematics, map_keys(topPtRwgtSysMap));
-    }
-    if(cfg.getParameter<bool>("has_LHE_weights"))
-    {
-      merge_systematic_shifts(supported_systematics, map_keys(lheScaleSysMap));
+      merge_systematic_shifts(supported_systematics, map_keys(puSysMap));
+      if(cfg.getParameter<bool>("apply_topPtReweighting"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(topPtRwgtSysMap));
+      }
+      if(cfg.getParameter<bool>("has_LHE_weights"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(lheScaleSysMap));
+      }
+      if(cfg.getParameter<bool>("has_PS_weights"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(psSysMap));
+      }
+      if(cfg.getParameter<bool>("has_PDF_weight"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(pdfSysMap));
+        const int nof_pdf_members = cfg.getParameter<int>("nof_PDF_members");
+        std::vector<std::string> pdf_member_sys;
+        for(int pdf_member_idx = 0; pdf_member_idx < nof_pdf_members; ++pdf_member_idx)
+        {
+          pdf_member_sys.push_back(getPDFsys_str(pdf_member_idx));
+        }
+        merge_systematic_shifts(supported_systematics, pdf_member_sys);
+      }
     }
   }
   return supported_systematics;

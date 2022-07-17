@@ -9,6 +9,9 @@
 #include <boost/algorithm/string/predicate.hpp>                         // boost::algorithm::starts_with(), boost::algorithm::ends_with()
 
 #include <assert.h>                                                     // assert()
+#include <regex>                                                        // std::regex, std::smatch, std::regex_match()
+
+const std::string pdfSysStr = "CMS_ttHl_PDF_shape_Member";
 
 const std::map<std::string, int> btagWeightSysMap = {
   { "CMS_ttHl_btag_HFUp",                 kBtag_hfUp                      },
@@ -722,10 +725,16 @@ getSubjetBtagSys_option(const std::string & central_or_shift)
 bool
 isPDFsys_member(const std::string & central_or_shift)
 {
-  return
-    boost::starts_with(central_or_shift, "CMS_ttHl_PDF_shape") &&
-    central_or_shift.find("Member") != std::string::npos
-  ;
+  const std::regex pdfSysRegex(pdfSysStr + "[[:digit:]]+");
+  std::smatch pdfSysMatch;
+  return std::regex_match(central_or_shift, pdfSysMatch, pdfSysRegex);
+}
+
+std::string
+getPDFsys_str(int memberIdx)
+{
+  assert(memberIdx >= 0);
+  return pdfSysStr + std::to_string(memberIdx);
 }
 
 void
