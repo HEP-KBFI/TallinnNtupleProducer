@@ -85,6 +85,15 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
     if(cfg.getParameter<bool>("isMC"))
     {
       merge_systematic_shifts(supported_systematics, map_keys(puSysMap));
+      merge_systematic_shifts(supported_systematics, map_keys(btagWeightSysMap));
+      if(cfg.getParameter<bool>("apply_pileupJetID"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(pileupJetIDSysMap));
+      }
+      if(cfg.getParameter<bool>("l1PreFiringWeightReader"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(l1prefireSysMap));
+      }
       if(cfg.getParameter<bool>("apply_topPtReweighting"))
       {
         merge_systematic_shifts(supported_systematics, map_keys(topPtRwgtSysMap));
@@ -97,7 +106,7 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
       {
         merge_systematic_shifts(supported_systematics, map_keys(psSysMap));
       }
-      if(cfg.getParameter<bool>("has_PDF_weight"))
+      if(cfg.getParameter<bool>("has_PDF_weights"))
       {
         merge_systematic_shifts(supported_systematics, map_keys(pdfSysMap));
         const int nof_pdf_members = cfg.getParameter<int>("nof_PDF_members");
@@ -108,6 +117,19 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
         }
         merge_systematic_shifts(supported_systematics, pdf_member_sys);
       }
+      if(cfg.getParameter<unsigned>("numNominalLeptons") > 0)
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(leptonIDSFSysMap));
+        merge_systematic_shifts(supported_systematics, map_keys(jetToLeptonFRSysMap));
+      }
+      if(cfg.getParameter<unsigned>("numNominalHadTaus") > 0)
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(jetToTauFRSysMap));
+        merge_systematic_shifts(supported_systematics, map_keys(eToTauFRSysMap));
+        merge_systematic_shifts(supported_systematics, map_keys(mToTauFRSysMap));
+        merge_systematic_shifts(supported_systematics, map_keys(tauIDSFSysMap));
+      }
+      //TODO: trigger SF, b-tagging weight, PU jet ID SF, subjet b-tagging SF, jet/e/mu->tau FR, lepton/tau ID SF, jet->lepton FR, DY weights, EWK eights, Vpt
     }
   }
   return supported_systematics;

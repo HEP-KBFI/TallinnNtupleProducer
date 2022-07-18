@@ -94,6 +94,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , jetSelectorAK4_btagMedium_(nullptr)
   , jetsAK4_supported_systematics_(make_supported_systematics(RecoJetReaderAK4::get_supported_systematics(cfg)))
   , jetAK4_isInvalid_(false)
+  , apply_pileupJetID_(pileupJetID::kPileupJetID_disabled)
   , genParticleReader_(nullptr)
   , genHadTauReader_(nullptr)
   , genJetReader_(nullptr)
@@ -124,6 +125,9 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   applyNumNominalLeptonsCut_ = cfg.getParameter<bool>("applyNumNominalLeptonsCut");
   numNominalHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
   applyNumNominalHadTausCut_ = cfg.getParameter<bool>("applyNumNominalHadTausCut");
+
+  const std::string apply_pileupJetID_string = cfg.getParameter<std::string>("apply_pileupJetID");
+  apply_pileupJetID_ = get_pileupJetID(apply_pileupJetID_string);
 
   era_ = get_era(cfg.getParameter<std::string>("era"));
   isMC_ = cfg.getParameter<bool>("isMC");
@@ -180,6 +184,10 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   jetSelectorAK4_ = new RecoJetCollectionSelectorAK4(era_, -1, isDEBUG_);
   jetSelectorAK4_btagLoose_ = new RecoJetCollectionSelectorAK4_btagLoose(era_, -1, isDEBUG_);
   jetSelectorAK4_btagMedium_ = new RecoJetCollectionSelectorAK4_btagMedium(era_, -1, isDEBUG_);
+
+  jetSelectorAK4_->getSelector().set_pileupJetId(apply_pileupJetID_);
+  jetSelectorAK4_btagLoose_->getSelector().set_pileupJetId(apply_pileupJetID_);
+  jetSelectorAK4_btagMedium_->getSelector().set_pileupJetId(apply_pileupJetID_);
 
   if ( readGenMatching_ )
   {

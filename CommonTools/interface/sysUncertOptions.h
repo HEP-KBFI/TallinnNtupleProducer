@@ -3,6 +3,7 @@
 
 #include <string> // std::string
 #include <map> // std::map<,>
+#include <vector> // std::vector<>
 
 enum class Btag;
 enum class Era;
@@ -290,7 +291,7 @@ extern const std::map<std::string, PDFSys> pdfSysMap;
 // experimental uncertainties
 extern const std::map<std::string, L1PreFiringWeightSys> l1prefireSysMap;
 extern const std::map<std::string, PUsys> puSysMap;
-extern const std::map<std::string, TriggerSFsys> triggerSFSysMap;
+extern const std::map<std::string, TriggerSFsys> triggerSFSysMap; // NOT WRITTEN YET
 
 // AK4 jet uncertainties
 extern const std::map<std::string, int> btagWeightSysMap;
@@ -311,7 +312,7 @@ extern const std::map<std::string, int> jerAK8SysMap;
 extern const std::map<std::string, int> jerSplitAK8SysMap;
 extern const std::map<std::string, int> jmsAK8SysMap;
 extern const std::map<std::string, int> jmrAK8SysMap;
-extern const std::map<std::string, SubjetBtagSys> subjetBtagSysMap;
+extern const std::map<std::string, SubjetBtagSys> subjetBtagSysMap; // NOT WRITTEN YET
 
 // tau uncertainties
 extern const std::map<std::string, int> hadTauESSysMap;
@@ -327,16 +328,19 @@ extern const std::map<std::string, ElectronPtSys> ePtSysMap;
 extern const std::map<std::string, MuonPtSys> mPtSysMap;
 
 // DY uncertainties
-extern const std::map<std::string, int> dyMCRwgtSysMap;
-extern const std::map<std::string, int> dyMCNormSysMap;
+extern const std::map<std::string, int> dyMCRwgtSysMap; // NOT WRITTEN YET
+extern const std::map<std::string, int> dyMCNormSysMap; // NOT WRITTEN YET
 
 // top uncertainties
 extern const std::map<std::string, int> topPtRwgtSysMap;
 
 // EWK uncertainties
-extern const std::map<std::string, EWKJetSys> ewkJetSysMap;
-extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap;
-extern const std::map<std::string, LHEVptSys> lheVptSysMap;
+extern const std::map<std::string, EWKJetSys> ewkJetSysMap; // NOT WRITTEN YET
+extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap; // NOT WRITTEN YET
+extern const std::map<std::string, LHEVptSys> lheVptSysMap; // NOT WRITTEN YET
+
+std::vector<std::string>
+get_inclusive_systeatics(const std::vector<std::string> & systematics);
 
 bool
 isValidJESsource(Era era,

@@ -5,10 +5,10 @@
 pileupJetID
 get_pileupJetID(const std::string & pileupJetID_str)
 {
-  if     (pileupJetID_str == "disabled") return pileupJetID::kPileupJetID_disabled;
-  else if(pileupJetID_str == "loose"   ) return pileupJetID::kPileupJetID_loose;
-  else if(pileupJetID_str == "medium"  ) return pileupJetID::kPileupJetID_medium;
-  else if(pileupJetID_str == "tight"   ) return pileupJetID::kPileupJetID_tight;
+  if     (pileupJetID_str == "disabled" || pileupJetID_str.empty()) return pileupJetID::kPileupJetID_disabled;
+  else if(pileupJetID_str == "loose"   )                            return pileupJetID::kPileupJetID_loose;
+  else if(pileupJetID_str == "medium"  )                            return pileupJetID::kPileupJetID_medium;
+  else if(pileupJetID_str == "tight"   )                            return pileupJetID::kPileupJetID_tight;
   else throw cmsException(__func__, __LINE__) << "Invalid argument: " << pileupJetID_str;
 }
 

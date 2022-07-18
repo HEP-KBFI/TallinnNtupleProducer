@@ -1,8 +1,11 @@
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"            // Era
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                     // Era
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"          // Btag
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/contains.h"                // contains()
+#include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                // map_keys()
 
 #include <TString.h>                                                    // Form()
 
@@ -355,6 +358,38 @@ const std::map<std::string, SubjetBtagSys> subjetBtagSysMap = {
   { "CMS_btag_subjetUp",   SubjetBtagSys::up   },
   { "CMS_btag_subjetDown", SubjetBtagSys::down },
 };
+
+std::vector<std::string>
+get_inclusive_systeatics(const std::vector<std::string> & systematics)
+{
+  static std::vector<std::string> exclusive_systematics;
+  if(exclusive_systematics.empty())
+  {
+    merge_systematic_shifts(exclusive_systematics, map_keys(jesAK4SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jesSplitAK4SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jerAK4SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jerSplitAK4SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(metSysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jesAK8SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jesSplitAK8SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jerAK8SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jerSplitAK8SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jmsAK8SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(jmrAK8SysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(hadTauESSysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(ePtSysMap));
+    merge_systematic_shifts(exclusive_systematics, map_keys(mPtSysMap));
+  }
+  std::vector<std::string> inclusive_systematics;
+  for(const std::string & sys_str: systematics)
+  {
+    if(! contains(exclusive_systematics, sys_str))
+    {
+      inclusive_systematics.push_back(sys_str);
+    }
+  }
+  return inclusive_systematics;
+}
 
 bool
 isValidJESsource(Era era,

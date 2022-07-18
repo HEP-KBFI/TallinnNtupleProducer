@@ -778,7 +778,7 @@ EvtWeightRecorder::record_lheScaleWeight(const LHEInfoReader * const lheInfoRead
 }
 
 std::pair<std::vector<int>, std::vector<int>>
-EvtWeightRecorder::findHiggs(const LHEParticleCollection & lheParticles, std::vector<int> & exclude)
+EvtWeightRecorder::findHiggs(const LHEParticleCollection & lheParticles, std::vector<int> & exclude) const
 {
   int bestindex1(-1), bestindex2(-1);
   TLorentzVector d1, d2;

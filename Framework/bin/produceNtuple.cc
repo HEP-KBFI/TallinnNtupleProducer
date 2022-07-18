@@ -18,6 +18,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h"               // BranchAddressInitializer::print()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/contains.h"                               // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                              // format_vstring()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
@@ -115,6 +116,7 @@ int main(int argc, char* argv[])
   edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
   bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
   std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
+  const pileupJetID apply_pileupJetID = get_pileupJetID(cfg.getParameter<std::string>("apply_pileupJetID"));
   bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
   bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
   bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");
@@ -270,17 +272,19 @@ int main(int argc, char* argv[])
   std::vector<std::unique_ptr<WriterBase>> writers;
   for ( auto cfg_writer : cfg_writers )
   {
-    std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
+    const std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
     copyParameter<vstring>(cfg_produceNtuple, cfg_writer, "disable_ak8_corr");
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
     cfg_writer.addParameter<std::string>("process", process);
+    cfg_writer.addParameter<bool>("l1PreFiringWeightReader", l1PreFiringWeightReader);
     cfg_writer.addParameter<bool>("apply_topPtReweighting", apply_topPtReweighting);
     cfg_writer.addParameter<bool>("has_LHE_weights", lheInfoReader && lheInfoReader->has_LHE_weights());
     cfg_writer.addParameter<bool>("has_PS_weights", psWeightReader && psWeightReader->has_PS_weights());
-    cfg_writer.addParameter<bool>("has_PDF_weight", has_PDF_weights);
+    cfg_writer.addParameter<bool>("has_PDF_weights", has_PDF_weights);
+    cfg_writer.addParameter<bool>("apply_pileupJetID", apply_pileupJetID != pileupJetID::kPileupJetID_disabled);
     if(has_PDF_weights)
     {
       cfg_writer.addParameter<int>("nof_PDF_members", lheInfoReader->saveAllPdfMembers() ? lheInfoReader->getPdfSize() : 0);
@@ -302,17 +306,32 @@ int main(int argc, char* argv[])
   }
   // CV: add central value (for data and MC)
   merge_systematic_shifts(systematic_shifts, { "central" });
-  std::cout << "Processing systematic uncertainties = " << format_vstring(systematic_shifts) << std::endl;
+
+  const std::vector<std::string> inclusive_systematic_shifts = get_inclusive_systeatics(systematic_shifts);
+  assert(contains(inclusive_systematic_shifts, "central"));
+  std::cout << "Processing systematic uncertainties = " << format_vstring(systematic_shifts) << '\n';
+
+  // keep inclusive systematics together, split the rest
+  std::vector<std::vector<std::string>> sytematics_split { inclusive_systematic_shifts };
+  for(const std::string & central_or_shift : systematic_shifts)
+  {
+    if(! contains(inclusive_systematic_shifts, central_or_shift))
+    {
+      sytematics_split.push_back({ central_or_shift });
+    }
+  }
 
   int analyzedEntries = 0;
   TH1* histogram_analyzedEntries = fs.make<TH1D>("analyzedEntries", "analyzedEntries", 1, -0.5, +0.5);
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
     bool skipEvent = false;
-    for ( const auto & central_or_shift : systematic_shifts )
+    for ( const std::vector<std::string> & central_or_shift : sytematics_split ) // TODO this looks very inefficient
     {
       const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
-      if ( central_or_shift == "central" )
+      const bool has_central = contains(central_or_shift, "central");
+      std::string default_systematics;
+      if ( has_central )
       {
         if ( inputTree->canReport(reportEvery) )
         {
@@ -324,6 +343,12 @@ int main(int argc, char* argv[])
         }
         ++analyzedEntries;
         histogram_analyzedEntries->Fill(0.);
+        default_systematics = "central";
+      }
+      else
+      {
+        assert(central_or_shift.size() == 1); // shifting or smearing energy scales
+        default_systematics = central_or_shift.at(0);
       }
       if ( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) )
       {
@@ -332,9 +357,9 @@ int main(int argc, char* argv[])
       }
       if ( isDEBUG || run_lumi_eventSelector )
       {
-        std::cout << "Processing central_or_shift = '" << central_or_shift << "'\n";
+        std::cout << "Processing central_or_shift(s) = " << format_vstring(central_or_shift) << '\n';
       }
-      if ( central_or_shift == "central" && (isDEBUG || run_lumi_eventSelector) )
+      if ( has_central && (isDEBUG || run_lumi_eventSelector) )
       {
         std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx() << ": " << runLumiEvent << '\n';
         if ( inputTree->isOpen() )
@@ -343,7 +368,7 @@ int main(int argc, char* argv[])
         }
       }
 
-      eventReader->set_central_or_shift(central_or_shift);
+      eventReader->set_central_or_shift(default_systematics);
       const Event& event = eventReader->read();
       // CV: skip processing events that don't contain the nominal number of leptons and hadronic taus,
       //     if the flags applyNumNominalLeptonsCut and applyNumNominalHadTausCut are enabled in the config file
@@ -353,15 +378,11 @@ int main(int argc, char* argv[])
         continue;
       }
 
-      EvtWeightRecorder evtWeightRecorder({ central_or_shift }, central_or_shift, isMC);
+      EvtWeightRecorder evtWeightRecorder(central_or_shift, default_systematics, isMC);
       if ( isMC )
       {
         if ( apply_genWeight         ) evtWeightRecorder.record_genWeight(event.eventInfo());
-        if ( eventWeightManager      )
-        { 
-          eventWeightManager->set_central_or_shift(central_or_shift);
-          evtWeightRecorder.record_auxWeight(eventWeightManager);
-        }
+        if ( eventWeightManager      ) evtWeightRecorder.record_auxWeight(eventWeightManager);
         if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
         if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.topPtRwgtSF());
         lheInfoReader->read();
@@ -372,7 +393,7 @@ int main(int argc, char* argv[])
         evtWeightRecorder.record_psWeight(psWeightReader);
         if ( analysisConfig.isHH_rwgt_allowed() )
         {
-          LHEParticleCollection lheParticles = lheParticleReader->read();
+          const LHEParticleCollection lheParticles = lheParticleReader->read();
           evtWeightRecorder.record_gen_mHH_cosThetaStar(lheParticles);
         }
         evtWeightRecorder.record_puWeight(&event.eventInfo());
@@ -475,8 +496,11 @@ int main(int argc, char* argv[])
 
       for ( auto & writer : writers )
       {
-        writer->set_central_or_shift(central_or_shift);
-        writer->write(event, evtWeightRecorder);
+        for(const std::string & sys_shift: central_or_shift)
+        {
+          writer->set_central_or_shift(sys_shift);
+          writer->write(event, evtWeightRecorder);
+        }
       }
     }
     if ( !skipEvent )

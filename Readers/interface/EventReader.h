@@ -153,6 +153,7 @@ class EventReader : public ReaderBase
   std::set<std::string> jetsAK4_supported_systematics_;
   mutable std::string jetAK4_lastSystematic_;
   mutable bool jetAK4_isInvalid_;
+  pileupJetID apply_pileupJetID_;
 
   GenParticleReader * genParticleReader_;
   GenHadTauReader * genHadTauReader_;
