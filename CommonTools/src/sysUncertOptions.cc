@@ -238,18 +238,10 @@ const std::map<std::string, TriggerSFsys> triggerSFSysMap = {
   { "CMS_ttHl_trigger_2lssEMuDown",  TriggerSFsys::shift_2lssEMuDown  },
   { "CMS_ttHl_trigger_2lssMuMuUp",   TriggerSFsys::shift_2lssMuMuUp   },
   { "CMS_ttHl_trigger_2lssMuMuDown", TriggerSFsys::shift_2lssMuMuDown },
-  { "CMS_ttHl_trigger_3lUp",         TriggerSFsys::shift_3lUp         },
-  { "CMS_ttHl_trigger_3lDown",       TriggerSFsys::shift_3lDown       },
-  { "CMS_ttHl_trigger_1l2tauUp",     TriggerSFsys::shift_1l2tauUp     },
-  { "CMS_ttHl_trigger_1l2tauDown",   TriggerSFsys::shift_1l2tauDown   },
   { "CMS_ttHl_trigger_1l1tauUp",     TriggerSFsys::shift_1l1tauUp     },
   { "CMS_ttHl_trigger_1l1tauDown",   TriggerSFsys::shift_1l1tauDown   },
   { "CMS_ttHl_trigger_0l2tauUp",     TriggerSFsys::shift_0l2tauUp     },
   { "CMS_ttHl_trigger_0l2tauDown",   TriggerSFsys::shift_0l2tauDown   },
-  { "CMS_ttHl_trigger_1lEUp",        TriggerSFsys::shift_1lEUp        },
-  { "CMS_ttHl_trigger_1lEDown",      TriggerSFsys::shift_1lEDown      },
-  { "CMS_ttHl_trigger_1lMuUp",       TriggerSFsys::shift_1lMuUp       },
-  { "CMS_ttHl_trigger_1lMuDown",     TriggerSFsys::shift_1lMuDown     },
 };
 
 const std::map<std::string, int> lheScaleSysMap = {

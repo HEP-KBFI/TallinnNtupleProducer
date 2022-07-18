@@ -85,18 +85,10 @@ TauTriggerSFInterface::getTauTriggerEvalData(TriggerSFsys central_or_shift,
       case TriggerSFsys::shift_2lssEMuDown:  __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuUp:   __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuDown: __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lUp:         __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lDown:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauUp:     __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauDown:   __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEUp:        __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEDown:      __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuUp:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuDown:     __attribute__((fallthrough));
       default: assert(false);
     }
   }
@@ -115,18 +107,10 @@ TauTriggerSFInterface::getTauTriggerEvalData(TriggerSFsys central_or_shift,
       case TriggerSFsys::shift_2lssEMuDown:  __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuUp:   __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuDown: __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lUp:         __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lDown:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauUp:     __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauDown:   __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEUp:        __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEDown:      __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuUp:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuDown:     __attribute__((fallthrough));
       default: assert(false);
     }
   }
@@ -160,18 +144,10 @@ TauTriggerSFInterface::getTauTriggerEvalMC(TriggerSFsys central_or_shift,
       case TriggerSFsys::shift_2lssEMuDown:  __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuUp:   __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuDown: __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lUp:         __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lDown:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauUp:     __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauDown:   __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEUp:        __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEDown:      __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuUp:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuDown:     __attribute__((fallthrough));
       default: assert(false);
     }
   }
@@ -190,18 +166,10 @@ TauTriggerSFInterface::getTauTriggerEvalMC(TriggerSFsys central_or_shift,
       case TriggerSFsys::shift_2lssEMuDown:  __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuUp:   __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuDown: __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lUp:         __attribute__((fallthrough));
-      case TriggerSFsys::shift_3lDown:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauUp:     __attribute__((fallthrough));
-      case TriggerSFsys::shift_1l2tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauDown:   __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEUp:        __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lEDown:      __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuUp:       __attribute__((fallthrough));
-      case TriggerSFsys::shift_1lMuDown:     __attribute__((fallthrough));
       default: assert(false);
     }
   }
@@ -255,10 +223,8 @@ TauTriggerSFInterface::getGenericTriggerSFsys(TriggerSFsys central_or_shift) con
     }
     return central_or_shift == TriggerSFsys::shift_0l2tauUp ? TriggerSFsys::shiftUp : TriggerSFsys::shiftDown;
   }
-  else if(central_or_shift == TriggerSFsys::shift_1l1tauUp   ||
-          central_or_shift == TriggerSFsys::shift_1l1tauDown ||
-          central_or_shift == TriggerSFsys::shift_1l2tauUp   ||
-          central_or_shift == TriggerSFsys::shift_1l2tauDown  )
+  else if(central_or_shift == TriggerSFsys::shift_1l1tauUp ||
+          central_or_shift == TriggerSFsys::shift_1l1tauDown)
   {
     if(triggerType_ != TauTriggerType::ETau && triggerType_ != TauTriggerType::MuTau)
     {
@@ -267,10 +233,7 @@ TauTriggerSFInterface::getGenericTriggerSFsys(TriggerSFsys central_or_shift) con
            "for the trigger type " << as_integer(triggerType_)
       ;
     }
-    return (central_or_shift == TriggerSFsys::shift_1l1tauUp || central_or_shift == TriggerSFsys::shift_1l2tauUp) ?
-      TriggerSFsys::shiftUp :
-      TriggerSFsys::shiftDown
-    ;
+    return (central_or_shift == TriggerSFsys::shift_1l1tauUp) ? TriggerSFsys::shiftUp : TriggerSFsys::shiftDown;
   }
   throw cmsException(this, __func__, __LINE__)
       << "Invalid choice of systematic uncertainty:" << as_integer(central_or_shift)

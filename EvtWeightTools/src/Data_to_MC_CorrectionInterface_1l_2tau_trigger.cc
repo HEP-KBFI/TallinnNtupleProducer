@@ -270,10 +270,8 @@ bool
 Data_to_MC_CorrectionInterface_1l_2tau_trigger::check_triggerSFsys_opt(TriggerSFsys central_or_shift) const
 {
   return
-    central_or_shift == TriggerSFsys::central          ||
-    central_or_shift == TriggerSFsys::shiftUp          ||
-    central_or_shift == TriggerSFsys::shiftDown        ||
-    central_or_shift == TriggerSFsys::shift_1l2tauUp   ||
-    central_or_shift == TriggerSFsys::shift_1l2tauDown
+    central_or_shift == TriggerSFsys::central   ||
+    central_or_shift == TriggerSFsys::shiftUp   ||
+    central_or_shift == TriggerSFsys::shiftDown
   ;
 }

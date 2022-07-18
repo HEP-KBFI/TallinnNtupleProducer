@@ -326,7 +326,7 @@ int main(int argc, char* argv[])
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
     bool skipEvent = false;
-    for ( const std::vector<std::string> & central_or_shift : sytematics_split ) // TODO this looks very inefficient
+    for ( const std::vector<std::string> & central_or_shift : sytematics_split )
     {
       const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
       const bool has_central = contains(central_or_shift, "central");
