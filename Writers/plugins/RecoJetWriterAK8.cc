@@ -48,7 +48,7 @@ RecoJetWriterAK8::RecoJetWriterAK8(const edm::ParameterSet & cfg)
 
 RecoJetWriterAK8::~RecoJetWriterAK8()
 {
-  for ( auto it : central_or_shiftEntries_ )
+  for ( auto & it : central_or_shiftEntries_ )
   {
     delete[] it.second.pt_;
     delete[] it.second.eta_;
@@ -165,4 +165,4 @@ RecoJetWriterAK8::get_supported_systematics(const edm::ParameterSet & cfg)
   return RecoJetReaderAK8::get_supported_systematics(cfg);
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoJetWriterAK8, "RecoJetWriterAK8");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoJetWriterAK8, "RecoJetWriterAK8"); // clazy:skip

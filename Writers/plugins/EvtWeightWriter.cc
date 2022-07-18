@@ -135,4 +135,4 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return supported_systematics;
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtWeightWriter, "EvtWeightWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtWeightWriter, "EvtWeightWriter"); // clazy:skip

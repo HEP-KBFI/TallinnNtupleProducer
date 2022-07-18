@@ -5,6 +5,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // get_human_line()
 
+#include <vector>                                                     // std::vector<>
 #include <iostream>                                                   // std::cout
 
 template <typename T>

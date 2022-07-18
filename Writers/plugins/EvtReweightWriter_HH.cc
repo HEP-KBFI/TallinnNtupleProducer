@@ -33,7 +33,7 @@ EvtReweightWriter_HH::EvtReweightWriter_HH(const edm::ParameterSet & cfg)
       Era era = get_era(cfg.getParameter<std::string>("era"));
       hhWeightInterfaceNLO_ = new HHWeightInterfaceNLO(hhWeightInterface_couplings_, era);
     }
-    for ( auto bmName : bmNames_ )
+    for ( const auto & bmName : bmNames_ )
     {
       branchNames_[bmName] = Form("hhReweight_%s", bmName.data());
       hhReweights_[bmName] = 1.;
@@ -52,7 +52,7 @@ void
 EvtReweightWriter_HH::setBranches(TTree * outputTree)
 {
   BranchAddressInitializer bai(outputTree);
-  for ( auto bmName : bmNames_ )
+  for ( const auto & bmName : bmNames_ )
   {
     bai.setBranch(hhReweights_[bmName], branchNames_[bmName]);
   }
@@ -74,7 +74,7 @@ EvtReweightWriter_HH::writeImp(const Event & event, const EvtWeightRecorder & ev
     {
       hhReweight_sm *= hhWeightInterfaceNLO_->getWeight_LOtoNLO("SM", evtWeightRecorder.gen_mHH(), evtWeightRecorder.gen_cosThetaStar());
     }
-    for ( auto bmName : bmNames_ )
+    for ( const auto & bmName : bmNames_ )
     {
       double hhReweight_bm = 1.;
       if ( apply_HH_rwgt_lo_ )
@@ -98,4 +98,4 @@ EvtReweightWriter_HH::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtReweightWriter_HH, "EvtReweightWriter_HH");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtReweightWriter_HH, "EvtReweightWriter_HH"); // clazy:skip

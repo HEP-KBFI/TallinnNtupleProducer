@@ -52,4 +52,4 @@ RecoLeptonMultiplicityWriter::get_supported_systematics(const edm::ParameterSet 
   return supported_systematics;
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoLeptonMultiplicityWriter, "RecoLeptonMultiplicityWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoLeptonMultiplicityWriter, "RecoLeptonMultiplicityWriter"); // clazy:skip

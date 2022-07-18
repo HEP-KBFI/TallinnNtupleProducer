@@ -34,4 +34,4 @@ RunLumiEventWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, RunLumiEventWriter, "RunLumiEventWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, RunLumiEventWriter, "RunLumiEventWriter"); // clazy:skip

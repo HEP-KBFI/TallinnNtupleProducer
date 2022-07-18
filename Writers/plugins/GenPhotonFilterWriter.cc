@@ -48,4 +48,4 @@ GenPhotonFilterWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, GenPhotonFilterWriter, "GenPhotonFilterWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, GenPhotonFilterWriter, "GenPhotonFilterWriter"); // clazy:skip

@@ -164,7 +164,6 @@ RecoMEtReader::read() const
     double met_px = met_pt*std::cos(met_phi) + met_pxpyCorr.first;
     double met_py = met_pt*std::sin(met_phi) + met_pxpyCorr.second;
     met_pt = std::sqrt(square(met_px) + square(met_py));
-    met_phi = 0.;
     if     (met_px > 0) { met_phi = std::atan(met_py / met_px); }
     else if(met_px < 0) { met_phi = std::atan(met_py / met_px) + ((met_py > 0. ? +1. : -1.) * M_PI);  }
     else                { met_phi = (met_py > 0. ? +1. : -1.) * M_PI; }

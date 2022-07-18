@@ -1,6 +1,8 @@
 #ifndef TallinnNtupleProducer_CommonTools_as_integer_h
 #define TallinnNtupleProducer_CommonTools_as_integer_h
 
+#include <type_traits> // std::underlying_type<>
+
 /**
  * @brief Converts enum class value to corresponding integer value
  *        which is determined by the order in which the enums are declared

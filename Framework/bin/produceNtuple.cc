@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
   edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
   bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
   std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
-  const pileupJetID apply_pileupJetID = get_pileupJetID(cfg.getParameter<std::string>("apply_pileupJetID"));
+  const pileupJetID apply_pileupJetID = get_pileupJetID(cfg_produceNtuple.getParameter<std::string>("apply_pileupJetID"));
   bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
   bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
   bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");

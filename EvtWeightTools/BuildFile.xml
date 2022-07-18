@@ -8,7 +8,7 @@
 <use   name="TauAnalysisTools/TauTriggerSFs"/>
 <use   name="python3"/>
 <use   name="root"/>
-<Flags CXXFLAGS="-O3 -fPIC -Wswitch -Wswitch-enum -Werror -Wshadow -Wno-reorder -Wno-error=bool-compare" />
+<Flags CXXFLAGS="-O3 -fPIC -Wswitch -Wswitch-enum -Werror -Wshadow -Wno-reorder -Wno-error=bool-compare -Wall -Wextra" />
 <export>
   <lib   name="1"/>
 </export>

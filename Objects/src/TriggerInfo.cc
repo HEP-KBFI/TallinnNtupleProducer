@@ -65,26 +65,27 @@ trigger::Set_of_HLTPaths::Set_of_HLTPaths(const edm::ParameterSet & cfg)
   , use_it_(cfg.getParameter<bool>("use_it"))
 {
   vstring hltPathNames = cfg.getParameter<vstring>("hltPaths");
-  for ( auto hltPathName : hltPathNames )
+  for ( const auto & hltPathName : hltPathNames )
   {
     hltPaths_.push_back(HLTPath(hltPathName));
   }
-  std::vector<trigger::TypeDef> typeDefs;
-  typeDefs.push_back(TypeDef("1e",      1, 0, 0));
-  typeDefs.push_back(TypeDef("1mu",     0, 1, 0));
-  typeDefs.push_back(TypeDef("1tau",    0, 0, 1));
-  typeDefs.push_back(TypeDef("2e",      2, 0, 0));
-  typeDefs.push_back(TypeDef("1e1mu",   1, 1, 0));
-  typeDefs.push_back(TypeDef("1e1tau",  1, 0, 1));
-  typeDefs.push_back(TypeDef("2mu",     0, 2, 0));
-  typeDefs.push_back(TypeDef("1mu1tau", 0, 1, 1));
-  typeDefs.push_back(TypeDef("2tau",    0, 0, 2));
-  typeDefs.push_back(TypeDef("3e",      3, 0, 0));
-  typeDefs.push_back(TypeDef("2e1mu",   2, 1, 0));
-  typeDefs.push_back(TypeDef("1e2mu",   1, 2, 0));
-  typeDefs.push_back(TypeDef("3mu",     0, 3, 0));
+  const std::vector<trigger::TypeDef> typeDefs = {
+    { "1e",      1, 0, 0 },
+    { "1mu",     0, 1, 0 },
+    { "1tau",    0, 0, 1 },
+    { "2e",      2, 0, 0 },
+    { "1e1mu",   1, 1, 0 },
+    { "1e1tau",  1, 0, 1 },
+    { "2mu",     0, 2, 0 },
+    { "1mu1tau", 0, 1, 1 },
+    { "2tau",    0, 0, 2 },
+    { "3e",      3, 0, 0 },
+    { "2e1mu",   2, 1, 0 },
+    { "1e2mu",   1, 2, 0 },
+    { "3mu",     0, 3, 0 },
+  };
   bool isTypeDefined = false;
-  for ( auto typeDef : typeDefs )
+  for ( const auto & typeDef : typeDefs )
   {
     if ( typeDef.type_ == type_ )
     {
@@ -180,7 +181,7 @@ trigger::operator<<(std::ostream & stream,
                     const trigger::Set_of_HLTPaths & entry)
 {
   stream << entry.type() << " HLT paths:" << std::endl;
-  for ( auto hltPath : entry.hltPaths() )
+  for ( const auto & hltPath : entry.hltPaths() )
   {
     stream << hltPath;
   }
@@ -244,7 +245,7 @@ trigger::Object::filterBits() const
 TriggerInfo::TriggerInfo(const edm::ParameterSet & cfg)
 {
   vstring entryNames = cfg.getParameterNamesForType<edm::ParameterSet>();
-  for ( auto entryName : entryNames )
+  for ( const auto & entryName : entryNames )
   {
     edm::ParameterSet cfgEntry = cfg.getParameter<edm::ParameterSet>(entryName);
     entries_.push_back(trigger::Set_of_HLTPaths(cfgEntry));
@@ -270,7 +271,7 @@ std::ostream &
 operator<<(std::ostream & stream,
            const TriggerInfo & triggerInfo)
 {
-  for ( auto entry : triggerInfo.entries() )
+  for ( const auto & entry : triggerInfo.entries() )
   {
     stream << entry;
   }

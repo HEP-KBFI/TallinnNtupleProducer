@@ -79,4 +79,4 @@ HtoZZto4lVetoWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return supported_systematics;
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, HtoZZto4lVetoWriter, "HtoZZto4lVetoWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, HtoZZto4lVetoWriter, "HtoZZto4lVetoWriter"); // clazy:skip

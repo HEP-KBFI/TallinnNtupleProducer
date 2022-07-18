@@ -174,4 +174,4 @@ RecoLeptonWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return supported_systematics;
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoLeptonWriter, "RecoLeptonWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoLeptonWriter, "RecoLeptonWriter"); // clazy:skip

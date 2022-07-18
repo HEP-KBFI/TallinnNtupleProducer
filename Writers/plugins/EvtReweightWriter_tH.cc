@@ -52,13 +52,13 @@ EvtReweightWriter_tH::writeImp(const Event & event, const EvtWeightRecorder & ev
       assert(outputTree_);
       BranchAddressInitializer bai(outputTree_);
       central_or_shiftEntry it;
-      for ( auto couplingScenario : couplingScenarios )
+      for ( const auto & couplingScenario : couplingScenarios )
       {
         it.thReweights_[couplingScenario] = 1.;
       }
       central_or_shiftEntries_[central_or_shift_tH] = it;
       current_central_or_shiftEntry_ = &central_or_shiftEntries_[central_or_shift_tH];
-      for ( auto couplingScenario : couplingScenarios )
+      for ( const auto & couplingScenario : couplingScenarios )
       {
         bai.setBranch(current_central_or_shiftEntry_->thReweights_[couplingScenario], get_branchName("thReweight", couplingScenario, central_or_shift_tH));
       }
@@ -66,7 +66,7 @@ EvtReweightWriter_tH::writeImp(const Event & event, const EvtWeightRecorder & ev
     }
     const double evtWeight = evtWeightRecorder.get(central_or_shift_tH);
     const double evtWeight_tH_nom = evtWeightRecorder.get_nom_tH_weight(central_or_shift_tH);
-    for ( auto couplingScenario : couplingScenarios )
+    for ( const auto & couplingScenario : couplingScenarios )
     {
       current_central_or_shiftEntry_->thReweights_[couplingScenario] = (evtWeight/evtWeight_tH_nom)*eventInfo.genWeight_tH(central_or_shift_tH, couplingScenario);
     }
@@ -79,4 +79,4 @@ EvtReweightWriter_tH::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>(); // CV: to be implemented !!
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtReweightWriter_tH, "EvtReweightWriter_tH");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtReweightWriter_tH, "EvtReweightWriter_tH"); // clazy:skip

@@ -181,4 +181,4 @@ BDTVarWriter_HH_2lss::get_supported_systematics(const edm::ParameterSet & cfg)
   return supported_systematics;
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, BDTVarWriter_HH_2lss, "BDTVarWriter_HH_2lss");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, BDTVarWriter_HH_2lss, "BDTVarWriter_HH_2lss"); // clazy:skip

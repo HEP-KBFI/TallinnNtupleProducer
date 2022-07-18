@@ -66,4 +66,4 @@ LowMassLeptonPairVetoWriter::get_supported_systematics(const edm::ParameterSet &
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, LowMassLeptonPairVetoWriter, "LowMassLeptonPairVetoWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, LowMassLeptonPairVetoWriter, "LowMassLeptonPairVetoWriter"); // clazy:skip

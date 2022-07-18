@@ -22,6 +22,8 @@ public:
   HTXS(Float_t pt,
        Float_t y);
   HTXS(const HTXS & other);
+  HTXS &
+  operator=(const HTXS & other);
 
   int
   get_category() const;

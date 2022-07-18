@@ -184,4 +184,4 @@ RecoMEtWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return RecoMEtReader::get_supported_systematics(cfg);
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoMEtWriter, "RecoMEtWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoMEtWriter, "RecoMEtWriter"); // clazy:skip

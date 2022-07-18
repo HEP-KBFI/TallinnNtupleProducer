@@ -72,4 +72,4 @@ ZbosonMassVetoWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, ZbosonMassVetoWriter, "ZbosonMassVetoWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, ZbosonMassVetoWriter, "ZbosonMassVetoWriter"); // clazy:skip

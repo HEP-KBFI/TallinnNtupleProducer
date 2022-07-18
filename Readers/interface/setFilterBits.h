@@ -1,12 +1,15 @@
 #ifndef TallinnNtupleProducer_Readers_setFilterBits_h
 #define TallinnNtupleProducer_Readers_setFilterBits_h
 
-#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h" // TriggerInfo
+#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"  // TriggerInfo
+#include "TallinnNtupleProducer/Objects/interface/RecoElectron.h" // RecoElectron
+#include "TallinnNtupleProducer/Objects/interface/RecoMuon.h"     // RecoMuon
+#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"   // RecoHadTau
 
-#include <DataFormats/Math/interface/deltaR.h>                   // deltaR()
+#include <DataFormats/Math/interface/deltaR.h>                    // deltaR()
 
-#include <assert.h>                                              // assert()
-#include <vector>                                                // std::vector
+#include <assert.h>                                               // assert()
+#include <vector>                                                 // std::vector
 
 template <typename T>
 void

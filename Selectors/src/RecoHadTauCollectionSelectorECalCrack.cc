@@ -43,7 +43,6 @@ compPositionAtECalEntrance(const RecoHadTau& hadTau, const Particle::Point& vert
       yAtECalEntrance, 
       zAtECalEntrance);
   } else {
-    zAtECalEntrance = 0.;
     if      ( hadTau.eta() > 0. ) zAtECalEntrance = +zECal_barrel;
     else if ( hadTau.eta() < 0. ) zAtECalEntrance = -zECal_barrel;
     else assert(0);

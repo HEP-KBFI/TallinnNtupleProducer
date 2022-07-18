@@ -33,11 +33,8 @@ getPtBin(double minPt,
   if     (minPt > 0. && maxPt > 0.) PtBin = Form("Pt%1.1fto%1.1f", minPt, maxPt);
   else if(minPt > 0.              ) PtBin = Form("PtGt%1.1f", minPt);
   else if(              maxPt > 0.) PtBin = Form("PtLt%1.1f", maxPt);
-  else if (minPt < 0. && maxPt < 0.){
-    PtBin = "incl";                          
-  }else{
-    assert(0);
-  }
+  else if(minPt < 0. && maxPt < 0.) PtBin = "incl";                          
+  else                              assert(0);
   return boost::replace_all_copy(PtBin, ".", "_");
 }
 
@@ -51,7 +48,7 @@ getTrigMatchingOption_2016(const std::string& trigMatching)
   else if ( trigMatching == "failsTriggerMatchingLooseIso"          ) filterBit = kTauFilterBit2016_failsLooseIso;
   else if ( trigMatching == "passesTriggerMatchingMediumIso"        ) filterBit = kTauFilterBit2016_passesMediumIso;
   else if ( trigMatching == "failsTriggerMatchingMediumIso"         ) filterBit = kTauFilterBit2016_failsMediumIso;
-  throw cmsException(__func__, __LINE__)
+  else throw cmsException(__func__, __LINE__)
           << "Invalid parameter 'trigMatching' = " << trigMatching << " !!";
   return filterBit;
 }
@@ -68,7 +65,7 @@ getTrigMatchingOption_2017and2018(const std::string& trigMatching)
   else if ( trigMatching == "failsTriggerMatchingMediumChargedIso"  ) filterBit = kTauFilterBit2017and2018_failsMediumChargedIso;
   else if ( trigMatching == "passesTriggerMatchingTightChargedIso"  ) filterBit = kTauFilterBit2017and2018_passesTightChargedIso;
   else if ( trigMatching == "failsTriggerMatchingTightChargedIso"   ) filterBit = kTauFilterBit2017and2018_failsTightChargedIso;
-  throw cmsException(__func__, __LINE__)
+  else throw cmsException(__func__, __LINE__)
           << "Invalid parameter 'trigMatching' = " << trigMatching << " !!";
   return filterBit;
 }

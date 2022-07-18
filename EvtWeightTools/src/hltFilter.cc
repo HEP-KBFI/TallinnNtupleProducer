@@ -5,6 +5,8 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"       // RecoHadTau
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"       // RecoLepton
 
+#include <array>                                                      // std::array<,>
+
 bool
 hltFilter(const std::map<hltPathsE, bool> & trigger_bits,
           const std::vector<const RecoLepton *> & leptons,

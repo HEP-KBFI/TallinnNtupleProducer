@@ -14,5 +14,5 @@
   <use   name="TallinnNtupleProducer/Selectors"/>
   <use   name="TallinnNtupleProducer/Writers"/>
   <use   name="root"/>
-  <Flags CXXFLAGS="-O3 -fPIC -Wswitch -Wswitch-enum -Werror -Wshadow -Wno-reorder -Wno-error=bool-compare" />
+  <Flags CXXFLAGS="-O3 -fPIC -Wswitch -Wswitch-enum -Werror -Wshadow -Wno-reorder -Wno-error=bool-compare -Wall -Wextra" />
 </bin>

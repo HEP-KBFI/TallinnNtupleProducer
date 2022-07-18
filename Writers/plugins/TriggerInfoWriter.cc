@@ -38,7 +38,7 @@ TriggerInfoWriter::TriggerInfoWriter(const edm::ParameterSet & cfg)
   std::string PD_string = cfg.getParameter<std::string>("PD");
   PD_ = convertPD_to_int(PD_string);
   vstring PD_priority_strings = cfg.getParameter<vstring>("PD_priority");
-  for ( auto PD_priority_string : PD_priority_strings )
+  for ( const auto & PD_priority_string : PD_priority_strings )
   {
     PD_priority_.push_back(convertPD_to_int(PD_priority_string));
   }
@@ -164,4 +164,4 @@ TriggerInfoWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, TriggerInfoWriter, "TriggerInfoWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, TriggerInfoWriter, "TriggerInfoWriter"); // clazy:skip

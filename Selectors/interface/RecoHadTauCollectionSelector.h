@@ -1,6 +1,8 @@
 #ifndef TallinnNtupleProducer_Selectors_RecoHadTauCollectionSelector_h
 #define TallinnNtupleProducer_Selectors_RecoHadTauCollectionSelector_h
 
+#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                   // RecoHadTau
+
 #include "TallinnNtupleProducer/Selectors/interface/ParticleCollectionSelector.h" // ParticleCollectionSelector
 
 enum class TauID;

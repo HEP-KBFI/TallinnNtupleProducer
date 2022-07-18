@@ -86,4 +86,4 @@ RecoHadTauMultiplicityWriter::get_supported_systematics(const edm::ParameterSet 
   return RecoHadTauReader::get_supported_systematics(cfg);
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoHadTauMultiplicityWriter, "RecoHadTauMultiplicityWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoHadTauMultiplicityWriter, "RecoHadTauMultiplicityWriter"); // clazy:skip

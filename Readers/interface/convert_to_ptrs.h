@@ -1,6 +1,8 @@
 #ifndef TallinnNtupleProducer_Readers_convert_to_ptrs_h
 #define TallinnNtupleProducer_Readers_convert_to_ptrs_h
 
+#include <vector> // std::vector<>
+
 /**
  * @brief Auxiliary function to convert std::vector<Particle> to std::vector<const Particle*>, 
  * @return std::vector of const pointers to particles in collection given as function argument

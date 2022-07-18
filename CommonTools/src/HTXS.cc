@@ -19,6 +19,14 @@ HTXS::HTXS(const HTXS & other)
   y_ = other.y_;
 }
 
+HTXS &
+HTXS::operator=(const HTXS & other)
+{
+  pt_ = other.pt_;
+  y_ = other.y_;
+  return *this;
+}
+
 int
 HTXS::get_category() const
 {

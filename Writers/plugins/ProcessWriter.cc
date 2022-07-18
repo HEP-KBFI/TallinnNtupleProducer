@@ -29,4 +29,4 @@ ProcessWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, ProcessWriter, "ProcessWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, ProcessWriter, "ProcessWriter"); // clazy:skip

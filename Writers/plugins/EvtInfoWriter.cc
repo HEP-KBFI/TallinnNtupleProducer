@@ -34,4 +34,4 @@ EvtInfoWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtInfoWriter, "EvtInfoWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, EvtInfoWriter, "EvtInfoWriter"); // clazy:skip

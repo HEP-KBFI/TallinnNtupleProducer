@@ -44,4 +44,4 @@ GenHHKinematicsWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, GenHHKinematicsWriter, "GenHHKinematicsWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, GenHHKinematicsWriter, "GenHHKinematicsWriter"); // clazy:skip

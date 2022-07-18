@@ -44,4 +44,4 @@ MEtFilterWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return std::vector<std::string>();
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, MEtFilterWriter, "MEtFilterWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, MEtFilterWriter, "MEtFilterWriter"); // clazy:skip

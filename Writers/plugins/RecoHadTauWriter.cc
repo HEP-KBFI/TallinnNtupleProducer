@@ -43,7 +43,7 @@ RecoHadTauWriter::RecoHadTauWriter(const edm::ParameterSet & cfg)
 
 RecoHadTauWriter::~RecoHadTauWriter()
 {
-  for ( auto it : central_or_shiftEntries_ )
+  for ( auto & it : central_or_shiftEntries_ )
   {
     delete[] it.second.pt_;
     delete[] it.second.eta_;
@@ -194,4 +194,4 @@ RecoHadTauWriter::get_supported_systematics(const edm::ParameterSet & cfg)
   return RecoHadTauReader::get_supported_systematics(cfg);
 }
 
-DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoHadTauWriter, "RecoHadTauWriter");
+DEFINE_EDM_PLUGIN(WriterPluginFactory, RecoHadTauWriter, "RecoHadTauWriter"); // clazy:skip

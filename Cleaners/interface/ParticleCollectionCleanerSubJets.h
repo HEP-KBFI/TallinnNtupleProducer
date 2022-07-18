@@ -5,6 +5,9 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // get_human_line()
 
+#include <vector>                                                     // std::vector<>
+#include <iostream>                                                   // std::cout
+
 template <typename T>
 class ParticleCollectionCleanerSubJets
 {
@@ -33,8 +36,8 @@ public:
         isOverlap = true;
         if(debug_)
         {
-          std::cout << "Jet of type '" << get_human_name<T>() << "' "
-                    << "removed:\n"    << *particle
+          std::cout << "Jet of type '" << get_human_name(this, __func__, __LINE__) << "' "
+                       "removed:\n"    << *particle
                     << "because it does not have subjets\n"
           ;
         }
@@ -59,9 +62,9 @@ public:
           if(debug_)
           {
             std::cout
-              << "Jet of type '" << get_human_name<T>() << "' (that has 3rd subjet =" << subJet3Exists<T>(0) << ") "
+              << "Jet of type '" << get_human_name(this, __func__, __LINE__) << "' "
                  "removed:\n" << *particle << "because it overlapped with:\n" << *overlap << " "
-                 "within dR1 = " << dRoverlap1 << " dR2 = " << dRoverlap2 << " dR3 = " << dRoverlap3 << '\n'
+                 "within dR1 = " << dRoverlap1 << " dR2 = " << dRoverlap2 << '\n'
             ;
           }
           break;
