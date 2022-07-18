@@ -15,6 +15,7 @@
 #include "FWCore/PluginManager/interface/standard.h"                                            // edmplugin::standard::config()
 #include "PhysicsTools/FWLite/interface/TFileService.h"                                         // fwlite::TFileService
 
+#include "TallinnNtupleProducer/CommonTools/interface/memory_logger.h"                          // log_memory(), display_memory()
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h"               // BranchAddressInitializer::print()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
@@ -200,7 +201,8 @@ int main(int argc, char* argv[])
 
   fwlite::InputSource inputFiles(cfg);
   int maxEvents = inputFiles.maxEvents();
-  std::cout << " maxEvents = " << maxEvents << std::endl;
+  int skipEvents = cfg.getParameterSet("fwliteInput").getParameter<int>("skipEvents");
+  std::cout << " maxEvents = " << maxEvents << ", skipEvents = " << skipEvents << '\n';
   unsigned reportEvery = inputFiles.reportAfter();
 
   fwlite::OutputFiles outputFile(cfg);
@@ -335,11 +337,15 @@ int main(int argc, char* argv[])
       {
         if ( inputTree->canReport(reportEvery) )
         {
+          const auto memory_consumption = log_memory();
           std::cout << "processing Entry " << inputTree->getCurrentMaxEventIdx()
                     << " or " << inputTree->getCurrentEventIdx() << " entry in #"
                     << (inputTree->getProcessedFileCount() - 1)
                     << " (" << runLumiEvent
-                    << ") file\n";
+                    << ") file; "
+                       "VSIZE = " << display_memory(memory_consumption.first) << ", "
+                       "RSS = " << display_memory(memory_consumption.second) << '\n';
+          ;
         }
         ++analyzedEntries;
         histogram_analyzedEntries->Fill(0.);
@@ -350,7 +356,8 @@ int main(int argc, char* argv[])
         assert(central_or_shift.size() == 1); // shifting or smearing energy scales
         default_systematics = central_or_shift.at(0);
       }
-      if ( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) )
+      if (( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) ) ||
+          ( skipEvents > 0 && analyzedEntries <= skipEvents ))
       {
         skipEvent = true;
         break; // skip to the next event

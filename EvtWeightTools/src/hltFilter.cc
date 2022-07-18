@@ -121,8 +121,9 @@ hltFilter(const RecoHadTau& tau, const hltPathsE& hltPath)
     { hltPathsE::trigger_2tau,     64 }
   };
   if ( trigger_filterBits.find(hltPath) == trigger_filterBits.end() )
-    throw cms::Exception("hltFilter") 
-      << "Invalid parameter 'hltPath' = " << (int)hltPath << " !!\n";
+  {
+    throw cmsException(__func__, __LINE__) << "Invalid parameter 'hltPath' = " << (int)hltPath;
+  }
   if ( tau.filterBits() & trigger_filterBits.at(hltPath) ) return true;
   else return false;
 }
@@ -141,7 +142,7 @@ hltFilter(const RecoHadTau& tau, int filterBit, Era era)
     else if ( filterBit == kTauFilterBit2016_failsLooseIso                 ) { filterBit_mask = 1; filterBit_status = 0; }
     else if ( filterBit == kTauFilterBit2016_passesMediumIso               ) { filterBit_mask = 2; filterBit_status = 1; }
     else if ( filterBit == kTauFilterBit2016_failsMediumIso                ) { filterBit_mask = 2; filterBit_status = 0; }
-    else throw cms::Exception("hltFilter") 
+    else throw cmsException(__func__, __LINE__)
       << "Invalid parameter 'filterBit' = " << filterBit << " !!\n";
   }
   // HLT filter names specific to 2017 and 2018 data-taking periods
@@ -154,10 +155,10 @@ hltFilter(const RecoHadTau& tau, int filterBit, Era era)
     else if ( filterBit == kTauFilterBit2017and2018_failsMediumChargedIso  ) { filterBit_mask = 2; filterBit_status = 0; }
     else if ( filterBit == kTauFilterBit2017and2018_passesTightChargedIso  ) { filterBit_mask = 4; filterBit_status = 1; }
     else if ( filterBit == kTauFilterBit2017and2018_failsTightChargedIso   ) { filterBit_mask = 4; filterBit_status = 0; }
-    else throw cms::Exception("hltFilter") 
+    else cmsException(__func__, __LINE__)
       << "Invalid parameter 'filterBit' = " << filterBit << " !!\n";
   }
-  else throw cms::Exception("hltFilter") 
+  else cmsException(__func__, __LINE__)
     << "Invalid era = " << static_cast<int>(era) << " !!\n";
   if      ( filterBit_status == 1 ) 
   {
