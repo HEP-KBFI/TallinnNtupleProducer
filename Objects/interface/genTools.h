@@ -3,6 +3,8 @@
 
 #include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // GenParticleCollection
 
+#include <utility> // std::pair<,>
+
 // forward declarations
 enum class TopPtRwgtOption;
 
@@ -12,5 +14,8 @@ getHiggsDecayMode(const GenParticleCollection & genParticles);
 double
 topPtRwgtSF(const GenParticleCollection & genParticles,
             TopPtRwgtOption option);
+
+std::pair<const GenParticle *, const GenParticle *>
+findTauLeptonPair(const GenParticleCollection & genParticles);
 
 #endif // TallinnNtupleProducer_Objects_genTools_h

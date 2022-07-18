@@ -176,11 +176,11 @@ class EvtWeightRecorder
 
   void
   record_dy_rwgt(const DYMCReweighting * const dyReweighting,
-                 const std::vector<GenParticle> & genTauLeptons);
+                 const std::vector<GenParticle> & genParticles);
 
   void
   record_dy_norm(const DYMCNormScaleFactors * const dyNormScaleFactors,
-                 const std::vector<GenParticle> & genTauLeptons,
+                 const std::vector<GenParticle> & genParticles,
                  int nJets,
                  int nBLoose,
                  int nBMedium);

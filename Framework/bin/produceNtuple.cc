@@ -30,6 +30,8 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h" // Data_to_MC_CorrectionInterface_2016
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2017.h" // Data_to_MC_CorrectionInterface_2017
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2018.h" // Data_to_MC_CorrectionInterface_2018
+#include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCReweighting.h"                     // DYMCReweighting
+#include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCNormScaleFactors.h"                // DYMCNormScaleFactors
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"                    // EvtWeightManager
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"                   // EvtWeightRecorder
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HadTauFakeRateInterface.h"             // HadTauFakeRateInterface
@@ -37,6 +39,7 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceLO.h"                 // HHWeightInterfaceLO
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceNLO.h"                // HHWeightInterfaceNLO
 #include "TallinnNtupleProducer/EvtWeightTools/interface/LeptonFakeRateInterface.h"             // LeptonFakeRateInterface
+#include "TallinnNtupleProducer/EvtWeightTools/interface/LHEVpt_LOtoNLO.h"                      // LHEVpt_LOtoNLO
 #include "TallinnNtupleProducer/Objects/interface/Event.h"                                      // Event
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                  // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                                  // GenHadTau
@@ -99,33 +102,36 @@ int main(int argc, char* argv[])
   if ( !edm::readPSetsFrom(argv[1])->existsAs<edm::ParameterSet>("process") )
     throw cmsException("produceNtuple", __LINE__) << "No ParameterSet 'process' found in config file !!";
 
-  edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameterSet("process");
+  const edm::ParameterSet cfg = edm::readPSetsFrom(argv[1])->getParameterSet("process");
 
-  edm::ParameterSet cfg_produceNtuple = cfg.getParameterSet("produceNtuple");
-  AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
+  const edm::ParameterSet cfg_produceNtuple = cfg.getParameterSet("produceNtuple");
+  const AnalysisConfig analysisConfig("produceNtuple", cfg_produceNtuple);
   
-  std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
+  const std::string treeName = cfg_produceNtuple.getParameter<std::string>("treeName");
 
-  std::string process = cfg_produceNtuple.getParameter<std::string>("process");
+  const std::string process = cfg_produceNtuple.getParameter<std::string>("process");
   std::cout << "Processing process = '" << process << "'" << std::endl;
 
   std::string era_string = cfg_produceNtuple.getParameter<std::string>("era");
   const Era era = get_era(era_string);
   std::cout << "Setting era to: " << get_era(era) << std::endl;
 
-  bool isMC = cfg_produceNtuple.getParameter<bool>("isMC");
-  edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
-  bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
-  std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
+  const bool isMC = cfg_produceNtuple.getParameter<bool>("isMC");
+  const edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
+  const bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
+  const std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
   const pileupJetID apply_pileupJetID = get_pileupJetID(cfg_produceNtuple.getParameter<std::string>("apply_pileupJetID"));
-  bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
-  bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
-  bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");
+  const bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
+  const bool apply_DYMCReweighting = cfg_produceNtuple.getParameter<bool>("apply_DYMCReweighting");
+  const bool apply_DYMCNormScaleFactors = cfg_produceNtuple.getParameter<bool>("apply_DYMCNormScaleFactors");
+  const bool apply_LHEVpt_rwgt = cfg_produceNtuple.getParameter<bool>("apply_LHEVpt_rwgt");
+  const bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
+  const bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");
 
-  unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
-  bool applyNumNominalLeptonsCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalLeptonsCut");
-  unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
-  bool applyNumNominalHadTausCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalHadTausCut");
+  const unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
+  const bool applyNumNominalLeptonsCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalLeptonsCut");
+  const unsigned int numNominalHadTaus = cfg_produceNtuple.getParameter<unsigned int>("numNominalHadTaus");
+  const bool applyNumNominalHadTausCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalHadTausCut");
   std::cout << "Setting nominal multiplicity of leptons and taus to: #leptons = " << numNominalLeptons << ", #taus = " << numNominalHadTaus << std::endl;
   if ( applyNumNominalLeptonsCut )
   {
@@ -161,7 +167,7 @@ int main(int argc, char* argv[])
   }
   std::cout << "Applying selection = '" << selection << "'" << std::endl;
   
-  bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
+  const bool isDEBUG = cfg_produceNtuple.getParameter<bool>("isDEBUG");
 
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("era", era_string);
@@ -233,6 +239,23 @@ int main(int argc, char* argv[])
     inputTree->registerReader(l1PreFiringWeightReader);
   }
 
+  DYMCReweighting * dyReweighting = nullptr;
+  if(apply_DYMCReweighting)
+  {
+    dyReweighting = new DYMCReweighting(era);
+  }
+  DYMCNormScaleFactors * dyNormScaleFactors = nullptr;
+  if(apply_DYMCNormScaleFactors)
+  {
+    dyNormScaleFactors = new DYMCNormScaleFactors(era);
+  }
+  LHEVpt_LOtoNLO * lhe_vpt = nullptr;
+  if(apply_LHEVpt_rwgt)
+  {
+    lhe_vpt = new LHEVpt_LOtoNLO(analysisConfig, isDEBUG);
+    inputTree->registerReader(lhe_vpt);
+  }
+
   LHEInfoReader* lheInfoReader = nullptr;
   PSWeightReader* psWeightReader = nullptr;
   LHEParticleReader* lheParticleReader = nullptr;
@@ -274,6 +297,7 @@ int main(int argc, char* argv[])
   std::vector<std::unique_ptr<WriterBase>> writers;
   for ( auto cfg_writer : cfg_writers )
   {
+    // TODO bring out constant portion from this loop and merge with cfg_writer inside the loop
     const std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
@@ -287,6 +311,10 @@ int main(int argc, char* argv[])
     cfg_writer.addParameter<bool>("has_PS_weights", psWeightReader && psWeightReader->has_PS_weights());
     cfg_writer.addParameter<bool>("has_PDF_weights", has_PDF_weights);
     cfg_writer.addParameter<bool>("apply_pileupJetID", apply_pileupJetID != pileupJetID::kPileupJetID_disabled);
+    cfg_writer.addParameter<bool>("apply_DYMCReweighting", apply_DYMCReweighting);
+    cfg_writer.addParameter<bool>("apply_DYMCNormScaleFactors", apply_DYMCNormScaleFactors);
+    cfg_writer.addParameter<bool>("apply_LHEVpt_rwgt", apply_LHEVpt_rwgt);
+    cfg_writer.addParameter<bool>("apply_EWK_corrections", analysisConfig.isMC_EWK());
     if(has_PDF_weights)
     {
       cfg_writer.addParameter<int>("nof_PDF_members", lheInfoReader->saveAllPdfMembers() ? lheInfoReader->getPdfSize() : 0);
@@ -392,6 +420,18 @@ int main(int argc, char* argv[])
         if ( eventWeightManager      ) evtWeightRecorder.record_auxWeight(eventWeightManager);
         if ( l1PreFiringWeightReader ) evtWeightRecorder.record_l1PrefireWeight(l1PreFiringWeightReader);
         if ( apply_topPtReweighting  ) evtWeightRecorder.record_toppt_rwgt(event.topPtRwgtSF());
+        if ( apply_LHEVpt_rwgt       ) evtWeightRecorder.record_LHEVpt(lhe_vpt);
+        if ( dyReweighting           ) evtWeightRecorder.record_dy_rwgt(dyReweighting, event.genParticles());
+        if ( dyNormScaleFactors )
+        {
+          evtWeightRecorder.record_dy_norm(
+            dyNormScaleFactors,
+            event.genParticles(),
+            event.selJetsAK4().size(),
+            event.selJetsAK4_btagLoose().size(),
+            event.selJetsAK4_btagMedium().size()
+          );
+        }
         lheInfoReader->read();
         psWeightReader->read();
         evtWeightRecorder.record_lheScaleWeight(lheInfoReader);
@@ -562,6 +602,7 @@ int main(int argc, char* argv[])
   delete eventReader;
   delete l1PreFiringWeightReader;
   delete lheInfoReader;
+  delete dyReweighting;
   delete psWeightReader;
   delete lheParticleReader;
 

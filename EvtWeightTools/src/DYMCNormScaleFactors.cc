@@ -3,6 +3,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"     // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"              // Era
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kDYMCNormScaleFactors_central, kDYMCNormScaleFactors_Up, kDYMCNormScaleFactors_Down
+#include "TallinnNtupleProducer/Objects/interface/genTools.h"             // findTauLeptonPair()
 
 DYMCNormScaleFactors::DYMCNormScaleFactors(Era era,
                                            bool debug)
@@ -14,29 +15,19 @@ DYMCNormScaleFactors::~DYMCNormScaleFactors()
 {}
 
 double
-DYMCNormScaleFactors::getWeight(const std::vector<GenParticle> & genTauLeptons,
+DYMCNormScaleFactors::getWeight(const std::vector<GenParticle> & genParticles,
                                 int nJets,
                                 int nBLoose,
                                 int nBMedium,
                                 int central_or_shift) const
 {
-  const GenParticle * genTauLeptonPlus = nullptr;
-  const GenParticle * genTauLeptonMinus = nullptr;
-  for(const GenParticle & genTauLepton: genTauLeptons)
-  {
-    if(genTauLepton.charge() > 0 && (! genTauLeptonPlus || genTauLepton.pt() > genTauLeptonPlus->pt()))
-    {
-      genTauLeptonPlus = &genTauLepton;
-    }
-    if(genTauLepton.charge() < 0 && (! genTauLeptonMinus || genTauLepton.pt() > genTauLeptonMinus->pt()))
-    {
-      genTauLeptonMinus = &genTauLepton;
-    }
-  }
+  const auto tauLeptonPair = findTauLeptonPair(genParticles);
+  const GenParticle * const genTauLeptonPlus = tauLeptonPair.first;
+  const GenParticle * const genTauLeptonMinus = tauLeptonPair.second;
 
   double weight = 1.;
   double weight_error = 0.;
-  if(genTauLeptonPlus && genTauLeptonMinus && genTauLeptons.size() == 2)
+  if(genTauLeptonPlus && genTauLeptonMinus)
   {
     const Particle::LorentzVector dileptonP4 = genTauLeptonPlus->p4() + genTauLeptonMinus->p4();
     const double dileptonMass = dileptonP4.mass();

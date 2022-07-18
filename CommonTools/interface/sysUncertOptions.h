@@ -324,16 +324,16 @@ extern const std::map<std::string, ElectronPtSys> ePtSysMap;
 extern const std::map<std::string, MuonPtSys> mPtSysMap;
 
 // DY uncertainties
-extern const std::map<std::string, int> dyMCRwgtSysMap; // NOT WRITTEN YET
-extern const std::map<std::string, int> dyMCNormSysMap; // NOT WRITTEN YET
+extern const std::map<std::string, int> dyMCRwgtSysMap;
+extern const std::map<std::string, int> dyMCNormSysMap;
 
 // top uncertainties
 extern const std::map<std::string, int> topPtRwgtSysMap;
 
 // EWK uncertainties
-extern const std::map<std::string, EWKJetSys> ewkJetSysMap; // NOT WRITTEN YET
-extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap; // NOT WRITTEN YET
-extern const std::map<std::string, LHEVptSys> lheVptSysMap; // NOT WRITTEN YET
+extern const std::map<std::string, EWKJetSys> ewkJetSysMap;
+extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap;
+extern const std::map<std::string, LHEVptSys> lheVptSysMap;
 
 std::vector<std::string>
 get_inclusive_systeatics(const std::vector<std::string> & systematics);

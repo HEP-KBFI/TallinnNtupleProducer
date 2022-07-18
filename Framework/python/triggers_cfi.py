@@ -11,11 +11,12 @@ import FWCore.ParameterSet.Config as cms
 #      - primary dataset (PD) that belonfs to this type of trigger
 #
 #    The trigger type is defined in:
-#      https://github.com/HEP-KBFI/TallinnNtupleProducer/blob/main/Objects/src/TriggerInfo.cc#L72-L85
+#      https://github.com/HEP-KBFI/TallinnNtupleProducer/blob/db7eaec73a328698a7e39ccc9d068e045a7b63da/Objects/src/TriggerInfo.cc#L72-L85
 #    The names of PDs are defined in:
-#      https://github.com/HEP-KBFI/TallinnNtupleProducer/blob/main/Writers/plugins/TriggerInfoWriter.cc#L16-L22
-#    The HLT filter bits are defined in:
-#      https://github.com/HEP-KBFI/cmssw/blob/master/PhysicsTools/NanoAOD/python/triggerObjects_cff.py
+#      https://github.com/HEP-KBFI/TallinnNtupleProducer/blob/db7eaec73a328698a7e39ccc9d068e045a7b63da/Writers/plugins/TriggerInfoWriter.cc#L21-L27
+#    For NanoAODv7 HLT filter bits are defined in:
+#      https://github.com/cms-sw/cmssw/blob/CMSSW_10_2_22/PhysicsTools/NanoAOD/python/triggerObjects_cff.py
+#    (For other NanoAOD versions, please check the corresponding CMSSW release that was used in the production of said NanoAOD Ntuple)
 #
 #    Note that the present trigger information is incomplete:
 #      - the trigger information for 2017 is missing the types 3mu, 1e2mu, 2e1mu, 3e, 2tau, 1mu1tau, 1e1tau, 1tau

@@ -129,7 +129,24 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
         merge_systematic_shifts(supported_systematics, map_keys(mToTauFRSysMap));
         merge_systematic_shifts(supported_systematics, map_keys(tauIDSFSysMap));
       }
-      //TODO: trigger SF, b-tagging weight, PU jet ID SF, subjet b-tagging SF, jet/e/mu->tau FR, lepton/tau ID SF, jet->lepton FR, DY weights, EWK eights, Vpt
+      if(cfg.getParameter<bool>("apply_DYMCReweighting"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(dyMCRwgtSysMap));
+      }
+      if(cfg.getParameter<bool>("apply_DYMCNormScaleFactors"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(dyMCNormSysMap));
+      }
+      if(cfg.getParameter<bool>("apply_LHEVpt_rwgt"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(lheVptSysMap));
+      }
+      if(cfg.getParameter<bool>("apply_EWK_corrections"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(ewkJetSysMap));
+        merge_systematic_shifts(supported_systematics, map_keys(ewkBJetSysMap));
+      }
+      //TODO: trigger SF, subjet b-tagging SF, Vpt
     }
   }
   return supported_systematics;

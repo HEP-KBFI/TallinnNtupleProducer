@@ -4,6 +4,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                // Era
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"   // kDYMCReweighting_*
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h" // lutWrapperTH2
+#include "TallinnNtupleProducer/Objects/interface/genTools.h"               // findTauLeptonPair()
 
 #include <TFile.h>                                                          // TFile
 
@@ -58,25 +59,15 @@ DYMCReweighting::~DYMCReweighting()
 }
 
 double
-DYMCReweighting::getWeight(const std::vector<GenParticle> & genTauLeptons,
+DYMCReweighting::getWeight(const std::vector<GenParticle> & genParticles,
                            int central_or_shift) const
 {
-  const GenParticle * genTauLeptonPlus = nullptr;
-  const GenParticle * genTauLeptonMinus = nullptr;
-  for(const GenParticle & genTauLepton: genTauLeptons)
-  {
-    if(genTauLepton.charge() > 0 && (! genTauLeptonPlus || genTauLepton.pt() > genTauLeptonPlus->pt()))
-    {
-      genTauLeptonPlus = &genTauLepton;
-    }
-    if(genTauLepton.charge() < 0 && (! genTauLeptonMinus || genTauLepton.pt() > genTauLeptonMinus->pt()))
-    {
-      genTauLeptonMinus = &genTauLepton;
-    }
-  }
+  const auto tauLeptonPair = findTauLeptonPair(genParticles);
+  const GenParticle * const genTauLeptonPlus = tauLeptonPair.first;
+  const GenParticle * const genTauLeptonMinus = tauLeptonPair.second;
 
   double weight = 1.;
-  if(genTauLeptonPlus && genTauLeptonMinus && genTauLeptons.size() == 2)
+  if(genTauLeptonPlus && genTauLeptonMinus)
   {
     const Particle::LorentzVector dileptonP4 = genTauLeptonPlus->p4() + genTauLeptonMinus->p4();
     const double dileptonMass = dileptonP4.mass();

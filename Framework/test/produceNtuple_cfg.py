@@ -98,6 +98,7 @@ process.produceNtuple = cms.PSet(
     apply_genWeight = cms.bool(True),
     apply_DYMCReweighting = cms.bool(False),
     apply_DYMCNormScaleFactors = cms.bool(False),
+    apply_LHEVpt_rwgt = cms.bool(False),
     apply_topPtReweighting = cms.string(''),
     apply_l1PreFireWeight = cms.bool(True),
     apply_pileupJetID = cms.string(''),

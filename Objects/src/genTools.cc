@@ -187,3 +187,40 @@ topPtRwgtSF(const GenParticleCollection & genParticles,
   assert(topPtRwgt > 0.);
   return std::sqrt(topPtRwgt);
 }
+
+std::pair<const GenParticle *, const GenParticle *>
+findTauLeptonPair(const GenParticleCollection & genParticles)
+{
+  const GenParticle * genTauLeptonPlus = nullptr;
+  const GenParticle * genTauLeptonMinus = nullptr;
+  for(const GenParticle & genParticle: genParticles)
+  {
+    if(genParticle.absPdgId() != 15)
+    {
+      continue;
+    }
+    bool not_last_copy = false; // TOOD could StatusFlag::isLastCopy work?
+    for(int dau_idx: genParticle.dauIdxs())
+    {
+      if(genParticles.at(dau_idx).absPdgId() == 15)
+      {
+        not_last_copy = true;
+        break;
+      }
+    }
+    if(! not_last_copy)
+    {
+      continue;
+    }
+    // TODO require StatusFlag::isPrompt? or does that not work when the tau originates from (Z/gamma*) decays?
+    if(genParticle.charge() > 0 && (! genTauLeptonPlus || genParticle.pt() > genTauLeptonPlus->pt()))
+    {
+      genTauLeptonPlus = &genParticle;
+    }
+    if(genParticle.charge() < 0 && (! genTauLeptonMinus || genParticle.pt() > genTauLeptonMinus->pt()))
+    {
+      genTauLeptonMinus = &genParticle;
+    }
+  }
+  return std::make_pair(genTauLeptonPlus, genTauLeptonMinus);
+}

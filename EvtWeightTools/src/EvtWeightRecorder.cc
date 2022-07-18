@@ -497,7 +497,7 @@ EvtWeightRecorder::record_auxWeight(const EvtWeightManager * const evtWeightMana
 
 void
 EvtWeightRecorder::record_dy_rwgt(const DYMCReweighting * const dyReweighting,
-                                  const std::vector<GenParticle> & genTauLeptons)
+                                  const std::vector<GenParticle> & genParticles)
 {
   assert(isMC_);
   weights_dy_rwgt_.clear();
@@ -508,13 +508,13 @@ EvtWeightRecorder::record_dy_rwgt(const DYMCReweighting * const dyReweighting,
     {
       continue;
     }
-    weights_dy_rwgt_[dyMCReweighting_option] = dyReweighting->getWeight(genTauLeptons, dyMCReweighting_option);
+    weights_dy_rwgt_[dyMCReweighting_option] = dyReweighting->getWeight(genParticles, dyMCReweighting_option);
   }
 }
 
 void
 EvtWeightRecorder::record_dy_norm(const DYMCNormScaleFactors * const dyNormScaleFactors,
-                                  const std::vector<GenParticle> & genTauLeptons,
+                                  const std::vector<GenParticle> & genParticles,
                                   int nJets,
                                   int nBLoose,
                                   int nBMedium)
@@ -529,7 +529,7 @@ EvtWeightRecorder::record_dy_norm(const DYMCNormScaleFactors * const dyNormScale
       continue;
     }
     weights_dy_norm_[dyMCNormScaleFactors_option] = dyNormScaleFactors->getWeight(
-      genTauLeptons, nJets, nBLoose, nBMedium, dyMCNormScaleFactors_option
+      genParticles, nJets, nBLoose, nBMedium, dyMCNormScaleFactors_option
     );
   }
 }
