@@ -1,14 +1,14 @@
-#ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger_h
-#define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger_h
+#ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_0l_4tau_trigger_h
+#define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_0l_4tau_trigger_h
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_2tau_trigger.h"
 
-class Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger
+class Data_to_MC_CorrectionInterface_0l_4tau_trigger
   : public Data_to_MC_CorrectionInterface_0l_2tau_trigger
 {
 public:
-  Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger(const edm::ParameterSet & cfg);
-  ~Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger();
+  Data_to_MC_CorrectionInterface_0l_4tau_trigger(const edm::ParameterSet & cfg);
+  ~Data_to_MC_CorrectionInterface_0l_4tau_trigger();
 
   //-----------------------------------------------------------------------------
   // set hadTau pT, eta and decay mode
@@ -60,4 +60,4 @@ protected:
   int hadTau4_decayMode_;
 };
 
-#endif // TallinnNtupleProducer_EvtWeightTools_data_to_MC_corrections_hh_0l_4tau_trigger_h
+#endif // TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_0l_4tau_trigger_h

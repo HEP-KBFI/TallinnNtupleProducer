@@ -1,16 +1,16 @@
-#ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger_h
-#define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger_h
+#ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h
+#define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_2tau_trigger.h"
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h" // lutWrapperBase, vLutWrapperBase
 
-class Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger
+class Data_to_MC_CorrectionInterface_1l_3tau_trigger
   : public Data_to_MC_CorrectionInterface_1l_2tau_trigger
 {
 public:
-  Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger(const edm::ParameterSet & cfg);
-  ~Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger();
+  Data_to_MC_CorrectionInterface_1l_3tau_trigger(const edm::ParameterSet & cfg);
+  ~Data_to_MC_CorrectionInterface_1l_3tau_trigger();
 
   //-----------------------------------------------------------------------------
   // set HLT trigger bits
@@ -93,4 +93,4 @@ protected:
   TauTriggerSFInterface effTrigger_2tau_tauLeg_;
 };
 
-#endif // TallinnNtupleProducer_EvtWeightTools_data_to_MC_corrections_hh_1l_3tau_trigger_h
+#endif // TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h

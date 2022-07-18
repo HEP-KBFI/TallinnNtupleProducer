@@ -1,4 +1,4 @@
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger.h"
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_4tau_trigger.h"
 
 #include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"                         // TauTriggerSFs2017
 
@@ -15,7 +15,7 @@
 
 #include <cassert> // assert()
 
-Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger(const edm::ParameterSet & cfg)
+Data_to_MC_CorrectionInterface_0l_4tau_trigger::Data_to_MC_CorrectionInterface_0l_4tau_trigger(const edm::ParameterSet & cfg)
   : Data_to_MC_CorrectionInterface_0l_2tau_trigger(cfg)
   , hadTau3_genPdgId_(0)
   , hadTau3_pt_(0.)
@@ -29,21 +29,21 @@ Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::Data_to_MC_CorrectionInterfac
   , hadTau4_decayMode_(0)
 {}
 
-Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::~Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger()
+Data_to_MC_CorrectionInterface_0l_4tau_trigger::~Data_to_MC_CorrectionInterface_0l_4tau_trigger()
 {}
 
 void
-Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::setHadTaus(const RecoHadTau * const __attribute__((unused)) hadTau1,
-                                                              const RecoHadTau * const __attribute__((unused)) hadTau2)
+Data_to_MC_CorrectionInterface_0l_4tau_trigger::setHadTaus(const RecoHadTau * const __attribute__((unused)) hadTau1,
+                                                           const RecoHadTau * const __attribute__((unused)) hadTau2)
 {
   throw cmsException(this, __func__, __LINE__) << "Invalid call";
 }
 
 void
-Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::setHadTaus(const RecoHadTau * const hadTau1,
-                                                              const RecoHadTau * const hadTau2,
-                                                              const RecoHadTau * const hadTau3,
-                                                              const RecoHadTau * const hadTau4)
+Data_to_MC_CorrectionInterface_0l_4tau_trigger::setHadTaus(const RecoHadTau * const hadTau1,
+                                                           const RecoHadTau * const hadTau2,
+                                                           const RecoHadTau * const hadTau3,
+                                                           const RecoHadTau * const hadTau4)
 {
   hadTau1_pt_        = hadTau1->pt();
   hadTau1_eta_       = hadTau1->eta();
@@ -67,7 +67,7 @@ Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::setHadTaus(const RecoHadTau *
 }
 
 double
-Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys central_or_shift) const
+Data_to_MC_CorrectionInterface_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys central_or_shift) const
 {
   if(isDEBUG_)
   {
@@ -188,8 +188,8 @@ Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys
 }
  
 double
-Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::getProb_tau(int tau_status,
-                                                               double eff_2tau_tauLeg) const
+Data_to_MC_CorrectionInterface_0l_4tau_trigger::getProb_tau(int tau_status,
+                                                            double eff_2tau_tauLeg) const
 {
   double prob = 0.;
   switch(tau_status)
@@ -202,7 +202,7 @@ Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::getProb_tau(int tau_status,
 }
 
 bool
-Data_to_MC_CorrectionInterface_hh_0l_4tau_trigger::check_triggerSFsys_opt(TriggerSFsys central_or_shift) const
+Data_to_MC_CorrectionInterface_0l_4tau_trigger::check_triggerSFsys_opt(TriggerSFsys central_or_shift) const
 {
   return
     central_or_shift == TriggerSFsys::central          ||

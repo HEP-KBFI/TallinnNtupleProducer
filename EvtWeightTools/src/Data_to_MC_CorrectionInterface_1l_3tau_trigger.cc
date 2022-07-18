@@ -1,4 +1,4 @@
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger.h"
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_3tau_trigger.h"
 
 #include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"                         // TauTriggerSFs2017
 
@@ -16,7 +16,7 @@
 
 #include <cassert> // assert()
 
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger(const edm::ParameterSet & cfg)
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::Data_to_MC_CorrectionInterface_1l_3tau_trigger(const edm::ParameterSet & cfg)
   : Data_to_MC_CorrectionInterface_1l_2tau_trigger(cfg)
   , hadTau3_genPdgId_(0)
   , hadTau3_pt_(0.)
@@ -26,15 +26,15 @@ Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::Data_to_MC_CorrectionInterfac
   , effTrigger_2tau_tauLeg_(era_str_, hadTauSelection_, TauTriggerType::DiTau)
 {}
 
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::~Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger()
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::~Data_to_MC_CorrectionInterface_1l_3tau_trigger()
 {}
 
 void
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::setTriggerBits(bool isTriggered_1e,
-                                                                  bool isTriggered_1e1tau,
-                                                                  bool isTriggered_1m,
-                                                                  bool isTriggered_1m1tau,
-                                                                  bool isTriggered_2tau)
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::setTriggerBits(bool isTriggered_1e,
+                                                               bool isTriggered_1e1tau,
+                                                               bool isTriggered_1m,
+                                                               bool isTriggered_1m1tau,
+                                                               bool isTriggered_2tau)
 {
   isTriggered_1e_     = isTriggered_1e;
   isTriggered_1e1tau_ = isTriggered_1e1tau;
@@ -44,16 +44,16 @@ Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::setTriggerBits(bool isTrigger
 }
 
 void
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::setHadTaus(const RecoHadTau * const __attribute__((unused)) hadTau1,
-                                                              const RecoHadTau * const __attribute__((unused)) hadTau2)
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::setHadTaus(const RecoHadTau * const __attribute__((unused)) hadTau1,
+                                                           const RecoHadTau * const __attribute__((unused)) hadTau2)
 {
   throw cmsException(this, __func__, __LINE__) << "Invalid call";
 }
 
 void
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::setHadTaus(const RecoHadTau * const hadTau1,
-                                                              const RecoHadTau * const hadTau2,
-                                                              const RecoHadTau * const hadTau3)
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::setHadTaus(const RecoHadTau * const hadTau1,
+                                                           const RecoHadTau * const hadTau2,
+                                                           const RecoHadTau * const hadTau3)
 {
   hadTau1_pt_        = hadTau1->pt();
   hadTau1_eta_       = hadTau1->eta();
@@ -72,7 +72,7 @@ Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::setHadTaus(const RecoHadTau *
 }
 
 double
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::getSF_triggerEff(TriggerSFsys central_or_shift) const
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::getSF_triggerEff(TriggerSFsys central_or_shift) const
 {
   if(isDEBUG_)
   {
@@ -363,9 +363,9 @@ Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::getSF_triggerEff(TriggerSFsys
 }
 
 double
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::getProb_lepton(int lepton_status,
-                                                                  double eff_1l,
-                                                                  double eff_1l1tau_lepLeg) const
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::getProb_lepton(int lepton_status,
+                                                               double eff_1l,
+                                                               double eff_1l1tau_lepLeg) const
 {
   double prob = 0.;
   switch(lepton_status)
@@ -384,9 +384,9 @@ Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::getProb_lepton(int lepton_sta
 }
  
 double
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::getProb_tau(int tau_status,
-                                                               double eff_1l1tau_tauLeg,
-                                                               double eff_2tau_tauLeg) const
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::getProb_tau(int tau_status,
+                                                            double eff_1l1tau_tauLeg,
+                                                            double eff_2tau_tauLeg) const
 {
   double prob = 0.;
   switch(tau_status)
@@ -405,7 +405,7 @@ Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::getProb_tau(int tau_status,
 }
 
 bool
-Data_to_MC_CorrectionInterface_hh_1l_3tau_trigger::check_triggerSFsys_opt(TriggerSFsys central_or_shift) const
+Data_to_MC_CorrectionInterface_1l_3tau_trigger::check_triggerSFsys_opt(TriggerSFsys central_or_shift) const
 {
   return
     central_or_shift == TriggerSFsys::central          ||
