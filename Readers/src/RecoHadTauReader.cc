@@ -210,7 +210,7 @@ RecoHadTauReader::read() const
               gInstance->hadTau_decayMode_[idxHadTau],
               gInstance->hadTau_genPartFlav_[idxHadTau],
               "DeepTau2017v2p1",
-              "nom"
+               systematic_,
                 }) : 1
         ;
       const double hadTau_pt   = gInstance->hadTau_pt_  [idxHadTau] * corrFactor;
