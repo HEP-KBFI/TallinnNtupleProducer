@@ -9,7 +9,6 @@
 
 // forward declarations
 class TTree;
-class TauESTool;
 
 enum class Era;
 
@@ -81,7 +80,6 @@ class RecoHadTauReader : public ReaderBase
   std::map<TauID, std::string> branchNames_rawMVA_;
 
   TauID tauID_;
-  TauESTool * tauESTool_;
   std::string systematic_;
 
   UInt_t nHadTaus_;

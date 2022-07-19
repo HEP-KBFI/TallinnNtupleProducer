@@ -2,14 +2,13 @@
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_0l_2tau_trigger_h
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"       // lutWrapperBase, vLutWrapperBase
-#include "TallinnNtupleProducer/EvtWeightTools/interface/TauTriggerSFInterface.h" // TauTriggerSFInterface, TriggerSFsys
 #include "correction.h"
-
 // forward declarations
 class RecoHadTau;
 
 enum class Era;
 enum class TauID;
+enum class TriggerSFsys;
 
 class Data_to_MC_CorrectionInterface_0l_2tau_trigger
 {
@@ -72,7 +71,6 @@ class Data_to_MC_CorrectionInterface_0l_2tau_trigger
   //-----------------------------------------------------------------------------
   // data/MC corrections for trigger efficiencies
 
-  TauTriggerSFInterface effTrigger_tauLeg_;
   correction::Correction::Ref sf_0l_2tau_trigger_;
   //-----------------------------------------------------------------------------
 };

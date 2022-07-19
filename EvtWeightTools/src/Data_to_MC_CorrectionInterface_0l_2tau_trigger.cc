@@ -75,8 +75,19 @@ Data_to_MC_CorrectionInterface_0l_2tau_trigger::getSF_triggerEff(TriggerSFsys ce
   double eff_2tau_tauLeg2_data = 0.;
   double eff_2tau_tauLeg2_mc   = 0.;
 
-  std::string sys = (central_or_shift == TriggerSFsys::central) ? "nom" :
-    ((central_or_shift == TriggerSFsys::shiftUp || central_or_shift == TriggerSFsys::shift_0l2tauUp) ? "up" : "down");
+  std::string sys;
+  if ( central_or_shift == TriggerSFsys::central )
+  {
+    sys = "nom";
+  }
+  else if ( central_or_shift == TriggerSFsys::shiftUp || central_or_shift == TriggerSFsys::shift_0l2tauUp )
+  {
+    sys = "up";
+  }
+  else
+  {
+    sys = "down";
+  }
 
   if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
   {

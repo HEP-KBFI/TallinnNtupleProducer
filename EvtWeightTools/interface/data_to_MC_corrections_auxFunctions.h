@@ -120,7 +120,12 @@ namespace aux
                                      vLutWrapperBase & effTrigger_1m1tau_lepLeg_mc,
                                      std::map<std::string, TFile *> & inputFiles);
 
-  TauTriggerSFValues tau_leg_efficiency(const double pt, const int dm, const std::string trigger_type, const std::string wp, const std::string data_type, correction::Correction::Ref cset);
+  TauTriggerSFValues tau_leg_efficiency(const double pt, 
+                                        const int dm, 
+                                        const std::string trigger_type, 
+                                        const std::string wp, 
+                                        const std::string data_type, 
+                                        const correction::Correction::Ref cset);
 }
 
 #endif // TallinnNtupleProducer_EvtWeightTools_data_to_MC_corrections_auxFunctions_h

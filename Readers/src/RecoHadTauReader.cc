@@ -4,8 +4,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // TauID
-#include "TallinnNtupleProducer/Readers/interface/TauESTool.h"                    // TauESTool
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kHadTauPt_central, kHadTauPt_shiftUp, kHadTauPt_shiftDown
 
 #include "TMath.h"
 #include "TTree.h"                                                                // TTree
@@ -92,7 +91,7 @@ RecoHadTauReader::setHadTauPt_central_or_shift(int hadTauPt_option)
   case kHadTauPt_central: systematic_ = "nom"; break;
   case kHadTauPt_shiftUp: systematic_ = "up"; break;
   case kHadTauPt_shiftDown: systematic_ = "down"; break;
-  default: throw cmsException("RecoHadTauReader", __LINE__) << "Invalid systematic shift = " << hadTauPt_option;
+  default: throw cmsException(__func__, __LINE__) << "Invalid systematic shift = " << hadTauPt_option;
   }
 }
 
@@ -203,7 +202,10 @@ RecoHadTauReader::read() const
     hadTaus.reserve(nHadTaus);
     for(UInt_t idxHadTau = 0; idxHadTau < nHadTaus; ++idxHadTau)
     {
-      bool valid_dm = ( (gInstance->hadTau_decayMode_[idxHadTau] >=0 && gInstance->hadTau_decayMode_[idxHadTau] <=2) || (gInstance->hadTau_decayMode_[idxHadTau] == 10 || gInstance->hadTau_decayMode_[idxHadTau] ==11) ) ? true : false;
+      const bool valid_dm =
+        (gInstance->hadTau_decayMode_[idxHadTau] >= 0 && gInstance->hadTau_decayMode_[idxHadTau] <= 2 ) ||
+        gInstance->hadTau_decayMode_[idxHadTau] == 10 ||
+        gInstance->hadTau_decayMode_[idxHadTau] == 11;
       const double corrFactor = (valid_dm) ? tauEScset_->evaluate({
               gInstance->hadTau_pt_[idxHadTau],
               gInstance->hadTau_eta_[idxHadTau],

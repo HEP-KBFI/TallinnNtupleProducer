@@ -51,7 +51,6 @@
 #include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                             // PSWeightReader
 #include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
 #include <TString.h>                                                                            // TString, Form()
@@ -208,17 +207,10 @@ int main(int argc, char* argv[])
   TTreeWrapper* inputTree = new TTreeWrapper(treeName.data(), inputFiles.files(), maxEvents);
   std::cout << "Loaded " << inputTree->getFileCount() << " file(s).\n";
 
-  const std::string tauCorrectionSetFile_ = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", era_string.data())).fullPath();
-  std::unique_ptr<correction::CorrectionSet> tau_cset_ = correction::CorrectionSet::from_file(tauCorrectionSetFile_);
-
-  dataToMCcorrectionInterface->set_hadTauID_and_Iso_cset(tau_cset_->at("DeepTau2017v2p1VSjet"));
-  dataToMCcorrectionInterface->set_eToTauFakeRate_cset(tau_cset_->at("antiEleMVA6"));
-  dataToMCcorrectionInterface->set_muToTauFakeRate_cset(tau_cset_->at("antiMu3"));
-
   EventReader* eventReader = new EventReader(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
 
-  eventReader->set_tauEScset(tau_cset_->at("tau_energy_scale"));
+  eventReader->set_tauEScset(dataToMCcorrectionInterface->get_tau_energy_scale_cset());
 
   TTree* outputTree = fs.make<TTree>("Events", "Events");
 

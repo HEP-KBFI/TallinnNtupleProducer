@@ -41,6 +41,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , era_(era)
   , hadTauSelection_(-1)
   , hadTauId_(TauID::DeepTau2017v2VSjet)
+  , tauCorrectionSetFile_(LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", get_era(era_).data())).fullPath())
   , applyHadTauSF_(true)
   , isDEBUG_(cfg.exists("isDEBUG") ? cfg.getParameter<bool>("isDEBUG") : false)
   , pileupJetId_(pileupJetID::kPileupJetID_disabled)
@@ -55,6 +56,10 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , numHadTaus_(0)
   , numJets_(0)
 {
+  tau_cset_ = correction::CorrectionSet::from_file(tauCorrectionSetFile_);
+  set_hadTauID_and_Iso_cset(tau_cset_->at("DeepTau2017v2p1VSjet"));
+  set_eToTauFakeRate_cset(tau_cset_->at("antiEleMVA6"));
+  set_muToTauFakeRate_cset(tau_cset_->at("antiMu3"));
   const std::string hadTauSelection_string = cfg.getParameter<std::string>("hadTauSelection_againstJets");
   applyHadTauSF_ = hadTauSelection_string != "disabled";
   if(applyHadTauSF_)
@@ -253,6 +258,12 @@ Data_to_MC_CorrectionInterface_Base::setHadTauSelection(const std::string & hadT
 {
   hadTauSelection_ = get_tau_id_wp_int(hadTauSelection);
   hadTauId_ = get_tau_id_enum(hadTauSelection);
+}
+
+const correction::Correction::Ref
+Data_to_MC_CorrectionInterface_Base::get_tau_energy_scale_cset()
+{
+  return tau_cset_->at("tau_energy_scale");
 }
 
 void
