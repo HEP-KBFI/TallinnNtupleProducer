@@ -150,6 +150,8 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   tightElectronSelector_ = new RecoElectronCollectionSelectorTight(era_, -1, isDEBUG_);
 
   hadTauReader_ = new RecoHadTauReader(make_cfg(cfg, "branchName_hadTaus"));
+  hadTauReader_->setHadTauPt_central_or_shift(kHadTauPt_central);
+
   looseHadTauSelector_ = new RecoHadTauCollectionSelectorLoose(era_, -1, isDEBUG_);
   fakeableHadTauSelector_ = new RecoHadTauCollectionSelectorFakeable(era_, -1, isDEBUG_);
   tightHadTauSelector_ = new RecoHadTauCollectionSelectorTight(era_, -1, isDEBUG_);
