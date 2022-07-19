@@ -2,7 +2,9 @@
 
 Code, python scripts and config files for producing "plain" Tallinn Ntuples
 
-# To checkout the code
+## Setup
+
+### To checkout the code
 
 ```bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -18,7 +20,7 @@ git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
 scram b -j 8
 ```
 
-# To run the code:
+### To run the code:
 
 ```bash
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -27,3 +29,18 @@ cmsenv
 cd $CMSSW_BASE/src/TallinnNtupleProducer/Framework/test
 produceNtuple produceNtuple_cfg.py
 ```
+
+## Additional information
+
+### Generate documentation from input NanoAOD:
+
+```bash
+$CMSSW_RELEASE_BASE/src/PhysicsTools/NanoAOD/test/inspectNanoFile.py -d nano.html nano.root
+```
+
+Example output [here](https://kaehatah.web.cern.ch/nanodoc/nano.html)
+
+### JSON POG interface
+
+Available [here](https://kaehatah.web.cern.ch/json_prelegacy/)
+
