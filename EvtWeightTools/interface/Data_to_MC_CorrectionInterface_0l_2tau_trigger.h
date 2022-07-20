@@ -2,12 +2,13 @@
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_0l_2tau_trigger_h
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"       // lutWrapperBase, vLutWrapperBase
-#include "TallinnNtupleProducer/EvtWeightTools/interface/TauTriggerSFInterface.h" // TauTriggerSFInterface, TriggerSFsys
-
+#include "correction.h"
 // forward declarations
 class RecoHadTau;
 
 enum class Era;
+enum class TauID;
+enum class TriggerSFsys;
 
 class Data_to_MC_CorrectionInterface_0l_2tau_trigger
 {
@@ -16,8 +17,13 @@ class Data_to_MC_CorrectionInterface_0l_2tau_trigger
   ~Data_to_MC_CorrectionInterface_0l_2tau_trigger();
 
   //-----------------------------------------------------------------------------
+
+  void
+  set_0l_2tau_trigger_sf(correction::Correction::Ref cset);
+
   // set HLT trigger bits
   // (to be called once per event, before calling any of the getSF.. functions)
+
   void
   setTriggerBits(bool isTriggered_2tau);
   //-----------------------------------------------------------------------------
@@ -60,10 +66,12 @@ class Data_to_MC_CorrectionInterface_0l_2tau_trigger
   double hadTau2_phi_;
   int hadTau2_decayMode_;
 
+  const TauID tauId_;
+  const std::string wp_str_;
   //-----------------------------------------------------------------------------
   // data/MC corrections for trigger efficiencies
 
-  TauTriggerSFInterface effTrigger_tauLeg_;
+  correction::Correction::Ref sf_0l_2tau_trigger_;
   //-----------------------------------------------------------------------------
 };
 

@@ -56,12 +56,12 @@
 #include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                             // PSWeightReader
 #include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
 #include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
-
 #include <TBenchmark.h>                                                                         // TBenchmark
 #include <TError.h>                                                                             // gErrorAbortLevel, kError
 #include <TString.h>                                                                            // TString, Form()
 #include <TTree.h>                                                                              // TTree
 
+#include "correction.h"
 #include <assert.h>                                                                             // assert()
 #include <cstdlib>                                                                              // EXIT_SUCCESS, EXIT_FAILURE
 #include <iostream>                                                                             // std::cout
@@ -219,6 +219,8 @@ int main(int argc, char* argv[])
 
   EventReader* eventReader = new EventReader(cfg_produceNtuple);
   inputTree->registerReader(eventReader);
+
+  eventReader->set_tauEScset(dataToMCcorrectionInterface->get_tau_energy_scale_cset());
 
   TTree* outputTree = fs.make<TTree>("Events", "Events");
 

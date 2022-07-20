@@ -32,6 +32,19 @@ class Data_to_MC_CorrectionInterface_Base
   // overwrite configuration parameters (needed by analyze_jetToTauFakeRate.cc)
   void
   setHadTauSelection(const std::string & hadTauSelection);
+
+  const correction::Correction::Ref
+  get_tau_energy_scale_cset();
+
+  void
+  set_hadTauID_and_Iso_cset(correction::Correction::Ref cset);
+
+  void
+  set_eToTauFakeRate_cset(correction::Correction::Ref cset);
+
+  void
+  set_muToTauFakeRate_cset(correction::Correction::Ref cset);
+
   //-----------------------------------------------------------------------------
 
   //-----------------------------------------------------------------------------
@@ -157,6 +170,9 @@ class Data_to_MC_CorrectionInterface_Base
 
   const std::string tauCorrectionSetFile_;
   std::unique_ptr<correction::CorrectionSet> tau_cset_;
+  correction::Correction::Ref hadTauID_and_Iso_cset_;
+  correction::Correction::Ref eToTauFakeRate_cset_;
+  correction::Correction::Ref muToTauFakeRate_cset_;
 
   bool applyHadTauSF_;
   bool isDEBUG_;

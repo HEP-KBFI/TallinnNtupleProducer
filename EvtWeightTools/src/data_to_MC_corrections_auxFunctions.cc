@@ -571,4 +571,16 @@ namespace aux
       ));
     }
   }
+  TauTriggerSFValues tau_leg_efficiency(const double pt, 
+                                        const int dm, 
+                                        const std::string trigger_type, 
+                                        const std::string wp, 
+                                        const std::string data_type, 
+                                        const correction::Correction::Ref cset)
+  {
+    double nom = cset->evaluate({pt, dm, trigger_type, wp, data_type, "nom"});
+    double up = cset->evaluate({pt, dm, trigger_type, wp, data_type, "up"});
+    double down = cset->evaluate({pt, dm, trigger_type, wp, data_type, "down"});
+    return {down, nom, up};
+  }
 }
