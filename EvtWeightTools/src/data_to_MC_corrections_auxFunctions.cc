@@ -4,12 +4,13 @@
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"   // TriggerSFsys
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h" // lutWrapperBase, vLutWrapperBase
 
-#include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"     // TauTriggerSFs2017
-
 #include <boost/algorithm/string/replace.hpp>                               // boost::replace_all_copy()
 #include <boost/algorithm/string/predicate.hpp>                             // boost::ends_with()
 
+#include <TString.h>                                                        // Form()
+
 #include <assert.h>                                                         // assert()
+#include <iostream>                                                         // std::cout
 
 namespace aux
 {
@@ -571,16 +572,30 @@ namespace aux
       ));
     }
   }
-  TauTriggerSFValues tau_leg_efficiency(const double pt, 
-                                        const int dm, 
-                                        const std::string trigger_type, 
-                                        const std::string wp, 
-                                        const std::string data_type, 
-                                        const correction::Correction::Ref cset)
+
+  double
+  tau_leg_efficiency(const double pt, 
+                     const int dm, 
+                     const std::string trigger_type, 
+                     const std::string wp, 
+                     const std::string data_type, 
+                     const correction::Correction::Ref cset,
+                     const std::string & sys)
   {
-    double nom = cset->evaluate({pt, dm, trigger_type, wp, data_type, "nom"});
-    double up = cset->evaluate({pt, dm, trigger_type, wp, data_type, "up"});
-    double down = cset->evaluate({pt, dm, trigger_type, wp, data_type, "down"});
-    return {down, nom, up};
+    return cset->evaluate({ pt, dm, trigger_type, wp, data_type, sys });
+  }
+
+  TauTriggerSFValues
+  tau_leg_efficiency(const double pt, 
+                     const int dm, 
+                     const std::string trigger_type, 
+                     const std::string wp, 
+                     const std::string data_type, 
+                     const correction::Correction::Ref cset)
+  {
+    const double nom = tau_leg_efficiency(pt, dm, trigger_type, wp, data_type, cset, "nom");
+    const double up = tau_leg_efficiency(pt, dm, trigger_type, wp, data_type, cset, "up");
+    const double down = tau_leg_efficiency(pt, dm, trigger_type, wp, data_type, cset, "down");
+    return { down, nom, up };
   }
 }

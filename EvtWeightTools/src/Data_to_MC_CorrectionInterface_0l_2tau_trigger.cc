@@ -1,7 +1,5 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_2tau_trigger.h"
 
-#include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"                         // TauTriggerSFs2017
-
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // get_human_line()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys

@@ -12,11 +12,8 @@
 
 // forward declarations
 class TFile;
-class TauTriggerSFs2017;
 
 enum class TriggerSFsys;
-
-typedef double (TauTriggerSFs2017::*getTriggerEfficiencyFunc)(double, double, double, int) const;
 
 namespace aux
 {
@@ -119,6 +116,15 @@ namespace aux
   loadTriggerEff_1m_1tau_lepLeg_2018(vLutWrapperBase & effTrigger_1m1tau_lepLeg_data,
                                      vLutWrapperBase & effTrigger_1m1tau_lepLeg_mc,
                                      std::map<std::string, TFile *> & inputFiles);
+
+  double
+  tau_leg_efficiency(const double pt, 
+                     const int dm, 
+                     const std::string trigger_type, 
+                     const std::string wp, 
+                     const std::string data_type, 
+                     const correction::Correction::Ref cset,
+                     const std::string & sys);
 
   TauTriggerSFValues tau_leg_efficiency(const double pt, 
                                         const int dm, 

@@ -1,7 +1,5 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_2tau_trigger.h"
 
-#include "TauAnalysisTools/TauTriggerSFs/interface/TauTriggerSFs2017.h"                         // TauTriggerSFs2017
-
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/leptonTypes.h"                            // getLeptonType()
@@ -154,7 +152,7 @@ Data_to_MC_CorrectionInterface_1l_2tau_trigger::getSF_triggerEff(TriggerSFsys ce
     if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
     {
       eff_1l1tau_tauLeg1_data = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_data", sf_1l_2tau_trigger_);
-        eff_1l1tau_tauLeg1_mc = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_2tau_trigger_);
+      eff_1l1tau_tauLeg1_mc = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_2tau_trigger_);
     }
 
     if(std::fabs(hadTau2_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau2_decayMode_))
