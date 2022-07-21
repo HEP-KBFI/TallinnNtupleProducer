@@ -36,6 +36,16 @@ public:
   // set lepton type, pT and eta as well as hadTau pT, eta and decay mode
   // (to be called once per event, before calling any of the getSF.. functions)
 
+  void
+  setHadTaus(const RecoHadTau * const hadTau1,
+             const RecoHadTau * const hadTau2);
+
+  void
+  setHadTaus(const RecoHadTau * const hadTau1,
+             const RecoHadTau * const hadTau2,
+             const RecoHadTau * const hadTau3);
+  //-----------------------------------------------------------------------------
+
   //-----------------------------------------------------------------------------
   // data/MC correction for trigger efficiency 
   double
@@ -77,6 +87,12 @@ protected:
               double eff_2tau_tauLeg) const;
 
   bool isTriggered_2tau_;
+
+  int hadTau3_genPdgId_;
+  double hadTau3_pt_;
+  double hadTau3_eta_;
+  double hadTau3_phi_;
+  int hadTau3_decayMode_;
 
   correction::Correction::Ref sf_0l_2tau_trigger_;
 };
