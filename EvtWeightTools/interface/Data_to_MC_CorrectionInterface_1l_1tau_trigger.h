@@ -1,19 +1,15 @@
 #ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_1tau_trigger_h
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_1tau_trigger_h
 
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_trigger_Base.h" // Data_to_MC_CorrectionInterface_triger_Base
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"       // lutWrapperBase, vLutWrapperBase
 #include "correction.h"
 
 // forward declarations
-class RecoHadTau;
-class RecoLepton;
-
-enum class Era;
-enum class TauID;
 enum class TriggerSFsys;
 
 
-class Data_to_MC_CorrectionInterface_1l_1tau_trigger
+class Data_to_MC_CorrectionInterface_1l_1tau_trigger : public Data_to_MC_CorrectionInterface_trigger_Base
 {
  public:
   Data_to_MC_CorrectionInterface_1l_1tau_trigger(const edm::ParameterSet & cfg);
@@ -34,16 +30,6 @@ class Data_to_MC_CorrectionInterface_1l_1tau_trigger
   //-----------------------------------------------------------------------------
 
   //-----------------------------------------------------------------------------
-  // set lepton type, pT and eta as well as hadTau pT, eta and decay mode
-  // (to be called once per event, before calling any of the getSF.. functions)
-  void
-  setLepton(const RecoLepton * const lepton);
-
-  void
-  setHadTau(const RecoHadTau * const lepton);
-
-  //-----------------------------------------------------------------------------
-
   //-----------------------------------------------------------------------------
   // data/MC correction for trigger efficiency 
   double
@@ -56,28 +42,12 @@ class Data_to_MC_CorrectionInterface_1l_1tau_trigger
 
   std::map<std::string, TFile *> inputFiles_;
 
-  std::string era_str_;
-  Era era_;
-  std::string hadTauSelection_;
-  bool isDEBUG_;
   std::vector<int> allowedDecayModes_;
 
   bool isTriggered_1e_;
   bool isTriggered_1e1tau_;
   bool isTriggered_1m_;
   bool isTriggered_1m1tau_;
-
-  int lepton_type_;
-  double lepton_pt_;
-  double lepton_eta_;
-
-  int hadTau_genPdgId_;
-  double hadTau_pt_;
-  double hadTau_eta_;
-  double hadTau_phi_;
-  int hadTau_decayMode_;
-  const TauID tauId_;
-  const std::string wp_str_;
 
   //-----------------------------------------------------------------------------
   // data/MC corrections for trigger efficiencies in 2017 ReReco data and Summer17 MC
