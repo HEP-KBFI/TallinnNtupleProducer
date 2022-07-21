@@ -1,12 +1,13 @@
 #ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h
 
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_trigger_Base.h"
+     // Data_to_MC_CorrectionInterface_trigger_Base
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_2tau_trigger.h"
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h" // lutWrapperBase, vLutWrapperBase
 
-class Data_to_MC_CorrectionInterface_1l_3tau_trigger
-  : public Data_to_MC_CorrectionInterface_1l_2tau_trigger
+class Data_to_MC_CorrectionInterface_1l_3tau_trigger : public Data_to_MC_CorrectionInterface_1l_2tau_trigger
 {
 public:
   Data_to_MC_CorrectionInterface_1l_3tau_trigger(const edm::ParameterSet & cfg);
@@ -30,20 +31,6 @@ public:
                  bool isTriggered_1m,
                  bool isTriggered_1m1tau,
                  bool isTriggered_2tau);
-  //-----------------------------------------------------------------------------
-
-  //-----------------------------------------------------------------------------
-  // set lepton type, pT and eta as well as hadTau pT, eta and decay mode
-  // (to be called once per event, before calling any of the getSF.. functions)
-
-  void
-  setHadTaus(const RecoHadTau * const hadTau1,
-             const RecoHadTau * const hadTau2);
-
-  void
-  setHadTaus(const RecoHadTau * const hadTau1,
-             const RecoHadTau * const hadTau2,
-             const RecoHadTau * const hadTau3);
   //-----------------------------------------------------------------------------
 
   //-----------------------------------------------------------------------------
@@ -87,12 +74,6 @@ protected:
               double eff_2tau_tauLeg) const;
 
   bool isTriggered_2tau_;
-
-  int hadTau3_genPdgId_;
-  double hadTau3_pt_;
-  double hadTau3_eta_;
-  double hadTau3_phi_;
-  int hadTau3_decayMode_;
 
   correction::Correction::Ref sf_0l_2tau_trigger_;
 };

@@ -4,29 +4,10 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
-#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
-#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"
-
 #include <assert.h>                                                                             // assert()
-
+#include <TMath.h>                                                                          // std::fabs()
 Data_to_MC_CorrectionInterface_0l_2tau_trigger::Data_to_MC_CorrectionInterface_0l_2tau_trigger(const edm::ParameterSet & cfg)
-  : era_str_(cfg.getParameter<std::string>("era"))
-  , era_(get_era(era_str_))
-  , hadTauSelection_(cfg.getParameter<std::string>("hadTauSelection"))
-  , isDEBUG_(cfg.exists("isDEBUG") ? cfg.getParameter<bool>("isDEBUG") : false)
-  , allowedDecayModes_({ 0, 1, 2, 10, 11 })
-  , hadTau1_genPdgId_(0)
-  , hadTau1_pt_(0.)
-  , hadTau1_eta_(0.)
-  , hadTau1_phi_(0.)
-  , hadTau1_decayMode_(0)
-  , hadTau2_genPdgId_(0)
-  , hadTau2_pt_(0.)
-  , hadTau2_eta_(0.)
-  , hadTau2_phi_(0.)
-  , hadTau2_decayMode_(0)
-  , tauId_(get_tau_id_enum(hadTauSelection_))
-  , wp_str_(get_tau_id_wp_str(tauId_, get_tau_id_wp_int(hadTauSelection_)))
+  : Data_to_MC_CorrectionInterface_trigger_Base(cfg)
 {}
 
 Data_to_MC_CorrectionInterface_0l_2tau_trigger::~Data_to_MC_CorrectionInterface_0l_2tau_trigger()
@@ -42,21 +23,6 @@ void
 Data_to_MC_CorrectionInterface_0l_2tau_trigger::setTriggerBits(bool isTriggered_2tau)
 {
   isTriggered_2tau_ = isTriggered_2tau;
-}
-
-void
-Data_to_MC_CorrectionInterface_0l_2tau_trigger::setHadTaus(const RecoHadTau * const hadTau1,
-                                                           const RecoHadTau * const hadTau2)
-{
-  hadTau1_pt_ = hadTau1->pt();
-  hadTau1_eta_ = hadTau1->eta();
-  hadTau1_phi_ = hadTau1->phi();
-  hadTau1_decayMode_ = hadTau1->decayMode();
-
-  hadTau2_pt_ = hadTau2->pt();
-  hadTau2_eta_ = hadTau2->eta();
-  hadTau2_phi_ = hadTau2->phi();
-  hadTau2_decayMode_ = hadTau2->decayMode();
 }
 
 double

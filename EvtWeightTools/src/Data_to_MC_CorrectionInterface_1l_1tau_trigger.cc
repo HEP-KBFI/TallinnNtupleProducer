@@ -5,29 +5,15 @@
 #include "TallinnNtupleProducer/CommonTools/interface/leptonTypes.h"                            // getLeptonType()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
-#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
-#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                                 // RecoLepton
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"
 
 #include <assert.h>                                                                             // assert()
+#include <TMath.h>                                                                        \
+  // std::fabs()
 
 Data_to_MC_CorrectionInterface_1l_1tau_trigger::Data_to_MC_CorrectionInterface_1l_1tau_trigger(const edm::ParameterSet & cfg)
-  : era_str_(cfg.getParameter<std::string>("era"))
-  , era_(get_era(era_str_))
-  , hadTauSelection_(cfg.getParameter<std::string>("hadTauSelection"))
-  , isDEBUG_(cfg.exists("isDEBUG") ? cfg.getParameter<bool>("isDEBUG") : false)
-  , allowedDecayModes_({ 0, 1, 2, 10, 11 })
-  , lepton_type_(-1)
-  , lepton_pt_(0.)
-  , lepton_eta_(0.)
-  , hadTau_genPdgId_(0)
-  , hadTau_pt_(0.)
-  , hadTau_eta_(0.)
-  , hadTau_phi_(0.)
-  , hadTau_decayMode_(0)
-  , tauId_(get_tau_id_enum(hadTauSelection_))
-  , wp_str_(get_tau_id_wp_str(tauId_, get_tau_id_wp_int(hadTauSelection_)))
-{
+  : Data_to_MC_CorrectionInterface_trigger_Base(cfg)
+ {
   if(era_ == Era::k2016)
   {
     aux::loadTriggerEff_1e_2016(effTrigger_1e_data_, effTrigger_1e_mc_, inputFiles_);
@@ -89,23 +75,6 @@ Data_to_MC_CorrectionInterface_1l_1tau_trigger::setTriggerBits(bool isTriggered_
   isTriggered_1m1tau_ = isTriggered_1m1tau;
 }
 
-void
-Data_to_MC_CorrectionInterface_1l_1tau_trigger::setLepton(const RecoLepton * const lepton)
-{
-  lepton_type_ = getLeptonType(lepton->pdgId());
-  lepton_pt_   = lepton->pt();
-  lepton_eta_  = lepton->eta();
-}
-
-void
-Data_to_MC_CorrectionInterface_1l_1tau_trigger::setHadTau(const RecoHadTau * const hadTau)
-{
-  hadTau_pt_        = hadTau->pt();
-  hadTau_eta_       = hadTau->eta();
-  hadTau_phi_       = hadTau->phi();
-  hadTau_decayMode_ = hadTau->decayMode();
-}
-
 double
 Data_to_MC_CorrectionInterface_1l_1tau_trigger::getSF_triggerEff(TriggerSFsys central_or_shift) const
 {
@@ -136,10 +105,10 @@ Data_to_MC_CorrectionInterface_1l_1tau_trigger::getSF_triggerEff(TriggerSFsys ce
     eff_1l1tau_lepLeg_data = get_from_lut(effTrigger_1e1tau_lepLeg_data_, lepton_pt_, lepton_eta_, isDEBUG_);
     eff_1l1tau_lepLeg_mc   = get_from_lut(effTrigger_1e1tau_lepLeg_mc_,   lepton_pt_, lepton_eta_, isDEBUG_);
 
-    if(std::fabs(hadTau_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau_decayMode_))
+    if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
     {
-      eff_1l1tau_tauLeg_data = aux::tau_leg_efficiency(hadTau_pt_, hadTau_decayMode_, "etau", wp_str_, "eff_data", sf_1l_1tau_trigger_);
-      eff_1l1tau_tauLeg_mc   = aux::tau_leg_efficiency(hadTau_pt_, hadTau_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_1tau_trigger_);
+      eff_1l1tau_tauLeg_data = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_data", sf_1l_1tau_trigger_);
+      eff_1l1tau_tauLeg_mc   = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_1tau_trigger_);
     }
 
     isTriggered_1l     = isTriggered_1e_;
@@ -156,10 +125,10 @@ Data_to_MC_CorrectionInterface_1l_1tau_trigger::getSF_triggerEff(TriggerSFsys ce
     eff_1l1tau_lepLeg_data = get_from_lut(effTrigger_1m1tau_lepLeg_data_, lepton_pt_, lepton_eta_, isDEBUG_);
     eff_1l1tau_lepLeg_mc   = get_from_lut(effTrigger_1m1tau_lepLeg_mc_,   lepton_pt_, lepton_eta_, isDEBUG_);
 
-    if(std::fabs(hadTau_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau_decayMode_))
+    if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
     {
-      eff_1l1tau_tauLeg_data = aux::tau_leg_efficiency(hadTau_pt_, hadTau_decayMode_, "mutau", wp_str_, "eff_data", sf_1l_1tau_trigger_);
-      eff_1l1tau_tauLeg_mc   = aux::tau_leg_efficiency(hadTau_pt_, hadTau_decayMode_, "mutau", wp_str_, "eff_mc", sf_1l_1tau_trigger_);
+      eff_1l1tau_tauLeg_data = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mutau", wp_str_, "eff_data", sf_1l_1tau_trigger_);
+      eff_1l1tau_tauLeg_mc   = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mutau", wp_str_, "eff_mc", sf_1l_1tau_trigger_);
     }
 
     isTriggered_1l     = isTriggered_1m_;
@@ -172,7 +141,7 @@ Data_to_MC_CorrectionInterface_1l_1tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
   if(isDEBUG_)
   {
-    std::cout << "hadTau (lead):    pT = " << hadTau_pt_ << ", eta = " << hadTau_eta_ << "\n"
+    std::cout << "hadTau1 (lead):    pT = " << hadTau1_pt_ << ", eta = " << hadTau1_eta_ << "\n"
                  "eff (L):     data = " << eff_1l_data            << ", MC = " << eff_1l_mc            << "\n"
                  "eff (X_lep): data = " << eff_1l1tau_lepLeg_data << ", MC = " << eff_1l1tau_lepLeg_mc << "\n"
                  "eff (X_tau): data = " << eff_1l1tau_tauLeg_data << ", MC = " << eff_1l1tau_tauLeg_mc << "\n"
