@@ -1,8 +1,10 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_trigger_Base.h"
 
+#include "TallinnNtupleProducer/CommonTools/interface/leptonTypes.h"                            // getLeptonType()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // get_human_line()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
+#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                               // RecoLepton
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"
 
 #include <assert.h>                                                                             // assert()
@@ -42,6 +44,14 @@ Data_to_MC_CorrectionInterface_trigger_Base::Data_to_MC_CorrectionInterface_trig
 
 Data_to_MC_CorrectionInterface_trigger_Base::~Data_to_MC_CorrectionInterface_trigger_Base()
 {}
+
+void
+Data_to_MC_CorrectionInterface_trigger_Base::setLepton(const RecoLepton * const lepton)
+{
+  lepton_type_ = getLeptonType(lepton->pdgId());
+  lepton_pt_   = lepton->pt();
+  lepton_eta_  = lepton->eta();
+}
 
 void
 Data_to_MC_CorrectionInterface_trigger_Base::setHadTaus(const std::vector<const RecoHadTau *>& hadTaus)
