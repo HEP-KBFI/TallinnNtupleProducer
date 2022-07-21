@@ -12,7 +12,26 @@
 #include <assert.h>                                                                             // assert()
 
 Data_to_MC_CorrectionInterface_1l_2tau_trigger::Data_to_MC_CorrectionInterface_1l_2tau_trigger(const edm::ParameterSet & cfg)
-  : Data_to_MC_CorrectionInterface_trigger_Base(cfg)
+  : era_str_(cfg.getParameter<std::string>("era"))
+  , era_(get_era(era_str_))
+  , hadTauSelection_(cfg.getParameter<std::string>("hadTauSelection"))
+  , isDEBUG_(cfg.exists("isDEBUG") ? cfg.getParameter<bool>("isDEBUG") : false)
+  , allowedDecayModes_({ 0, 1, 2, 10, 11 })
+  , lepton_type_(-1)
+  , lepton_pt_(0.)
+  , lepton_eta_(0.)
+  , hadTau1_genPdgId_(0)
+  , hadTau1_pt_(0.)
+  , hadTau1_eta_(0.)
+  , hadTau1_phi_(0.)
+  , hadTau1_decayMode_(0)
+  , hadTau2_genPdgId_(0)
+  , hadTau2_pt_(0.)
+  , hadTau2_eta_(0.)
+  , hadTau2_phi_(0.)
+  , hadTau2_decayMode_(0)
+  , tauId_(get_tau_id_enum(hadTauSelection_))
+  , wp_str_(get_tau_id_wp_str(tauId_, get_tau_id_wp_int(hadTauSelection_)))
 {
   if(era_ == Era::k2016)
   {
@@ -73,6 +92,29 @@ Data_to_MC_CorrectionInterface_1l_2tau_trigger::setTriggerBits(bool isTriggered_
   isTriggered_1e1tau_ = isTriggered_1e1tau;
   isTriggered_1m_     = isTriggered_1m;
   isTriggered_1m1tau_ = isTriggered_1m1tau;
+}
+
+void
+Data_to_MC_CorrectionInterface_1l_2tau_trigger::setLepton(const RecoLepton * const lepton)
+{
+  lepton_type_ = getLeptonType(lepton->pdgId());
+  lepton_pt_   = lepton->pt();
+  lepton_eta_  = lepton->eta();
+}
+
+void
+Data_to_MC_CorrectionInterface_1l_2tau_trigger::setHadTaus(const RecoHadTau * const hadTau1,
+                                                           const RecoHadTau * const hadTau2)
+{
+  hadTau1_pt_ = hadTau1->pt();
+  hadTau1_eta_ = hadTau1->eta();
+  hadTau1_phi_ = hadTau1->phi();
+  hadTau1_decayMode_ = hadTau1->decayMode();
+
+  hadTau2_pt_ = hadTau2->pt();
+  hadTau2_eta_ = hadTau2->eta();
+  hadTau2_phi_ = hadTau2->phi();
+  hadTau2_decayMode_ = hadTau2->decayMode();
 }
 
 double
