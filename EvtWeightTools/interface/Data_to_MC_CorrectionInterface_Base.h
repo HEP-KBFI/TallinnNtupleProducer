@@ -36,17 +36,6 @@ class Data_to_MC_CorrectionInterface_Base
   const correction::Correction::Ref
   get_tau_energy_scale_cset();
 
-  void
-  set_hadTauID_and_Iso_cset(correction::Correction::Ref cset);
-
-  void
-  set_eToTauFakeRate_cset(correction::Correction::Ref cset);
-
-  void
-  set_muToTauFakeRate_cset(correction::Correction::Ref cset);
-
-  //-----------------------------------------------------------------------------
-
   //-----------------------------------------------------------------------------
   // set leptons, taus, and jets
   // (to be called once per event, before calling any of the getSF.. functions)
@@ -56,9 +45,6 @@ class Data_to_MC_CorrectionInterface_Base
 
   void
   setHadTaus(const std::vector<const RecoHadTau *> & hadTaus);
-
-  void
-  setJets(const std::vector<const RecoJetAK4 *> & jets);
   //-----------------------------------------------------------------------------
 
   //-----------------------------------------------------------------------------
@@ -97,9 +83,14 @@ class Data_to_MC_CorrectionInterface_Base
   //-----------------------------------------------------------------------------
 
   //-----------------------------------------------------------------------------
-  // data/MC corrections for jets to pass pileup jet ID
+  // data/MC corrections for jets
   double
-  getSF_pileupJetID(pileupJetIDSFsys central_or_shift) const;
+  getSF_pileupJetID(const std::vector<const RecoJetAK4 *> & jets,
+                    pileupJetIDSFsys central_or_shift) const;
+
+  double
+  getSF_btag(const std::vector<const RecoJetAK4 *> & jets,
+             int central_or_shift) const;
   //-----------------------------------------------------------------------------
 
  protected:
@@ -157,18 +148,17 @@ class Data_to_MC_CorrectionInterface_Base
   //-----------------------------------------------------------------------------
 
   Era era_;
+  std::string era_str_;
 
   std::map<std::string, TFile *> inputFiles_;
 
   int hadTauSelection_;
   TauID hadTauId_;
-  std::string tauIDSF_str_;
   std::string tauIDSF_level_str_;
 
   int hadTauSelection_antiElectron_[4];
   int hadTauSelection_antiMuon_[4];
 
-  const std::string tauCorrectionSetFile_;
   std::unique_ptr<correction::CorrectionSet> tau_cset_;
   correction::Correction::Ref hadTauID_and_Iso_cset_;
   correction::Correction::Ref eToTauFakeRate_cset_;
@@ -178,6 +168,8 @@ class Data_to_MC_CorrectionInterface_Base
   bool isDEBUG_;
 
   pileupJetID pileupJetId_;
+  std::unique_ptr<correction::CorrectionSet> btag_cset_;
+  correction::Correction::Ref btag_shape_cset_;
 
   bool recompTightSF_;
   double recompTightSF_el_woTightCharge_;

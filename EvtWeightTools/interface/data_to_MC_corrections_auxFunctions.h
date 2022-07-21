@@ -126,12 +126,20 @@ namespace aux
                      const correction::Correction::Ref cset,
                      const std::string & sys);
 
-  TauTriggerSFValues tau_leg_efficiency(const double pt, 
-                                        const int dm, 
-                                        const std::string trigger_type, 
-                                        const std::string wp, 
-                                        const std::string data_type, 
-                                        const correction::Correction::Ref cset);
+  TauTriggerSFValues
+  tau_leg_efficiency(const double pt, 
+                     const int dm, 
+                     const std::string trigger_type, 
+                     const std::string wp, 
+                     const std::string data_type, 
+                     const correction::Correction::Ref cset);
+
+  int
+  get_btv_flavor(int hadronFlav);
+
+  bool
+  is_relevant_shape_sys(int hadronFlavor,
+                        int central_or_shift);
 }
 
 #endif // TallinnNtupleProducer_EvtWeightTools_data_to_MC_corrections_auxFunctions_h

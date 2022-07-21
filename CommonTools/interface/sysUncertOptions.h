@@ -335,6 +335,10 @@ extern const std::map<std::string, EWKJetSys> ewkJetSysMap;
 extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap;
 extern const std::map<std::string, LHEVptSys> lheVptSysMap;
 
+// ------------------------
+// mapping of b-tagging systematics enums to correctionlib strings
+extern const std::map<int, std::string> btagWeightSysMap_correctionLib;
+
 std::vector<std::string>
 get_inclusive_systeatics(const std::vector<std::string> & systematics);
 
@@ -443,12 +447,6 @@ getPDFsys_str(int memberIdx);
 void
 checkOptionValidity(const std::string & central_or_shift,
                     bool isMC);
-
-std::string
-getBranchName_bTagWeight(Btag btag,
-                         Era era,
-                         const std::string & default_collectionName,
-                         int central_or_shift);
 
 /**
  * @brief Return branch name to read RecoJet pt and mass

@@ -119,12 +119,14 @@ int main(int argc, char* argv[])
   const edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
   const bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
   const std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
-  const pileupJetID apply_pileupJetID = get_pileupJetID(cfg_produceNtuple.getParameter<std::string>("apply_pileupJetID"));
+  const std::string apply_pileupJetID_str = cfg_produceNtuple.getParameter<std::string>("apply_pileupJetID");
+  const pileupJetID apply_pileupJetID = get_pileupJetID(apply_pileupJetID_str);
   const bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
   const bool apply_DYMCReweighting = cfg_produceNtuple.getParameter<bool>("apply_DYMCReweighting");
   const bool apply_DYMCNormScaleFactors = cfg_produceNtuple.getParameter<bool>("apply_DYMCNormScaleFactors");
   const bool apply_LHEVpt_rwgt = cfg_produceNtuple.getParameter<bool>("apply_LHEVpt_rwgt");
   const bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
+  const bool isCP5 = cfg_produceNtuple.getParameter<bool>("isCP5");
 
   const unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
   const bool applyNumNominalLeptonsCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalLeptonsCut");
@@ -173,6 +175,8 @@ int main(int argc, char* argv[])
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstElectrons", get_tau_id_wp_int(hadTauWP_againstElectrons));
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstMuons", get_tau_id_wp_int(hadTauWP_againstMuons));
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("lep_mva_wp", lep_mva_wp);
+  cfg_dataToMCcorrectionInterface.addParameter<std::string>("pileupJetID", apply_pileupJetID_str);
+  cfg_dataToMCcorrectionInterface.addParameter<bool>("isCP5", isCP5);
   cfg_dataToMCcorrectionInterface.addParameter<bool>("isDEBUG", isDEBUG);
   Data_to_MC_CorrectionInterface_Base * dataToMCcorrectionInterface = nullptr;
   switch ( era )
@@ -440,10 +444,11 @@ int main(int argc, char* argv[])
         evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
 
-//--- compute event-level weight for data/MC correction of b-tagging efficiency and mistag rate
-//   (using the method "Event reweighting using scale factors calculated with a tag and probe method",
-//    described on the BTV POG twiki https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration )
-        evtWeightRecorder.record_btagWeight(event.selJetsAK4());
+        evtWeightRecorder.record_btagWeight(dataToMCcorrectionInterface, event.selJetsAK4());
+        if(apply_pileupJetID != pileupJetID::kPileupJetID_disabled)
+        {
+          evtWeightRecorder.record_pileupJetIDSF(dataToMCcorrectionInterface, event.selJetsAK4());
+        }
 
         if ( analysisConfig.isMC_EWK() )
         {

@@ -109,7 +109,7 @@ class ParticleCollectionGenMatcher
         continue;
       }
 
-      const int genJetIdx = recParticle->genPartIdx();
+      const int genJetIdx = recParticle->genJetIdx();
       if(genJetIdx >= 0)
       {
         if(genJetIdx >= genJetSize)

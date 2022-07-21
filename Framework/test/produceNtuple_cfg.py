@@ -102,7 +102,6 @@ process.produceNtuple = cms.PSet(
     apply_topPtReweighting = cms.string(''),
     apply_l1PreFireWeight = cms.bool(True),
     apply_pileupJetID = cms.string(''),
-    btagSFRatio = cms.PSet(),
     apply_btagSFRatio = cms.bool(True),
     #metFilters = cms.PSet(),
     #apply_hadTauFakeRateSF = cms.bool(False),
@@ -111,6 +110,7 @@ process.produceNtuple = cms.PSet(
     apply_chargeMisIdRate = cms.bool(True), # CV: set to True for 2lss and 2lss+1tau channels, and to False for all other channels
     split_jes = cms.bool(True),
     split_jer = cms.bool(False),
+    isCP5 = cms.bool(False),
 
     evtWeight = cms.PSet(
         apply = cms.bool(False),

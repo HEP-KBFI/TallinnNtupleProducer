@@ -897,7 +897,8 @@ EvtWeightRecorder::record_puWeight(const EventInfo * const eventInfo)
 }
 
 void
-EvtWeightRecorder::record_pileupJetIDSF(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface)
+EvtWeightRecorder::record_pileupJetIDSF(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface,
+                                        const std::vector<const RecoJetAK4 *> & jets)
 {
   assert(isMC_);
   weights_puJetIDSF_.clear();
@@ -908,7 +909,7 @@ EvtWeightRecorder::record_pileupJetIDSF(const Data_to_MC_CorrectionInterface_Bas
     {
       continue;
     }
-    weights_puJetIDSF_[puJetIDSF_option] = dataToMCcorrectionInterface->getSF_pileupJetID(puJetIDSF_option);
+    weights_puJetIDSF_[puJetIDSF_option] = dataToMCcorrectionInterface->getSF_pileupJetID(jets, puJetIDSF_option);
   }
 }
 
@@ -1013,23 +1014,9 @@ EvtWeightRecorder::record_subjetBtagSF(SubjetBtagSFInterface * const subjetBtagS
   }
 }
 
-namespace
-{
-  double
-  get_BtagWeight(const std::vector<const RecoJetAK4 *> & jets,
-                 int central_or_shift)
-  {
-    double btag_weight = 1.;
-    for(const RecoJetAK4 * jet: jets)
-    {
-      btag_weight *= jet->BtagWeight(central_or_shift);
-    }
-    return btag_weight;
-  }
-}
-
 void
-EvtWeightRecorder::record_btagWeight(const std::vector<const RecoJetAK4 *> & jets)
+EvtWeightRecorder::record_btagWeight(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface,
+                                     const std::vector<const RecoJetAK4 *> & jets)
 {
   assert(isMC_);
   weights_btag_.clear();
@@ -1040,7 +1027,7 @@ EvtWeightRecorder::record_btagWeight(const std::vector<const RecoJetAK4 *> & jet
     {
       continue;
     }
-    weights_btag_[jetBtagSF_option] = get_BtagWeight(jets, jetBtagSF_option);
+    weights_btag_[jetBtagSF_option] = dataToMCcorrectionInterface->getSF_btag(jets, jetBtagSF_option);
   }
 }
 

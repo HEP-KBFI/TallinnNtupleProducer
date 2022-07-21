@@ -255,10 +255,12 @@ class EvtWeightRecorder
   record_puWeight(const EventInfo * const eventInfo);
 
   void
-  record_pileupJetIDSF(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface);
+  record_pileupJetIDSF(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface,
+                       const std::vector<const RecoJetAK4 *> & jets);
 
   void
-  record_btagWeight(const std::vector<const RecoJetAK4 *> & jets);
+  record_btagWeight(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface,
+                    const std::vector<const RecoJetAK4 *> & jets);
 
   void
   record_ewk_jet(const std::vector<const RecoJetAK4 *> & jets);
