@@ -24,7 +24,6 @@ class DYMCNormScaleFactors;
 class Data_to_MC_CorrectionInterface_0l_2tau_trigger;
 class Data_to_MC_CorrectionInterface_1l_1tau_trigger;
 class Data_to_MC_CorrectionInterface_1l_2tau_trigger;
-class BtagSFRatioInterface;
 class HHWeightInterfaceLO;
 class HHWeightInterfaceNLO;
 class LHEVpt_LOtoNLO;
@@ -86,9 +85,6 @@ class EvtWeightRecorder
   double
   get_prescaleWeight() const; 
   
-  double
-  get_btagSFRatio(const std::string & central_or_shift) const;
-
   double
   get_nom_tH_weight(const std::string & central_or_shift) const;
 
@@ -190,10 +186,6 @@ class EvtWeightRecorder
   
   void
   record_lumiScale(const edm::VParameterSet & lumiScales);
-
-  void
-  record_btagSFRatio(const BtagSFRatioInterface * const btagSFRatioInterface,
-                     int nselJets);
 
   void
   record_rescaling(double rescaling);
@@ -337,7 +329,6 @@ class EvtWeightRecorder
   std::map<std::string, double> auxWeight_;
   std::map<std::string, std::map<std::string, double>> lumiScale_;
   std::map<std::string, double> nom_tH_weight_;
-  std::map<std::string, double> btagSFRatio_;
   double leptonSF_;
   double chargeMisIdProb_;
   double dyBgrWeight_;

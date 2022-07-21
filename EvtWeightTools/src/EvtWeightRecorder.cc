@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                                      // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                                  // EWKJetSys, EWKBJetSys, getJetToLeptonFR_option(), getJetToTauFR_option(), kFRjt_central, kFRl_central, TriggerSFsysChoice
-#include "TallinnNtupleProducer/EvtWeightTools/interface/BtagSFRatioInterface.h"                           // BtagSFRatioInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_Base.h"            // Data_to_MC_CorrectionInterface_Base
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_2tau_trigger.h" // Data_to_MC_CorrectionInterface_0l_2tau_trigger
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_1tau_trigger.h" // Data_to_MC_CorrectionInterface_1l_1tau_trigger
@@ -72,14 +71,13 @@ double
 EvtWeightRecorder::get_inclusive(const std::string & central_or_shift,
                                  const std::string & bin) const
 {
-  double retVal = isMC_ ? get_genWeight() * get_auxWeight(central_or_shift) * get_lumiScale(central_or_shift, bin) *
-                 get_nom_tH_weight(central_or_shift) * get_puWeight(central_or_shift) *
-                 get_l1PreFiringWeight(central_or_shift) * get_lheScaleWeight(central_or_shift) * get_pdfWeight(central_or_shift) *
-                 get_dy_rwgt(central_or_shift) * get_rescaling() * get_psWeight(central_or_shift) * get_hhWeight() *
-                 get_pdfMemberWeight(central_or_shift) * get_LHEVpt(central_or_shift)
-               : 1.
+  return isMC_ ? get_genWeight() * get_auxWeight(central_or_shift) * get_lumiScale(central_or_shift, bin) *
+         get_nom_tH_weight(central_or_shift) * get_puWeight(central_or_shift) *
+         get_l1PreFiringWeight(central_or_shift) * get_lheScaleWeight(central_or_shift) * get_pdfWeight(central_or_shift) *
+         get_dy_rwgt(central_or_shift) * get_rescaling() * get_psWeight(central_or_shift) * get_hhWeight() *
+         get_pdfMemberWeight(central_or_shift) * get_LHEVpt(central_or_shift)
+       : 1.
   ;
-  return retVal;
 }
 
 double
@@ -141,16 +139,6 @@ double
 EvtWeightRecorder::get_prescaleWeight() const
 {
   return prescale_;
-}
-
-double
-EvtWeightRecorder::get_btagSFRatio(const std::string & central_or_shift) const
-{
-  if(isMC_ && btagSFRatio_.count(central_or_shift))
-  {
-    return btagSFRatio_.at(central_or_shift);
-  }
-  return 1.;
 }
 
 double
@@ -414,7 +402,7 @@ EvtWeightRecorder::get_data_to_MC_correction(const std::string & central_or_shif
   return isMC_ ? get_sf_triggerEff(central_or_shift) * get_leptonSF() * get_leptonIDSF(central_or_shift) *
                  get_tauSF(central_or_shift) * get_btag(central_or_shift) * get_dy_norm(central_or_shift) *
                  get_toppt_rwgt(central_or_shift) * get_ewk_jet(central_or_shift) * get_ewk_bjet(central_or_shift) *
-                 get_btagSFRatio(central_or_shift) * get_pileupJetIDSF(central_or_shift) * get_subjetBtagSF(central_or_shift)
+                 get_pileupJetIDSF(central_or_shift) * get_subjetBtagSF(central_or_shift)
                : 1.
   ;
 }
@@ -579,19 +567,6 @@ EvtWeightRecorder::record_lumiScale(const edm::VParameterSet & lumiScales)
       lumiScale_[central_or_shift] = lumiScale_.at("central");
     }
   }
-}
-
-void
-EvtWeightRecorder::record_btagSFRatio(const BtagSFRatioInterface * const btagSFRatioInterface,
-                                      int nselJets)
-{
-  assert(isMC_);
-  btagSFRatio_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    btagSFRatio_[central_or_shift] = btagSFRatioInterface->get_btagSFRatio(central_or_shift, nselJets);
-  }
-  assert(btagSFRatio_.count(central_or_shift_));
 }
 
 void
@@ -1339,7 +1314,6 @@ operator<<(std::ostream & os,
           "  stitching weight      = " << evtWeightRecorder.get_auxWeight(central_or_shift)               << "\n"
           "  lumiScale             = " << evtWeightRecorder.get_lumiScale(central_or_shift)               << "\n"
           "  prescale weight       = " << evtWeightRecorder.get_prescaleWeight()                          << "\n"
-          "  btag SF ratio         = " << evtWeightRecorder.get_btagSFRatio(central_or_shift)             << "\n"
           "  nominal tH weight     = " << evtWeightRecorder.get_nom_tH_weight(central_or_shift)           << "\n"
           "  PU weight             = " << evtWeightRecorder.get_puWeight(central_or_shift)                << "\n"
           "  L1 prefiring weight   = " << evtWeightRecorder.get_l1PreFiringWeight(central_or_shift)       << "\n"
