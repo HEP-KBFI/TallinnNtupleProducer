@@ -140,19 +140,19 @@ Data_to_MC_CorrectionInterface_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
         for(int tau4_status = k2tau; tau4_status <= kNot2tau; ++tau4_status)
         {
-	  const double prob_tau4_data = getProb_tau(tau4_status, eff_2tau_tauLeg4_data);
+          const double prob_tau4_data = getProb_tau(tau4_status, eff_2tau_tauLeg4_data);
           const double prob_tau4_mc   = getProb_tau(tau4_status, eff_2tau_tauLeg4_mc);
 
-	  int nTrig_2tau_tauLeg = 0;
-	  if(tau1_status == k2tau)
-	  {
-	    ++nTrig_2tau_tauLeg;
-	  }
-	  if(tau2_status == k2tau)
+          int nTrig_2tau_tauLeg = 0;
+          if(tau1_status == k2tau)
           {
-	    ++nTrig_2tau_tauLeg;
-	  }
-	  if(tau3_status == k2tau)
+            ++nTrig_2tau_tauLeg;
+          }
+          if(tau2_status == k2tau)
+          {
+            ++nTrig_2tau_tauLeg;
+          }
+          if(tau3_status == k2tau)
           {
             ++nTrig_2tau_tauLeg;
           }

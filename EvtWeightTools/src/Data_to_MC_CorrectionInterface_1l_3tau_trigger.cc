@@ -251,26 +251,26 @@ Data_to_MC_CorrectionInterface_1l_3tau_trigger::getSF_triggerEff(TriggerSFsys ce
           const double prob_tau3_data = getProb_tau(tau3_status, eff_1l1tau_tauLeg3_data, eff_2tau_tauLeg3_data);
           const double prob_tau3_mc   = getProb_tau(tau3_status, eff_1l1tau_tauLeg3_mc,   eff_2tau_tauLeg3_mc);
 
-	  int nTrig_1l1tau_tauLeg = 0;
-	  if(tau1_status == k1l1tauAnd2tau || tau1_status == k1l1tauAndNot2tau)
-	  {
-	    ++nTrig_1l1tau_tauLeg;
-	  }
-	  if(tau2_status == k1l1tauAnd2tau || tau2_status == k1l1tauAndNot2tau)
+          int nTrig_1l1tau_tauLeg = 0;
+          if(tau1_status == k1l1tauAnd2tau || tau1_status == k1l1tauAndNot2tau)
           {
             ++nTrig_1l1tau_tauLeg;
           }
-	  if(tau3_status == k1l1tauAnd2tau || tau3_status == k1l1tauAndNot2tau)
+          if(tau2_status == k1l1tauAnd2tau || tau2_status == k1l1tauAndNot2tau)
+          {
+            ++nTrig_1l1tau_tauLeg;
+          }
+          if(tau3_status == k1l1tauAnd2tau || tau3_status == k1l1tauAndNot2tau)
           {
             ++nTrig_1l1tau_tauLeg;
           }
 
-	  int nTrig_2tau_tauLeg = 0;
-	  if(tau1_status == k1l1tauAnd2tau || tau1_status == kNot1l1tauAnd2tau)
+          int nTrig_2tau_tauLeg = 0;
+          if(tau1_status == k1l1tauAnd2tau || tau1_status == kNot1l1tauAnd2tau)
           {
             ++nTrig_2tau_tauLeg;
           }
-	  if(tau2_status == k1l1tauAnd2tau || tau2_status == kNot1l1tauAnd2tau)
+          if(tau2_status == k1l1tauAnd2tau || tau2_status == kNot1l1tauAnd2tau)
           {
             ++nTrig_2tau_tauLeg;
           }
