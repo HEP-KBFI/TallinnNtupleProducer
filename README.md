@@ -30,7 +30,7 @@ cd $CMSSW_BASE/src/TallinnNtupleProducer/Framework/test
 produceNtuple produceNtuple_cfg.py
 ```
 
-## Additional information
+## Additional documentation
 
 ### Generate documentation from input NanoAOD:
 
@@ -43,4 +43,10 @@ Example output [here](https://kaehatah.web.cern.ch/nanodoc/nano.html)
 ### JSON POG interface
 
 Available [here](https://kaehatah.web.cern.ch/json_prelegacy/)
+
+If you want to generate the API documents yourself, run the following:
+
+```bash
+correction --html out.html /path/to/pog.json.gz
+```
 
