@@ -1,8 +1,6 @@
 #ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h
 
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_trigger_Base.h"
-     // Data_to_MC_CorrectionInterface_trigger_Base
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_2tau_trigger.h"
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h" // lutWrapperBase, vLutWrapperBase

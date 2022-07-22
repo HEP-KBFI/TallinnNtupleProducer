@@ -5,7 +5,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
 #include <assert.h>                                                                             // assert()
-#include <TMath.h>                                                                          // std::fabs()
+#include <cmath>                                                                          // std::fabs()
 Data_to_MC_CorrectionInterface_0l_2tau_trigger::Data_to_MC_CorrectionInterface_0l_2tau_trigger(const edm::ParameterSet & cfg)
   : Data_to_MC_CorrectionInterface_trigger_Base(cfg)
 {}

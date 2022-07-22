@@ -8,7 +8,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"
 
 #include <assert.h>                                                                             // assert()
-#include <TMath.h>                                                                        \
+#include <cmath>                                                                        \
   // std::fabs()
 
 Data_to_MC_CorrectionInterface_1l_1tau_trigger::Data_to_MC_CorrectionInterface_1l_1tau_trigger(const edm::ParameterSet & cfg)

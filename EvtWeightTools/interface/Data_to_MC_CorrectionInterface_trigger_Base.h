@@ -1,8 +1,8 @@
 #ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_trigger_Base_h
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_trigger_Base_h
 
-#include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"       // lutWrapperBase, vLutWrapperBase
-#include <iostream>
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                  // edm::ParameterSet
+#include <iostream> //std::cout
 
 // forward declarations
 class RecoHadTau;
@@ -23,7 +23,7 @@ class Data_to_MC_CorrectionInterface_trigger_Base
   // set hadTau pT, eta and decay mode
   // (to be called once per event, before calling any of the getSF.. functions)
   void
-    setHadTaus(const std::vector<const RecoHadTau * >& hadTaus);
+  setHadTaus(const std::vector<const RecoHadTau * >& hadTaus);
   //-----------------------------------------------------------------------------
 
   // set lepton type, pT and eta as well as hadTau pT, eta and decay mode

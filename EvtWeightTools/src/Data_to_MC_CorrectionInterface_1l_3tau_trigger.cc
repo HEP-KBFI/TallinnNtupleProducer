@@ -6,7 +6,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys, getTriggerSF_option()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
 #include <TString.h> // Form()
-#include <TMath.h> // std::fabs()
 
 #include <boost/algorithm/string/predicate.hpp> // boost::ends_with()
 
