@@ -15,8 +15,10 @@
 #include <regex>                                                        // std::regex, std::smatch, std::regex_match()
 
 const std::string pdfSysStr = "CMS_ttHl_PDF_shape_Member";
+const std::string noBtagWeightStr = "noBtagSF";
 
 const std::map<std::string, int> btagWeightSysMap = {
+  { noBtagWeightStr,                      kBtag_noBtagSF                  },
   { "CMS_ttHl_btag_HFUp",                 kBtag_hfUp                      },
   { "CMS_ttHl_btag_HFDown",               kBtag_hfDown                    },
   { "CMS_ttHl_btag_HFStats1Up",           kBtag_hfStats1Up                },
@@ -819,7 +821,7 @@ checkOptionValidity(const std::string & central_or_shift,
       throw cmsException(__func__, __LINE__) << "Non-empty or non-central systematics option passed to data";
     }
     if(isMC && ! (boost::ends_with(central_or_shift, "Up") || boost::ends_with(central_or_shift, "Down")) &&
-       ! isPDFsys_member(central_or_shift))
+       ! isPDFsys_member(central_or_shift) && central_or_shift != noBtagWeightStr)
     {
       throw cmsException(__func__, __LINE__) << "Non-central MC systematics option not ending with Up or Down: " << central_or_shift;
     }

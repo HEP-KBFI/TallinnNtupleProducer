@@ -13,6 +13,7 @@ enum class Era;
 enum
 {
   kBtag_central,
+  kBtag_noBtagSF,
 
   kBtag_hfUp,       kBtag_hfDown,
   kBtag_hfStats1Up, kBtag_hfStats1Down,
@@ -278,6 +279,7 @@ enum class SubjetBtagSys
 };
 
 extern const std::string pdfSysStr;
+extern const std::string noBtagWeightStr;
 
 // theory uncertainties
 extern const std::map<std::string, int> lheScaleSysMap;

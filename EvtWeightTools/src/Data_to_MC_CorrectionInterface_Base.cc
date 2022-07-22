@@ -909,18 +909,22 @@ double
 Data_to_MC_CorrectionInterface_Base::getSF_btag(const std::vector<const RecoJetAK4 *> & jets,
                                                 int central_or_shift) const
 {
-  const auto it = btagWeightSysMap_correctionLib.find(central_or_shift);
-  if(it == btagWeightSysMap_correctionLib.end())
-  {
-    throw cmsException(this, __func__, __LINE__) << "Invalid central / shift option: " << central_or_shift;
-  }
-  const std::string sys_opt = boost::replace_all_copy(it->second, "ERA", era_str_);
   double btagSF = 1.;
-  for(const RecoJetAK4 * jet: jets)
+  if(central_or_shift != kBtag_noBtagSF)
   {
-    const std::string sys_opt_jet = aux::is_relevant_shape_sys(jet->hadronFlav(), central_or_shift) ? sys_opt : "central";
-    const double btagWeight = btag_shape_cset_->evaluate({ sys_opt_jet, aux::get_btv_flavor(jet->hadronFlav()), jet->absEta(), jet->pt(), jet->BtagCSV() });
-    btagSF *= btagWeight < 1e-2 ? 1. : btagWeight;
+    const auto it = btagWeightSysMap_correctionLib.find(central_or_shift);
+    if(it == btagWeightSysMap_correctionLib.end())
+    {
+      throw cmsException(this, __func__, __LINE__) << "Invalid central / shift option: " << central_or_shift;
+    }
+
+    const std::string sys_opt = boost::replace_all_copy(it->second, "ERA", era_str_);
+    for(const RecoJetAK4 * jet: jets)
+    {
+      const std::string sys_opt_jet = aux::is_relevant_shape_sys(jet->hadronFlav(), central_or_shift) ? sys_opt : "central";
+      const double btagWeight = btag_shape_cset_->evaluate({ sys_opt_jet, aux::get_btv_flavor(jet->hadronFlav()), jet->absEta(), jet->pt(), jet->BtagCSV() });
+      btagSF *= btagWeight < 1e-2 ? 1. : btagWeight;
+    }
   }
   return btagSF;
 }
