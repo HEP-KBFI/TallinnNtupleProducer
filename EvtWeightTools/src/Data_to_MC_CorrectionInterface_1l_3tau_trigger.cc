@@ -5,10 +5,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys, getTriggerSF_option()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
-#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
-
 #include <TString.h> // Form()
-#include <TMath.h> // std::fabs()
 
 #include <boost/algorithm/string/predicate.hpp> // boost::ends_with()
 
@@ -16,11 +13,6 @@
 
 Data_to_MC_CorrectionInterface_1l_3tau_trigger::Data_to_MC_CorrectionInterface_1l_3tau_trigger(const edm::ParameterSet & cfg)
   : Data_to_MC_CorrectionInterface_1l_2tau_trigger(cfg)
-  , hadTau3_genPdgId_(0)
-  , hadTau3_pt_(0.)
-  , hadTau3_eta_(0.)
-  , hadTau3_phi_(0.)
-  , hadTau3_decayMode_(0)
 {}
 
 Data_to_MC_CorrectionInterface_1l_3tau_trigger::~Data_to_MC_CorrectionInterface_1l_3tau_trigger()
@@ -44,34 +36,6 @@ Data_to_MC_CorrectionInterface_1l_3tau_trigger::setTriggerBits(bool isTriggered_
   isTriggered_1m_     = isTriggered_1m;
   isTriggered_1m1tau_ = isTriggered_1m1tau;
   isTriggered_2tau_   = isTriggered_2tau;
-}
-
-void
-Data_to_MC_CorrectionInterface_1l_3tau_trigger::setHadTaus(const RecoHadTau * const __attribute__((unused)) hadTau1,
-                                                           const RecoHadTau * const __attribute__((unused)) hadTau2)
-{
-  throw cmsException(this, __func__, __LINE__) << "Invalid call";
-}
-
-void
-Data_to_MC_CorrectionInterface_1l_3tau_trigger::setHadTaus(const RecoHadTau * const hadTau1,
-                                                           const RecoHadTau * const hadTau2,
-                                                           const RecoHadTau * const hadTau3)
-{
-  hadTau1_pt_        = hadTau1->pt();
-  hadTau1_eta_       = hadTau1->eta();
-  hadTau1_phi_       = hadTau1->phi();
-  hadTau1_decayMode_ = hadTau1->decayMode();
-
-  hadTau2_pt_        = hadTau2->pt();
-  hadTau2_eta_       = hadTau2->eta();
-  hadTau2_phi_       = hadTau2->phi();
-  hadTau2_decayMode_ = hadTau2->decayMode();
-
-  hadTau3_pt_        = hadTau3->pt();
-  hadTau3_eta_       = hadTau3->eta();
-  hadTau3_phi_       = hadTau3->phi();
-  hadTau3_decayMode_ = hadTau3->decayMode();
 }
 
 double

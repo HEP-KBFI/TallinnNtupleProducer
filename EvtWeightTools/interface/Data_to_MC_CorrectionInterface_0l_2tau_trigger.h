@@ -2,15 +2,13 @@
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_0l_2tau_trigger_h
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"       // lutWrapperBase, vLutWrapperBase
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_trigger_Base.h"
+               // Data_to_MC_CorrectionInterface_trigger_Base
 #include "correction.h"
 // forward declarations
-class RecoHadTau;
-
-enum class Era;
-enum class TauID;
 enum class TriggerSFsys;
 
-class Data_to_MC_CorrectionInterface_0l_2tau_trigger
+class Data_to_MC_CorrectionInterface_0l_2tau_trigger : public Data_to_MC_CorrectionInterface_trigger_Base
 {
  public:
   Data_to_MC_CorrectionInterface_0l_2tau_trigger(const edm::ParameterSet & cfg);
@@ -29,14 +27,6 @@ class Data_to_MC_CorrectionInterface_0l_2tau_trigger
   //-----------------------------------------------------------------------------
 
   //-----------------------------------------------------------------------------
-  // set hadTau pT, eta and decay mode
-  // (to be called once per event, before calling any of the getSF.. functions)
-  void
-  setHadTaus(const RecoHadTau * const hadTau1,
-             const RecoHadTau * const hadTau2);
-  //-----------------------------------------------------------------------------
-
-  //-----------------------------------------------------------------------------
   // data/MC correction for trigger efficiency 
   double
   getSF_triggerEff(TriggerSFsys central_or_shift) const;
@@ -46,28 +36,8 @@ class Data_to_MC_CorrectionInterface_0l_2tau_trigger
   bool
   check_triggerSFsys_opt(TriggerSFsys central_or_shift) const;
 
-  std::string era_str_;
-  Era era_;
-  std::string hadTauSelection_;
-  bool isDEBUG_;
-  std::vector<int> allowedDecayModes_;
-
   bool isTriggered_2tau_;
 
-  int hadTau1_genPdgId_;
-  double hadTau1_pt_;
-  double hadTau1_eta_;
-  double hadTau1_phi_;
-  int hadTau1_decayMode_;
-
-  int hadTau2_genPdgId_;
-  double hadTau2_pt_;
-  double hadTau2_eta_;
-  double hadTau2_phi_;
-  int hadTau2_decayMode_;
-
-  const TauID tauId_;
-  const std::string wp_str_;
   //-----------------------------------------------------------------------------
   // data/MC corrections for trigger efficiencies
 
