@@ -102,8 +102,6 @@ process.produceNtuple = cms.PSet(
     apply_topPtReweighting = cms.string(''),
     apply_l1PreFireWeight = cms.bool(True),
     apply_pileupJetID = cms.string(''),
-    btagSFRatio = cms.PSet(),
-    apply_btagSFRatio = cms.bool(True),
     #metFilters = cms.PSet(),
     #apply_hadTauFakeRateSF = cms.bool(False),
     #apply_genPhotonFilter = cms.string("disabled"),
@@ -111,6 +109,7 @@ process.produceNtuple = cms.PSet(
     apply_chargeMisIdRate = cms.bool(True), # CV: set to True for 2lss and 2lss+1tau channels, and to False for all other channels
     split_jes = cms.bool(True),
     split_jer = cms.bool(False),
+    isCP5 = cms.bool(False),
 
     evtWeight = cms.PSet(
         apply = cms.bool(False),
@@ -302,7 +301,6 @@ process.produceNtuple.hhWeights.apply_rwgt_lo                        = cms.bool(
 process.produceNtuple.hhWeights.rwgt_nlo_mode                        = cms.string('v3')
 process.produceNtuple.apply_topPtReweighting                         = cms.string('')
 #process.produceNtuple.useAssocJetBtag                                = cms.bool(False)
-process.produceNtuple.apply_btagSFRatio                              = cms.bool(True)
 #process.produceNtuple.gen_mHH                                        = cms.vdouble([250.0, 260.0, 270.0, 280.0, 300.0, 320.0, 350.0, 400.0, 450.0, 500.0, 550.0, 600.0, 650.0, 700.0, 750.0, 800.0, 850.0, 900.0, 1000.0])
 writers_triggerInfo.PD                                               = cms.string("MC")
 writers_genPhotonFilter.apply_genPhotonFilter                        = cms.string('disabled')
@@ -315,9 +313,6 @@ process.produceNtuple.has_pdf_weights                                = cms.bool(
 process.produceNtuple.pdfSettings.lhaid                              = cms.uint32(306000)
 process.produceNtuple.pdfSettings.norm                               = cms.vdouble([ 1. ] * 103) # for the sake of argument
 process.produceNtuple.pdfSettings.saveAllMembers                     = cms.bool(False)
-process.produceNtuple.btagSFRatio                                    = cms.PSet(
-  central = cms.vdouble(1.0, 0.983850754831, 0.970806608203, 0.95589515666, 0.941090355157, 0.919510668991, 0.896747198034, 0.869121413881, 0.843409507134, 0.788891130366),
-)
 #process.produceNtuple.selection                                      = cms.string("nlep == 2 & ntau == 1")
 process.produceNtuple.selection                                      = cms.string("")
 #process.produceNtuple.selEventsFileName                              = cms.string('selEvents_DEBUG.txt')

@@ -13,6 +13,7 @@ enum class Era;
 enum
 {
   kBtag_central,
+  kBtag_noBtagSF,
 
   kBtag_hfUp,       kBtag_hfDown,
   kBtag_hfStats1Up, kBtag_hfStats1Down,
@@ -278,6 +279,7 @@ enum class SubjetBtagSys
 };
 
 extern const std::string pdfSysStr;
+extern const std::string noBtagWeightStr;
 
 // theory uncertainties
 extern const std::map<std::string, int> lheScaleSysMap;
@@ -291,6 +293,7 @@ extern const std::map<std::string, TriggerSFsys> triggerSFSysMap; // NOT WRITTEN
 
 // AK4 jet uncertainties
 extern const std::map<std::string, int> btagWeightSysMap;
+extern const std::map<std::string, int> btagWeightJESsplitSysMap;
 extern const std::map<std::string, pileupJetIDSFsys> pileupJetIDSysMap;
 
 extern const std::map<std::string, int> jesAK4SysMap;
@@ -334,6 +337,10 @@ extern const std::map<std::string, int> topPtRwgtSysMap;
 extern const std::map<std::string, EWKJetSys> ewkJetSysMap;
 extern const std::map<std::string, EWKBJetSys> ewkBJetSysMap;
 extern const std::map<std::string, LHEVptSys> lheVptSysMap;
+
+// ------------------------
+// mapping of b-tagging systematics enums to correctionlib strings
+extern const std::map<int, std::string> btagWeightSysMap_correctionLib;
 
 std::vector<std::string>
 get_inclusive_systeatics(const std::vector<std::string> & systematics);
@@ -443,12 +450,6 @@ getPDFsys_str(int memberIdx);
 void
 checkOptionValidity(const std::string & central_or_shift,
                     bool isMC);
-
-std::string
-getBranchName_bTagWeight(Btag btag,
-                         Era era,
-                         const std::string & default_collectionName,
-                         int central_or_shift);
 
 /**
  * @brief Return branch name to read RecoJet pt and mass

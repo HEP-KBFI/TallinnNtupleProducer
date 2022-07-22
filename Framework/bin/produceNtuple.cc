@@ -25,7 +25,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h"                        // get_tH_SM_str()
 #include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"                           // TTreeWrapper
-#include "TallinnNtupleProducer/EvtWeightTools/interface/BtagSFRatioInterface.h"                // BtagSFRatioInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/ChargeMisIdRateInterface.h"            // ChargeMisIdRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h" // Data_to_MC_CorrectionInterface_2016
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2017.h" // Data_to_MC_CorrectionInterface_2017
@@ -120,13 +119,14 @@ int main(int argc, char* argv[])
   const edm::VParameterSet lumiScale = cfg_produceNtuple.getParameterSetVector("lumiScale");
   const bool apply_genWeight = cfg_produceNtuple.getParameter<bool>("apply_genWeight");
   const std::string apply_topPtReweighting_str = cfg_produceNtuple.getParameter<std::string>("apply_topPtReweighting");
-  const pileupJetID apply_pileupJetID = get_pileupJetID(cfg_produceNtuple.getParameter<std::string>("apply_pileupJetID"));
+  const std::string apply_pileupJetID_str = cfg_produceNtuple.getParameter<std::string>("apply_pileupJetID");
+  const pileupJetID apply_pileupJetID = get_pileupJetID(apply_pileupJetID_str);
   const bool apply_topPtReweighting = ! apply_topPtReweighting_str.empty();
   const bool apply_DYMCReweighting = cfg_produceNtuple.getParameter<bool>("apply_DYMCReweighting");
   const bool apply_DYMCNormScaleFactors = cfg_produceNtuple.getParameter<bool>("apply_DYMCNormScaleFactors");
   const bool apply_LHEVpt_rwgt = cfg_produceNtuple.getParameter<bool>("apply_LHEVpt_rwgt");
   const bool apply_l1PreFireWeight = cfg_produceNtuple.getParameter<bool>("apply_l1PreFireWeight");
-  const bool apply_btagSFRatio = cfg_produceNtuple.getParameter<bool>("apply_btagSFRatio");
+  const bool isCP5 = cfg_produceNtuple.getParameter<bool>("isCP5");
 
   const unsigned int numNominalLeptons = cfg_produceNtuple.getParameter<unsigned int>("numNominalLeptons");
   const bool applyNumNominalLeptonsCut = cfg_produceNtuple.getParameter<bool>("applyNumNominalLeptonsCut");
@@ -175,6 +175,8 @@ int main(int argc, char* argv[])
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstElectrons", get_tau_id_wp_int(hadTauWP_againstElectrons));
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstMuons", get_tau_id_wp_int(hadTauWP_againstMuons));
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("lep_mva_wp", lep_mva_wp);
+  cfg_dataToMCcorrectionInterface.addParameter<std::string>("pileupJetID", apply_pileupJetID_str);
+  cfg_dataToMCcorrectionInterface.addParameter<bool>("isCP5", isCP5);
   cfg_dataToMCcorrectionInterface.addParameter<bool>("isDEBUG", isDEBUG);
   Data_to_MC_CorrectionInterface_Base * dataToMCcorrectionInterface = nullptr;
   switch ( era )
@@ -283,13 +285,6 @@ int main(int argc, char* argv[])
     inputTree->registerReader(lheParticleReader);
   }
 
-  BtagSFRatioInterface* btagSFRatioInterface = nullptr;
-  if ( apply_btagSFRatio )
-  {
-    const edm::ParameterSet btagSFRatio = cfg_produceNtuple.getParameterSet("btagSFRatio");
-    btagSFRatioInterface = new BtagSFRatioInterface(btagSFRatio);
-  }
-
   // CV: create plugins that write branches to "plain" Ntuple
   if ( !edmplugin::PluginManager::isAvailable() )
   {  
@@ -307,6 +302,7 @@ int main(int argc, char* argv[])
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
     cfg_writer.addParameter<std::string>("process", process);
+    cfg_writer.addParameter<bool>("split_jes", cfg_produceNtuple.getParameter<bool>("split_jes"));
     cfg_writer.addParameter<bool>("l1PreFiringWeightReader", l1PreFiringWeightReader);
     cfg_writer.addParameter<bool>("apply_topPtReweighting", apply_topPtReweighting);
     cfg_writer.addParameter<bool>("has_LHE_weights", lheInfoReader && lheInfoReader->has_LHE_weights());
@@ -329,6 +325,7 @@ int main(int argc, char* argv[])
 
   std::vector<std::string> systematic_shifts;
   // CV: process all systematic uncertainties supported by any plugin that writes branches to "plain" Ntuple (only for MC)
+  // TODO fake rates (and potentiall charge flip rates) do have systematic uncertainties
   if ( isMC )
   {
     for ( auto & writer : writers )
@@ -449,13 +446,10 @@ int main(int argc, char* argv[])
         evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
 
-//--- compute event-level weight for data/MC correction of b-tagging efficiency and mistag rate
-//   (using the method "Event reweighting using scale factors calculated with a tag and probe method",
-//    described on the BTV POG twiki https://twiki.cern.ch/twiki/bin/view/CMS/BTagShapeCalibration )
-        evtWeightRecorder.record_btagWeight(event.selJetsAK4());
-        if ( btagSFRatioInterface )
+        evtWeightRecorder.record_btagWeight(dataToMCcorrectionInterface, event.selJetsAK4());
+        if(apply_pileupJetID != pileupJetID::kPileupJetID_disabled)
         {
-          evtWeightRecorder.record_btagSFRatio(btagSFRatioInterface, event.selJetsAK4().size());
+          evtWeightRecorder.record_pileupJetIDSF(dataToMCcorrectionInterface, event.selJetsAK4());
         }
 
         if ( analysisConfig.isMC_EWK() )
@@ -611,7 +605,6 @@ int main(int argc, char* argv[])
   delete dataToMCcorrectionInterface;
   delete jetToLeptonFakeRateInterface;
   delete jetToHadTauFakeRateInterface;
-  delete btagSFRatioInterface;
 
   for ( auto & writer : writers )
   {

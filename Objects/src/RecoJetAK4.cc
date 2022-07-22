@@ -5,28 +5,24 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag, pileupJetID
 
 RecoJetAK4::RecoJetAK4(const GenJet & jet,
-                       Double_t charge,
                        Double_t BtagCSV,
-                       Double_t BtagWeight,
                        Double_t QGDiscr,
                        Double_t bRegCorr,
                        Double_t bRegRes,
                        Int_t jetId,
                        Int_t puId,
                        UInt_t idx,
-                       Int_t genPartIdx,
+                       Int_t genJetIdx,
                        Btag btag,
                        Int_t central_or_shift)
 : RecoJetBase(jet, idx)
-  , jetCharge_(charge)
   , BtagCSV_(BtagCSV)
-  , BtagWeight_(BtagWeight)
   , QGDiscr_(QGDiscr)
   , bRegCorr_(bRegCorr)
   , bRegRes_(bRegRes)
   , jetId_(jetId)
   , puId_(puId)
-  , genPartIdx_(genPartIdx)
+  , genJetIdx_(genJetIdx)
   , btag_(btag)
   , isBJet_loose_(false)
   , isBJet_medium_(false)
@@ -48,12 +44,6 @@ RecoJetAK4::set_isBJet_medium() const
 }
 
 Double_t
-RecoJetAK4::charge() const
-{
-  return jetCharge_;
-}
-
-Double_t
 RecoJetAK4::BtagCSV() const
 {
   return BtagCSV_;
@@ -69,25 +59,6 @@ RecoJetAK4::BtagCSV(Btag btag) const
     ;
   }
   return BtagCSV_systematics_.at(btag);
-}
-
-Double_t
-RecoJetAK4::BtagWeight() const
-{
-  return BtagWeight_;
-}
-
-Double_t
-RecoJetAK4::BtagWeight(Btag btag,
-                    int central_or_shift) const
-{
-  return BtagWeight_systematics_.at(btag).at(central_or_shift);
-}
-
-Double_t
-RecoJetAK4::BtagWeight(int central_or_shift) const
-{
-  return BtagWeight(btag_, central_or_shift);
 }
 
 Double_t
@@ -130,15 +101,15 @@ RecoJetAK4::puId() const
 }
 
 Int_t
-RecoJetAK4::genPartIdx() const
+RecoJetAK4::genJetIdx() const
 {
-  return genPartIdx_;
+  return genJetIdx_;
 }
 
 bool
 RecoJetAK4::passesPUID(pileupJetID puIdWP) const
 {
-  return this->puId() & (int)puIdWP;
+  return this->puId() & static_cast<int>(puIdWP);
 }
 
 bool
@@ -147,6 +118,12 @@ RecoJetAK4::is_PUID_taggable() const
   // PU jet ID is applicable only to jets that have pT < 50. GeV
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
   return this->pt() < 50.;
+}
+
+bool
+RecoJetAK4::is_PU() const
+{
+  return genJetIdx_ < 0;
 }
 
 bool
@@ -166,7 +143,7 @@ operator<<(std::ostream & stream,
            const RecoJetAK4 & jet)
 {
   stream << static_cast<const RecoJetBase &>(jet)                            << ",\n"
-            " genPartIdx = "      << jet.genPartIdx()                        << ","
+            " genJetIdx = "       << jet.genJetIdx()                         << ","
             " CSV = "             << jet.BtagCSV()                           << ","
             " jet ID = "          << jet.jetId()                             << ","
             " PU ID = "           << jet.puId()                              << ","

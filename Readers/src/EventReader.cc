@@ -8,7 +8,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/pickFirstNobjects.h"        // pickFirstNobjects()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getBTagWeight_option(), getMET_option()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getHadTauPt_option(), getFatJet_option(), getJet_option(), getMET_option()
 #include "TallinnNtupleProducer/Objects/interface/printCollection.h"              // printCollection()
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
@@ -274,8 +274,6 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
   {
     const int jetPt_option = getJet_option(central_or_shift, isMC_);
     jetReaderAK4_->setPtMass_central_or_shift(jetPt_option);
-    const int btagWeight_option = ( isMC_ ) ? getBTagWeight_option(central_or_shift) : kBtag_central;
-    jetReaderAK4_->setBtagWeight_central_or_shift(btagWeight_option);
   }
   if ( central_or_shift == "central" || contains(jetReaderAK8_Hbb_->get_supported_systematics(cfg_), central_or_shift) )
   {

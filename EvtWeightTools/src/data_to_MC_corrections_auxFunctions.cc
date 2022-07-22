@@ -598,4 +598,47 @@ namespace aux
     const double down = tau_leg_efficiency(pt, dm, trigger_type, wp, data_type, cset, "down");
     return { down, nom, up };
   }
+
+  int
+  get_btv_flavor(int hadronFlav)
+  {
+    if     (hadronFlav == 5) return 0; // b
+    else if(hadronFlav == 4) return 1; // c
+    return 2;                          // udsg
+  }
+
+  bool
+  is_relevant_shape_sys(int hadronFlavor,
+                        int central_or_shift)
+  {
+    const bool is_valid =
+      central_or_shift == kBtag_central ||
+      (
+        hadronFlavor == 5 &&
+        (
+          central_or_shift == kBtag_lfUp       || central_or_shift == kBtag_lfDown       ||
+          central_or_shift == kBtag_hfStats1Up || central_or_shift == kBtag_hfStats1Down ||
+          central_or_shift == kBtag_hfStats2Up || central_or_shift == kBtag_hfStats2Down ||
+          central_or_shift >= kBtag_jesTotalUp
+        )
+      ) ||
+      (
+        hadronFlavor == 4 &&
+        (
+          central_or_shift == kBtag_cErr1Up || central_or_shift == kBtag_cErr1Down ||
+          central_or_shift == kBtag_cErr2Up || central_or_shift == kBtag_cErr2Down
+        )
+      ) ||
+      (
+        hadronFlavor == 0 &&
+        (
+            central_or_shift == kBtag_hfUp       || central_or_shift == kBtag_hfDown       ||
+            central_or_shift == kBtag_lfStats1Up || central_or_shift == kBtag_lfStats1Down ||
+            central_or_shift == kBtag_lfStats2Up || central_or_shift == kBtag_lfStats2Down ||
+            central_or_shift >= kBtag_jesTotalUp
+        )
+      )
+    ;
+    return is_valid;
+  }
 }

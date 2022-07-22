@@ -18,7 +18,7 @@
 #include "TFile.h"                                                                              // TFile
 #include "TString.h"                                                                            // Form()
 
-#include <boost/algorithm/string/predicate.hpp>                                                 // boost::ends_with(), boost::starts_with()
+#include <boost/algorithm/string/replace.hpp>                                                   // boost::replace_all_copy()
 
 #include <assert.h>                                                                             // assert()
 
@@ -39,12 +39,18 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , sfPileupJetID_mistag_(nullptr)
   , sfPileupJetID_mistag_errors_(nullptr)
   , era_(era)
+  , era_str_(get_era(era_))
   , hadTauSelection_(-1)
   , hadTauId_(TauID::DeepTau2017v2VSjet)
-  , tauCorrectionSetFile_(LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", get_era(era_).data())).fullPath())
+  , tau_cset_(nullptr)
+  , hadTauID_and_Iso_cset_(nullptr)
+  , eToTauFakeRate_cset_(nullptr)
+  , muToTauFakeRate_cset_(nullptr)
   , applyHadTauSF_(true)
   , isDEBUG_(cfg.exists("isDEBUG") ? cfg.getParameter<bool>("isDEBUG") : false)
   , pileupJetId_(pileupJetID::kPileupJetID_disabled)
+  , btag_cset_(nullptr)
+  , btag_shape_cset_(nullptr)
   , recompTightSF_(cfg.exists("lep_mva_wp") && cfg.getParameter<std::string>("lep_mva_wp") == "hh_multilepton")
   , recompTightSF_el_woTightCharge_(1.)
   , recompTightSF_mu_woTightCharge_(1.)
@@ -56,10 +62,11 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , numHadTaus_(0)
   , numJets_(0)
 {
-  tau_cset_ = correction::CorrectionSet::from_file(tauCorrectionSetFile_);
-  set_hadTauID_and_Iso_cset(tau_cset_->at("DeepTau2017v2p1VSjet"));
-  set_eToTauFakeRate_cset(tau_cset_->at("antiEleMVA6"));
-  set_muToTauFakeRate_cset(tau_cset_->at("antiMu3"));
+  const std::string tauCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", era_str_.data())).fullPath();
+  tau_cset_ = correction::CorrectionSet::from_file(tauCorrectionSetFile);
+  hadTauID_and_Iso_cset_ = tau_cset_->at(TauID_names.at(hadTauId_));
+  eToTauFakeRate_cset_ = tau_cset_->at("antiEleMVA6");
+  muToTauFakeRate_cset_ = tau_cset_->at("antiMu3");
   const std::string hadTauSelection_string = cfg.getParameter<std::string>("hadTauSelection_againstJets");
   applyHadTauSF_ = hadTauSelection_string != "disabled";
   if(applyHadTauSF_)
@@ -101,13 +108,11 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   {
     if(hadTauId_ == TauID::DeepTau2017v2VSjet)
     {
-      tauIDSF_str_ = "DeepTau2017v2p1VSjet";
       tauIDSF_level_str_ = TauID_level_strings.at(TauID_levels.at(hadTauId_)).at(hadTauSelection_);
     }
     else if(hadTauId_ == TauID::MVAoldDM2017v2     ||
             hadTauId_ == TauID::MVAoldDMdR032017v2  )
     {
-      tauIDSF_str_ = "MVAoldDM2017v2";
       tauIDSF_level_str_ = TauID_level_strings.at(TauID_levels.at(hadTauId_)).at(std::max(1, hadTauSelection_));
     }
     else
@@ -115,77 +120,82 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
       throw cmsException(this, __func__, __LINE__) << "Invalid tau ID: " << as_integer(hadTauId_);
     }
   }
-
+  //-----------------------------------------------------------------------------
+  std::string era_str_btag = era_str_;
+  if(era_str_btag == "2016" && cfg.getParameter<bool>("isCP5"))
+  {
+    era_str_btag += "cp5";
+  }
+  const std::string btagCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/btv/%s/btagging.json.gz", era_str_btag.data())).fullPath();
+  btag_cset_ = correction::CorrectionSet::from_file(btagCorrectionSetFile);
+  btag_shape_cset_ = btag_cset_->at("deepJet_shape");
   //-----------------------------------------------------------------------------
   // Efficiencies and mistag rates for pileup jet ID, provided by JetMET POG
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
-  if ( cfg.exists("pileupJetID") )
+  pileupJetId_ = get_pileupJetID(cfg.getParameter<std::string>("pileupJetID"));
+  if ( pileupJetId_ != pileupJetID::kPileupJetID_disabled )
   {
-    pileupJetId_ = get_pileupJetID(cfg.getParameter<std::string>("pileupJetID"));
-    if ( pileupJetId_ != pileupJetID::kPileupJetID_disabled )
+    std::string wp_string;
+    // The encoding of the pileup jet ID working points is:
+    //   puId==0 means 000: fail all PU ID;
+    //   puId==4 means 100: pass loose ID, fail medium, fail tight;
+    //   puId==6 means 110: pass loose and medium ID, fail tight;
+    //   puId==7 means 111: pass loose, medium, tight ID. 
+    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID#miniAOD_and_nanoAOD
+    if ( pileupJetId_ == pileupJetID::kPileupJetID_loose )
     {
-      const std::string era_string = get_era(era_);
-      std::string wp_string;
-      // The encoding of the pileup jet ID working points is:
-      //   puId==0 means 000: fail all PU ID;
-      //   puId==4 means 100: pass loose ID, fail medium, fail tight;
-      //   puId==6 means 110: pass loose and medium ID, fail tight;
-      //   puId==7 means 111: pass loose, medium, tight ID. 
-      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID#miniAOD_and_nanoAOD
-      if ( pileupJetId_ == pileupJetID::kPileupJetID_loose )
-      {
-        wp_string = "L";
-      }
-      else if ( pileupJetId_ == pileupJetID::kPileupJetID_medium )
-      {
-        wp_string = "M";
-      }
-      else if ( pileupJetId_ == pileupJetID::kPileupJetID_tight )
-      {
-        wp_string = "T";
-      }
-      else
-      {
-        throw cmsException(this, __func__, __LINE__) << "Option 'pileupJetId_' set to an invalid value: " << (int)pileupJetId_;
-      }
-      effPileupJetID_ = new lutWrapperTH2(
-        inputFiles_,
-        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
-        Form("h2_eff_mc%s_%s", era_string.data(), wp_string.data()),
-        lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
-      );
-      sfPileupJetID_eff_ = new lutWrapperTH2(
-        inputFiles_,
-        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
-        Form("h2_eff_sf%s_%s", era_string.data(), wp_string.data()),
-        lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
-      );
-      sfPileupJetID_eff_errors_ = new lutWrapperTH2(
-        inputFiles_,
-        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
-        Form("h2_eff_sf%s_%s_Systuncty", era_string.data(), wp_string.data()),
-        lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
-      );
-      mistagPileupJetID_ = new lutWrapperTH2(
-        inputFiles_,
-        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
-        Form("h2_mistag_mc%s_%s", era_string.data(), wp_string.data()),
-        lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
-      );
-      sfPileupJetID_mistag_ = new lutWrapperTH2(
-        inputFiles_,
-        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
-        Form("h2_mistag_sf%s_%s", era_string.data(), wp_string.data()),
-        lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
-      );
-      sfPileupJetID_mistag_errors_ = new lutWrapperTH2(
-        inputFiles_,
-        "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
-        Form("h2_mistag_sf%s_%s_Systuncty", era_string.data(), wp_string.data()),
-        lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
-      );
+      wp_string = "L";
     }
+    else if ( pileupJetId_ == pileupJetID::kPileupJetID_medium )
+    {
+      wp_string = "M";
+    }
+    else if ( pileupJetId_ == pileupJetID::kPileupJetID_tight )
+    {
+      wp_string = "T";
+    }
+    else
+    {
+      throw cmsException(this, __func__, __LINE__) << "Option 'pileupJetId_' set to an invalid value: " << (int)pileupJetId_;
+    }
+    effPileupJetID_ = new lutWrapperTH2(
+      inputFiles_,
+      "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
+      Form("h2_eff_mc%s_%s", era_str_.data(), wp_string.data()),
+      lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
+    );
+    sfPileupJetID_eff_ = new lutWrapperTH2(
+      inputFiles_,
+      "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+      Form("h2_eff_sf%s_%s", era_str_.data(), wp_string.data()),
+      lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
+    );
+    sfPileupJetID_eff_errors_ = new lutWrapperTH2(
+      inputFiles_,
+      "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+      Form("h2_eff_sf%s_%s_Systuncty", era_str_.data(), wp_string.data()),
+      lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
+    );
+    mistagPileupJetID_ = new lutWrapperTH2(
+      inputFiles_,
+      "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/effcyPUID_81Xtraining.root",
+      Form("h2_mistag_mc%s_%s", era_str_.data(), wp_string.data()),
+      lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
+    );
+    sfPileupJetID_mistag_ = new lutWrapperTH2(
+      inputFiles_,
+      "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+      Form("h2_mistag_sf%s_%s", era_str_.data(), wp_string.data()),
+      lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
+    );
+    sfPileupJetID_mistag_errors_ = new lutWrapperTH2(
+      inputFiles_,
+      "TallinnNtupleProducer/EvtWeightTools/data/pileupJetIdSF/scalefactorsPUID_81Xtraining.root",
+      Form("h2_mistag_sf%s_%s_Systuncty", era_str_.data(), wp_string.data()),
+      lut::kXptYeta, 15., 50., lut::kLimit_and_Cut, -5.0, +5.0, lut::kLimit
+    );
   }
+  
   //-----------------------------------------------------------------------------
   if(recompTightSF_)
   {
@@ -264,24 +274,6 @@ const correction::Correction::Ref
 Data_to_MC_CorrectionInterface_Base::get_tau_energy_scale_cset()
 {
   return tau_cset_->at("tau_energy_scale");
-}
-
-void
-Data_to_MC_CorrectionInterface_Base::set_hadTauID_and_Iso_cset(correction::Correction::Ref cset)
-{
-  hadTauID_and_Iso_cset_ = cset;
-}
-
-void
-Data_to_MC_CorrectionInterface_Base::set_eToTauFakeRate_cset(correction::Correction::Ref cset)
-{
-  eToTauFakeRate_cset_ = cset;
-}
-
-void
-Data_to_MC_CorrectionInterface_Base::set_muToTauFakeRate_cset(correction::Correction::Ref cset)
-{
-  muToTauFakeRate_cset_ = cset;
 }
 
 void
@@ -375,29 +367,6 @@ Data_to_MC_CorrectionInterface_Base::setHadTaus(const std::vector<const RecoHadT
     ++numHadTaus_;
   }
 }
-
-void
-Data_to_MC_CorrectionInterface_Base::setJets(const std::vector<const RecoJetAK4 *> & jets)
-{
-  numJets_ = 0;
-  jet_pt_.clear();
-  jet_eta_.clear();
-  jet_isPileup_.clear();
-  jet_passesPileupJetId_.clear();
-  for(const RecoJetAK4 * const jet: jets)
-  {
-    if(! jet->is_PUID_taggable())
-    {
-      continue;
-    }
-    jet_pt_.push_back(jet->pt());
-    jet_eta_.push_back(jet->eta());
-    jet_isPileup_.push_back(jet->genJet() ? false : true);
-    jet_passesPileupJetId_.push_back(jet->passesPUID(pileupJetId_));
-    ++numJets_;
-  }
-}
-
 
 double
 Data_to_MC_CorrectionInterface_Base::getSF_leptonTriggerEff(TriggerSFsys central_or_shift) const
@@ -851,7 +820,8 @@ Data_to_MC_CorrectionInterface_Base::getSF_muToTauFakeRate(FRmt central_or_shift
 }
 
 double
-Data_to_MC_CorrectionInterface_Base::getSF_pileupJetID(pileupJetIDSFsys central_or_shift) const
+Data_to_MC_CorrectionInterface_Base::getSF_pileupJetID(const std::vector<const RecoJetAK4 *> & jets,
+                                                       pileupJetIDSFsys central_or_shift) const
 {
   // CV: Compute SF for efficiencies and mistag rates for jets to pass the pileup jet ID, following the recipe provided by the JetMET POG
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
@@ -861,60 +831,67 @@ Data_to_MC_CorrectionInterface_Base::getSF_pileupJetID(pileupJetIDSFsys central_
   {
     std::cout << get_human_line(this, __func__, __LINE__) << " -> sys unc = " << as_integer(central_or_shift) << '\n';
   }
-  for(std::size_t idxJet = 0; idxJet < numJets_; ++idxJet)
+  if(pileupJetId_ != pileupJetID::kPileupJetID_disabled)
   {
-    if(isDEBUG_)
+    for(const RecoJetAK4 * const jet: jets)
     {
-      std::cout
-        << get_human_line(this, __func__, __LINE__)
-        << '#' << idxJet << " jet (pT = " << jet_pt_[idxJet] << ", eta = " << jet_eta_[idxJet] << ", "
-           "is PU? = " << jet_isPileup_[idxJet] << ", passes PU? " << jet_passesPileupJetId_[idxJet] << ") -> "
-      ;
-    }
-    double eff = 0.;
-    double sf = 0.;
-    if ( ! jet_isPileup_[idxJet] )
-    {
-      // apply efficiency to jets originating from hard-scatter interaction (ie real jets)
-      eff = effPileupJetID_->getSF(jet_pt_[idxJet], jet_eta_[idxJet]);
-      sf = sfPileupJetID_eff_->getSF(jet_pt_[idxJet], jet_eta_[idxJet]);
-      const double sfErr = sfPileupJetID_eff_errors_->getSF(jet_pt_[idxJet], jet_eta_[idxJet]);
+      if(! jet->is_PUID_taggable())
+      {
+        continue;
+      }
       if(isDEBUG_)
       {
-        std::cout << "eff = " << eff << ", sf = " << sf << " +/- " << sfErr;
+        std::cout
+          << get_human_line(this, __func__, __LINE__)
+          << " jet (pT = " << jet->pt() << ", eta = " << jet->eta() << ", "
+             "is PU? = " << jet->is_PU() << ", passes PU? " << jet->passesPUID(pileupJetId_) << ") -> "
+        ;
       }
-      if      ( central_or_shift == pileupJetIDSFsys::effUp   ) sf += sfErr;
-      else if ( central_or_shift == pileupJetIDSFsys::effDown ) sf -= sfErr;
-    }
-    else
-    {
-      // apply mistag rate to pileup jets
-      eff = mistagPileupJetID_->getSF(jet_pt_[idxJet], jet_eta_[idxJet]);
-      sf = sfPileupJetID_mistag_->getSF(jet_pt_[idxJet], jet_eta_[idxJet]);
-      const double sfErr = sfPileupJetID_mistag_errors_->getSF(jet_pt_[idxJet], jet_eta_[idxJet]);
+      double eff = 0.;
+      double sf = 0.;
+      if ( ! jet->is_PU() )
+      {
+        // apply efficiency to jets originating from hard-scatter interaction (ie real jets)
+        eff = effPileupJetID_->getSF(jet->pt(), jet->eta());
+        sf = sfPileupJetID_eff_->getSF(jet->pt(), jet->eta());
+        const double sfErr = sfPileupJetID_eff_errors_->getSF(jet->pt(), jet->eta());
+        if(isDEBUG_)
+        {
+          std::cout << "eff = " << eff << ", sf = " << sf << " +/- " << sfErr;
+        }
+        if      ( central_or_shift == pileupJetIDSFsys::effUp   ) sf += sfErr;
+        else if ( central_or_shift == pileupJetIDSFsys::effDown ) sf -= sfErr;
+      }
+      else
+      {
+        // apply mistag rate to pileup jets
+        eff = mistagPileupJetID_->getSF(jet->pt(), jet->eta());
+        sf = sfPileupJetID_mistag_->getSF(jet->pt(), jet->eta());
+        const double sfErr = sfPileupJetID_mistag_errors_->getSF(jet->pt(), jet->eta());
+        if(isDEBUG_)
+        {
+          std::cout << "mistag = " << eff << ", sf = " << sf << " +/- " << sfErr;
+        }
+        if      ( central_or_shift == pileupJetIDSFsys::mistagUp   ) sf += sfErr;
+        else if ( central_or_shift == pileupJetIDSFsys::mistagDown ) sf -= sfErr;
+      }
+      // CV: limit SF to the range [0..5], following the recommendation given by the JetMET POG on the twiki
+      // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
+      sf = std::clamp(sf, 0., 5.);
+      if ( jet->passesPUID(pileupJetId_) )
+      {
+        prob_mc *= eff;
+        prob_data *= (sf*eff);
+      }
+      else
+      {
+        prob_mc *= (1.0 - eff);
+        prob_data *= (1.0 - sf*eff);
+      }
       if(isDEBUG_)
       {
-        std::cout << "mistag = " << eff << ", sf = " << sf << " +/- " << sfErr;
+        std::cout << " => sf = " << sf << ", prob_mc = " << prob_mc << ", prob_data = " << prob_data << '\n';
       }
-      if      ( central_or_shift == pileupJetIDSFsys::mistagUp   ) sf += sfErr;
-      else if ( central_or_shift == pileupJetIDSFsys::mistagDown ) sf -= sfErr;
-    }
-    // CV: limit SF to the range [0..5], following the recommendation given by the JetMET POG on the twiki
-    // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
-    sf = std::clamp(sf, 0., 5.);
-    if ( jet_passesPileupJetId_[idxJet] )
-    {
-      prob_mc *= eff;
-      prob_data *= (sf*eff);
-    }
-    else
-    {
-      prob_mc *= (1.0 - eff);
-      prob_data *= (1.0 - sf*eff);
-    }
-    if(isDEBUG_)
-    {
-      std::cout << " => sf = " << sf << ", prob_mc = " << prob_mc << ", prob_data = " << prob_data << '\n';
     }
   }
   const double sf = aux::compSF(prob_data, prob_mc);
@@ -926,4 +903,28 @@ Data_to_MC_CorrectionInterface_Base::getSF_pileupJetID(pileupJetIDSFsys central_
     ;
   }
   return sf;
+}
+
+double
+Data_to_MC_CorrectionInterface_Base::getSF_btag(const std::vector<const RecoJetAK4 *> & jets,
+                                                int central_or_shift) const
+{
+  double btagSF = 1.;
+  if(central_or_shift != kBtag_noBtagSF)
+  {
+    const auto it = btagWeightSysMap_correctionLib.find(central_or_shift);
+    if(it == btagWeightSysMap_correctionLib.end())
+    {
+      throw cmsException(this, __func__, __LINE__) << "Invalid central / shift option: " << central_or_shift;
+    }
+
+    const std::string sys_opt = boost::replace_all_copy(it->second, "ERA", era_str_);
+    for(const RecoJetAK4 * jet: jets)
+    {
+      const std::string sys_opt_jet = aux::is_relevant_shape_sys(jet->hadronFlav(), central_or_shift) ? sys_opt : "central";
+      const double btagWeight = btag_shape_cset_->evaluate({ sys_opt_jet, aux::get_btv_flavor(jet->hadronFlav()), jet->absEta(), jet->pt(), jet->BtagCSV() });
+      btagSF *= btagWeight < 1e-2 ? 1. : btagWeight;
+    }
+  }
+  return btagSF;
 }

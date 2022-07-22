@@ -15,8 +15,10 @@
 #include <regex>                                                        // std::regex, std::smatch, std::regex_match()
 
 const std::string pdfSysStr = "CMS_ttHl_PDF_shape_Member";
+const std::string noBtagWeightStr = "noBtagSF";
 
 const std::map<std::string, int> btagWeightSysMap = {
+  { noBtagWeightStr,                      kBtag_noBtagSF                  },
   { "CMS_ttHl_btag_HFUp",                 kBtag_hfUp                      },
   { "CMS_ttHl_btag_HFDown",               kBtag_hfDown                    },
   { "CMS_ttHl_btag_HFStats1Up",           kBtag_hfStats1Up                },
@@ -35,6 +37,9 @@ const std::map<std::string, int> btagWeightSysMap = {
   { "CMS_ttHl_btag_cErr2Down",            kBtag_cErr2Down                 },
   { "CMS_ttHl_JESUp",                     kBtag_jesTotalUp                },
   { "CMS_ttHl_JESDown",                   kBtag_jesTotalDown              },
+};
+
+const std::map<std::string, int> btagWeightJESsplitSysMap = {
   { "CMS_ttHl_JESAbsoluteUp",             kBtag_jesAbsoluteUp             },
   { "CMS_ttHl_JESAbsoluteDown",           kBtag_jesAbsoluteDown           },
   { "CMS_ttHl_JESAbsolute_EraUp",         kBtag_jesAbsolute_EraUp         },
@@ -351,6 +356,50 @@ const std::map<std::string, SubjetBtagSys> subjetBtagSysMap = {
   { "CMS_btag_subjetDown", SubjetBtagSys::down },
 };
 
+extern const std::map<int, std::string> btagWeightSysMap_correctionLib = {
+  { kBtag_central,                   "central"                    },
+  { kBtag_hfUp,                      "up_hf"                      },
+  { kBtag_hfDown,                    "down_hf"                    },
+  { kBtag_hfStats1Up,                "up_hfstats1"                },
+  { kBtag_hfStats1Down,              "down_hfstats1"              },
+  { kBtag_hfStats2Up,                "up_hfstats2"                },
+  { kBtag_hfStats2Down,              "down_hfstats2"              },
+  { kBtag_lfUp,                      "up_lf"                      },
+  { kBtag_lfDown,                    "down_lf"                    },
+  { kBtag_lfStats1Up,                "up_lfstats1"                },
+  { kBtag_lfStats1Down,              "down_lfstats1"              },
+  { kBtag_lfStats2Up,                "up_lfstats2"                },
+  { kBtag_lfStats2Down,              "down_lfstats2"              },
+  { kBtag_cErr1Up,                   "up_cferr1"                  },
+  { kBtag_cErr1Down,                 "down_cferr1"                },
+  { kBtag_cErr2Up,                   "up_cferr2"                  },
+  { kBtag_cErr2Down,                 "down_cferr2"                },
+  { kBtag_jesTotalUp,                "up_jes"                     },
+  { kBtag_jesTotalDown,              "down_jes"                   },
+  { kBtag_jesAbsoluteUp,             "up_jesAbsolute"             },
+  { kBtag_jesAbsoluteDown,           "down_jesAbsolute"           },
+  { kBtag_jesAbsolute_EraUp,         "up_jesAbsolute_ERA"         },
+  { kBtag_jesAbsolute_EraDown,       "down_jesAbsolute_ERA"       },
+  { kBtag_jesBBEC1Up,                "up_jesBBEC1"                },
+  { kBtag_jesBBEC1Down,              "down_jesBBEC1"              },
+  { kBtag_jesBBEC1_EraUp,            "up_jesBBEC1_ERA"            },
+  { kBtag_jesBBEC1_EraDown,          "down_jesBBEC1_ERA"          },
+  { kBtag_jesEC2Up,                  "up_jesEC2"                  },
+  { kBtag_jesEC2Down,                "down_jesEC2"                },
+  { kBtag_jesEC2_EraUp,              "up_jesEC2_ERA"              },
+  { kBtag_jesEC2_EraDown,            "down_jesEC2_ERA"            },
+  { kBtag_jesFlavorQCDUp,            "up_jesFlavorQCD"            },
+  { kBtag_jesFlavorQCDDown,          "down_jesFlavorQCD"          },
+  { kBtag_jesHFUp,                   "up_jesHF"                   },
+  { kBtag_jesHFDown,                 "down_jesHF"                 },
+  { kBtag_jesHF_EraUp,               "up_jesHF_ERA"               },
+  { kBtag_jesHF_EraDown,             "down_jesHF_ERA"             },
+  { kBtag_jesRelativeBalUp,          "up_jesRelativeBal"          },
+  { kBtag_jesRelativeBalDown,        "down_jesRelativeBal"        },
+  { kBtag_jesRelativeSample_EraUp,   "up_jesRelativeSample_ERA"   },
+  { kBtag_jesRelativeSample_EraDown, "down_jesRelativeSample_ERA" },
+};
+
 std::vector<std::string>
 get_inclusive_systeatics(const std::vector<std::string> & systematics)
 {
@@ -416,10 +465,13 @@ isValidFatJetAttribute(int central_or_shift,
 int
 getBTagWeight_option(const std::string & central_or_shift)
 {
-  const auto kv = btagWeightSysMap.find(central_or_shift);
-  if(kv != btagWeightSysMap.end())
+  for(const auto & map: { btagWeightSysMap, btagWeightJESsplitSysMap })
   {
-    return kv->second;
+    const auto kv = map.find(central_or_shift);
+    if(kv != map.end())
+    {
+      return kv->second;
+    }
   }
   return kBtag_central;
 }
@@ -775,71 +827,11 @@ checkOptionValidity(const std::string & central_or_shift,
       throw cmsException(__func__, __LINE__) << "Non-empty or non-central systematics option passed to data";
     }
     if(isMC && ! (boost::ends_with(central_or_shift, "Up") || boost::ends_with(central_or_shift, "Down")) &&
-       ! isPDFsys_member(central_or_shift))
+       ! isPDFsys_member(central_or_shift) && central_or_shift != noBtagWeightStr)
     {
       throw cmsException(__func__, __LINE__) << "Non-central MC systematics option not ending with Up or Down: " << central_or_shift;
     }
   }
-}
-
-std::string
-getBranchName_bTagWeight(Btag btag,
-                         Era era,
-                         const std::string & default_collectionName,
-                         int central_or_shift)
-{
-  std::map<int, std::string> branchNames_bTagWeight;
-  std::string discrName;
-  switch(btag)
-  {
-    case Btag::kDeepJet: discrName = "deepjet"; break;
-    case Btag::kDeepCSV: discrName = "deepcsv"; break;
-    case Btag::kCSVv2:   discrName = "csvv2";   break;
-  }
-  const std::string era_str = get_era(era);
-  branchNames_bTagWeight[kBtag_central] = Form("%s_btagSF_%s_shape", default_collectionName.data(), discrName.data());
-  branchNames_bTagWeight[kBtag_hfUp]                      = branchNames_bTagWeight[kBtag_central] + "_up_hf";
-  branchNames_bTagWeight[kBtag_hfDown]                    = branchNames_bTagWeight[kBtag_central] + "_down_hf";
-  branchNames_bTagWeight[kBtag_hfStats1Up]                = branchNames_bTagWeight[kBtag_central] + "_up_hfstats1";
-  branchNames_bTagWeight[kBtag_hfStats1Down]              = branchNames_bTagWeight[kBtag_central] + "_down_hfstats1";
-  branchNames_bTagWeight[kBtag_hfStats2Up]                = branchNames_bTagWeight[kBtag_central] + "_up_hfstats2";
-  branchNames_bTagWeight[kBtag_hfStats2Down]              = branchNames_bTagWeight[kBtag_central] + "_down_hfstats2";
-  branchNames_bTagWeight[kBtag_lfUp]                      = branchNames_bTagWeight[kBtag_central] + "_up_lf";
-  branchNames_bTagWeight[kBtag_lfDown]                    = branchNames_bTagWeight[kBtag_central] + "_down_lf";
-  branchNames_bTagWeight[kBtag_lfStats1Up]                = branchNames_bTagWeight[kBtag_central] + "_up_lfstats1";
-  branchNames_bTagWeight[kBtag_lfStats1Down]              = branchNames_bTagWeight[kBtag_central] + "_down_lfstats1";
-  branchNames_bTagWeight[kBtag_lfStats2Up]                = branchNames_bTagWeight[kBtag_central] + "_up_lfstats2";
-  branchNames_bTagWeight[kBtag_lfStats2Down]              = branchNames_bTagWeight[kBtag_central] + "_down_lfstats2";
-  branchNames_bTagWeight[kBtag_cErr1Up]                   = branchNames_bTagWeight[kBtag_central] + "_up_cferr1";
-  branchNames_bTagWeight[kBtag_cErr1Down]                 = branchNames_bTagWeight[kBtag_central] + "_down_cferr1";
-  branchNames_bTagWeight[kBtag_cErr2Up]                   = branchNames_bTagWeight[kBtag_central] + "_up_cferr2";
-  branchNames_bTagWeight[kBtag_cErr2Down]                 = branchNames_bTagWeight[kBtag_central] + "_down_cferr2";
-  branchNames_bTagWeight[kBtag_jesTotalUp]                = branchNames_bTagWeight[kBtag_central] + "_up_jes";
-  branchNames_bTagWeight[kBtag_jesTotalDown]              = branchNames_bTagWeight[kBtag_central] + "_down_jes";
-  branchNames_bTagWeight[kBtag_jesAbsoluteUp]             = branchNames_bTagWeight[kBtag_central] + "_up_jesAbsolute";
-  branchNames_bTagWeight[kBtag_jesAbsoluteDown]           = branchNames_bTagWeight[kBtag_central] + "_down_jesAbsolute";
-  branchNames_bTagWeight[kBtag_jesAbsolute_EraUp]         = branchNames_bTagWeight[kBtag_central] + Form("_up_jesAbsolute_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesAbsolute_EraDown]       = branchNames_bTagWeight[kBtag_central] + Form("_down_jesAbsolute_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesBBEC1Up]                = branchNames_bTagWeight[kBtag_central] + "_up_jesBBEC1";
-  branchNames_bTagWeight[kBtag_jesBBEC1Down]              = branchNames_bTagWeight[kBtag_central] + "_down_jesBBEC1";
-  branchNames_bTagWeight[kBtag_jesBBEC1_EraUp]            = branchNames_bTagWeight[kBtag_central] + Form("_up_jesBBEC1_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesBBEC1_EraDown]          = branchNames_bTagWeight[kBtag_central] + Form("_down_jesBBEC1_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesEC2Up]                  = branchNames_bTagWeight[kBtag_central] + "_up_jesEC2";
-  branchNames_bTagWeight[kBtag_jesEC2Down]                = branchNames_bTagWeight[kBtag_central] + "_down_jesEC2";
-  branchNames_bTagWeight[kBtag_jesEC2_EraUp]              = branchNames_bTagWeight[kBtag_central] + Form("_up_jesEC2_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesEC2_EraDown]            = branchNames_bTagWeight[kBtag_central] + Form("_down_jesEC2_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesFlavorQCDUp]            = branchNames_bTagWeight[kBtag_central] + "_up_jesFlavorQCD";
-  branchNames_bTagWeight[kBtag_jesFlavorQCDDown]          = branchNames_bTagWeight[kBtag_central] + "_down_jesFlavorQCD";
-  branchNames_bTagWeight[kBtag_jesHFUp]                   = branchNames_bTagWeight[kBtag_central] + "_up_jesHF";
-  branchNames_bTagWeight[kBtag_jesHFDown]                 = branchNames_bTagWeight[kBtag_central] + "_down_jesHF";
-  branchNames_bTagWeight[kBtag_jesHF_EraUp]               = branchNames_bTagWeight[kBtag_central] + Form("_up_jesHF_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesHF_EraDown]             = branchNames_bTagWeight[kBtag_central] + Form("_down_jesHF_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesRelativeBalUp]          = branchNames_bTagWeight[kBtag_central] + "_up_jesRelativeBal";
-  branchNames_bTagWeight[kBtag_jesRelativeBalDown]        = branchNames_bTagWeight[kBtag_central] + "_down_jesRelativeBal";
-  branchNames_bTagWeight[kBtag_jesRelativeSample_EraUp]   = branchNames_bTagWeight[kBtag_central] + Form("_up_jesRelativeSample_%s", era_str.data());
-  branchNames_bTagWeight[kBtag_jesRelativeSample_EraDown] = branchNames_bTagWeight[kBtag_central] + Form("_down_jesRelativeSample_%s", era_str.data());
-  assert(branchNames_bTagWeight.count(central_or_shift));
-  return branchNames_bTagWeight.at(central_or_shift);
 }
 
 std::string

@@ -22,16 +22,14 @@ class RecoJetAK4 : public RecoJetBase
  public:
   RecoJetAK4() = default;
   RecoJetAK4(const GenJet & particle,
-             Double_t charge,
              Double_t BtagCSV,
-             Double_t BtagWeight,
              Double_t QGDiscr,
              Double_t bRegCorr,
              Double_t bRegRes,
              Int_t jetId,
              Int_t puId,
              UInt_t idx,
-             Int_t genPartIdx,
+             Int_t genJetIdx,
              Btag btag,
              Int_t central_or_shift);
 
@@ -47,22 +45,19 @@ class RecoJetAK4 : public RecoJetBase
    * @brief Funtions to access data-members
    * @return Values of data-members
    */
-  Double_t charge() const;
   Double_t BtagCSV() const;
   Double_t BtagCSV(Btag btag) const;
-  Double_t BtagWeight() const;
-  Double_t BtagWeight(int central_or_shift) const;
-  Double_t BtagWeight(Btag btag, int central_or_shift) const;
   Double_t QGDiscr() const;
   Double_t bRegCorr() const;
   Particle::LorentzVector p4_bRegCorr() const;
   Double_t bRegRes() const;
   Int_t jetId() const;
   Int_t puId() const;
-  Int_t genPartIdx() const;
+  Int_t genJetIdx() const;
 
   bool passesPUID(pileupJetID puIdWP) const;
   bool is_PUID_taggable() const;
+  bool is_PU() const;
 
   bool isBJet_loose() const;
   bool isBJet_medium() const;
@@ -70,18 +65,15 @@ class RecoJetAK4 : public RecoJetBase
   friend class RecoJetReaderAK4;
 
  protected:
-  Double_t jetCharge_;  ///< jet charge, computed according to JME-13-006
   Double_t BtagCSV_;    ///< CSV b-tagging discriminator value
-  Double_t BtagWeight_; ///< weight for data/MC correction of b-tagging efficiency and mistag rate
   Double_t QGDiscr_;    ///< quark/gluon discriminator
   Double_t bRegCorr_;   ///< pT correction for b-jet regression
   Double_t bRegRes_;    ///< resolution on pT corrected with b-jet regression
   Int_t jetId_;         ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID
   Int_t puId_;          ///< pileup jet ID, as explained in https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
-  Int_t genPartIdx_;   ///< index to gen jet
+  Int_t genJetIdx_;     ///< index to gen jet
   Btag btag_;           ///< default b-tagging discriminant
 
-  std::map<Btag, std::map<int, Double_t>> BtagWeight_systematics_;
   std::map<Btag, Double_t> BtagCSV_systematics_;
 
 //--- flags indicating whether or not jet passes loose and medium b-jet selection criteria

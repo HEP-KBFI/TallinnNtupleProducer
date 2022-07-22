@@ -85,7 +85,13 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
     if(cfg.getParameter<bool>("isMC"))
     {
       merge_systematic_shifts(supported_systematics, map_keys(puSysMap));
+
       merge_systematic_shifts(supported_systematics, map_keys(btagWeightSysMap));
+      if(cfg.getParameter<bool>("split_jes"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(btagWeightJESsplitSysMap));
+      }
+
       if(cfg.getParameter<bool>("apply_pileupJetID"))
       {
         merge_systematic_shifts(supported_systematics, map_keys(pileupJetIDSysMap));

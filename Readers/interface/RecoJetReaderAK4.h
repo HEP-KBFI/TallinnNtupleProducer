@@ -24,9 +24,6 @@ class RecoJetReaderAK4 : public ReaderBase
   setPtMass_central_or_shift(int central_or_shift);
 
   void
-  setBtagWeight_central_or_shift(int central_or_shift);
-
-  void
   read_Btag(Btag btag);
 
   /**
@@ -64,7 +61,6 @@ class RecoJetReaderAK4 : public ReaderBase
  
   std::string branchName_eta_;
   std::string branchName_phi_;
-  std::string branchName_jetCharge_;
   std::string branchName_QGDiscr_;
   std::string branchName_bRegCorr_;
   std::string branchName_bRegRes_;
@@ -72,11 +68,12 @@ class RecoJetReaderAK4 : public ReaderBase
   std::string branchName_jetId_;
   std::string branchName_puId_;
   std::string branchName_genJetIdx_;
+  std::string branchName_partonFlavour_;
+  std::string branchName_hadronFlavour_;
 
   std::map<int, std::string> branchNames_pt_systematics_;
   std::map<int, std::string> branchNames_mass_systematics_;
   std::map<Btag, std::string> branchNames_btag_;
-  std::map<Btag, std::map<int, std::string>> branchNames_BtagWeight_systematics_;
 
   Btag btag_;
   int btag_central_or_shift_;
@@ -86,7 +83,6 @@ class RecoJetReaderAK4 : public ReaderBase
   UInt_t nJets_;
   Float_t * jet_eta_;
   Float_t * jet_phi_;
-  Float_t * jet_charge_;
   Float_t * jet_QGDiscr_;
   Float_t * jet_bRegCorr_;
   Float_t * jet_bRegRes_;
@@ -94,10 +90,11 @@ class RecoJetReaderAK4 : public ReaderBase
   Int_t * jet_jetId_;
   Int_t * jet_puId_;
   Int_t * jet_genJetIdx_;
+  Int_t * jet_partonFlavour_;
+  Int_t * jet_hadronFlavour_;
 
   std::map<int, Float_t *> jet_pt_systematics_;
   std::map<int, Float_t *> jet_mass_systematics_;
-  std::map<Btag, std::map<int, Float_t *>> jet_BtagWeights_systematics_;
 
   // CV: make sure that only one RecoJetReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

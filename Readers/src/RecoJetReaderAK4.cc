@@ -6,7 +6,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_jetMET(), getBranchName_bTagWeight(), getBranchName_jetPtMass()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_jetMET()
 
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
@@ -27,7 +27,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , ptMassOption_(-1)
   , jet_eta_(nullptr)
   , jet_phi_(nullptr)
-  , jet_charge_(nullptr)
   , jet_QGDiscr_(nullptr)
   , jet_bRegCorr_(nullptr)
   , jet_bRegRes_(nullptr)
@@ -35,6 +34,8 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , jet_jetId_(nullptr)
   , jet_puId_(nullptr)
   , jet_genJetIdx_(nullptr)
+  , jet_partonFlavour_(nullptr)
+  , jet_hadronFlavour_(nullptr)
 {
   era_ = get_era(cfg.getParameter<std::string>("era"));
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Jet"
@@ -55,7 +56,6 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     assert(gInstance);
     delete[] gInstance->jet_eta_;
     delete[] gInstance->jet_phi_;
-    delete[] gInstance->jet_charge_;
     delete[] gInstance->jet_QGDiscr_;
     delete[] gInstance->jet_bRegCorr_;
     delete[] gInstance->jet_bRegRes_;
@@ -63,6 +63,8 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_jetId_;
     delete[] gInstance->jet_puId_;
     delete[] gInstance->jet_genJetIdx_;
+    delete[] gInstance->jet_partonFlavour_;
+    delete[] gInstance->jet_hadronFlavour_;
     for(auto & kv: gInstance->jet_pt_systematics_)
     {
       delete[] kv.second;
@@ -70,13 +72,6 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     for(auto & kv: gInstance->jet_mass_systematics_)
     {
       delete[] kv.second;
-    }
-    for(auto & kv: gInstance->jet_BtagWeights_systematics_)
-    {
-      for(auto & kw: kv.second)
-      {
-        delete[] kw.second;
-      }
     }
     instances_[branchName_obj_] = nullptr;
   }
@@ -94,19 +89,6 @@ RecoJetReaderAK4::setPtMass_central_or_shift(int central_or_shift)
     ptMassOption_ = ptMassOption_central_;
   }
   ptMassOption_ = central_or_shift;
-}
-
-void
-RecoJetReaderAK4::setBtagWeight_central_or_shift(int central_or_shift)
-{
-  if(! isMC_ && central_or_shift != kBtag_central)
-  {
-    throw cmsException(this, __func__, __LINE__)
-      << "No systematic uncertainties on b-tagging SFs available for data"
-    ;
-  }
-  assert(central_or_shift >= kBtag_central && central_or_shift <= kBtag_jesRelativeSample_EraDown);
-  btag_central_or_shift_ = central_or_shift;
 }
 
 void
@@ -148,24 +130,12 @@ RecoJetReaderAK4::setBranchNames()
     branchName_QGDiscr_ = Form("%s_%s", branchName_obj_.data(), "qgl");
     branchName_bRegCorr_ = Form("%s_%s", branchName_obj_.data(), "bRegCorr");
     branchName_bRegRes_ = Form("%s_%s", branchName_obj_.data(), "bRegRes");
-    for(auto & kv: BtagWP_map.at(era_))
-    {
-      if(kv.first != Btag::kDeepJet)
-      {
-        continue;
-      }
-      branchNames_BtagWeight_systematics_[kv.first] = {};
-      for(int idxShift = kBtag_central; idxShift <= kBtag_jesRelativeSample_EraDown; ++idxShift)
-      {
-        branchNames_BtagWeight_systematics_[kv.first][idxShift] = getBranchName_bTagWeight(
-          kv.first, era_, branchName_obj_, idxShift
-        );
-      }
-    }
     branchName_BtagScore_ = Form("%s_%s", branchName_obj_.data(), "btagDeepFlavB");
     branchName_jetId_ = Form("%s_%s", branchName_obj_.data(), "jetId");
     branchName_puId_ = Form("%s_%s", branchName_obj_.data(), "puId");
     branchName_genJetIdx_ = Form("%s_%s", branchName_obj_.data(), "genJetIdx");
+    branchName_partonFlavour_ = Form("%s_%s", branchName_obj_.data(), "partonFlavour");
+    branchName_hadronFlavour_ = Form("%s_%s", branchName_obj_.data(), "hadronFlavour");
     instances_[branchName_obj_] = this;
   }
   else
@@ -200,21 +170,6 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(nJets_, branchName_num_);
     bai.setBranchAddress(jet_eta_, branchName_eta_);
     bai.setBranchAddress(jet_phi_, branchName_phi_);
-    bai.setBranchAddress(jet_charge_, branchName_jetCharge_);
-
-    for(const auto & kv: branchNames_BtagWeight_systematics_)
-    {
-      for(int idxShift = kBtag_central; idxShift <= kBtag_jesRelativeSample_EraDown; ++idxShift)
-      {
-        if( idxShift == btag_central_or_shift_ || isMC_ )
-        {
-          bai.setBranchAddress(
-            jet_BtagWeights_systematics_[kv.first][idxShift], isMC_ ? branchNames_BtagWeight_systematics_[kv.first][idxShift] : "", 1.
-          );
-        }
-      }
-    }
-
     bai.setBranchAddress(jet_QGDiscr_, branchName_QGDiscr_, 1.);
     bai.setBranchAddress(jet_bRegCorr_, branchName_bRegCorr_, 1.);
     bai.setBranchAddress(jet_bRegRes_, branchName_bRegRes_, 0.);
@@ -222,6 +177,8 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_jetId_, branchName_jetId_);
     bai.setBranchAddress(jet_puId_, branchName_puId_);
     bai.setBranchAddress(jet_genJetIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genJetIdx_ : "", -1);
+    bai.setBranchAddress(jet_partonFlavour_, branchName_partonFlavour_);
+    bai.setBranchAddress(jet_hadronFlavour_, branchName_hadronFlavour_);
 
     const std::vector<std::string> recoJetBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoJetBranches.begin(), recoJetBranches.end());
@@ -281,10 +238,10 @@ RecoJetReaderAK4::read() const
           jet_eta,
           jet_phi,
           jet_mass,
+          gInstance->jet_partonFlavour_[idxJet],
+          gInstance->jet_hadronFlavour_[idxJet],
         },
-        gInstance->jet_charge_[idxJet],
         btagCSV,
-        gInstance->jet_BtagWeights_systematics_.at(btag_).at(btag_central_or_shift_)[idxJet],
         qgl,
         gInstance->jet_bRegCorr_[idxJet],
         gInstance->jet_bRegRes_[idxJet],
@@ -295,20 +252,6 @@ RecoJetReaderAK4::read() const
         btag_,
         ptMassOption_,
       });
-      RecoJetAK4 & jet = jets.back();
-      if(isMC_)
-      {
-        for(const auto & kv: gInstance->jet_BtagWeights_systematics_)
-        {
-          for(int idxShift = kBtag_central; idxShift <= kBtag_jesRelativeSample_EraDown; ++idxShift)
-          {
-            if(gInstance->jet_BtagWeights_systematics_.at(kv.first).count(idxShift))
-            {
-              jet.BtagWeight_systematics_[kv.first][idxShift] = gInstance->jet_BtagWeights_systematics_.at(kv.first).at(idxShift)[idxJet];
-            }
-          } // idxShift
-        } // jet_BtagWeights_systematics_
-      } // isMC_
     } // idxJet
   } // nJets > 0
   return jets;
