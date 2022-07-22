@@ -37,6 +37,9 @@ const std::map<std::string, int> btagWeightSysMap = {
   { "CMS_ttHl_btag_cErr2Down",            kBtag_cErr2Down                 },
   { "CMS_ttHl_JESUp",                     kBtag_jesTotalUp                },
   { "CMS_ttHl_JESDown",                   kBtag_jesTotalDown              },
+};
+
+const std::map<std::string, int> btagWeightJESsplitSysMap = {
   { "CMS_ttHl_JESAbsoluteUp",             kBtag_jesAbsoluteUp             },
   { "CMS_ttHl_JESAbsoluteDown",           kBtag_jesAbsoluteDown           },
   { "CMS_ttHl_JESAbsolute_EraUp",         kBtag_jesAbsolute_EraUp         },
@@ -462,10 +465,13 @@ isValidFatJetAttribute(int central_or_shift,
 int
 getBTagWeight_option(const std::string & central_or_shift)
 {
-  const auto kv = btagWeightSysMap.find(central_or_shift);
-  if(kv != btagWeightSysMap.end())
+  for(const auto & map: { btagWeightSysMap, btagWeightJESsplitSysMap })
   {
-    return kv->second;
+    const auto kv = map.find(central_or_shift);
+    if(kv != map.end())
+    {
+      return kv->second;
+    }
   }
   return kBtag_central;
 }

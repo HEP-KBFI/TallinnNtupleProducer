@@ -302,6 +302,7 @@ int main(int argc, char* argv[])
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
     cfg_writer.addParameter<std::string>("process", process);
+    cfg_writer.addParameter<bool>("split_jes", cfg_produceNtuple.getParameter<bool>("split_jes"));
     cfg_writer.addParameter<bool>("l1PreFiringWeightReader", l1PreFiringWeightReader);
     cfg_writer.addParameter<bool>("apply_topPtReweighting", apply_topPtReweighting);
     cfg_writer.addParameter<bool>("has_LHE_weights", lheInfoReader && lheInfoReader->has_LHE_weights());
@@ -324,6 +325,7 @@ int main(int argc, char* argv[])
 
   std::vector<std::string> systematic_shifts;
   // CV: process all systematic uncertainties supported by any plugin that writes branches to "plain" Ntuple (only for MC)
+  // TODO fake rates (and potentiall charge flip rates) do have systematic uncertainties
   if ( isMC )
   {
     for ( auto & writer : writers )

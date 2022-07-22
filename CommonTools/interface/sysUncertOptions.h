@@ -293,6 +293,7 @@ extern const std::map<std::string, TriggerSFsys> triggerSFSysMap; // NOT WRITTEN
 
 // AK4 jet uncertainties
 extern const std::map<std::string, int> btagWeightSysMap;
+extern const std::map<std::string, int> btagWeightJESsplitSysMap;
 extern const std::map<std::string, pileupJetIDSFsys> pileupJetIDSysMap;
 
 extern const std::map<std::string, int> jesAK4SysMap;
