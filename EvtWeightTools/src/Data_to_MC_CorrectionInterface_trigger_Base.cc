@@ -4,9 +4,8 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // get_human_line()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
-#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                               // RecoLepton
-#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"
-// get_tau_id_enum, get_tau_id_wp_str
+#include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                                 // RecoLepton
+#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_enum(), get_tau_id_wp_str()
 #include <assert.h>                                                                             // assert()
 
 Data_to_MC_CorrectionInterface_trigger_Base::Data_to_MC_CorrectionInterface_trigger_Base(const edm::ParameterSet & cfg)

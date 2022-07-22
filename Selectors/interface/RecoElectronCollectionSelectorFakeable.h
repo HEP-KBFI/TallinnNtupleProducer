@@ -1,5 +1,5 @@
-#ifndef tthAnalysis_HiggsToTauTau_TallinnNtupleProducer_Selectors_RecoElectronCollectionSelectorFakeable_h
-#define tthAnalysis_HiggsToTauTau_TallinnNtupleProducer_Selectors_RecoElectronCollectionSelectorFakeable_h
+#ifndef TallinnNtupleProducer_Selectors_RecoElectronCollectionSelectorFakeable_h
+#define TallinnNtupleProducer_Selectors_RecoElectronCollectionSelectorFakeable_h
 
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h"                 // RecoElectron
 #include "TallinnNtupleProducer/Selectors/interface/ParticleCollectionSelector.h" // ParticleCollectionSelector
@@ -108,4 +108,3 @@ class RecoElectronCollectionSelectorFakeable : public ParticleCollectionSelector
 };
 
 #endif // TallinnNtupleProducer_Selectors_RecoElectronCollectionSelectorFakeable_h
-

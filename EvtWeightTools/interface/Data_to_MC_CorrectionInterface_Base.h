@@ -203,6 +203,11 @@ class Data_to_MC_CorrectionInterface_Base
   std::vector<double> jet_eta_;
   std::vector<bool> jet_isPileup_;
   std::vector<bool> jet_passesPileupJetId_;
+
+  std::vector<lutWrapperBase *> effTrigger_1e_data_;
+  std::vector<lutWrapperBase *> effTrigger_1e_mc_;
+  std::vector<lutWrapperBase *> effTrigger_1m_data_;
+  std::vector<lutWrapperBase *> effTrigger_1m_mc_;
 };
 
 #endif // TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_Base_h

@@ -68,4 +68,4 @@ class PSWeightReader : public ReaderBase
    static std::map<std::string, PSWeightReader *> instances_;
 };
 
-#endif // tthAnalysis_HiggsToTauTau_PSWeightReader_h
+#endif // TallinnNtupleProducer_Readers_PSWeightReader_h

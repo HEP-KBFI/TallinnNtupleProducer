@@ -109,5 +109,4 @@ class LHEInfoReader : public ReaderBase
   static std::map<std::string, LHEInfoReader *> instances_;
 };
 
-#endif // tthAnalysis_HiggsToTauTau_LHEInfoReader_h
-
+#endif // TallinnNtupleProducer_Readers_LHEInfoReader_h

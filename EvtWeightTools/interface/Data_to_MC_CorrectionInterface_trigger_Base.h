@@ -2,7 +2,7 @@
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_trigger_Base_h
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                  // edm::ParameterSet
-#include <iostream> //std::cout
+#include <iostream>                                                      // std::cout
 
 // forward declarations
 class RecoHadTau;

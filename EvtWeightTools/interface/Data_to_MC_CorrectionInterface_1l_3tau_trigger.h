@@ -3,9 +3,8 @@
 
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_2tau_trigger.h"
 
-#include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h" // lutWrapperBase, vLutWrapperBase
-
-class Data_to_MC_CorrectionInterface_1l_3tau_trigger : public Data_to_MC_CorrectionInterface_1l_2tau_trigger
+class Data_to_MC_CorrectionInterface_1l_3tau_trigger
+  : public Data_to_MC_CorrectionInterface_1l_2tau_trigger
 {
 public:
   Data_to_MC_CorrectionInterface_1l_3tau_trigger(const edm::ParameterSet & cfg);

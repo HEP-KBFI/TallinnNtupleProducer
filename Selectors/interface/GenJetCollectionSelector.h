@@ -42,5 +42,4 @@ protected:
 
 typedef ParticleCollectionSelector<GenJet, GenJetSelector> GenJetCollectionSelector;
 
-#endif // tthAnalysis_HiggsToTauTau_GenJetCollectionSelector_h
-
+#endif // TallinnNtupleProducer_Selectors_GenJetCollectionSelector_h
