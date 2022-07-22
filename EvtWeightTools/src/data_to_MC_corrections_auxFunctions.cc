@@ -612,14 +612,14 @@ namespace aux
                         int central_or_shift)
   {
     const bool is_valid =
-      central_or_shift == kBtag_central    ||
-      central_or_shift >= kBtag_jesTotalUp ||
+      central_or_shift == kBtag_central ||
       (
         hadronFlavor == 5 &&
         (
           central_or_shift == kBtag_lfUp       || central_or_shift == kBtag_lfDown       ||
           central_or_shift == kBtag_hfStats1Up || central_or_shift == kBtag_hfStats1Down ||
-          central_or_shift == kBtag_hfStats2Up || central_or_shift == kBtag_hfStats2Down
+          central_or_shift == kBtag_hfStats2Up || central_or_shift == kBtag_hfStats2Down ||
+          central_or_shift >= kBtag_jesTotalUp
         )
       ) ||
       (
@@ -634,7 +634,8 @@ namespace aux
         (
             central_or_shift == kBtag_hfUp       || central_or_shift == kBtag_hfDown       ||
             central_or_shift == kBtag_lfStats1Up || central_or_shift == kBtag_lfStats1Down ||
-            central_or_shift == kBtag_lfStats2Up || central_or_shift == kBtag_lfStats2Down
+            central_or_shift == kBtag_lfStats2Up || central_or_shift == kBtag_lfStats2Down ||
+            central_or_shift >= kBtag_jesTotalUp
         )
       )
     ;

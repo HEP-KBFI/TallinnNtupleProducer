@@ -22,7 +22,6 @@ class RecoJetAK4 : public RecoJetBase
  public:
   RecoJetAK4() = default;
   RecoJetAK4(const GenJet & particle,
-             Double_t charge,
              Double_t BtagCSV,
              Double_t QGDiscr,
              Double_t bRegCorr,
@@ -46,7 +45,6 @@ class RecoJetAK4 : public RecoJetBase
    * @brief Funtions to access data-members
    * @return Values of data-members
    */
-  Double_t charge() const;
   Double_t BtagCSV() const;
   Double_t BtagCSV(Btag btag) const;
   Double_t QGDiscr() const;
@@ -67,7 +65,6 @@ class RecoJetAK4 : public RecoJetBase
   friend class RecoJetReaderAK4;
 
  protected:
-  Double_t jetCharge_;  ///< jet charge, computed according to JME-13-006
   Double_t BtagCSV_;    ///< CSV b-tagging discriminator value
   Double_t QGDiscr_;    ///< quark/gluon discriminator
   Double_t bRegCorr_;   ///< pT correction for b-jet regression

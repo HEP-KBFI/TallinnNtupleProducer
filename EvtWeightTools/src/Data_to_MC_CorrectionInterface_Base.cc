@@ -918,12 +918,9 @@ Data_to_MC_CorrectionInterface_Base::getSF_btag(const std::vector<const RecoJetA
   double btagSF = 1.;
   for(const RecoJetAK4 * jet: jets)
   {
-    if(! aux::is_relevant_shape_sys(jet->hadronFlav(), central_or_shift))
-    {
-      continue;
-    }
-    // TODO use the jet pT that corresponds to the b-tagging JES systematic uncertainty
-    btagSF *= btag_shape_cset_->evaluate({ sys_opt, aux::get_btv_flavor(jet->hadronFlav()), jet->absEta(), jet->pt(), jet->BtagCSV() });
+    const std::string sys_opt_jet = aux::is_relevant_shape_sys(jet->hadronFlav(), central_or_shift) ? sys_opt : "central";
+    const double btagWeight = btag_shape_cset_->evaluate({ sys_opt_jet, aux::get_btv_flavor(jet->hadronFlav()), jet->absEta(), jet->pt(), jet->BtagCSV() });
+    btagSF *= btagWeight < 1e-2 ? 1. : btagWeight;
   }
   return btagSF;
 }

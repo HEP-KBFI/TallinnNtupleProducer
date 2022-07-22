@@ -5,7 +5,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag, pileupJetID
 
 RecoJetAK4::RecoJetAK4(const GenJet & jet,
-                       Double_t charge,
                        Double_t BtagCSV,
                        Double_t QGDiscr,
                        Double_t bRegCorr,
@@ -17,7 +16,6 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Btag btag,
                        Int_t central_or_shift)
 : RecoJetBase(jet, idx)
-  , jetCharge_(charge)
   , BtagCSV_(BtagCSV)
   , QGDiscr_(QGDiscr)
   , bRegCorr_(bRegCorr)
@@ -43,12 +41,6 @@ void
 RecoJetAK4::set_isBJet_medium() const
 {
   isBJet_medium_ = true;
-}
-
-Double_t
-RecoJetAK4::charge() const
-{
-  return jetCharge_;
 }
 
 Double_t
