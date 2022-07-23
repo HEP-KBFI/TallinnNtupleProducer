@@ -1,30 +1,13 @@
 #ifndef TallinnNtupleProducer_Readers_EventReader_h
 #define TallinnNtupleProducer_Readers_EventReader_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"                                       // edm::ParameterSet
-
 #include "TallinnNtupleProducer/Cleaners/interface/ParticleCollectionCleaner.h"               // RecoElectronCollectionCleaner, RecoHadTauCollectionCleaner, RecoJetCollectionCleanerAK4, RecoMuonCollectionCleaner
 #include "TallinnNtupleProducer/Cleaners/interface/RecoJetCollectionCleanerByIndexAK4.h"      // RecoJetCollectionCleanerByIndexAK4
-#include "TallinnNtupleProducer/Objects/interface/Event.h"                                    // Event
-#include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"                          // EventInfoReader
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                          // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                             // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"                        // GenParticleReader
-#include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"                          // MEtFilterReader
 #include "TallinnNtupleProducer/Readers/interface/ParticleCollectionGenMatcher.h"             // RecoElectronCollectionGenMatcher, RecoMuonCollectionGenMatcher, RecoHadTauCollectionGenMatcher, RecoJetCollectionGenMatcher
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                               // ReaderBase
-#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"                       // RecoElectronReader
-#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"                         // RecoHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"                         // RecoJetReaderAK4
-#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"                         // RecoJetReaderAK8
-#include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                            // RecoMEtReader
-#include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"                           // RecoMuonReader
-#include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"                         // RecoVertexReader
-#include "TallinnNtupleProducer/Readers/interface/RunLumiEventReader.h"                       // RunLumiEventReader
-#include "TallinnNtupleProducer/Readers/interface/TriggerInfoReader.h"                        // TriggerInfoReader
-#include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorFakeable.h" // RecoElectronCollectionSelectorFakeable
-#include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorLoose.h"    // RecoElectronCollectionSelectorLoose
-#include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorTight.h"    // RecoElectronCollectionSelectorTight
+#include "TallinnNtupleProducer/Objects/interface/Event.h"                                    // Event
+
+#include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorLoose.h"        // RecoMuonCollectionSelectorLoose
 #include "TallinnNtupleProducer/Selectors/interface/RecoHadTauCollectionSelectorFakeable.h"   // RecoHadTauCollectionSelectorFakeable
 #include "TallinnNtupleProducer/Selectors/interface/RecoHadTauCollectionSelectorLoose.h"      // RecoHadTauCollectionSelectorLoose
 #include "TallinnNtupleProducer/Selectors/interface/RecoHadTauCollectionSelectorTight.h"      // RecoHadTauCollectionSelectorTight
@@ -33,16 +16,34 @@
 #include "TallinnNtupleProducer/Selectors/interface/RecoJetCollectionSelectorAK8.h"           // RecoJetCollectionSelectorAK8
 #include "TallinnNtupleProducer/Selectors/interface/RecoJetCollectionSelectorAK8_Hbb.h"       // RecoJetCollectionSSelectorAK8_Hbb
 #include "TallinnNtupleProducer/Selectors/interface/RecoJetCollectionSelectorAK8_Wjj.h"       // RecoJetCollectionSSelectorAK8_Wjj
-#include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorFakeable.h"     // RecoMuonCollectionSelectorFakeable
-#include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorLoose.h"        // RecoMuonCollectionSelectorLoose
-#include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorTight.h"        // RecoMuonCollectionSelectorTight
+
+#include "correction.h"                                                                       // correction::Correction::Ref
 
 #include <set>                                                                                // std::set
-#include <string>                                                                             // std::string
-#include <vector>                                                                             // std::vector
 
 // forward declarations
 class TTree;
+class RunLumiEvent;
+class RunLumiEventReader;
+class TriggerInfoReader;
+class EventInfoReader;
+class GenHadTauReader;
+class GenJetReader;
+class GenParticleReader;
+class MEtFilterReader;
+class RecoElectronCollectionSelectorFakeable;
+class RecoElectronCollectionSelectorLoose;
+class RecoElectronCollectionSelectorTight;
+class RecoMuonCollectionSelectorFakeable;
+class RecoMuonCollectionSelectorTight;
+class RecoElectronReader;
+class RecoHadTauReader;
+class RecoMEtReader;
+class RecoMuonReader;
+class RecoVertexReader;
+class RecoJetReaderAK4;
+class RecoJetReaderAK8;
+class JMECorrector;
 
 enum class Era;
 
@@ -145,6 +146,8 @@ class EventReader : public ReaderBase
   std::set<std::string> hadTau_supported_systematics_;
   mutable std::string hadTau_lastSystematic_;
   mutable bool hadTau_isInvalid_;
+
+  JMECorrector * jmeCorrector_;
 
   RecoJetReaderAK4 * jetReaderAK4_;
   RecoJetCollectionCleanerAK4 jetCleanerAK4_dR04_; // used for cleaning AK4 jets wrt electrons, muons, and tauh

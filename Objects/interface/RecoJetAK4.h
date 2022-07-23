@@ -34,8 +34,7 @@ class RecoJetAK4 : public RecoJetBase
              Float_t muonSubtrFactor,
              UInt_t idx,
              Int_t genJetIdx,
-             Btag btag,
-             Int_t central_or_shift);
+             Btag btag);
 
   virtual ~RecoJetAK4();
 

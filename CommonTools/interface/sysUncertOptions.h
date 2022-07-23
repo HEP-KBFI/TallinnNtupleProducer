@@ -52,7 +52,7 @@ enum class pileupJetIDSFsys
 //--- declare systematic uncertainties on data/MC corrections for jet pt & mass and MET pt & phi
 enum
 {
-  kJetMET_central_nonNominal,  // for data and sync Ntuples
+  kJetMET_central_nonNominal,  // for data and sync Ntuples; TODO change to uncorrected
   kJetMET_central,             // for MC
   kJetMET_jesUp,                   kJetMET_jesDown, // total JES
   // regrouped, sources with era in their names are treated as uncorrelated, the remaining are correlated
@@ -82,7 +82,7 @@ enum
 
 enum
 {
-  kFatJet_central_nonNominal,     // for data and sync Ntuples
+  kFatJet_central_nonNominal,     // for data and sync Ntuples; todo change to uncorrected
   kFatJet_central,                // for MC
   kFatJet_jesUp,                   kFatJet_jesDown, // total JES
   // regrouped JES

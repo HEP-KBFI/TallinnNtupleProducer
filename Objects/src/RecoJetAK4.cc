@@ -17,8 +17,7 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Float_t muonSubtrFactor,
                        UInt_t idx,
                        Int_t genJetIdx,
-                       Btag btag,
-                       Int_t central_or_shift)
+                       Btag btag)
 : RecoJetBase(jet, idx)
 , BtagCSV_(BtagCSV)
 , QGDiscr_(QGDiscr)
