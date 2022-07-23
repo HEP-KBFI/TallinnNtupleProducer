@@ -107,7 +107,7 @@ process.produceNtuple = cms.PSet(
     #apply_genPhotonFilter = cms.string("disabled"),
     disable_ak8_corr = cms.vstring(['JMS', 'JMR', 'PUPPI']),
     apply_chargeMisIdRate = cms.bool(True), # CV: set to True for 2lss and 2lss+1tau channels, and to False for all other channels
-    split_jes = cms.bool(True),
+    split_jes = cms.bool(False),
     split_jer = cms.bool(False),
     isCP5 = cms.bool(False),
 
