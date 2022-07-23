@@ -11,21 +11,29 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Double_t bRegRes,
                        Int_t jetId,
                        Int_t puId,
+                       Float_t rawFactor,
+                       Float_t neEmEF,
+                       Float_t chEmEF,
+                       Float_t muonSubtrFactor,
                        UInt_t idx,
                        Int_t genJetIdx,
                        Btag btag,
                        Int_t central_or_shift)
 : RecoJetBase(jet, idx)
-  , BtagCSV_(BtagCSV)
-  , QGDiscr_(QGDiscr)
-  , bRegCorr_(bRegCorr)
-  , bRegRes_(bRegRes)
-  , jetId_(jetId)
-  , puId_(puId)
-  , genJetIdx_(genJetIdx)
-  , btag_(btag)
-  , isBJet_loose_(false)
-  , isBJet_medium_(false)
+, BtagCSV_(BtagCSV)
+, QGDiscr_(QGDiscr)
+, bRegCorr_(bRegCorr)
+, bRegRes_(bRegRes)
+, jetId_(jetId)
+, puId_(puId)
+, rawFactor_(rawFactor)
+, neEmEF_(neEmEF)
+, chEmEF_(chEmEF)
+, muonSubtrFactor_(muonSubtrFactor)
+, genJetIdx_(genJetIdx)
+, btag_(btag)
+, isBJet_loose_(false)
+, isBJet_medium_(false)
 {}
 
 RecoJetAK4::~RecoJetAK4()
@@ -100,6 +108,30 @@ RecoJetAK4::puId() const
   return puId_;
 }
 
+Float_t
+RecoJetAK4::rawFactor() const
+{
+  return rawFactor_;
+}
+
+Float_t
+RecoJetAK4::neEmEF() const
+{
+  return neEmEF_;
+}
+
+Float_t
+RecoJetAK4::chEmEF() const
+{
+  return chEmEF_;
+}
+
+Float_t
+RecoJetAK4::muonSubtrFactor() const
+{
+  return muonSubtrFactor_;
+}
+
 Int_t
 RecoJetAK4::genJetIdx() const
 {
@@ -144,9 +176,13 @@ operator<<(std::ostream & stream,
 {
   stream << static_cast<const RecoJetBase &>(jet)                            << ",\n"
             " genJetIdx = "       << jet.genJetIdx()                         << ","
-            " CSV = "             << jet.BtagCSV()                           << ","
+            " btag score = "      << jet.BtagCSV()                           << ","
             " jet ID = "          << jet.jetId()                             << ","
             " PU ID = "           << jet.puId()                              << ","
+            " rawFactor = "       << jet.rawFactor()                         << ","
+            " neEmEF = "          << jet.neEmEF()                            << ","
+            " chEmEF = "          << jet.chEmEF()                            << ","
+            " muonSubtrFactor = " << jet.muonSubtrFactor()                   << ","
             " QGL = "             << jet.QGDiscr()                           << ","
             " bReg corr (res) = " << jet.bRegCorr() << " (" << jet.bRegRes() << ")\n"
   ;

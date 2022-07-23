@@ -28,6 +28,10 @@ class RecoJetAK4 : public RecoJetBase
              Double_t bRegRes,
              Int_t jetId,
              Int_t puId,
+             Float_t rawFactor,
+             Float_t neEmEF,
+             Float_t chEmEF,
+             Float_t muonSubtrFactor,
              UInt_t idx,
              Int_t genJetIdx,
              Btag btag,
@@ -53,6 +57,10 @@ class RecoJetAK4 : public RecoJetBase
   Double_t bRegRes() const;
   Int_t jetId() const;
   Int_t puId() const;
+  Float_t rawFactor() const;
+  Float_t neEmEF() const;
+  Float_t chEmEF() const;
+  Float_t muonSubtrFactor() const;
   Int_t genJetIdx() const;
 
   bool passesPUID(pileupJetID puIdWP) const;
@@ -65,14 +73,18 @@ class RecoJetAK4 : public RecoJetBase
   friend class RecoJetReaderAK4;
 
  protected:
-  Double_t BtagCSV_;    ///< CSV b-tagging discriminator value
-  Double_t QGDiscr_;    ///< quark/gluon discriminator
-  Double_t bRegCorr_;   ///< pT correction for b-jet regression
-  Double_t bRegRes_;    ///< resolution on pT corrected with b-jet regression
-  Int_t jetId_;         ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID
-  Int_t puId_;          ///< pileup jet ID, as explained in https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
-  Int_t genJetIdx_;     ///< index to gen jet
-  Btag btag_;           ///< default b-tagging discriminant
+  Double_t BtagCSV_;        ///< CSV b-tagging discriminator value
+  Double_t QGDiscr_;        ///< quark/gluon discriminator
+  Double_t bRegCorr_;       ///< pT correction for b-jet regression
+  Double_t bRegRes_;        ///< resolution on pT corrected with b-jet regression
+  Int_t jetId_;             ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID
+  Int_t puId_;              ///< pileup jet ID, as explained in https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
+  Float_t rawFactor_;       ///< 1 - factor to get back to raw jet pT
+  Float_t neEmEF_;          ///< neutral electromagnetic energy fraction
+  Float_t chEmEF_;          ///< charged electromagnetic energy fraction
+  Float_t muonSubtrFactor_; ///< 1 - (muon-subtracted raw pt / raw pt)
+  Int_t genJetIdx_;         ///< index to gen jet
+  Btag btag_;               ///< default b-tagging discriminant
 
   std::map<Btag, Double_t> BtagCSV_systematics_;
 
