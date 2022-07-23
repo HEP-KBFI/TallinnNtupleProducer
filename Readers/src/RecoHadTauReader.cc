@@ -5,11 +5,25 @@
 #include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // TauID
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kHadTauPt_central, kHadTauPt_shiftUp, kHadTauPt_shiftDown
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // kHadTauPt_central, kHadTauPt_shiftUp, kHadTauPt_shiftDown
 
 #include "TMath.h"
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
+
+namespace {
+  int
+  intlog2(unsigned input)
+  {
+    unsigned input_copy = input + 1;
+    int log2val = 0;
+    while(input_copy >>= 1)
+    {
+      ++log2val;
+    }
+    return log2val;
+  }
+};
 
 std::map<std::string, int> RecoHadTauReader::numInstances_;
 std::map<std::string, RecoHadTauReader *> RecoHadTauReader::instances_;
@@ -206,16 +220,17 @@ RecoHadTauReader::read() const
       const bool valid_dm =
         (gInstance->hadTau_decayMode_[idxHadTau] >= 0 && gInstance->hadTau_decayMode_[idxHadTau] <= 2 ) ||
         gInstance->hadTau_decayMode_[idxHadTau] == 10 ||
-        gInstance->hadTau_decayMode_[idxHadTau] == 11;
-      const double corrFactor = (valid_dm) ? tauEScset_->evaluate({
-              gInstance->hadTau_pt_[idxHadTau],
-              gInstance->hadTau_eta_[idxHadTau],
-              gInstance->hadTau_decayMode_[idxHadTau],
-              gInstance->hadTau_genPartFlav_[idxHadTau],
-              "DeepTau2017v2p1",
-               systematic_,
-                }) : 1
-        ;
+        gInstance->hadTau_decayMode_[idxHadTau] == 11
+      ;
+      const double corrFactor = valid_dm ? tauEScset_->evaluate({
+          gInstance->hadTau_pt_[idxHadTau],
+          gInstance->hadTau_eta_[idxHadTau],
+          gInstance->hadTau_decayMode_[idxHadTau],
+          gInstance->hadTau_genPartFlav_[idxHadTau],
+          "DeepTau2017v2p1",
+           systematic_,
+        }) : 1
+      ;
       const double hadTau_pt   = gInstance->hadTau_pt_  [idxHadTau] * corrFactor;
       const double hadTau_mass = gInstance->hadTau_mass_[idxHadTau] * corrFactor;
 
@@ -234,8 +249,8 @@ RecoHadTauReader::read() const
         gInstance->hadTau_idDecayMode_[idxHadTau],
         gInstance->hadTau_idMVAs_.at(tauID_)[idxHadTau],
         gInstance->hadTau_rawMVAs_.at(tauID_)[idxHadTau],
-        (int)TMath::Log2(gInstance->hadTau_idAgainstElec_[idxHadTau]+1),
-        (int)TMath::Log2(gInstance->hadTau_idAgainstMu_[idxHadTau]+1),
+        ::intlog2(gInstance->hadTau_idAgainstElec_[idxHadTau]),
+        ::intlog2(gInstance->hadTau_idAgainstMu_[idxHadTau]),
         gInstance->hadTau_jetIdx_[idxHadTau],
         gInstance->hadTau_genPartFlav_[idxHadTau],
         gInstance->hadTau_genPartIdx_[idxHadTau],
@@ -245,8 +260,7 @@ RecoHadTauReader::read() const
 
       for(const auto & kv: gInstance->hadTau_idMVAs_)
       {
-        const int idMVA = (int)TMath::Log2(gInstance->hadTau_idMVAs_.at(kv.first)[idxHadTau]+1);
-        hadTau.tauID_ids_[kv.first] = idMVA;
+        hadTau.tauID_ids_[kv.first] = ::intlog2(gInstance->hadTau_idMVAs_.at(kv.first)[idxHadTau]);
       }
       for(const auto & kv: gInstance->hadTau_rawMVAs_)
       {
