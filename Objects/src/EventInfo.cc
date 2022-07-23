@@ -26,7 +26,8 @@ EventInfo::EventInfo()
   , lumi_(0)
   , event_(0)
   , genWeight_(1.)
-  , pileupWeight_(1.)
+  , nof_pileup_(0.)
+  , rho_(0.)
   , nLHEReweightingWeight_(0)
   , LHEReweightingWeight_(nullptr)
   , LHEReweightingWeight_max_(69)
@@ -126,21 +127,15 @@ EventInfo::genWeight() const
 }
 
 Float_t
-EventInfo::pileupWeight() const
+EventInfo::nof_pileup() const
 {
-  return pileupWeight_;
+  return nof_pileup_;
 }
 
 Float_t
-EventInfo::pileupWeightUp() const
+EventInfo::rho() const
 {
-  return pileupWeightUp_;
-}
-
-Float_t
-EventInfo::pileupWeightDown() const
-{
-  return pileupWeightDown_;
+  return rho_;
 }
 
 const AnalysisConfig &

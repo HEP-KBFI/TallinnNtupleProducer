@@ -23,8 +23,10 @@ class EventInfo
 
   UInt_t
   run() const;
+
   UInt_t
   lumi() const;
+
   ULong64_t
   event() const;
 
@@ -32,11 +34,10 @@ class EventInfo
   genWeight() const;
 
   Float_t
-  pileupWeight() const;
+  nof_pileup() const;
+
   Float_t
-  pileupWeightUp() const;
-  Float_t
-  pileupWeightDown() const;
+  rho() const;
 
   const AnalysisConfig &
   analysisConfig() const;
@@ -118,9 +119,8 @@ class EventInfo
   UInt_t    lumi_;                ///< luminosity
   ULong64_t event_;               ///< event number
   Float_t   genWeight_;           ///< generator-level weight (only if MC)
-  Float_t   pileupWeight_;        ///< pile-up weight (only if MC)
-  Float_t   pileupWeightUp_;      ///< pile-up weight up-shifted (only if MC)
-  Float_t   pileupWeightDown_;    ///< pile-up weight down-shifted (only if MC)
+  Float_t   nof_pileup_;          ///< true number of pileup interactions (only if MC)
+  Float_t   rho_;                 ///< rho from all PF candidates
 
   UInt_t nLHEReweightingWeight_;
   Float_t * LHEReweightingWeight_;

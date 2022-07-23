@@ -12,6 +12,9 @@ public:
   ~JMECorrector();
 
   void
+  set_rho(double rho);
+
+  void
   reset(int central_or_shift);
 
   void
@@ -20,7 +23,9 @@ public:
   // TODO set run/lumi/evt number for reproducible smearing
 
 protected:
+  bool isDEBUG_;
   int central_or_shift_;
+  double rho_;
 };
 
 #endif // TallinnNtupleProducer_Readers_JMECorrector_h

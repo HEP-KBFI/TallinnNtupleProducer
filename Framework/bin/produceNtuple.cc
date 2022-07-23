@@ -442,7 +442,7 @@ int main(int argc, char* argv[])
           const LHEParticleCollection lheParticles = lheParticleReader->read();
           evtWeightRecorder.record_gen_mHH_cosThetaStar(lheParticles);
         }
-        evtWeightRecorder.record_puWeight(&event.eventInfo());
+        evtWeightRecorder.record_puWeight(dataToMCcorrectionInterface, &event.eventInfo());
         evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
 

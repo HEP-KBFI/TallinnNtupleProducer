@@ -28,6 +28,10 @@ class Data_to_MC_CorrectionInterface_Base
   Data_to_MC_CorrectionInterface_Base(Era era, const edm::ParameterSet & cfg);
   virtual ~Data_to_MC_CorrectionInterface_Base();
 
+  double
+  getSF_pileup(float nof_pileup,
+               PUsys central_or_shfit) const;
+
   //-----------------------------------------------------------------------------
   // overwrite configuration parameters (needed by analyze_jetToTauFakeRate.cc)
   void
@@ -166,6 +170,8 @@ class Data_to_MC_CorrectionInterface_Base
 
   bool applyHadTauSF_;
   bool isDEBUG_;
+
+  correction::Correction::Ref pileup_cset_;
 
   pileupJetID pileupJetId_;
   std::unique_ptr<correction::CorrectionSet> btag_cset_;

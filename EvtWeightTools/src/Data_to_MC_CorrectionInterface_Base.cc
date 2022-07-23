@@ -48,6 +48,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , muToTauFakeRate_cset_(nullptr)
   , applyHadTauSF_(true)
   , isDEBUG_(cfg.exists("isDEBUG") ? cfg.getParameter<bool>("isDEBUG") : false)
+  , pileup_cset_(nullptr)
   , pileupJetId_(pileupJetID::kPileupJetID_disabled)
   , btag_cset_(nullptr)
   , btag_shape_cset_(nullptr)
@@ -62,11 +63,17 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , numHadTaus_(0)
   , numJets_(0)
 {
+  const std::string era_last_two_digit = era_str_.substr(era_str_.size()-2);
+  const std::string pileupCorrectionSet = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/pu/%s/puWeights.json.gz", era_str_.data())).fullPath();
+  pileup_cset_ = correction::CorrectionSet::from_file(pileupCorrectionSet)->at(Form("Collisions%s_goldenJSON", era_last_two_digit.data()));
+
   const std::string tauCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", era_str_.data())).fullPath();
   tau_cset_ = correction::CorrectionSet::from_file(tauCorrectionSetFile);
+
   hadTauID_and_Iso_cset_ = tau_cset_->at(TauID_names.at(hadTauId_));
   eToTauFakeRate_cset_ = tau_cset_->at("antiEleMVA6");
   muToTauFakeRate_cset_ = tau_cset_->at("antiMu3");
+
   const std::string hadTauSelection_string = cfg.getParameter<std::string>("hadTauSelection_againstJets");
   applyHadTauSF_ = hadTauSelection_string != "disabled";
   if(applyHadTauSF_)
@@ -129,6 +136,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   const std::string btagCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/btv/%s/btagging.json.gz", era_str_btag.data())).fullPath();
   btag_cset_ = correction::CorrectionSet::from_file(btagCorrectionSetFile);
   btag_shape_cset_ = btag_cset_->at("deepJet_shape");
+
   //-----------------------------------------------------------------------------
   // Efficiencies and mistag rates for pileup jet ID, provided by JetMET POG
   // https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJetID
@@ -261,6 +269,22 @@ Data_to_MC_CorrectionInterface_Base::~Data_to_MC_CorrectionInterface_Base()
   delete mistagPileupJetID_;
   delete sfPileupJetID_mistag_;
   delete sfPileupJetID_mistag_errors_;
+}
+
+double
+Data_to_MC_CorrectionInterface_Base::getSF_pileup(float nof_pileup,
+                                                  PUsys central_or_shfit) const
+{
+  std::string sys_str;
+  switch(central_or_shfit)
+  {
+    case PUsys::central: sys_str = "nominal"; break;
+    case PUsys::up:      sys_str = "up";      break;
+    case PUsys::down:    sys_str = "down";    break;
+    default: assert(0);
+  }
+
+  return pileup_cset_->evaluate({nof_pileup, sys_str});
 }
 
 void

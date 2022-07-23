@@ -875,7 +875,8 @@ EvtWeightRecorder::record_psWeight(const PSWeightReader * const psWeightReader)
 }
 
 void
-EvtWeightRecorder::record_puWeight(const EventInfo * const eventInfo)
+EvtWeightRecorder::record_puWeight(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface,
+                                   const EventInfo * const eventInfo)
 {
   assert(isMC_);
   weights_pu_.clear();
@@ -886,13 +887,7 @@ EvtWeightRecorder::record_puWeight(const EventInfo * const eventInfo)
     {
       continue;
     }
-    switch(puSys_option)
-    {
-      case PUsys::central: weights_pu_[puSys_option] = eventInfo->pileupWeight();     break;
-      case PUsys::up:      weights_pu_[puSys_option] = eventInfo->pileupWeightUp();   break;
-      case PUsys::down:    weights_pu_[puSys_option] = eventInfo->pileupWeightDown(); break;
-      default: assert(0);
-    }
+    weights_pu_[puSys_option] = dataToMCcorrectionInterface->getSF_pileup(eventInfo->nof_pileup(), puSys_option);
   }
 }
 

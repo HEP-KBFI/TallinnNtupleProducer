@@ -421,6 +421,8 @@ EventReader::read() const
     event_.triggerInfo_ = &triggerInfoReader_->read();
   }
 
+  jmeCorrector_->set_rho(event_.eventInfo_->rho());
+
   bool isJetSystematicAK4 = contains(jetsAK4_supported_systematics_, current_central_or_shift_);
   bool isUpdatedJetsAK4 = false;
   bool jetAK4_needsUpdate = isJetSystematicAK4 || isNewEvent || jetAK4_isInvalid_ || (jetAK4_lastSystematic_ != "central" && !isJetSystematicAK4);
