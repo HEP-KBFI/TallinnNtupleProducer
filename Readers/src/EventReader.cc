@@ -36,6 +36,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"                         // RecoVertexReader
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"                         // RecoJetReaderAK4
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"                         // RecoJetReaderAK8
+#include "TallinnNtupleProducer/Readers/interface/ParticleReader.h"                           // ParticleReader
 #include "TallinnNtupleProducer/Readers/interface/JMECorrector.h"                             // JMECorrector
 
 namespace
@@ -138,6 +139,8 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , jetAK8_Hbb_isInvalid_(false)
   , jetsAK8_Wjj_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg_)))
   , jetAK8_Wjj_isInvalid_(false)
+  , genJetAK8Reader_(nullptr)
+  , genSubJetAK8Reader_(nullptr)
   , rawmetReader_(new GenMEtReader(make_cfg(cfg, "branchName_rawMet")))
   , metReader_(new RecoMEtReader(make_cfg(cfg, "branchName_met")))
   , met_supported_systematics_(make_supported_systematics(RecoMEtReader::get_supported_systematics(cfg_)))
@@ -189,6 +192,8 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
     genHadTauReader_ = new GenHadTauReader(make_cfg(cfg, "branchName_genHadTaus"));
     genJetReader_ = new GenJetReader(make_cfg(cfg, "branchName_genJets"));
     corrT1METJetReader_ = new CorrT1METJetReader(make_cfg(cfg, "branchName_corrT1METJet"));
+    genJetAK8Reader_ = new ParticleReader(make_cfg(cfg, "branchName_genJetAK8"));
+    genSubJetAK8Reader_ = new ParticleReader(make_cfg(cfg, "branchName_genSubJetAK8"));
 
     muonGenMatcher_ = new RecoMuonCollectionGenMatcher();
     electronGenMatcher_ = new RecoElectronCollectionGenMatcher();
@@ -222,6 +227,8 @@ EventReader::~EventReader()
   delete genHadTauReader_;
   delete genJetReader_;
   delete corrT1METJetReader_;
+  delete genJetAK8Reader_;
+  delete genSubJetAK8Reader_;
   delete muonGenMatcher_;
   delete electronGenMatcher_;
   delete hadTauGenMatcher_;
@@ -286,6 +293,8 @@ EventReader::setBranchAddresses(TTree * inputTree)
   const std::vector<std::string> genHadTauBranches = genHadTauReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> corrT1METJetBranches = corrT1METJetReader_->setBranchAddresses(inputTree);
+  const std::vector<std::string> genJetAKBranches = genJetAK8Reader_->setBranchAddresses(inputTree);
+  const std::vector<std::string> genSubJetAKBranches = genSubJetAK8Reader_->setBranchAddresses(inputTree);
 
   const std::vector<std::string> jetBranchesAK8 = jetReaderAK8_->setBranchAddresses(inputTree);
   const std::vector<std::string> rawmetBranches = rawmetReader_->setBranchAddresses(inputTree);
@@ -305,6 +314,8 @@ EventReader::setBranchAddresses(TTree * inputTree)
   bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
   bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
   bound_branches.insert(bound_branches.end(), corrT1METJetBranches.begin(), corrT1METJetBranches.end());
+  bound_branches.insert(bound_branches.end(), genJetAKBranches.begin(), genJetAKBranches.end());
+  bound_branches.insert(bound_branches.end(), genSubJetAKBranches.begin(), genSubJetAKBranches.end());
 
   bound_branches.insert(bound_branches.end(), jetBranchesAK8.begin(), jetBranchesAK8.end());
   bound_branches.insert(bound_branches.end(), rawmetBranches.begin(), rawmetBranches.end());
@@ -627,9 +638,14 @@ EventReader::read() const
   if ( jetAK8_Hbb_needsUpdate )
   {
     event_.jetsAK8_ = jetReaderAK8_->read();
+    if ( isMC_ && isNewEvent )
+    {
+      event_.genJetsAK8_ = genJetAK8Reader_->read();
+      event_.genSubJetsAK8_ = genSubJetAK8Reader_->read();
+    }
     for(RecoJetAK8 & jet: event_.jetsAK8_)
     {
-      jmeCorrector_->correct(jet, event_.genJets_);
+      jmeCorrector_->correct(jet, event_.genJetsAK8_, event_.genSubJetsAK8_);
     }
     event_.jet_ptrsAK8_ = convert_to_ptrs(event_.jetsAK8_);
     event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_, isHigherPt<RecoJetAK8>);

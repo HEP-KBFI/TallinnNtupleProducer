@@ -42,7 +42,8 @@ public:
 
   void
   correct(const RecoJetAK8 & jet,
-          const std::vector<GenJet> & genJets);
+          const std::vector<Particle> & genJetsAK8,
+          const std::vector<Particle> & genSubJetsAK8);
 
   void
   correct(RecoMEt & met,

@@ -45,6 +45,7 @@ class RecoMuonReader;
 class RecoVertexReader;
 class RecoJetReaderAK4;
 class RecoJetReaderAK8;
+class ParticleReader;
 class JMECorrector;
 
 enum class Era;
@@ -182,6 +183,9 @@ class EventReader : public ReaderBase
   std::set<std::string> jetsAK8_Wjj_supported_systematics_;
   mutable std::string jetAK8_Wjj_lastSystematic_;
   mutable bool jetAK8_Wjj_isInvalid_;
+
+  ParticleReader * genJetAK8Reader_;
+  ParticleReader * genSubJetAK8Reader_;
 
   GenMEtReader * rawmetReader_;
   RecoMEtReader * metReader_;
