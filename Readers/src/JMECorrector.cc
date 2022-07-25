@@ -62,6 +62,13 @@ JMECorrector::correct(const CorrT1METJet & jet,
 }
 
 void
+JMECorrector::correct(const RecoJetAK8 & jet,
+                      const std::vector<GenJet> & genJets)
+{
+  //
+}
+
+void
 JMECorrector::correct(RecoMEt & met,
                       const GenMEt & rawmet,
                       const EventInfo * const eventInfo,

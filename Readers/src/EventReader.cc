@@ -130,8 +130,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , hadTauGenMatcher_(nullptr)
   , jetGenMatcherAK4_(nullptr)
   , corrT1METJetGenMatcher_(nullptr)
-  , jetReaderAK8_Hbb_(new RecoJetReaderAK8(make_cfg_jetsAK8(cfg_, "branchName_jets_ak8_Hbb", "branchName_subjets_ak8_Hbb")))
-  , jetReaderAK8_Wjj_(new RecoJetReaderAK8(make_cfg_jetsAK8(cfg_, "branchName_jets_ak8_Wjj", "branchName_subjets_ak8_Wjj")))
+  , jetReaderAK8_(new RecoJetReaderAK8(make_cfg_jetsAK8(cfg_, "branchName_jets_ak8", "branchName_subjets_ak8")))
   , jetCleanerAK8_dR08_(0.8, isDEBUG_)
   , jetSelectorAK8_Hbb_(new RecoJetCollectionSelectorAK8_Hbb(era_, -1, isDEBUG_))
   , jetSelectorAK8_Wjj_(new RecoJetCollectionSelectorAK8_Wjj(era_, -1, isDEBUG_))
@@ -200,8 +199,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
 
   const std::vector<std::string> disable_ak8_corr = cfg.getParameter<std::vector<std::string>>("disable_ak8_corr");
   const int ignore_ak8_sys = get_ignore_ak8_sys(disable_ak8_corr);
-  jetReaderAK8_Hbb_->ignoreSys(ignore_ak8_sys);
-  jetReaderAK8_Wjj_->ignoreSys(ignore_ak8_sys);
+  jetReaderAK8_->ignoreSys(ignore_ak8_sys);
 }
 
 EventReader::~EventReader()
@@ -233,8 +231,7 @@ EventReader::~EventReader()
   delete hadTauGenMatcher_;
   delete jetGenMatcherAK4_;
   delete corrT1METJetGenMatcher_;
-  delete jetReaderAK8_Hbb_;
-  delete jetReaderAK8_Wjj_;
+  delete jetReaderAK8_;
   delete jetSelectorAK8_Hbb_;
   delete jetSelectorAK8_Wjj_;
   delete rawmetReader_;
@@ -265,15 +262,10 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
     const int jetPt_option = getJet_option(central_or_shift, isMC_);
     jmeCorrector_->set_jet_opt(jetPt_option);
   }
-  if ( central_or_shift == "central" || contains(jetReaderAK8_Hbb_->get_supported_systematics(cfg_), central_or_shift) )
+  if ( central_or_shift == "central" || contains(jetReaderAK8_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-    jetReaderAK8_Hbb_->set_central_or_shift(fatJetPt_option);
-  }
-  if ( central_or_shift == "central" || contains(jetReaderAK8_Wjj_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-    jetReaderAK8_Wjj_->set_central_or_shift(fatJetPt_option);
+    jetReaderAK8_->set_central_or_shift(fatJetPt_option);
   }
   if ( central_or_shift == "central" || contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
@@ -299,8 +291,7 @@ EventReader::setBranchAddresses(TTree * inputTree)
   const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> corrT1METJetBranches = corrT1METJetReader_->setBranchAddresses(inputTree);
 
-  const std::vector<std::string> jetBranchesAK8_Hbb = jetReaderAK8_Hbb_->setBranchAddresses(inputTree);
-  const std::vector<std::string> jetBranchesAK8_Wjj = jetReaderAK8_Wjj_->setBranchAddresses(inputTree);
+  const std::vector<std::string> jetBranchesAK8 = jetReaderAK8_->setBranchAddresses(inputTree);
   const std::vector<std::string> rawmetBranches = rawmetReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> metBranches = metReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> metFilterBranches = metFilterReader_->setBranchAddresses(inputTree);
@@ -319,8 +310,7 @@ EventReader::setBranchAddresses(TTree * inputTree)
   bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
   bound_branches.insert(bound_branches.end(), corrT1METJetBranches.begin(), corrT1METJetBranches.end());
 
-  bound_branches.insert(bound_branches.end(), jetBranchesAK8_Hbb.begin(), jetBranchesAK8_Hbb.end());
-  bound_branches.insert(bound_branches.end(), jetBranchesAK8_Wjj.begin(), jetBranchesAK8_Wjj.end());
+  bound_branches.insert(bound_branches.end(), jetBranchesAK8.begin(), jetBranchesAK8.end());
   bound_branches.insert(bound_branches.end(), rawmetBranches.begin(), rawmetBranches.end());
   bound_branches.insert(bound_branches.end(), metBranches.begin(), metBranches.end());
   bound_branches.insert(bound_branches.end(), metFilterBranches.begin(), metFilterBranches.end());
@@ -640,16 +630,20 @@ EventReader::read() const
   bool jetAK8_Hbb_needsUpdate = isJetSystematicAK8_Hbb || isNewEvent || jetAK8_Hbb_isInvalid_ || (jetAK8_Hbb_lastSystematic_ != "central" && !isJetSystematicAK8_Hbb);
   if ( jetAK8_Hbb_needsUpdate )
   {
-    event_.jetsAK8_Hbb_ = jetReaderAK8_Hbb_->read();
-    event_.jet_ptrsAK8_Hbb_ = convert_to_ptrs(event_.jetsAK8_Hbb_);
-    event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_Hbb_, isHigherPt<RecoJetAK8>);
+    event_.jetsAK8_ = jetReaderAK8_->read();
+    for(RecoJetAK8 & jet: event_.jetsAK8_)
+    {
+      jmeCorrector_->correct(jet, event_.genJets_);
+    }
+    event_.jet_ptrsAK8_ = convert_to_ptrs(event_.jetsAK8_);
+    event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_, isHigherPt<RecoJetAK8>);
     isUpdatedJetsAK8_Hbb = true;
   }
   if ( isUpdatedJetsAK8_Hbb || isUpdatedLeptons )
   {
     // CV: clean AK8_Hbb jets wrt leptons only (not wrt hadronic taus)
     event_.selJetsAK8_Hbb_ = jetCleanerAK8_dR08_(event_.selJetsUncleanedAK8_Hbb_, event_.fakeableLeptons_);
-    jetAK8_Hbb_lastSystematic_ = ( isJetSystematicAK8_Hbb ) ? current_central_or_shift_ : "central";
+    jetAK8_Hbb_lastSystematic_ = isJetSystematicAK8_Hbb ? current_central_or_shift_ : "central";
   }
   if ( isDEBUG_ )
   {
@@ -659,28 +653,21 @@ EventReader::read() const
   jetAK8_Hbb_isInvalid_ = false;
 
   bool isJetSystematicAK8_Wjj = contains(jetsAK8_Wjj_supported_systematics_, current_central_or_shift_);
-  bool isUpdatedJetsAK8_Wjj = false;
   bool jetAK8_Wjj_needsUpdate = isJetSystematicAK8_Wjj || isNewEvent || jetAK8_Wjj_isInvalid_ || (jetAK8_Wjj_lastSystematic_ != "central" && !isJetSystematicAK8_Wjj);
-  if ( jetAK8_Wjj_needsUpdate )
-  {
-    event_.jetsAK8_Wjj_ = jetReaderAK8_Wjj_->read();
-    event_.jet_ptrsAK8_Wjj_ = convert_to_ptrs(event_.jetsAK8_Wjj_);
-    isUpdatedJetsAK8_Wjj = true;
-  }
-  if ( isUpdatedJetsAK8_Wjj || isUpdatedLeptons )
+  if ( jetAK8_Wjj_needsUpdate || isUpdatedLeptons )
   {
     // CV: AK8_Wjj jets must NOT be cleaned wrt leptons,
     //     as the lepton produced in H->WW*->lnu qq decays often ends up near the two quarks in the detector (in dR)
     if ( event_.fakeableLeptons_.size() > 0 )
     {
       jetSelectorAK8_Wjj_->getSelector().set_leptons(event_.fakeableLeptons_);
-      event_.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(event_.jet_ptrsAK8_Wjj_, isHigherPt<RecoJetAK8>);
+      event_.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(event_.jet_ptrsAK8_, isHigherPt<RecoJetAK8>);
     }
     else
     {
       event_.selJetsAK8_Wjj_.clear();
     }
-    jetAK8_Wjj_lastSystematic_ = ( isJetSystematicAK8_Wjj ) ? current_central_or_shift_ : "central";
+    jetAK8_Wjj_lastSystematic_ = isJetSystematicAK8_Wjj ? current_central_or_shift_ : "central";
   }
   if ( isDEBUG_ )
   {

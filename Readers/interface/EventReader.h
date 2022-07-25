@@ -172,8 +172,7 @@ class EventReader : public ReaderBase
   RecoJetCollectionGenMatcherAK4 * jetGenMatcherAK4_;
   CorrT1METJetCollectionGenMatcher * corrT1METJetGenMatcher_;
 
-  RecoJetReaderAK8 * jetReaderAK8_Hbb_;
-  RecoJetReaderAK8 * jetReaderAK8_Wjj_;
+  RecoJetReaderAK8 * jetReaderAK8_;
   RecoJetCollectionCleanerAK8 jetCleanerAK8_dR08_;  // used for cleaning AK8 jets wrt electrons, muons, and tauh
   RecoJetCollectionSelectorAK8_Hbb * jetSelectorAK8_Hbb_;
   RecoJetCollectionSelectorAK8_Wjj * jetSelectorAK8_Wjj_;

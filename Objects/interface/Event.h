@@ -134,12 +134,10 @@ class Event
   GenJetCollection genJets_;
   CorrT1METJetCollection corrT1METJets_;
 
-  RecoJetCollectionAK8 jetsAK8_Hbb_;
-  RecoJetPtrCollectionAK8 jet_ptrsAK8_Hbb_;
+  RecoJetCollectionAK8 jetsAK8_;
+  RecoJetPtrCollectionAK8 jet_ptrsAK8_;
   RecoJetPtrCollectionAK8 selJetsUncleanedAK8_Hbb_;
   RecoJetPtrCollectionAK8 selJetsAK8_Hbb_;
-  RecoJetCollectionAK8 jetsAK8_Wjj_;
-  RecoJetPtrCollectionAK8 jet_ptrsAK8_Wjj_;
   RecoJetPtrCollectionAK8 selJetsAK8_Wjj_;
 
   GenMEt rawmet_;

@@ -3,6 +3,7 @@
 
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"   // RecoJetAK4
 #include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h" // CorrT1METJet
+#include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"   // RecoJetAK8
 #include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"      // RecoMEt
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
@@ -34,6 +35,10 @@ public:
 
   void
   correct(const CorrT1METJet & jet,
+          const std::vector<GenJet> & genJets);
+
+  void
+  correct(const RecoJetAK8 & jet,
           const std::vector<GenJet> & genJets);
 
   void
