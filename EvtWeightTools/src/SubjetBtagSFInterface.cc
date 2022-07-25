@@ -114,11 +114,11 @@ SubjetBtagSFInterface::addSubjets(const RecoJetAK8 * const fatJet)
 {
   if(fatJet)
   {
-    if(fatJet->subJet1() && fatJet->subJet1()->is_btagable())
+    if(fatJet->subJet1() && fatJet->subJet1()->is_btaggable())
     {
       subjets_.push_back(fatJet->subJet1());
     }
-    if(fatJet->subJet2() && fatJet->subJet2()->is_btagable())
+    if(fatJet->subJet2() && fatJet->subJet2()->is_btaggable())
     {
       subjets_.push_back(fatJet->subJet2());
     }

@@ -196,10 +196,6 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
     jetGenMatcherAK4_ = new RecoJetCollectionGenMatcherAK4();
     corrT1METJetGenMatcher_ = new CorrT1METJetCollectionGenMatcher();
   }
-
-  const std::vector<std::string> disable_ak8_corr = cfg.getParameter<std::vector<std::string>>("disable_ak8_corr");
-  const int ignore_ak8_sys = get_ignore_ak8_sys(disable_ak8_corr);
-  jetReaderAK8_->ignoreSys(ignore_ak8_sys);
 }
 
 EventReader::~EventReader()
@@ -265,7 +261,7 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
   if ( central_or_shift == "central" || contains(jetReaderAK8_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-    jetReaderAK8_->set_central_or_shift(fatJetPt_option);
+    jmeCorrector_->set_fatJet_opt(fatJetPt_option);
   }
   if ( central_or_shift == "central" || contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
   {

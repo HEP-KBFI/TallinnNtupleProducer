@@ -15,8 +15,6 @@
 
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h" // GenJet
 
-#include <memory>                                           // std::shared_ptr
-
 // forward declarations
 class GenHadTau;
 
@@ -25,6 +23,7 @@ class RecoJetBase : public GenJet
  public:
   RecoJetBase() = default;
   RecoJetBase(const GenJet & particle,
+              Float_t rawFactor,
               UInt_t idx);
 
   virtual ~RecoJetBase();
@@ -40,6 +39,7 @@ class RecoJetBase : public GenJet
    * @brief Funtions to access data-members
    * @return Values of data-members
    */
+  Float_t rawFactor() const;
   UInt_t idx() const;
 
   const GenParticle * genLepton() const;
@@ -50,7 +50,8 @@ class RecoJetBase : public GenJet
   bool hasAnyGenMatch() const;
 
  protected:
-  UInt_t idx_; ///< index of jet in the ntuple
+  Float_t rawFactor_; ///< 1 - Factor to get back to raw pT
+  UInt_t idx_;        ///< index of jet in the ntuple
 
 //--- matching to generator level particles
   const GenParticle * genLepton_;

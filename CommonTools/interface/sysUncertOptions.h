@@ -451,16 +451,4 @@ void
 checkOptionValidity(const std::string & central_or_shift,
                     bool isMC);
 
-/**
- * @brief Return branch name to read RecoJet pt and mass
- *
- * isPt -- if true, return pT branch name; if false, return mass branch name
- */
-
-std::string
-getBranchName_fatJet(const std::string & default_branchName,
-                     Era era,
-                     const std::string & attribute_name,
-                     int central_or_shift);
-
 #endif // TallinnNtupleProducer_CommonTools_sysUncertOptions_h

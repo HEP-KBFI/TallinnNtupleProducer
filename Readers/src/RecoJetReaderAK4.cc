@@ -16,11 +16,11 @@ std::map<std::string, RecoJetReaderAK4 *> RecoJetReaderAK4::instances_;
 
 RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
-  , era_(Era::kUndefined)
-  , isMC_(false)
+  , era_(get_era(cfg.getParameter<std::string>("era")))
+  , isMC_(cfg.getParameter<bool>("isMC"))
   , max_nJets_(256)
-  , branchName_num_("")
-  , branchName_obj_("")
+  , branchName_obj_(cfg.getParameter<std::string>("branchName"))
+  , branchName_num_(Form("n%s", branchName_obj_.data()))
   , btag_(Btag::kDeepJet)
   , jet_pt_(nullptr)
   , jet_eta_(nullptr)
@@ -36,14 +36,11 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , jet_partonFlavour_(nullptr)
   , jet_hadronFlavour_(nullptr)
   , jet_rawFactor_(nullptr)
+  , jet_area_(nullptr)
   , jet_neEmEF_(nullptr)
   , jet_chEmEF_(nullptr)
   , jet_muonSubtrFactor_(nullptr)
 {
-  era_ = get_era(cfg.getParameter<std::string>("era"));
-  branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Jet"
-  branchName_num_ = Form("n%s", branchName_obj_.data());
-  isMC_ = cfg.getParameter<bool>("isMC");
   setBranchNames();
 }
 
@@ -68,6 +65,11 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_genJetIdx_;
     delete[] gInstance->jet_partonFlavour_;
     delete[] gInstance->jet_hadronFlavour_;
+    delete[] gInstance->jet_rawFactor_;
+    delete[] gInstance->jet_area_;
+    delete[] gInstance->jet_neEmEF_;
+    delete[] gInstance->jet_chEmEF_;
+    delete[] gInstance->jet_muonSubtrFactor_;
     instances_[branchName_obj_] = nullptr;
   }
 }
@@ -112,6 +114,7 @@ RecoJetReaderAK4::setBranchNames()
     branchName_partonFlavour_ = Form("%s_%s", branchName_obj_.data(), "partonFlavour");
     branchName_hadronFlavour_ = Form("%s_%s", branchName_obj_.data(), "hadronFlavour");
     branchName_rawFactor_ = Form("%s_%s", branchName_obj_.data(), "rawFactor");
+    branchName_area_ = Form("%s_%s", branchName_obj_.data(), "area");
     branchName_neEmEF_ = Form("%s_%s", branchName_obj_.data(), "neEmEF");
     branchName_chEmEF_ = Form("%s_%s", branchName_obj_.data(), "chEmEF");
     branchName_muonSubtrFactor_ = Form("%s_%s", branchName_obj_.data(), "muonSubtrFactor");
@@ -154,6 +157,7 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_partonFlavour_, branchName_partonFlavour_);
     bai.setBranchAddress(jet_hadronFlavour_, branchName_hadronFlavour_);
     bai.setBranchAddress(jet_rawFactor_, branchName_rawFactor_);
+    bai.setBranchAddress(jet_area_, branchName_area_);
     bai.setBranchAddress(jet_neEmEF_, branchName_neEmEF_);
     bai.setBranchAddress(jet_chEmEF_, branchName_chEmEF_);
     bai.setBranchAddress(jet_muonSubtrFactor_, branchName_muonSubtrFactor_);
@@ -187,18 +191,18 @@ RecoJetReaderAK4::read() const
       // set QGL to -1. if:
       // 1) the value is nan
       // 2) the value is invalid: https://twiki.cern.ch/twiki/bin/view/CMS/QuarkGluonLikelihood#Return_codes
-      double qgl = gInstance->jet_QGDiscr_[idxJet];
+      float qgl = gInstance->jet_QGDiscr_[idxJet];
       if(std::isnan(qgl))
       {
         qgl = -1.;
       }
-      qgl = std::max(-1., qgl);
+      qgl = std::max(-1.f, qgl);
 
       // According to the log files of NanoAOD production, some jets might have nan as the value for DeepJet
       // b-tagging discriminator. In the past we've seen similar issues with DeepCSV score as well. Will set the value
       // of b-tagging discriminant to -2. in case the score is nan (as we already did with lepton-to-jet variables).
       // Not sure how nan values affect the b-tagging scale factors, though.
-      double btagCSV = gInstance->jet_BtagScore_[idxJet];
+      float btagCSV = gInstance->jet_BtagScore_[idxJet];
       if(std::isnan(btagCSV))
       {
         btagCSV = -2.;
@@ -220,6 +224,7 @@ RecoJetReaderAK4::read() const
         gInstance->jet_jetId_[idxJet],
         gInstance->jet_puId_[idxJet],
         gInstance->jet_rawFactor_[idxJet],
+        gInstance->jet_area_[idxJet],
         gInstance->jet_neEmEF_[idxJet],
         gInstance->jet_chEmEF_[idxJet],
         gInstance->jet_muonSubtrFactor_[idxJet],

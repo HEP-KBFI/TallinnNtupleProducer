@@ -14,7 +14,8 @@ class TTree;
 enum class Btag;
 enum class Era;
 
-class RecoJetReaderAK4 : public ReaderBase
+class RecoJetReaderAK4
+  : public ReaderBase
 {
  public:
   RecoJetReaderAK4(const edm::ParameterSet & cfg);
@@ -53,8 +54,8 @@ class RecoJetReaderAK4 : public ReaderBase
   Era era_;
   bool isMC_;
   unsigned int max_nJets_;
-  std::string branchName_num_;
   std::string branchName_obj_;
+  std::string branchName_num_;
  
   std::string branchName_pt_;
   std::string branchName_eta_;
@@ -70,6 +71,7 @@ class RecoJetReaderAK4 : public ReaderBase
   std::string branchName_partonFlavour_;
   std::string branchName_hadronFlavour_;
   std::string branchName_rawFactor_;
+  std::string branchName_area_;
   std::string branchName_neEmEF_;
   std::string branchName_chEmEF_;
   std::string branchName_muonSubtrFactor_;
@@ -92,6 +94,7 @@ class RecoJetReaderAK4 : public ReaderBase
   Int_t * jet_partonFlavour_;
   Int_t * jet_hadronFlavour_;
   Float_t * jet_rawFactor_;
+  Float_t * jet_area_;
   Float_t * jet_neEmEF_;
   Float_t * jet_chEmEF_;
   Float_t * jet_muonSubtrFactor_;

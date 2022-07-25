@@ -30,6 +30,9 @@ public:
   set_met_opt(int central_or_shift);
 
   void
+  set_fatJet_opt(int central_or_shift);
+
+  void
   correct(RecoJetAK4 & jet,
           const std::vector<GenJet> & genJets);
 
@@ -54,6 +57,7 @@ protected:
   Era era_;
   int jet_sys_;
   int met_sys_;
+  int fatJet_sys_;
   bool enable_phiModulationCorr_;
 
   double rho_;

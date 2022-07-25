@@ -3,8 +3,10 @@
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h" // GenHadTau
 #include <iostream>
 RecoJetBase::RecoJetBase(const GenJet & jet,
+                         Float_t rawFactor,
                          UInt_t idx)
   : GenJet(jet)
+  , rawFactor_(rawFactor)
   , idx_(idx)
   , genLepton_(nullptr)
   , genHadTau_(nullptr)
@@ -30,6 +32,12 @@ void
 RecoJetBase::set_genJet(const GenJet * genJet)
 {
   genJet_ = genJet;
+}
+
+Float_t
+RecoJetBase::rawFactor() const
+{
+  return rawFactor_;
 }
 
 UInt_t
@@ -72,8 +80,7 @@ std::ostream &
 operator<<(std::ostream & stream,
            const RecoJetBase & jet)
 {
-  stream << static_cast<const GenJet &>(jet)      << ","
-            " charge = "          << jet.charge() << ","
+  stream << static_cast<const GenJet &>(jet)   << ","
             "\n"
             " gen. matching:";
   stream << ",\n  lepton = " << jet.genLepton();

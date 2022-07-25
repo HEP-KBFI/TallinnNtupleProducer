@@ -199,14 +199,14 @@ RecoJetSelectorAK8_Hbb::operator()(const RecoJetAK8 & jet) const
 {
   int numSubJets_btagLoose  = 0;
   int numSubJets_btagMedium = 0;
-  if ( jet.subJet1() && jet.subJet1()->is_btagable() )
+  if ( jet.subJet1() && jet.subJet1()->is_btaggable() )
   {
     const double subJet1_btagCSV = jet.subJet1()->BtagCSV();
     if ( subJet1_btagCSV >= min_btagCSV_loose_  ) ++numSubJets_btagLoose;
     if ( subJet1_btagCSV >= min_btagCSV_medium_ ) ++numSubJets_btagMedium;
   }
 
-  if ( jet.subJet2() && jet.subJet2()->is_btagable() )
+  if ( jet.subJet2() && jet.subJet2()->is_btaggable() )
   {
     const double subJet2_btagCSV = jet.subJet2()->BtagCSV();
     if ( subJet2_btagCSV >= min_btagCSV_loose_  ) ++numSubJets_btagLoose;

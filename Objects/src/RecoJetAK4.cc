@@ -5,34 +5,35 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag, pileupJetID
 
 RecoJetAK4::RecoJetAK4(const GenJet & jet,
-                       Double_t BtagCSV,
-                       Double_t QGDiscr,
-                       Double_t bRegCorr,
-                       Double_t bRegRes,
+                       Float_t BtagCSV,
+                       Float_t QGDiscr,
+                       Float_t bRegCorr,
+                       Float_t bRegRes,
                        Int_t jetId,
                        Int_t puId,
                        Float_t rawFactor,
+                       Float_t area,
                        Float_t neEmEF,
                        Float_t chEmEF,
                        Float_t muonSubtrFactor,
                        UInt_t idx,
                        Int_t genJetIdx,
                        Btag btag)
-: RecoJetBase(jet, idx)
-, BtagCSV_(BtagCSV)
-, QGDiscr_(QGDiscr)
-, bRegCorr_(bRegCorr)
-, bRegRes_(bRegRes)
-, jetId_(jetId)
-, puId_(puId)
-, rawFactor_(rawFactor)
-, neEmEF_(neEmEF)
-, chEmEF_(chEmEF)
-, muonSubtrFactor_(muonSubtrFactor)
-, genJetIdx_(genJetIdx)
-, btag_(btag)
-, isBJet_loose_(false)
-, isBJet_medium_(false)
+  : RecoJetBase(jet, rawFactor, idx)
+  , BtagCSV_(BtagCSV)
+  , QGDiscr_(QGDiscr)
+  , bRegCorr_(bRegCorr)
+  , bRegRes_(bRegRes)
+  , jetId_(jetId)
+  , puId_(puId)
+  , area_(area)
+  , neEmEF_(neEmEF)
+  , chEmEF_(chEmEF)
+  , muonSubtrFactor_(muonSubtrFactor)
+  , genJetIdx_(genJetIdx)
+  , btag_(btag)
+  , isBJet_loose_(false)
+  , isBJet_medium_(false)
 {}
 
 RecoJetAK4::~RecoJetAK4()
@@ -50,13 +51,13 @@ RecoJetAK4::set_isBJet_medium() const
   isBJet_medium_ = true;
 }
 
-Double_t
+Float_t
 RecoJetAK4::BtagCSV() const
 {
   return BtagCSV_;
 }
 
-Double_t
+Float_t
 RecoJetAK4::BtagCSV(Btag btag) const
 {
   if(! BtagCSV_systematics_.count(btag))
@@ -68,13 +69,13 @@ RecoJetAK4::BtagCSV(Btag btag) const
   return BtagCSV_systematics_.at(btag);
 }
 
-Double_t
+Float_t
 RecoJetAK4::QGDiscr() const
 {
   return QGDiscr_;
 }
 
-Double_t
+Float_t
 RecoJetAK4::bRegCorr() const
 {
   return bRegCorr_;
@@ -89,7 +90,7 @@ RecoJetAK4::p4_bRegCorr() const
   return math::PtEtaPhiMLorentzVector(this->pt()*bRegCorr_, this->eta(), this->phi(), this->mass()*bRegCorr_);
 }
 
-Double_t
+Float_t
 RecoJetAK4::bRegRes() const
 {
   return bRegRes_;
@@ -108,9 +109,9 @@ RecoJetAK4::puId() const
 }
 
 Float_t
-RecoJetAK4::rawFactor() const
+RecoJetAK4::area() const
 {
-  return rawFactor_;
+  return area_;
 }
 
 Float_t
@@ -178,7 +179,7 @@ operator<<(std::ostream & stream,
             " btag score = "      << jet.BtagCSV()                           << ","
             " jet ID = "          << jet.jetId()                             << ","
             " PU ID = "           << jet.puId()                              << ","
-            " rawFactor = "       << jet.rawFactor()                         << ","
+            " area = "            << jet.area()                              << ","
             " neEmEF = "          << jet.neEmEF()                            << ","
             " chEmEF = "          << jet.chEmEF()                            << ","
             " muonSubtrFactor = " << jet.muonSubtrFactor()                   << ","

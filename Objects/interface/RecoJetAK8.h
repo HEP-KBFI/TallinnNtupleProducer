@@ -16,22 +16,23 @@
 #include <memory>                                                  // std::shared_ptr
 #include <map>                                                     // std::map
 
-class RecoJetAK8 : public RecoJetBase
+class RecoJetAK8
+  : public RecoJetBase
 {
  public:
   RecoJetAK8() = default;
   RecoJetAK8(const GenJet & particle,
-              Double_t msoftdrop,
-              const RecoSubjetAK8* subJet1,
-              const RecoSubjetAK8* subJet2,
-              Double_t tau1,
-              Double_t tau2,
-              Double_t tau3,
-              Double_t tau4,
-              Int_t jetId,
-              UInt_t idx,
-              Int_t central_or_shift,
-              Int_t ignored_corrections);
+             Float_t msoftdrop,
+             const RecoSubjetAK8* subJet1,
+             const RecoSubjetAK8* subJet2,
+             Float_t tau1,
+             Float_t tau2,
+             Float_t tau3,
+             Float_t tau4,
+             Int_t jetId,
+             Float_t rawFactor,
+             Float_t area,
+             UInt_t idx);
 
   virtual ~RecoJetAK8();
 
@@ -39,14 +40,15 @@ class RecoJetAK8 : public RecoJetBase
    * @brief Funtions to access data-members
    * @return Values of data-members
    */
-  Double_t msoftdrop() const;
+  Float_t msoftdrop() const;
   const RecoSubjetAK8* subJet1() const;
   const RecoSubjetAK8* subJet2() const;
-  Double_t tau1() const;
-  Double_t tau2() const;
-  Double_t tau3() const;
-  Double_t tau4() const;
+  Float_t tau1() const;
+  Float_t tau2() const;
+  Float_t tau3() const;
+  Float_t tau4() const;
   Int_t jetId() const;
+  Float_t area() const;
   Int_t get_default_systematics() const;
   Int_t get_ignored_corrections() const;
 
@@ -54,26 +56,15 @@ class RecoJetAK8 : public RecoJetBase
   friend class RecoJetWriterAK8;
 
  protected: 
-  Double_t msoftdrop_;
+  Float_t msoftdrop_;
   std::shared_ptr<const RecoSubjetAK8> subJet1_;
   std::shared_ptr<const RecoSubjetAK8> subJet2_;
-  Double_t tau1_;
-  Double_t tau2_;
-  Double_t tau3_;
-  Double_t tau4_;
-  Int_t jetId_;   ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2017
-
-//---------------------------------------------------------
-// needed by RecoJetWriter
-  std::map<int, Double_t> pt_systematics_;
-  std::map<int, Double_t> mass_systematics_;
-  std::map<int, Double_t> msoftdrop_systematics_;
-  int default_systematics_;
-
-  std::map<int, Double_t> mass_corrections_;
-  std::map<int, Double_t> sd_corrections_;
-  int ignored_corrections_;
-//---------------------------------------------------------
+  Float_t tau1_;
+  Float_t tau2_;
+  Float_t tau3_;
+  Float_t tau4_;
+  Int_t jetId_;     ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2017
+  Float_t area_;    ///< jet catchment area
 };
 
 typedef std::vector<RecoJetAK8> RecoJetCollectionAK8;

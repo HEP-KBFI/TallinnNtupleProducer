@@ -20,10 +20,11 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   , era_(get_era(cfg.getParameter<std::string>("era")))
   , jet_sys_(kJetMET_central)
   , met_sys_(kJetMET_central)
+  , fatJet_sys_(kFatJet_central)
   , enable_phiModulationCorr_(cfg.getParameter<bool>("enable_phiModulationCorr"))
   , rho_(0.)
 {
-  // TODO read the following options from cfg: apply JEC, apply JER, isMC
+  // TODO read the following options from cfg: apply JEC, apply JER, isMC, disable_ak8_corr
 }
 
 JMECorrector::~JMECorrector()
@@ -45,6 +46,12 @@ void
 JMECorrector::set_met_opt(int central_or_shift)
 {
   met_sys_ = central_or_shift;
+}
+
+void
+JMECorrector::set_fatJet_opt(int central_or_shift)
+{
+  fatJet_sys_ = central_or_shift;
 }
 
 void

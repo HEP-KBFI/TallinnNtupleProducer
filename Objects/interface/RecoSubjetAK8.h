@@ -12,12 +12,14 @@
 
 #include "TallinnNtupleProducer/Objects/interface/RecoJetBase.h" // RecoJetBase
 
-class RecoSubjetAK8 : public RecoJetBase
+class RecoSubjetAK8
+  : public RecoJetBase
 {
  public:
   RecoSubjetAK8() = default;
   RecoSubjetAK8(const GenJet & particle,
-                Double_t BtagCSV,
+                Float_t rawFactor,
+                Float_t BtagCSV,
                 Int_t idx);
 
   virtual ~RecoSubjetAK8();
@@ -26,9 +28,9 @@ class RecoSubjetAK8 : public RecoJetBase
    * @brief Funtions to access data-members
    * @return Values of data-members
    */
-  Double_t BtagCSV() const;
+  Float_t BtagCSV() const;
 
-  bool is_btagable() const;
+  bool is_btaggable() const;
 
  protected:
   Double_t BtagCSV_; ///< CSV b-tagging discriminator value
