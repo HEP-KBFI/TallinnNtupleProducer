@@ -11,6 +11,7 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"       // RecoHadTau
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"       // RecoJetAK4
 #include "TallinnNtupleProducer/Objects/interface/RecoMuon.h"         // RecoMuon
+#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h"     // CorrT1METJet
 
 #include <algorithm>                                                  // std::find()
 
@@ -374,5 +375,6 @@ typedef ParticleCollectionGenMatcher<RecoElectron> RecoElectronCollectionGenMatc
 typedef ParticleCollectionGenMatcher<RecoMuon> RecoMuonCollectionGenMatcher;
 typedef ParticleCollectionGenMatcher<RecoHadTau> RecoHadTauCollectionGenMatcher;
 typedef ParticleCollectionGenMatcher<RecoJetAK4> RecoJetCollectionGenMatcherAK4;
+typedef ParticleCollectionGenMatcher<CorrT1METJet> CorrT1METJetCollectionGenMatcher;
 
 #endif // TallinnNtupleProducer_Readers_ParticleCollectionGenMatcher_h

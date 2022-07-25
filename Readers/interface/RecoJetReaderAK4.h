@@ -10,7 +10,6 @@
 
 // forward declarations
 class TTree;
-class JMECorrector;
 
 enum class Btag;
 enum class Era;
@@ -20,9 +19,6 @@ class RecoJetReaderAK4 : public ReaderBase
  public:
   RecoJetReaderAK4(const edm::ParameterSet & cfg);
   ~RecoJetReaderAK4() override;
-
-  void
-  set_jmeCorrector(JMECorrector * corrector);
 
   void
   setPtMass_central_or_shift(int central_or_shift);
@@ -87,7 +83,6 @@ class RecoJetReaderAK4 : public ReaderBase
   int btag_central_or_shift_;
   int ptMassOption_central_;
   int ptMassOption_;
-  JMECorrector * corrector_;
 
   UInt_t nJets_;
   Float_t * jet_pt_;

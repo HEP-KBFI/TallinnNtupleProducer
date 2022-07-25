@@ -1,7 +1,8 @@
 #ifndef TallinnNtupleProducer_Readers_JMECorrector_h
 #define TallinnNtupleProducer_Readers_JMECorrector_h
 
-#include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h" // RecoJetAK4
+#include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"   // RecoJetAK4
+#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h" // CorrT1METJet
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
 
@@ -18,7 +19,12 @@ public:
   reset(int central_or_shift);
 
   void
-  correct(RecoJetAK4 & jet);
+  correct(RecoJetAK4 & jet,
+          const std::vector<GenJet> & genJets);
+
+  void
+  correct(const CorrT1METJet & jet,
+          const std::vector<GenJet> & genJets);
 
   // TODO set run/lumi/evt number for reproducible smearing
 

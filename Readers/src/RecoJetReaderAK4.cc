@@ -7,7 +7,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // kJetMET_*, kBtag_*
-#include "TallinnNtupleProducer/Readers/interface/JMECorrector.h"                 // JMECorrector
 
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
@@ -26,7 +25,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , btag_central_or_shift_(kBtag_central)
   , ptMassOption_central_(-1)
   , ptMassOption_(-1)
-  , corrector_(nullptr)
   , jet_pt_(nullptr)
   , jet_eta_(nullptr)
   , jet_phi_(nullptr)
@@ -77,12 +75,6 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_hadronFlavour_;
     instances_[branchName_obj_] = nullptr;
   }
-}
-
-void
-RecoJetReaderAK4::set_jmeCorrector(JMECorrector * corrector)
-{
-  corrector_ = corrector;
 }
 
 void
@@ -208,7 +200,6 @@ RecoJetReaderAK4::read() const
 
   if(nJets > 0)
   {
-    corrector_->reset(ptMassOption_);
     jets.reserve(nJets);
     for(UInt_t idxJet = 0; idxJet < nJets; ++idxJet)
     {
@@ -255,8 +246,6 @@ RecoJetReaderAK4::read() const
         gInstance->jet_genJetIdx_[idxJet],
         btag_,
       });
-      RecoJetAK4 & jet = jets.back();
-      corrector_->correct(jet);
     } // idxJet
   } // nJets > 0
   return jets;

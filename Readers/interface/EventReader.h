@@ -29,6 +29,7 @@ class TriggerInfoReader;
 class EventInfoReader;
 class GenHadTauReader;
 class GenJetReader;
+class CorrT1METJetReader;
 class GenParticleReader;
 class MEtFilterReader;
 class RecoElectronCollectionSelectorFakeable;
@@ -102,7 +103,6 @@ class EventReader : public ReaderBase
 
   Era era_;
   bool isMC_;
-  bool readGenMatching_;
   bool jetCleaningByIndex_;
   bool genMatchRecoJets_;
 
@@ -164,10 +164,12 @@ class EventReader : public ReaderBase
   GenParticleReader * genParticleReader_;
   GenHadTauReader * genHadTauReader_;
   GenJetReader * genJetReader_;
+  CorrT1METJetReader * corrT1METJetReader_;
   RecoMuonCollectionGenMatcher * muonGenMatcher_;
   RecoElectronCollectionGenMatcher * electronGenMatcher_;
   RecoHadTauCollectionGenMatcher * hadTauGenMatcher_;
   RecoJetCollectionGenMatcherAK4 * jetGenMatcherAK4_;
+  CorrT1METJetCollectionGenMatcher * corrT1METJetGenMatcher_;
 
   RecoJetReaderAK8 * jetReaderAK8_Hbb_;
   RecoJetReaderAK8 * jetReaderAK8_Wjj_;

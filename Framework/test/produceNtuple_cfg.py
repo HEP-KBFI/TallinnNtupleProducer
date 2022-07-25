@@ -139,6 +139,7 @@ process.produceNtuple = cms.PSet(
     branchName_genPart = cms.string('GenPart'),
     branchName_genHadTaus = cms.string('GenVisTau'),
     branchName_genJets = cms.string('GenJet'),
+    branchName_corrT1METJet = cms.string('CorrT1METJet'),
 
     # PS weights
     branchName_PSweights = cms.string('PSWeight'),

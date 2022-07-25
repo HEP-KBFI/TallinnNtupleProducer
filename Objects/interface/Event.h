@@ -4,6 +4,7 @@
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"    // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"    // GenHadTauCollection
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"       // GenJetCollection
+#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h" // CorrT1METJetCollection
 #include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"    // MEtFilter
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"  // TriggerInfo
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h" // RecoElectronCollection, RecoElectronPtrCollection
@@ -131,6 +132,7 @@ class Event
   GenParticleCollection genParticles_;
   GenHadTauCollection genHadTaus_;
   GenJetCollection genJets_;
+  CorrT1METJetCollection corrT1METJets_;
 
   RecoJetCollectionAK8 jetsAK8_Hbb_;
   RecoJetPtrCollectionAK8 jet_ptrsAK8_Hbb_;

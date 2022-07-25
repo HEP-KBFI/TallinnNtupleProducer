@@ -26,14 +26,15 @@ JMECorrector::reset(int central_or_shift)
 }
 
 void
-JMECorrector::correct(RecoJetAK4 & jet)
+JMECorrector::correct(RecoJetAK4 & jet,
+                      const std::vector<GenJet> & genJets)
 {
-  const double pt = jet.pt();
-  const double mass = jet.mass();
-  const double rawFactor = jet.rawFactor();
+  //
+}
 
-  const double rawpt = pt * (1 - rawFactor);
-  const double rawmass = mass * (1 - rawFactor);
-  
-  //TODO implement jet calibrator
+void
+JMECorrector::correct(const CorrT1METJet & jet,
+                      const std::vector<GenJet> & genJets)
+{
+  //
 }
