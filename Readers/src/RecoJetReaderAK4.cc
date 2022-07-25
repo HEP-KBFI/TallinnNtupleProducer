@@ -6,7 +6,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // kJetMET_*, kBtag_*
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // jesAK4SysMap, jerAK4SysMap, jesSplitAK4SysMap, jerSplitAK4SysMap
 
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
@@ -22,9 +22,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , branchName_num_("")
   , branchName_obj_("")
   , btag_(Btag::kDeepJet)
-  , btag_central_or_shift_(kBtag_central)
-  , ptMassOption_central_(-1)
-  , ptMassOption_(-1)
   , jet_pt_(nullptr)
   , jet_eta_(nullptr)
   , jet_phi_(nullptr)
@@ -47,8 +44,6 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Jet"
   branchName_num_ = Form("n%s", branchName_obj_.data());
   isMC_ = cfg.getParameter<bool>("isMC");
-  ptMassOption_central_ = isMC_ ? kJetMET_central : kJetMET_central_nonNominal;
-  ptMassOption_ = ptMassOption_central_;
   setBranchNames();
 }
 
@@ -75,20 +70,6 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_hadronFlavour_;
     instances_[branchName_obj_] = nullptr;
   }
-}
-
-void
-RecoJetReaderAK4::setPtMass_central_or_shift(int central_or_shift)
-{
-  if(! isMC_ && central_or_shift != kJetMET_central_nonNominal)
-  {
-    throw cmsException(this, __func__, __LINE__) << "Data has only non-nominal pt and mass";
-  }
-  if(! isValidJESsource(era_, central_or_shift))
-  {
-    ptMassOption_ = ptMassOption_central_;
-  }
-  ptMassOption_ = central_or_shift;
 }
 
 void

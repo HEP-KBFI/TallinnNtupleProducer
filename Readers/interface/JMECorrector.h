@@ -3,8 +3,15 @@
 
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"   // RecoJetAK4
 #include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h" // CorrT1METJet
+#include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"      // RecoMEt
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"         // edm::ParameterSet
+
+// forward declarations
+class EventInfo;
+class RecoVertex;
+
+enum class Era;
 
 class JMECorrector
 {
@@ -16,7 +23,10 @@ public:
   set_rho(double rho);
 
   void
-  reset(int central_or_shift);
+  set_jet_opt(int central_or_shift);
+
+  void
+  set_met_opt(int central_or_shift);
 
   void
   correct(RecoJetAK4 & jet,
@@ -26,11 +36,20 @@ public:
   correct(const CorrT1METJet & jet,
           const std::vector<GenJet> & genJets);
 
+  void
+  correct(RecoMEt & met,
+          const EventInfo * const eventInfo,
+          const RecoVertex * const recoVertex) const;
+
   // TODO set run/lumi/evt number for reproducible smearing
 
 protected:
   bool isDEBUG_;
-  int central_or_shift_;
+  Era era_;
+  int jet_sys_;
+  int met_sys_;
+  bool enable_phiModulationCorr_;
+
   double rho_;
 };
 

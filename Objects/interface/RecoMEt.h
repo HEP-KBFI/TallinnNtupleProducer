@@ -12,11 +12,15 @@ class RecoMEt
   RecoMEt(Float_t pt,
           Float_t phi,
           Float_t sumEt,
+          Float_t unclEnDeltaX,
+          Float_t unclEnDeltaY,
           Float_t covXX,
           Float_t covXY,
           Float_t covYY);
   RecoMEt(const math::PtEtaPhiMLorentzVector & p4,
           Float_t sumEt,
+          Float_t unclEnDeltaX,
+          Float_t unclEnDeltaY,
           const TMatrixD& cov);
 
   RecoMEt &
@@ -29,6 +33,8 @@ class RecoMEt
   Double_t pt() const;
   Double_t phi() const;
   Double_t sumEt() const;
+  Double_t unclEnDeltaX() const;
+  Double_t unclEnDeltaY() const;
   Double_t covXX() const;
   Double_t covXY() const;
   Double_t covYY() const;
@@ -46,22 +52,29 @@ class RecoMEt
   Double_t genPhi() const;
 
   friend class RecoMEtReader;
+  friend class JMECorrector;
 
  protected:
-  Float_t pt_;     ///< pT of missing transverse momentum vector
-  Float_t phi_;    ///< phi of missing transverse momentum vector
-  Float_t sumEt_;  ///< sum of transverse energies of all particles in the event
-  Float_t covXX_;  ///< XX element of MET resolution matrix
-  Float_t covXY_;  ///< XY element of MET resolution matrix
-  Float_t covYY_;  ///< YY element of MET resolution matrix
+  void
+  set(Double_t pt,
+      Double_t phi);
+  
+  Float_t pt_;           ///< pT of missing transverse momentum vector
+  Float_t phi_;          ///< phi of missing transverse momentum vector
+  Float_t sumEt_;        ///< sum of transverse energies of all particles in the event
+  Float_t unclEnDeltaX_; ///< Delta (METx_mod-METx) Unclustered Energy Up
+  Float_t unclEnDeltaY_; ///< Delta (METy_mod-METy) Unclustered Energy Up
+  Float_t covXX_;        ///< XX element of MET resolution matrix
+  Float_t covXY_;        ///< XY element of MET resolution matrix
+  Float_t covYY_;        ///< YY element of MET resolution matrix
 
   ///< four-momentum constructed from pT and phi, assuming eta and mass to be equal to zero
   math::PtEtaPhiMLorentzVector p4_;
 
-  TMatrixD cov_;   ///< MET resolution matrix
+  TMatrixD cov_;         ///< MET resolution matrix
 
-  Float_t genPt_;  ///< pT of generator level missing transverse momentum vector
-  Float_t genPhi_;
+  Float_t genPt_;        ///< pT of generator level missing transverse momentum vector
+  Float_t genPhi_;       ///< phi of generator level missing transverse momentum vector
 };
 
 std::ostream &

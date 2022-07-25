@@ -456,11 +456,6 @@ checkOptionValidity(const std::string & central_or_shift,
  *
  * isPt -- if true, return pT branch name; if false, return mass branch name
  */
-std::string
-getBranchName_jetMET(const std::string & default_branchName,
-                     Era era,
-                     int central_or_shift,
-                     bool isPt);
 
 std::string
 getBranchName_fatJet(const std::string & default_branchName,

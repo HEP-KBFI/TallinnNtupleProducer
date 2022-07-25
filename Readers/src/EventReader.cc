@@ -260,8 +260,7 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
   if ( central_or_shift == "central" || contains(jetReaderAK4_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int jetPt_option = getJet_option(central_or_shift, isMC_);
-    jetReaderAK4_->setPtMass_central_or_shift(jetPt_option);
-    jmeCorrector_->reset(jetPt_option);
+    jmeCorrector_->set_jet_opt(jetPt_option);
   }
   if ( central_or_shift == "central" || contains(jetReaderAK8_Hbb_->get_supported_systematics(cfg_), central_or_shift) )
   {
@@ -276,7 +275,7 @@ EventReader::set_central_or_shift(const std::string& central_or_shift)
   if ( central_or_shift == "central" || contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
   {
     const int met_option = getMET_option(central_or_shift, isMC_);
-    metReader_->setMEt_central_or_shift(met_option);
+    jmeCorrector_->set_jet_opt(met_option);
   }
   current_central_or_shift_ = central_or_shift;
 }
@@ -449,6 +448,11 @@ EventReader::read() const
       }
       for(RecoJetAK4 & jet: event_.jetsAK4_)
       {
+        // TODO consider the possibility that we use gen matches already present in NanoAOD. AFAICS, the gen matching of reco jets
+        // is less restrictive than what's implemented in nanoAOD-tools: the former employs max dR cut of 0.4 with no cuts of pT,
+        // whereas nanoAOD-tools matches gen jets to reco jets if they're separated by no more than dR=0.2 and their difference in pT
+        // is less than 3x the intrinsic jet resolution. We could check whether the gen-matched jet satisfies these requirements on
+        // top of the gen jet that was selected as the match in NanoAOD.
         jmeCorrector_->correct(jet, event_.genJets_);
       }
       for(const CorrT1METJet & jet: event_.corrT1METJets_)
@@ -693,8 +697,8 @@ EventReader::read() const
   bool met_needsUpdate = isMEtSystematic || isUpdatedVertex || isNewEvent || met_isInvalid_ || (met_lastSystematic_ != "central" && !isMEtSystematic);
   if ( met_needsUpdate )
   {
-    metReader_->set_phiModulationCorrDetails(event_.eventInfo_, &event_.vertex_);
     event_.met_ = metReader_->read();
+    jmeCorrector_->correct(event_.met_, event_.eventInfo_, &event_.vertex_);
     met_lastSystematic_ = ( isMEtSystematic ) ? current_central_or_shift_ : "central";
   }
   met_isInvalid_ = false;

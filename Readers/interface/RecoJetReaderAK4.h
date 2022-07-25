@@ -21,9 +21,6 @@ class RecoJetReaderAK4 : public ReaderBase
   ~RecoJetReaderAK4() override;
 
   void
-  setPtMass_central_or_shift(int central_or_shift);
-
-  void
   read_Btag(Btag btag);
 
   /**
@@ -78,11 +75,7 @@ class RecoJetReaderAK4 : public ReaderBase
   std::string branchName_muonSubtrFactor_;
 
   std::map<Btag, std::string> branchNames_btag_;
-
   Btag btag_;
-  int btag_central_or_shift_;
-  int ptMassOption_central_;
-  int ptMassOption_;
 
   UInt_t nJets_;
   Float_t * jet_pt_;

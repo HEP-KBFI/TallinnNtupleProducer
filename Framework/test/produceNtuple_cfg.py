@@ -110,6 +110,7 @@ process.produceNtuple = cms.PSet(
     split_jes = cms.bool(False),
     split_jer = cms.bool(False),
     isCP5 = cms.bool(False),
+    enable_phiModulationCorr = cms.bool(True),
 
     evtWeight = cms.PSet(
         apply = cms.bool(False),
