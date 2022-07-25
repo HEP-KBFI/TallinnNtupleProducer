@@ -702,8 +702,8 @@ EventReader::read() const
   bool met_needsUpdate = isMEtSystematic || isUpdatedVertex || isNewEvent || met_isInvalid_ || (met_lastSystematic_ != "central" && !isMEtSystematic);
   if ( met_needsUpdate )
   {
-    event_.met_ = metReader_->read();
-    event_.rawmet_ = rawmetReader_->read();
+    event_.met_ = std::move(metReader_->read());
+    event_.rawmet_ = std::move(rawmetReader_->read());
     jmeCorrector_->correct(event_.met_, event_.rawmet_, event_.eventInfo_, &event_.vertex_);
     met_lastSystematic_ = ( isMEtSystematic ) ? current_central_or_shift_ : "central";
     if(isDEBUG_)
