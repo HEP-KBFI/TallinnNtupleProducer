@@ -38,6 +38,7 @@ public:
 
   void
   correct(RecoMEt & met,
+          const GenMEt & rawmet,
           const EventInfo * const eventInfo,
           const RecoVertex * const recoVertex) const;
 

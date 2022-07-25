@@ -11,8 +11,8 @@ std::map<std::string, GenMEtReader *> GenMEtReader::instances_;
 
 GenMEtReader::GenMEtReader(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
+  , branchName_obj_(cfg.getParameter<std::string>("branchName"))
 {
-  branchName_obj_ = cfg.getParameter<std::string>("branchName");
   setBranchNames();
 }
 
@@ -32,11 +32,11 @@ void
 GenMEtReader::setBranchNames()
 {
   if(numInstances_[branchName_obj_] == 0)
-    {
-      branchName_pt_ = Form("%s_%s", branchName_obj_.data(), "pt");
-      branchName_phi_ = Form("%s_%s", branchName_obj_.data(), "phi");
-      instances_[branchName_obj_] = this;
-    }
+  {
+    branchName_pt_ = Form("%s_%s", branchName_obj_.data(), "pt");
+    branchName_phi_ = Form("%s_%s", branchName_obj_.data(), "phi");
+    instances_[branchName_obj_] = this;
+  }
   ++numInstances_[branchName_obj_];
 }
 
@@ -46,8 +46,8 @@ GenMEtReader::setBranchAddresses(TTree * tree)
   if(instances_[branchName_obj_] == this)
   {
     BranchAddressInitializer bai(tree);
-    bai.setBranchAddress(met_.pt_,  branchName_pt_);
-    bai.setBranchAddress(met_.phi_, branchName_phi_);
+    bai.setBranchAddress(pt_,  branchName_pt_);
+    bai.setBranchAddress(phi_, branchName_phi_);
     return bai.getBoundBranchNames_read();
   }
   return {};
@@ -58,7 +58,5 @@ GenMEtReader::read() const
 {
   const GenMEtReader * const gInstance = instances_[branchName_obj_];
   assert(gInstance);
-  GenMEt met = met_;
-  met.update(); // update p4
-  return met;
+  return { gInstance->pt_, gInstance->phi_ };
 }

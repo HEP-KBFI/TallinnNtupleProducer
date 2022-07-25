@@ -134,6 +134,7 @@ process.produceNtuple = cms.PSet(
     branchName_jets_ak8_Wjj = cms.string('FatJet'),
     branchName_subjets_ak8_Wjj = cms.string('SubJet'),
     branchName_met = cms.string('MET'),
+    branchName_rawMet = cms.string('RawMET'),
     branchName_vertex = cms.string('PV'),
 
     # generator level information

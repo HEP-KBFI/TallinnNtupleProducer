@@ -39,6 +39,7 @@ class RecoMuonCollectionSelectorFakeable;
 class RecoMuonCollectionSelectorTight;
 class RecoElectronReader;
 class RecoHadTauReader;
+class GenMEtReader;
 class RecoMEtReader;
 class RecoMuonReader;
 class RecoVertexReader;
@@ -183,6 +184,7 @@ class EventReader : public ReaderBase
   mutable std::string jetAK8_Wjj_lastSystematic_;
   mutable bool jetAK8_Wjj_isInvalid_;
 
+  GenMEtReader * rawmetReader_;
   RecoMEtReader * metReader_;
   std::set<std::string> met_supported_systematics_;
   mutable std::string met_lastSystematic_;

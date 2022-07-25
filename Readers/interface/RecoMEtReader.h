@@ -1,23 +1,20 @@
 #ifndef TallinnNtupleProducer_Readers_RecoMEtReader_h
 #define TallinnNtupleProducer_Readers_RecoMEtReader_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"                          // edm::ParameterSet
-
 #include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"                     // RecoMEt
 #include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                  // ReaderBase
-#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"            // RecoJetReaderAK4::get_supported_systematics()
 
 #include <map>                                                                   // std::map
 #include <string>                                                                // std::string
 
 // forward declarations
 class TTree;
-class EventInfo;
-class RecoVertex;
+class GenMEtReader;
 
 enum class Era;
 
-class RecoMEtReader : public ReaderBase
+class RecoMEtReader
+  : public ReaderBase
 {
  public:
   RecoMEtReader(const edm::ParameterSet & cfg);
@@ -52,10 +49,7 @@ class RecoMEtReader : public ReaderBase
 
   bool isMC_;
   std::string branchName_obj_;
-  std::string branchName_cov_;
 
-  std::string branchName_pt_;
-  std::string branchName_phi_;
   std::string branchName_sumEt_;
   std::string branchName_unclDeltaX_;
   std::string branchName_unclDeltaY_;
@@ -63,8 +57,8 @@ class RecoMEtReader : public ReaderBase
   std::string branchName_covXY_;
   std::string branchName_covYY_;
 
-  Float_t met_pt_;
-  Float_t met_phi_;
+  GenMEtReader * genMEtReader_;
+
   Float_t met_sumEt_;
   Float_t met_unclDeltaX_;
   Float_t met_unclDeltaY_;

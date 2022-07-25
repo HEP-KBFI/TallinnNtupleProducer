@@ -142,6 +142,7 @@ class Event
   RecoJetPtrCollectionAK8 jet_ptrsAK8_Wjj_;
   RecoJetPtrCollectionAK8 selJetsAK8_Wjj_;
 
+  GenMEt rawmet_;
   RecoMEt met_;
   MEtFilter metFilters_;
 

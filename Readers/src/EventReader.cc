@@ -30,6 +30,7 @@
 #include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorTight.h"        // RecoMuonCollectionSelectorTight
 #include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"                       // RecoElectronReader
 #include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"                         // RecoHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenMEtReader.h"                             // GenMEtReader
 #include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                            // RecoMEtReader
 #include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"                           // RecoMuonReader
 #include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"                         // RecoVertexReader
@@ -138,6 +139,7 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   , jetAK8_Hbb_isInvalid_(false)
   , jetsAK8_Wjj_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg_)))
   , jetAK8_Wjj_isInvalid_(false)
+  , rawmetReader_(new GenMEtReader(make_cfg(cfg, "branchName_rawMet")))
   , metReader_(new RecoMEtReader(make_cfg(cfg, "branchName_met")))
   , met_supported_systematics_(make_supported_systematics(RecoMEtReader::get_supported_systematics(cfg_)))
   , met_isInvalid_(false)
@@ -235,6 +237,7 @@ EventReader::~EventReader()
   delete jetReaderAK8_Wjj_;
   delete jetSelectorAK8_Hbb_;
   delete jetSelectorAK8_Wjj_;
+  delete rawmetReader_;
   delete metReader_;
   delete metFilterReader_;
   delete vertexReader_;
@@ -298,6 +301,7 @@ EventReader::setBranchAddresses(TTree * inputTree)
 
   const std::vector<std::string> jetBranchesAK8_Hbb = jetReaderAK8_Hbb_->setBranchAddresses(inputTree);
   const std::vector<std::string> jetBranchesAK8_Wjj = jetReaderAK8_Wjj_->setBranchAddresses(inputTree);
+  const std::vector<std::string> rawmetBranches = rawmetReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> metBranches = metReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> metFilterBranches = metFilterReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> vertexBranches = vertexReader_->setBranchAddresses(inputTree);
@@ -317,6 +321,7 @@ EventReader::setBranchAddresses(TTree * inputTree)
 
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Hbb.begin(), jetBranchesAK8_Hbb.end());
   bound_branches.insert(bound_branches.end(), jetBranchesAK8_Wjj.begin(), jetBranchesAK8_Wjj.end());
+  bound_branches.insert(bound_branches.end(), rawmetBranches.begin(), rawmetBranches.end());
   bound_branches.insert(bound_branches.end(), metBranches.begin(), metBranches.end());
   bound_branches.insert(bound_branches.end(), metFilterBranches.begin(), metFilterBranches.end());
   bound_branches.insert(bound_branches.end(), vertexBranches.begin(), vertexBranches.end());
@@ -698,8 +703,16 @@ EventReader::read() const
   if ( met_needsUpdate )
   {
     event_.met_ = metReader_->read();
-    jmeCorrector_->correct(event_.met_, event_.eventInfo_, &event_.vertex_);
+    event_.rawmet_ = rawmetReader_->read();
+    jmeCorrector_->correct(event_.met_, event_.rawmet_, event_.eventInfo_, &event_.vertex_);
     met_lastSystematic_ = ( isMEtSystematic ) ? current_central_or_shift_ : "central";
+    if(isDEBUG_)
+    {
+      std::cout
+        << "Raw MEt: " << event_.rawmet_ << "\n"
+           "RecoMEt: " << event_.met_ << '\n'
+      ;
+    }
   }
   met_isInvalid_ = false;
 

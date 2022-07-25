@@ -9,13 +9,10 @@
 
 class GenMEt
 {
- public:
+public:
   GenMEt();
-
   GenMEt(Float_t pt,
-	 Float_t phi);
-
-  GenMEt(const math::PtEtaPhiMLorentzVector & p4);
+         Float_t phi);
 
   GenMEt &
   operator=(const GenMEt & other);
@@ -29,23 +26,20 @@ class GenMEt
   
   const Particle::LorentzVector & p4() const;
 
-  friend class GenMEtReader;
-  // friend class GenMEtWriter; // since not needed 
+protected:
+  void
+  set(Double_t pt,
+      Double_t phi);
 
- protected:
   Float_t pt_;  ///< pT of missing transverse momentum vector
   Float_t phi_; ///< phi of missing transverse momentum vector
 
   ///< (default) 4-momentum constructed from pT and phi, assuming eta and mass to be equal to zero
   math::PtEtaPhiMLorentzVector p4_;
-
-  ///< Update cov and p4 (needed by GenMEtReader)
-  void update();
-  void update_p4();
 };
 
 std::ostream& 
-operator<<(std::ostream& stream, 
-           const GenMEt& met);
+operator<<(std::ostream & stream,
+           const GenMEt & met);
 
 #endif // TallinnNtupleProducer_Objects_GenMEt_h
