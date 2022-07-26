@@ -76,10 +76,17 @@ protected:
             int max_level) const;
 
   double
+  jec_unc(double jet_pt,
+          double jet_eta,
+          double jet_phi,
+          int jet_id) const;
+
+  double
   smear(const Particle::LorentzVector & jet,
         const Particle::LorentzVector & genJet);
 
   bool isDEBUG_;
+  bool isMC_;
   bool reapply_JEC_;
   bool apply_smearing_;
   Era era_;
@@ -97,11 +104,17 @@ protected:
   double rho_;
   unsigned rle_;
   const EventInfo * info_;
+  std::vector<double> delta_x_T1Jet_;
+  std::vector<double> delta_y_T1Jet_;
+  std::vector<double> delta_x_rawJet_;
+  std::vector<double> delta_y_rawJet_;
+
   std::mt19937 generator_;
   bool use_deterministic_seed_;
 
   std::unique_ptr<correction::CorrectionSet> jet_cset_;
   std::vector<correction::Correction::Ref> jet_compound_;
+  std::map<int, correction::Correction::Ref> jet_uncs_;
   correction::Correction::Ref jet_reso_;
   correction::Correction::Ref jet_jer_sf_;
 

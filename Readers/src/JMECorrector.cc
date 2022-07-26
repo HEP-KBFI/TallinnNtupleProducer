@@ -3,12 +3,16 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"              // get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kJetMET_*
 #include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"  // LocalFileInPath
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"     // cmsException()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"            // EventInfo
 #include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"     // METXYCorr_Met_MetPhi
 
 #include "DataFormats/Math/interface/deltaR.h"                            // deltaR()
 
 #include <TString.h>                                                      // Form()
+
+#include <boost/algorithm/string/predicate.hpp>                           // boost::ends_with()
+#include <boost/algorithm/string/replace.hpp>                             // boost::replace_all_copy()
 
 #define _USE_MATH_DEFINES // M_PI
 
@@ -33,6 +37,7 @@ JMECorrector::JetParams::JetParams(const RecoJetAK4 & jet)
 
 JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   : isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
+  , isMC_(cfg.getParameter<bool>("isMC"))
   , reapply_JEC_(cfg.getParameter<bool>("reapply_JEC"))
   , apply_smearing_(cfg.getParameter<bool>("apply_smearing"))
   , era_(get_era(cfg.getParameter<std::string>("era")))
@@ -54,7 +59,7 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   , fatJet_cset_(nullptr)
   , jmar_cset_(nullptr)
 {
-  // TODO read the following options from cfg: apply_JER, isMC, disable_ak8_corr
+  // TODO read the following options from cfg: disable_ak8_corr
   switch(era_)
   {
     case Era::k2016:      globalJECTag_ = "Summer16_07Aug2017_V11"; globalJERTag_ = "Summer16_25nsV1"; break;
@@ -72,15 +77,37 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   jet_cset_ = correction::CorrectionSet::from_file(jetCorrectionSetFile);
 
   // we could benefit from compound corrections here, but for now let's stack them manually
+  const std::string source = isMC_ ? "MC" : "DATA";
   jet_compound_ = {
-    jet_cset_->at(Form("%s_MC_L1FastJet_%s",    globalJECTag_.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_MC_L2Relative_%s",   globalJECTag_.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_MC_L3Absolute_%s",   globalJECTag_.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_MC_L2L3Residual_%s", globalJECTag_.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_%s_L1FastJet_%s",    globalJECTag_.data(), source.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_%s_L2Relative_%s",   globalJECTag_.data(), source.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_%s_L3Absolute_%s",   globalJECTag_.data(), source.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_%s_L2L3Residual_%s", globalJECTag_.data(), source.data(), ak4_jetType_.data())),
   };
+  if(isMC_)
+  {
+    jet_uncs_[kJetMET_jesUp] = jet_cset_->at(Form("%s_MC_Total_%s", globalJECTag_.data(), ak4_jetType_.data()));
+    for(const auto & kv: jesSplitAK4SysMap)
+    {
+      if(kv.second % 2 == 0 || kv.second >= kJetMET_jesHEMUp)
+      {
+        continue;
+      }
+      assert(boost::ends_with(kv.first, "Up"));
+      const std::string sys_opt = boost::replace_all_copy(kv.first.substr(12, kv.first.size() - 14), "Era", era_str_);
+      jet_uncs_[kv.second] = jet_cset_->at(Form("%s_MC_%s_%s", globalJECTag_.data(), sys_opt.data(), ak4_jetType_.data()));
+    }
 
-  jet_reso_ = jet_cset_->at(Form("%s_MC_PtResolution_%s", globalJERTag_.data(), ak4_jetType_.data()));
-  jet_jer_sf_ = jet_cset_->at(Form("%s_MC_ScaleFactor_%s", globalJERTag_.data(), ak4_jetType_.data()));
+    jet_reso_ = jet_cset_->at(Form("%s_MC_PtResolution_%s", globalJERTag_.data(), ak4_jetType_.data()));
+    jet_jer_sf_ = jet_cset_->at(Form("%s_MC_ScaleFactor_%s", globalJERTag_.data(), ak4_jetType_.data()));
+  }
+  else
+  {
+    if(apply_smearing_)
+    {
+      throw cmsException(this, __func__, __LINE__) << "Cannot smear jets in data";
+    }
+  }
 }
 
 JMECorrector::~JMECorrector()
@@ -92,6 +119,11 @@ JMECorrector::set_info(const EventInfo * info)
   info_ = info;
   rho_ = info_->rho();
   rle_ = (info_->run() << 20) + (info_->lumi() << 10) + info_->event();
+
+  delta_x_T1Jet_.clear();
+  delta_y_T1Jet_.clear();
+  delta_x_rawJet_.clear();
+  delta_y_rawJet_.clear();
 }
 
 void
@@ -145,7 +177,7 @@ JMECorrector::correct(RecoJetAK4 & jet,
   const double jet_pt_noMuL1 = jet_rawpt_noMu * jecL1;
 
   // smear the jets
-  double jer __attribute__((unused)) = 1.;
+  double jer = 1.;
   if(apply_smearing_)
   {
     const Particle::LorentzVector jet_p4 { jet_pt, jet.eta(), jet.phi(), jet_mass };
@@ -159,8 +191,30 @@ JMECorrector::correct(RecoJetAK4 & jet,
 
     jer = smear(jet_p4, genJet_p4);
   }
+  const double jet_pt_nom = jet_pt * jer;
+  const double jet_mass_nom = jer * jet_mass;
 
-  jet.set_ptEtaPhiMass(jet_pt, jet.eta(), jet.phi(), jet_mass);
+  // JEC uncertainties
+  const double delta = jec_unc(jet_pt_nom, jet.eta(), jet.phi(), jet.jetId());
+  const double jet_pt_shifted = jet_pt_nom * (1 + delta);
+  const double jet_mass_shifted = jet_mass_nom * (1 + delta);
+
+  // record the delta for removing (L1L2L3 - L1) corrected jets from the EE region
+  const double jet_pt_L1L2L3 = jet_pt_noMuL1L2L3 + muon_pt;
+  const double jet_pt_L1 = jet_pt_noMuL1 + muon_pt;
+  const double jet_absEta = std::fabs(jet.eta());
+  if(era_ == Era::k2017 && jet_pt_L1L2L3 > 15. && jet_absEta > 2.65 && jet_absEta < 3.14 && jet_rawpt < 50.)
+  {
+    const double jet_phi = jet.phi();
+    const double cos_jet_phi = std::cos(jet_phi);
+    const double sin_jet_phi = std::sin(jet_phi);
+    delta_x_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * cos_jet_phi + jet_rawpt * cos_jet_phi);
+    delta_y_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * sin_jet_phi + jet_rawpt * sin_jet_phi);
+    delta_x_rawJet_.push_back(jet_rawpt * cos_jet_phi);
+    delta_y_rawJet_.push_back(jet_rawpt * sin_jet_phi);
+  }
+
+  jet.set_ptEtaPhiMass(jet_pt_shifted, jet.eta(), jet.phi(), jet_mass_shifted);
 }
 
 void
@@ -219,6 +273,51 @@ JMECorrector::calibrate(const JetParams & jetParams,
   const double newpt = jetParams.pt * raw_corr;
   const double newmass = jetParams.mass * raw_corr;
   return std::make_pair(newpt, newmass);
+}
+
+double
+JMECorrector::jec_unc(double jet_pt,
+                      double jet_eta,
+                      double jet_phi,
+                      int jet_id) const
+{
+  double delta = 0.;
+  if(jet_sys_ != kJetMET_central)
+  {
+    assert(isMC_);
+    if(jet_sys_ < kJetMET_jesHEMUp)
+    {
+      const bool is_up = jet_sys_ % 2 == 1;
+      const int key = is_up ? jet_sys_ : (jet_sys_ - 1);
+      delta = jet_uncs_.at(key)->evaluate({ jet_eta, jet_pt });
+      if(! is_up)
+      {
+        delta *= -1;
+      }
+    }
+    else if(jet_sys_ == kJetMET_jesHEMDown)
+    {
+      if(era_ != Era::k2018)
+      {
+        throw cmsException(this, __func__, __LINE__)
+          << "Invalid combination of JES uncertainty and era: " << jet_sys_ << " and " << era_str_
+        ;
+      }
+      if(jet_pt > 15. && jet_id & 2 && jet_phi > -1.57 && jet_phi < -0.87)
+      {
+        // https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
+        if(jet_eta > -2.5 && jet_eta < -1.3)
+        {
+          delta = -0.2;
+        }
+        else if(jet_eta <= 2.5 && jet_eta > -3)
+        {
+          delta = -0.35;
+        }
+      }
+    }
+  }
+  return delta;
 }
 
 double

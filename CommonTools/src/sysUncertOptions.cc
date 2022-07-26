@@ -72,8 +72,8 @@ const std::map<std::string, pileupJetIDSFsys> pileupJetIDSysMap = {
 };
 
 const std::map<std::string, int> jesAK4SysMap = {
-  { "CMS_ttHl_JESUp",                     kJetMET_jesUp                     },
-  { "CMS_ttHl_JESDown",                   kJetMET_jesDown                   },
+  { "CMS_ttHl_JESTotalUp",                kJetMET_jesUp                     },
+  { "CMS_ttHl_JESTotalDown",              kJetMET_jesDown                   },
 };
 
 const std::map<std::string, int> jesSplitAK4SysMap = {
@@ -129,8 +129,8 @@ const std::map<std::string, int> metSysMap = {
 };
 
 const std::map<std::string, int> jesAK8SysMap = {
-  { "CMS_ttHl_JESUp",                     kFatJet_jesUp                     },
-  { "CMS_ttHl_JESDown",                   kFatJet_jesDown                   },
+  { "CMS_ttHl_JESTotalUp",                kFatJet_jesUp                     },
+  { "CMS_ttHl_JESTotalDown",              kFatJet_jesDown                   },
 };
 
 const std::map<std::string, int> jesSplitAK8SysMap = {
