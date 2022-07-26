@@ -132,6 +132,7 @@ class Event
   GenParticleCollection genParticles_;
   GenHadTauCollection genHadTaus_;
   GenJetCollection genJets_;
+  GenJetPtrCollection genJetPtrs_;
   CorrT1METJetCollection corrT1METJets_;
 
   RecoJetCollectionAK8 jetsAK8_;
@@ -141,7 +142,9 @@ class Event
   RecoJetPtrCollectionAK8 selJetsAK8_Wjj_;
 
   ParticleCollection genJetsAK8_;
+  ParticlePtrCollection genJetPtrsAK8_;
   ParticleCollection genSubJetsAK8_;
+  ParticlePtrCollection genSubJetPtrsAK8_;
 
   GenMEt rawmet_;
   RecoMEt met_;

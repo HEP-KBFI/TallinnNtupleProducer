@@ -491,19 +491,15 @@ int
 getJet_option(const std::string & central_or_shift,
               bool isMC)
 {
-  if(isMC)
+  for(const auto & map: { jesAK4SysMap, jesSplitAK4SysMap, jerAK4SysMap, jerSplitAK4SysMap })
   {
-    for(const auto & map: { jesAK4SysMap, jesSplitAK4SysMap, jerAK4SysMap, jerSplitAK4SysMap })
+    const auto kv = map.find(central_or_shift);
+    if(kv != map.end())
     {
-      const auto kv = map.find(central_or_shift);
-      if(kv != map.end())
-      {
-        return kv->second;
-      }
+      return kv->second;
     }
-    return kJetMET_central;
   }
-  return kJetMET_central_nonNominal;
+  return kJetMET_central;
 }
 
 int

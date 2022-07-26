@@ -438,30 +438,23 @@ EventReader::read() const
   {
     event_.jetsAK4_ = jetReaderAK4_->read();
 
-    // In order to smear the reco jets, they have to be gen-matched to gen jets first. Since this procedure is independent of
-    // how the reconstructed lepton are gen-matched, plus it runs fast compared to the matching of reconstructed jets to gen
-    // leptons and had taus, we can do it here.
     if ( isMC_ )
     {
       if ( isNewEvent )
       {
         event_.genJets_ = genJetReader_->read();
+        event_.genJetPtrs_ = convert_to_ptrs(event_.genJets_);
         event_.corrT1METJets_ = corrT1METJetReader_->read();
       }
       for(RecoJetAK4 & jet: event_.jetsAK4_)
       {
-        // TODO consider the possibility that we use gen matches already present in NanoAOD. AFAICS, the gen matching of reco jets
-        // is less restrictive than what's implemented in nanoAOD-tools: the former employs max dR cut of 0.4 with no cuts of pT,
-        // whereas nanoAOD-tools matches gen jets to reco jets if they're separated by no more than dR=0.2 and their difference in pT
-        // is less than 3x the intrinsic jet resolution. We could check whether the gen-matched jet satisfies these requirements on
-        // top of the gen jet that was selected as the match in NanoAOD.
-        jmeCorrector_->correct(jet, event_.genJets_);
+        jmeCorrector_->correct(jet, event_.genJetPtrs_);
       }
       for(const CorrT1METJet & jet: event_.corrT1METJets_)
       {
         // We're actually not correcting these jets, we just need to store deltas and propagate them to MET, hence the const qualifier.
         // This is also to avoid re-reading the collection every time the AK4 jet systematics changes.
-        jmeCorrector_->correct(jet, event_.genJets_);
+        jmeCorrector_->correct(jet, event_.genJetPtrs_);
       }
     }
 
@@ -641,11 +634,13 @@ EventReader::read() const
     if ( isMC_ && isNewEvent )
     {
       event_.genJetsAK8_ = genJetAK8Reader_->read();
+      event_.genJetPtrsAK8_ = convert_to_ptrs(event_.genJetsAK8_);
       event_.genSubJetsAK8_ = genSubJetAK8Reader_->read();
+      event_.genSubJetPtrsAK8_ = convert_to_ptrs(event_.genSubJetsAK8_);
     }
     for(RecoJetAK8 & jet: event_.jetsAK8_)
     {
-      jmeCorrector_->correct(jet, event_.genJetsAK8_, event_.genSubJetsAK8_);
+      jmeCorrector_->correct(jet, event_.genJetPtrsAK8_, event_.genSubJetPtrsAK8_);
     }
     event_.jet_ptrsAK8_ = convert_to_ptrs(event_.jetsAK8_);
     event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_, isHigherPt<RecoJetAK8>);
