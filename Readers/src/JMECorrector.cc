@@ -3,7 +3,10 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"              // get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kJetMET_*
 #include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"  // LocalFileInPath
+#include "TallinnNtupleProducer/Objects/interface/EventInfo.h"            // EventInfo
 #include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"     // METXYCorr_Met_MetPhi
+
+#include "DataFormats/Math/interface/deltaR.h"                            // deltaR()
 
 #include <TString.h>                                                      // Form()
 
@@ -41,39 +44,54 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   , fatJet_sys_(kFatJet_central)
   , enable_phiModulationCorr_(cfg.getParameter<bool>("enable_phiModulationCorr"))
   , rho_(0.)
+  , rle_(0)
+  , info_(nullptr)
+  , generator_(0)
+  , use_deterministic_seed_(true)
   , jet_cset_(nullptr)
+  , jet_reso_(nullptr)
+  , jet_jer_sf_(nullptr)
   , fatJet_cset_(nullptr)
   , jmar_cset_(nullptr)
 {
   // TODO read the following options from cfg: apply_JER, isMC, disable_ak8_corr
   switch(era_)
   {
-    case Era::k2016:      globalTag_ = "Summer16_07Aug2017_V11_MC"; break;
-    case Era::k2017:      globalTag_ = "Fall17_17Nov2017_V32_MC";   break;
-    case Era::k2018:      globalTag_ = "Autumn18_V19_MC";           break;
+    case Era::k2016:      globalJECTag_ = "Summer16_07Aug2017_V11"; globalJERTag_ = "Summer16_25nsV1"; break;
+    case Era::k2017:      globalJECTag_ = "Fall17_17Nov2017_V32";   globalJERTag_ = "Fall17_V3b";      break;
+    case Era::k2018:      globalJECTag_ = "Autumn18_V19";           globalJERTag_ = "Autumn18_V7";     break;
     case Era::kUndefined: __attribute__((fallthrough));
     default:              assert(0);
   }
+  assert(! globalJECTag_.empty());
+  assert(! globalJERTag_.empty());
 
-  const std::string jetCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jet_jerc.json.gz", era_str_.data())).fullPath();
+  const std::string jetCorrectionSetFile = LocalFileInPath(Form(
+    "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jet_jerc.json.gz", era_str_.data()
+  )).fullPath();
   jet_cset_ = correction::CorrectionSet::from_file(jetCorrectionSetFile);
 
   // we could benefit from compound corrections here, but for now let's stack them manually
   jet_compound_ = {
-    jet_cset_->at(Form("%s_L1FastJet_%s",    globalTag_.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_L2Relative_%s",   globalTag_.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_L3Absolute_%s",   globalTag_.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_L2L3Residual_%s", globalTag_.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_MC_L1FastJet_%s",    globalJECTag_.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_MC_L2Relative_%s",   globalJECTag_.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_MC_L3Absolute_%s",   globalJECTag_.data(), ak4_jetType_.data())),
+    jet_cset_->at(Form("%s_MC_L2L3Residual_%s", globalJECTag_.data(), ak4_jetType_.data())),
   };
+
+  jet_reso_ = jet_cset_->at(Form("%s_MC_PtResolution_%s", globalJERTag_.data(), ak4_jetType_.data()));
+  jet_jer_sf_ = jet_cset_->at(Form("%s_MC_ScaleFactor_%s", globalJERTag_.data(), ak4_jetType_.data()));
 }
 
 JMECorrector::~JMECorrector()
 {}
 
 void
-JMECorrector::set_rho(double rho)
+JMECorrector::set_info(const EventInfo * info)
 {
-  rho_ = rho;
+  info_ = info;
+  rho_ = info_->rho();
+  rle_ = (info_->run() << 20) + (info_->lumi() << 10) + info_->event();
 }
 
 void
@@ -163,7 +181,6 @@ JMECorrector::correct(RecoJetAK8 & jet,
 void
 JMECorrector::correct(RecoMEt & met,
                       const GenMEt & rawmet,
-                      const EventInfo * const eventInfo,
                       const RecoVertex * const recoVertex) const
 {
   if(enable_phiModulationCorr_)
@@ -171,9 +188,9 @@ JMECorrector::correct(RecoMEt & met,
     double met_pt = met.pt();
     double met_phi = met.phi();
 
-    const std::pair<double, double> met_pxpyCorr = METXYCorr_Met_MetPhi(eventInfo, recoVertex, era_);
-    double met_px = met_pt * std::cos(met_phi) + met_pxpyCorr.first;
-    double met_py = met_pt * std::sin(met_phi) + met_pxpyCorr.second;
+    const std::pair<double, double> met_pxpyCorr = METXYCorr_Met_MetPhi(info_, recoVertex, era_);
+    const double met_px = met_pt * std::cos(met_phi) + met_pxpyCorr.first;
+    const double met_py = met_pt * std::sin(met_phi) + met_pxpyCorr.second;
 
     met_pt = std::sqrt(square(met_px) + square(met_py));
     if     (met_px > 0) { met_phi = std::atan(met_py / met_px); }
@@ -208,7 +225,7 @@ double
 JMECorrector::smear(const Particle::LorentzVector & jet,
                     const Particle::LorentzVector & genJet)
 {
-  int shift = 0;
+  std::string sf_sys = "nom";
   if(jet_sys_ >= kJetMET_jerUp && jet_sys_ <= kJetMET_jerForwardHighPtDown)
   {
     const bool is_barrel = std::fabs(jet.Eta()) < 1.93;
@@ -217,27 +234,56 @@ JMECorrector::smear(const Particle::LorentzVector & jet,
     const bool is_forward = ! is_barrel && ! is_endcap1 && ! is_endcap2;
     const bool is_lowpt = jet.Pt() < 50.;
 
-    if    (jet_sys_ == kJetMET_jerUp                                             ||
-           (jet_sys_ == kJetMET_jerBarrelUp        && is_barrel                ) ||
-           (jet_sys_ == kJetMET_jerEndcap1Up       && is_endcap1               ) ||
-           (jet_sys_ == kJetMET_jerEndcap2LowPtUp  && is_endcap2 &&   is_lowpt ) ||
-           (jet_sys_ == kJetMET_jerEndcap2HighPtUp && is_endcap2 && ! is_lowpt ) ||
-           (jet_sys_ == kJetMET_jerForwardLowPtUp  && is_forward &&   is_lowpt ) ||
-           (jet_sys_ == kJetMET_jerForwardHighPtUp && is_forward && ! is_lowpt))
+    if     (jet_sys_ == kJetMET_jerUp                                           ||
+           (jet_sys_ == kJetMET_jerBarrelUp        && is_barrel               ) ||
+           (jet_sys_ == kJetMET_jerEndcap1Up       && is_endcap1              ) ||
+           (jet_sys_ == kJetMET_jerEndcap2LowPtUp  && is_endcap2 &&   is_lowpt) ||
+           (jet_sys_ == kJetMET_jerEndcap2HighPtUp && is_endcap2 && ! is_lowpt) ||
+           (jet_sys_ == kJetMET_jerForwardLowPtUp  && is_forward &&   is_lowpt) ||
+           (jet_sys_ == kJetMET_jerForwardHighPtUp && is_forward && ! is_lowpt)  )
     {
-      shift = +1;
+      sf_sys = "up";
     }
-    else if(jet_sys_ == kJetMET_jerDown                                             ||
-           (jet_sys_ == kJetMET_jerBarrelDown        && is_barrel                ) ||
-           (jet_sys_ == kJetMET_jerEndcap1Down       && is_endcap1               ) ||
-           (jet_sys_ == kJetMET_jerEndcap2LowPtDown  && is_endcap2 &&   is_lowpt ) ||
-           (jet_sys_ == kJetMET_jerEndcap2HighPtDown && is_endcap2 && ! is_lowpt ) ||
-           (jet_sys_ == kJetMET_jerForwardLowPtDown  && is_forward &&   is_lowpt ) ||
-           (jet_sys_ == kJetMET_jerForwardHighPtDown && is_forward && ! is_lowpt))
+    else if(jet_sys_ == kJetMET_jerDown                                           ||
+           (jet_sys_ == kJetMET_jerBarrelDown        && is_barrel               ) ||
+           (jet_sys_ == kJetMET_jerEndcap1Down       && is_endcap1              ) ||
+           (jet_sys_ == kJetMET_jerEndcap2LowPtDown  && is_endcap2 &&   is_lowpt) ||
+           (jet_sys_ == kJetMET_jerEndcap2HighPtDown && is_endcap2 && ! is_lowpt) ||
+           (jet_sys_ == kJetMET_jerForwardLowPtDown  && is_forward &&   is_lowpt) ||
+           (jet_sys_ == kJetMET_jerForwardHighPtDown && is_forward && ! is_lowpt)  )
     {
-      shift = -1;
+      sf_sys = "down";
     }
-    assert(shift != 0);
   }
-  return 1.;
+  const double jer_sf =
+    era_ == Era::k2018 ?
+    jet_jer_sf_->evaluate({ jet.Eta(), jet.Pt(), sf_sys }) :
+    jet_jer_sf_->evaluate({ jet.Eta(), sf_sys })
+  ;
+
+  const double reso = jet_reso_->evaluate({ jet.Eta(), jet.Pt(), rho_ });
+  const double dPt = (jet.Pt() - genJet.Pt()) / jet.Pt();
+  const bool has_genJet = genJet.Pt() > 0.;
+
+  double smearFactor = 1.;
+  if(has_genJet && std::fabs(dPt) < 3 * reso && ::deltaR(jet.Eta(), jet.Phi(), genJet.Eta(), genJet.Phi()) < 0.2)
+  {
+    // additional constraints on the selected gen jet are documented in:
+    // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+    smearFactor += (jer_sf - 1) * dPt;
+  }
+  else
+  {
+    // stochastic smearing
+    if(use_deterministic_seed_)
+    {
+      // inspiration from CMSSW implementation:
+      // https://github.com/cms-sw/cmssw/blob/1fef057ea0118be780f3ccd15eb7b1ce7c9a9dab/PhysicsTools/PatUtils/interface/SmearedJetProducerT.h#L208-L215
+      const unsigned seed = static_cast<unsigned>(jet.Eta() / 0.01) + rle_;
+      generator_.seed(seed);
+    }
+    std::normal_distribution<> gaus(0, reso);
+    smearFactor += gaus(generator_) * std::sqrt(std::max(square(jer_sf) - 1, 0.));
+  }
+  return smearFactor > 0 ? smearFactor : 1.;
 }

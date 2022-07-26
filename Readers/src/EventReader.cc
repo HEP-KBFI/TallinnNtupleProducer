@@ -419,7 +419,7 @@ EventReader::read() const
   if ( isEventInfoSystematic || isNewEvent )
   {
     event_.eventInfo_ = &eventInfoReader_->read();
-    jmeCorrector_->set_rho(event_.eventInfo_->rho());
+    jmeCorrector_->set_info(event_.eventInfo_);
   }
   if ( event_.isInvalid() && !isNewEvent )
   {
@@ -698,7 +698,7 @@ EventReader::read() const
   {
     event_.met_ = std::move(metReader_->read());
     event_.rawmet_ = std::move(rawmetReader_->read());
-    jmeCorrector_->correct(event_.met_, event_.rawmet_, event_.eventInfo_, &event_.vertex_);
+    jmeCorrector_->correct(event_.met_, event_.rawmet_, &event_.vertex_);
     met_lastSystematic_ = ( isMEtSystematic ) ? current_central_or_shift_ : "central";
     if(isDEBUG_)
     {

@@ -10,6 +10,8 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"           // edm::ParameterSet
 
+#include <random>                                                 // std::random_device, std::mt19937
+
 // forward declarations
 class EventInfo;
 class RecoVertex;
@@ -23,7 +25,7 @@ public:
   ~JMECorrector();
 
   void
-  set_rho(double rho);
+  set_info(const EventInfo * info);
 
   void
   set_jet_opt(int central_or_shift);
@@ -50,7 +52,6 @@ public:
   void
   correct(RecoMEt & met,
           const GenMEt & rawmet,
-          const EventInfo * const eventInfo,
           const RecoVertex * const recoVertex) const;
 
   // TODO set run/lumi/evt number for reproducible smearing
@@ -83,7 +84,8 @@ protected:
   bool apply_smearing_;
   Era era_;
   std::string era_str_;
-  std::string globalTag_;
+  std::string globalJECTag_;
+  std::string globalJERTag_;
   std::string ak4_jetType_;
   std::string ak8_jetType_;
 
@@ -93,9 +95,15 @@ protected:
   bool enable_phiModulationCorr_;
 
   double rho_;
+  unsigned rle_;
+  const EventInfo * info_;
+  std::mt19937 generator_;
+  bool use_deterministic_seed_;
 
   std::unique_ptr<correction::CorrectionSet> jet_cset_;
   std::vector<correction::Correction::Ref> jet_compound_;
+  correction::Correction::Ref jet_reso_;
+  correction::Correction::Ref jet_jer_sf_;
 
   std::unique_ptr<correction::CorrectionSet> fatJet_cset_;
   std::unique_ptr<correction::CorrectionSet> jmar_cset_;
