@@ -99,7 +99,6 @@ const std::map<std::string, int> jesSplitAK4SysMap = {
   { "CMS_ttHl_JESRelativeBalDown",        kJetMET_jesRelativeBalDown        },
   { "CMS_ttHl_JESRelativeSample_EraUp",   kJetMET_jesRelativeSample_EraUp   },
   { "CMS_ttHl_JESRelativeSample_EraDown", kJetMET_jesRelativeSample_EraDown },
-  { "CMS_ttHl_JESHEMUp",                  kJetMET_jesHEMUp                  },
   { "CMS_ttHl_JESHEMDown",                kJetMET_jesHEMDown                },
 };
 
@@ -156,7 +155,6 @@ const std::map<std::string, int> jesSplitAK8SysMap = {
   { "CMS_ttHl_JESRelativeBalDown",        kFatJet_jesRelativeBalDown        },
   { "CMS_ttHl_JESRelativeSample_EraUp",   kFatJet_jesRelativeSample_EraUp   },
   { "CMS_ttHl_JESRelativeSample_EraDown", kFatJet_jesRelativeSample_EraDown },
-  { "CMS_ttHl_JESHEMUp",                  kFatJet_jesHEMUp                  },
   { "CMS_ttHl_JESHEMDown",                kFatJet_jesHEMDown                },
 };
 
@@ -437,8 +435,8 @@ isValidJESsource(Era era,
                  int central_or_shift,
                  bool isFatJet)
 {
-  if((((central_or_shift == kJetMET_jesHEMUp || central_or_shift == kJetMET_jesHEMDown) && ! isFatJet) ||
-      ((central_or_shift == kFatJet_jesHEMUp || central_or_shift == kFatJet_jesHEMDown) &&   isFatJet)  ) &&
+  if(((central_or_shift == kJetMET_jesHEMDown && ! isFatJet) ||
+      (central_or_shift == kFatJet_jesHEMDown &&   isFatJet)  ) &&
      era != Era::k2018)
   {
     return false;

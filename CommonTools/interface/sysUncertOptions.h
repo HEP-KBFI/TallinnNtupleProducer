@@ -66,7 +66,7 @@ enum
   kJetMET_jesHF_EraUp,             kJetMET_jesHF_EraDown,
   kJetMET_jesRelativeBalUp,        kJetMET_jesRelativeBalDown,
   kJetMET_jesRelativeSample_EraUp, kJetMET_jesRelativeSample_EraDown,
-  kJetMET_jesHEMUp,                kJetMET_jesHEMDown,
+  kJetMET_jesHEMDown,
   // JER
   kJetMET_jerUp,                   kJetMET_jerDown, // total JER
   kJetMET_jerBarrelUp,             kJetMET_jerBarrelDown,
@@ -96,7 +96,7 @@ enum
   kFatJet_jesHF_EraUp,             kFatJet_jesHF_EraDown,
   kFatJet_jesRelativeBalUp,        kFatJet_jesRelativeBalDown,
   kFatJet_jesRelativeSample_EraUp, kFatJet_jesRelativeSample_EraDown,
-  kFatJet_jesHEMUp,                kFatJet_jesHEMDown,
+  kFatJet_jesHEMDown,
   kFatJet_jerUp,                   kFatJet_jerDown, // total JER
   // split JER
 //  kFatJet_jerBarrelUp,             kFatJet_jerBarrelDown,

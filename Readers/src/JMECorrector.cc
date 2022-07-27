@@ -89,7 +89,7 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
     jet_uncs_[kJetMET_jesUp] = jet_cset_->at(Form("%s_MC_Total_%s", globalJECTag_.data(), ak4_jetType_.data()));
     for(const auto & kv: jesSplitAK4SysMap)
     {
-      if(kv.second % 2 == 0 || kv.second >= kJetMET_jesHEMUp)
+      if(kv.second % 2 == 0 || kv.second >= kJetMET_jesHEMDown)
       {
         continue;
       }
@@ -285,7 +285,7 @@ JMECorrector::jec_unc(double jet_pt,
   if(jet_sys_ != kJetMET_central)
   {
     assert(isMC_);
-    if(jet_sys_ < kJetMET_jesHEMUp)
+    if(jet_sys_ < kJetMET_jesHEMDown)
     {
       const bool is_up = jet_sys_ % 2 == 1;
       const int key = is_up ? jet_sys_ : (jet_sys_ - 1);
