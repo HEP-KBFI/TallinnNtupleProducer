@@ -28,6 +28,12 @@ class RecoJetBase : public GenJet
 
   virtual ~RecoJetBase();
 
+  virtual void
+  set_ptEtaPhiMass(Double_t pt,
+                   Double_t eta,
+                   Double_t phi,
+                   Double_t mass) override;
+
   /**
    * @brief Set links to generator level particles (matched by dR)
    */
