@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
     const std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
-    copyParameter<vstring>(cfg_produceNtuple, cfg_writer, "disable_ak8_corr");
+    copyParameter<vstring>(cfg_produceNtuple, cfg_writer, "fatJet_corrections");
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
     cfg_writer.addParameter<std::string>("process", process);

@@ -48,4 +48,7 @@ get_BtagWP(Era era,
            Btag btag,
            BtagWP wp);
 
+int
+get_fatJet_corrections(const std::vector<std::string> & corrections);
+
 #endif // TallinnNtupleProducer_CommonTools_jetDefinitions_h

@@ -3,7 +3,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/get_ignore_ak8_sys.h"       // get_ignore_ak8_sys()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
@@ -241,13 +240,13 @@ RecoJetReaderAK8::get_supported_systematics(const edm::ParameterSet & cfg)
     {
       merge_systematic_shifts(supported_systematics, map_keys(jerSplitAK8SysMap));
     }
-    const std::vector<std::string> disable_ak8_corr = cfg.getParameter<std::vector<std::string>>("disable_ak8_corr");
-    const int ignore_ak8_sys = get_ignore_ak8_sys(disable_ak8_corr);
-    if ( !(ignore_ak8_sys & kFatJetJMS) )
+    const std::vector<std::string> fatJet_corrections_vstring = cfg.getParameter<std::vector<std::string>>("fatJet_corrections");
+    const int fatJet_corrections = get_fatJet_corrections(fatJet_corrections_vstring);
+    if ( fatJet_corrections & kFatJetJMS )
     {
       merge_systematic_shifts(supported_systematics, map_keys(jmsAK8SysMap));
     }
-    if ( !(ignore_ak8_sys & kFatJetJMR) )
+    if ( fatJet_corrections & kFatJetJMR )
     {
       merge_systematic_shifts(supported_systematics, map_keys(jmrAK8SysMap));
     }

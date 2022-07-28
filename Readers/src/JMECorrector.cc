@@ -78,7 +78,7 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   , fatJet_cset_(nullptr)
   , jmar_cset_(nullptr)
 {
-  // TODO read the following options from cfg: disable_ak8_corr
+  // TODO read the following options from cfg: fatJet_corrections
   switch(era_)
   {
     case Era::k2016:      globalJECTag_ = "Summer16_07Aug2017_V11"; globalJERTag_ = "Summer16_25nsV1"; break;
