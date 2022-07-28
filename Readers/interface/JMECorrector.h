@@ -70,7 +70,10 @@ protected:
     double rawFactor;
   };
 
-  std::pair<double, double>
+  static double
+  kahan_sum(const std::vector<double> & input);
+
+  double
   calibrate(const JetParams & jetParams,
             bool include_residual,
             int max_level) const;
@@ -108,6 +111,8 @@ protected:
   std::vector<double> delta_y_T1Jet_;
   std::vector<double> delta_x_rawJet_;
   std::vector<double> delta_y_rawJet_;
+  std::vector<double> met_T1Smear_px_;
+  std::vector<double> met_T1Smear_py_;
 
   std::mt19937 generator_;
   bool use_deterministic_seed_;

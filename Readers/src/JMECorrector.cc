@@ -35,6 +35,25 @@ JMECorrector::JetParams::JetParams(const RecoJetAK4 & jet)
   , rawFactor(jet.rawFactor())
 {}
 
+/**
+ * @brief https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+ */
+double
+JMECorrector::kahan_sum(const std::vector<double> & input)
+{
+  double compensation = 0.;
+  return std::accumulate(
+    input.begin(), input.end(), 0.,
+    [compensation](double sum, double element) mutable -> double
+    {
+      const double y = element - compensation;
+      const double t = sum + y;
+      compensation = (t - sum) - y;
+      return t;
+    }
+  );
+}
+
 JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   : isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
   , isMC_(cfg.getParameter<bool>("isMC"))
@@ -124,6 +143,8 @@ JMECorrector::set_info(const EventInfo * info)
   delta_y_T1Jet_.clear();
   delta_x_rawJet_.clear();
   delta_y_rawJet_.clear();
+  met_T1Smear_px_.clear();
+  met_T1Smear_py_.clear();
 }
 
 void
@@ -148,35 +169,16 @@ void
 JMECorrector::correct(RecoJetAK4 & jet,
                       const std::vector<const GenJet *> & genJets)
 {
-  // raw jet pT and mass
+  // Compute raw jet pT
   const double raw = 1 - jet.rawFactor();
   const double jet_rawpt = jet.pt() * raw;
-  const double jet_rawmass = jet.mass() * raw;
 
-  // nominal jet pT and mass without smearing
-  double jet_pt = jet.pt();
-  double jet_mass = jet.mass();
-  if(reapply_JEC_)
-  {
-    const auto jet_calibrated = calibrate(jet, true, 4);
-    jet_pt = jet_calibrated.first;
-    jet_mass = jet_calibrated.second;
-  }
-  const double jec = jet_pt / jet_rawpt;
+  // Recompute jet pT and mass by re-applying JEC
+  const double jec = reapply_JEC_ ? calibrate(jet, true, 4) : 1.;
+  const double jet_pt = jet.pt() * jec;
+  const double jet_mass = jet.mass() * jec;
 
-  // jet pT and mass with only L1 corrections applied
-  const auto jet_calibrated_l1 = calibrate(jet, false, 1);
-  const double & jet_pt_l1 = jet_calibrated_l1.first;
-  const double & jet_mass_l1 = jet_calibrated_l1.second;
-  const double jecL1 = jet_pt_l1 / jet_rawpt;
-
-  // muon-subtracted jet pT
-  const double muon_pt = jet_rawpt * jet.muonSubtrFactor();
-  const double jet_rawpt_noMu = jet_rawpt * (1 - jet.muonSubtrFactor());
-  const double jet_pt_noMuL1L2L3 = jet_rawpt_noMu * jec;
-  const double jet_pt_noMuL1 = jet_rawpt_noMu * jecL1;
-
-  // smear the jets
+  // Smear the jets
   double jer = 1.;
   if(apply_smearing_)
   {
@@ -192,26 +194,48 @@ JMECorrector::correct(RecoJetAK4 & jet,
     jer = smear(jet_p4, genJet_p4);
   }
   const double jet_pt_nom = jet_pt * jer;
-  const double jet_mass_nom = jer * jet_mass;
+  const double jet_mass_nom = jet_mass * jer;
 
-  // JEC uncertainties
+  // Propagate JEC uncertainties to the smeared jets
   const double delta = jec_unc(jet_pt_nom, jet.eta(), jet.phi(), jet.jetId());
-  const double jet_pt_shifted = jet_pt_nom * (1 + delta);
-  const double jet_mass_shifted = jet_mass_nom * (1 + delta);
+  const double delta_shift = 1 + delta;
+  const double jet_pt_shifted = jet_pt_nom * delta_shift;
+  const double jet_mass_shifted = jet_mass_nom * delta_shift;
 
-  // record the delta for removing (L1L2L3 - L1) corrected jets from the EE region
+  // Re-apply JEC on the muon-subtracted jet pT, so that the difference between
+  // fully-corrected and L1-corrected jet pT can be propagated to MET.
+  // https://indico.cern.ch/event/854654/contributions/3594580/attachments/1924445/3184422/MET_type1corrections_nanoAODtools.pdf
+  // https://indico.cern.ch/event/921037/contributions/3869620/attachments/2042217/3420993/nanoaod_jes_talk_v2.pdf
+  const double jecL1 = calibrate(jet, false, 1);
+  const double muon_pt = jet_rawpt * jet.muonSubtrFactor();
+  const double jet_rawpt_noMu = jet_rawpt * (1 - jet.muonSubtrFactor());
+  const double jet_pt_noMuL1L2L3 = jet_rawpt_noMu * jec;
   const double jet_pt_L1L2L3 = jet_pt_noMuL1L2L3 + muon_pt;
-  const double jet_pt_L1 = jet_pt_noMuL1 + muon_pt;
-  const double jet_absEta = std::fabs(jet.eta());
-  if(era_ == Era::k2017 && jet_pt_L1L2L3 > 15. && jet_absEta > 2.65 && jet_absEta < 3.14 && jet_rawpt < 50.)
+  if(jet_pt_L1L2L3 > 15.)
   {
+    const double jet_pt_noMuL1 = jet_rawpt_noMu * jecL1;
+    const double jet_pt_L1 = jet_pt_noMuL1 + muon_pt;
+    const double jet_absEta = std::fabs(jet.eta());
+
     const double jet_phi = jet.phi();
-    const double cos_jet_phi = std::cos(jet_phi);
-    const double sin_jet_phi = std::sin(jet_phi);
-    delta_x_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * cos_jet_phi + jet_rawpt * cos_jet_phi);
-    delta_y_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * sin_jet_phi + jet_rawpt * sin_jet_phi);
-    delta_x_rawJet_.push_back(jet_rawpt * cos_jet_phi);
-    delta_y_rawJet_.push_back(jet_rawpt * sin_jet_phi);
+    const double jet_cosPhi = std::cos(jet_phi);
+    const double jet_sinPhi = std::sin(jet_phi);
+
+    // Record the delta for removing (L1L2L3 - L1) corrected jets from the EE region
+    if(era_ == Era::k2017  && jet_absEta > 2.65 && jet_absEta < 3.14 && jet_rawpt < 50.)
+    {
+      delta_x_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * jet_cosPhi + jet_rawpt * jet_cosPhi);
+      delta_y_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * jet_sinPhi + jet_rawpt * jet_sinPhi);
+      delta_x_rawJet_.push_back(jet_rawpt * jet_cosPhi);
+      delta_y_rawJet_.push_back(jet_rawpt * jet_sinPhi);
+    }
+
+    // Save the delta to propagate JES and JER corrections with uncertainties to MET
+    if((jet.chEmEF() + jet.neEmEF()) < 0.9)
+    {
+      met_T1Smear_px_.push_back((jet_pt_L1L2L3 * (jer + delta) - jet_pt_L1) * jet_cosPhi);
+      met_T1Smear_py_.push_back((jet_pt_L1L2L3 * (jer + delta) - jet_pt_L1) * jet_sinPhi);
+    }
   }
 
   jet.set_ptEtaPhiMass(jet_pt_shifted, jet.eta(), jet.phi(), jet_mass_shifted);
@@ -237,25 +261,31 @@ JMECorrector::correct(RecoMEt & met,
                       const GenMEt & rawmet,
                       const RecoVertex * const recoVertex) const
 {
+  // TODO 2017
+  const double rawmet_px = rawmet.pt() * std::cos(rawmet.phi());
+  const double rawmet_py = rawmet.pt() * std::sin(rawmet.phi());
+  const double dpx = JMECorrector::kahan_sum(met_T1Smear_px_);
+  const double dpy = JMECorrector::kahan_sum(met_T1Smear_py_);
+  double newmet_px = rawmet_px - dpx;
+  double newmet_py = rawmet_py - dpy;
+
   if(enable_phiModulationCorr_)
   {
-    double met_pt = met.pt();
-    double met_phi = met.phi();
-
     const std::pair<double, double> met_pxpyCorr = METXYCorr_Met_MetPhi(info_, recoVertex, era_);
-    const double met_px = met_pt * std::cos(met_phi) + met_pxpyCorr.first;
-    const double met_py = met_pt * std::sin(met_phi) + met_pxpyCorr.second;
-
-    met_pt = std::sqrt(square(met_px) + square(met_py));
-    if     (met_px > 0) { met_phi = std::atan(met_py / met_px); }
-    else if(met_px < 0) { met_phi = std::atan(met_py / met_px) + ((met_py > 0. ? +1. : -1.) * M_PI);  }
-    else                { met_phi = (met_py > 0. ? +1. : -1.) * M_PI; }
-
-    met.set(met_pt, met_phi);
+    newmet_px += met_pxpyCorr.first;
+    newmet_py += met_pxpyCorr.second;
   }
+
+  const double newmet_pt = std::sqrt(square(newmet_px) + square(newmet_py));
+  double newmet_phi = 0.;
+  if     (newmet_px > 0) { newmet_phi = std::atan(newmet_py / newmet_px); }
+  else if(newmet_px < 0) { newmet_phi = std::atan(newmet_py / newmet_px) + ((newmet_py > 0. ? +1. : -1.) * M_PI);  }
+  else                   { newmet_phi = (newmet_py > 0. ? +1. : -1.) * M_PI; }
+
+  met.set(newmet_pt, newmet_phi);
 }
 
-std::pair<double, double>
+double
 JMECorrector::calibrate(const JetParams & jetParams,
                         bool include_residual,
                         int max_level) const
@@ -269,10 +299,7 @@ JMECorrector::calibrate(const JetParams & jetParams,
       jet_compound_.at(level)->evaluate({ jetParams.area, jetParams.eta, jetParams.pt * raw, rho_ })
     ;
   }
-  const double raw_corr = corr <= 0. ? 1. : raw * corr;
-  const double newpt = jetParams.pt * raw_corr;
-  const double newmass = jetParams.mass * raw_corr;
-  return std::make_pair(newpt, newmass);
+  return corr <= 0. ? 1. : corr * raw;
 }
 
 double
