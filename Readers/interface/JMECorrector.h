@@ -28,6 +28,9 @@ public:
   set_info(const EventInfo * info);
 
   void
+  reset();
+
+  void
   set_jet_opt(int central_or_shift);
 
   void

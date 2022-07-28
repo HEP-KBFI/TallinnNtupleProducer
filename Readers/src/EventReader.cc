@@ -247,34 +247,16 @@ void
 EventReader::set_central_or_shift(const std::string& central_or_shift)
 {
   eventInfoReader_->set_central_or_shift(central_or_shift);
-  if ( central_or_shift == "central" || contains(muonReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    // CV: muon momentum scale uncertainty not implemented yet
-  }
-  if ( central_or_shift == "central" || contains(electronReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    // CV: electron energy scale uncertainty not implemented yet 
-  }
-  if ( central_or_shift == "central" || contains(hadTauReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int hadTauPt_option = getHadTauPt_option(central_or_shift);
-    hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
-  }
-  if ( central_or_shift == "central" || contains(jetReaderAK4_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int jetPt_option = getJet_option(central_or_shift, isMC_);
-    jmeCorrector_->set_jet_opt(jetPt_option);
-  }
-  if ( central_or_shift == "central" || contains(jetReaderAK8_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-    jmeCorrector_->set_fatJet_opt(fatJetPt_option);
-  }
-  if ( central_or_shift == "central" || contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int met_option = getMET_option(central_or_shift, isMC_);
-    jmeCorrector_->set_jet_opt(met_option);
-  }
+  const int hadTauPt_option = getHadTauPt_option(central_or_shift);
+  hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
+
+  const int jetPt_option = getJet_option(central_or_shift, isMC_);
+  jmeCorrector_->set_jet_opt(jetPt_option);
+  const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
+  jmeCorrector_->set_fatJet_opt(fatJetPt_option);
+  const int met_option = getMET_option(central_or_shift, isMC_);
+  jmeCorrector_->set_jet_opt(met_option);
+
   current_central_or_shift_ = central_or_shift;
 }
 
@@ -446,6 +428,7 @@ EventReader::read() const
         event_.genJetPtrs_ = convert_to_ptrs(event_.genJets_);
         event_.corrT1METJets_ = corrT1METJetReader_->read();
       }
+      jmeCorrector_->reset();
       for(RecoJetAK4 & jet: event_.jetsAK4_)
       {
         jmeCorrector_->correct(jet, event_.genJetPtrs_);

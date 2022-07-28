@@ -138,7 +138,11 @@ JMECorrector::set_info(const EventInfo * info)
   info_ = info;
   rho_ = info_->rho();
   rle_ = (info_->run() << 20) + (info_->lumi() << 10) + info_->event();
+}
 
+void
+JMECorrector::reset()
+{
   delta_x_T1Jet_.clear();
   delta_y_T1Jet_.clear();
   delta_x_rawJet_.clear();
