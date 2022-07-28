@@ -143,10 +143,6 @@ JMECorrector::set_info(const EventInfo * info)
 void
 JMECorrector::reset()
 {
-  delta_x_T1Jet_.clear();
-  delta_y_T1Jet_.clear();
-  delta_x_rawJet_.clear();
-  delta_y_rawJet_.clear();
   met_T1Smear_px_.clear();
   met_T1Smear_py_.clear();
 }
@@ -209,8 +205,6 @@ JMECorrector::correct(RecoJetAK4 & jet,
 
   // Re-apply JEC on the muon-subtracted jet pT, so that the difference between
   // fully-corrected and L1-corrected jet pT can be propagated to MET.
-  // https://indico.cern.ch/event/854654/contributions/3594580/attachments/1924445/3184422/MET_type1corrections_nanoAODtools.pdf
-  // https://indico.cern.ch/event/921037/contributions/3869620/attachments/2042217/3420993/nanoaod_jes_talk_v2.pdf
   const double jecL1 = calibrate(jet, false, 1);
   const double muon_pt = jet_rawpt * jet.muonSubtrFactor();
   const double jet_rawpt_noMu = jet_rawpt * (1 - jet.muonSubtrFactor());
@@ -220,20 +214,10 @@ JMECorrector::correct(RecoJetAK4 & jet,
   {
     const double jet_pt_noMuL1 = jet_rawpt_noMu * jecL1;
     const double jet_pt_L1 = jet_pt_noMuL1 + muon_pt;
-    const double jet_absEta = std::fabs(jet.eta());
 
     const double jet_phi = jet.phi();
     const double jet_cosPhi = std::cos(jet_phi);
     const double jet_sinPhi = std::sin(jet_phi);
-
-    // Record the delta for removing (L1L2L3 - L1) corrected jets from the EE region
-    if(era_ == Era::k2017  && jet_absEta > 2.65 && jet_absEta < 3.14 && jet_rawpt < 50.)
-    {
-      delta_x_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * jet_cosPhi + jet_rawpt * jet_cosPhi);
-      delta_y_T1Jet_.push_back((jet_pt_L1L2L3 - jet_pt_L1) * jet_sinPhi + jet_rawpt * jet_sinPhi);
-      delta_x_rawJet_.push_back(jet_rawpt * jet_cosPhi);
-      delta_y_rawJet_.push_back(jet_rawpt * jet_sinPhi);
-    }
 
     // Save the delta to propagate JES and JER corrections with uncertainties to MET
     if((jet.chEmEF() + jet.neEmEF()) < 0.9)
@@ -280,7 +264,7 @@ JMECorrector::correct(const CorrT1METJet & jet,
     }
   }
   RecoJetAK4 jet_copy(jet, genJetIdx_best);
-  return correct(jet_copy, genJets, true);
+  return correct(jet_copy, genJets, true); // force recalibration because CorrT1METJets have only raw pT
 }
 
 void
@@ -296,7 +280,6 @@ JMECorrector::correct(RecoMEt & met,
                       const GenMEt & rawmet,
                       const RecoVertex * const recoVertex) const
 {
-  // TODO 2017
   const double rawmet_px = rawmet.pt() * std::cos(rawmet.phi());
   const double rawmet_py = rawmet.pt() * std::sin(rawmet.phi());
   const double dpx = JMECorrector::kahan_sum(met_T1Smear_px_);

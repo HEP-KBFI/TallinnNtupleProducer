@@ -112,10 +112,6 @@ protected:
   double rho_;
   unsigned rle_;
   const EventInfo * info_;
-  std::vector<double> delta_x_T1Jet_;
-  std::vector<double> delta_y_T1Jet_;
-  std::vector<double> delta_x_rawJet_;
-  std::vector<double> delta_y_rawJet_;
   std::vector<double> met_T1Smear_px_;
   std::vector<double> met_T1Smear_py_;
 
