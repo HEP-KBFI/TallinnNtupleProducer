@@ -273,6 +273,18 @@ JMECorrector::correct(RecoMEt & met,
   double newmet_px = rawmet_px - dpx;
   double newmet_py = rawmet_py - dpy;
 
+  // Shift the energy of unclustered MET
+  if     (met_sys_ == kJetMET_UnclusteredEnUp)
+  {
+    newmet_px += met.unclEnDeltaX();
+    newmet_py += met.unclEnDeltaY();
+  }
+  else if(met_sys_ == kJetMET_UnclusteredEnDown)
+  {
+    newmet_px -= met.unclEnDeltaX();
+    newmet_py -= met.unclEnDeltaY();
+  }
+
   if(enable_phiModulationCorr_)
   {
     const std::pair<double, double> met_pxpyCorr = METXYCorr_Met_MetPhi(info_, recoVertex, era_);

@@ -247,15 +247,11 @@ void
 EventReader::set_central_or_shift(const std::string& central_or_shift)
 {
   eventInfoReader_->set_central_or_shift(central_or_shift);
-  const int hadTauPt_option = getHadTauPt_option(central_or_shift);
-  hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
+  hadTauReader_->setHadTauPt_central_or_shift(getHadTauPt_option(central_or_shift));
 
-  const int jetPt_option = getJet_option(central_or_shift, isMC_);
-  jmeCorrector_->set_jet_opt(jetPt_option);
-  const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-  jmeCorrector_->set_fatJet_opt(fatJetPt_option);
-  const int met_option = getMET_option(central_or_shift, isMC_);
-  jmeCorrector_->set_jet_opt(met_option);
+  jmeCorrector_->set_jet_opt(getJet_option(central_or_shift, isMC_));
+  jmeCorrector_->set_fatJet_opt(getFatJet_option(central_or_shift, isMC_));
+  jmeCorrector_->set_met_opt(getMET_option(central_or_shift, isMC_));
 
   current_central_or_shift_ = central_or_shift;
 }
