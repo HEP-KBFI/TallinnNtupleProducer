@@ -75,9 +75,6 @@ protected:
     double rawFactor;
   };
 
-  static double
-  kahan_sum(const std::vector<double> & input);
-
   double
   calibrate(const JetParams & jetParams,
             bool include_residual,
@@ -107,6 +104,7 @@ protected:
   int jet_sys_;
   int met_sys_;
   int fatJet_sys_;
+  int fatJet_corr_;
   bool enable_phiModulationCorr_;
 
   double rho_;

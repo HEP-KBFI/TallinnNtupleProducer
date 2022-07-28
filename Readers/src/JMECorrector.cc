@@ -2,10 +2,11 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"              // get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kJetMET_*
+#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"   // get_fatJet_corrections()
 #include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"  // LocalFileInPath
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"     // cmsException()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"            // EventInfo
-#include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"     // METXYCorr_Met_MetPhi
+#include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"     // METXYCorr_Met_MetPhi()
 
 #include "DataFormats/Math/interface/deltaR.h"                            // deltaR()
 
@@ -20,9 +21,29 @@
 
 namespace
 {
-  double square(double x)
+  double
+  square(double x)
   {
-    return x*x;
+    return x * x;
+  }
+
+  /**
+   * @brief https://en.wikipedia.org/wiki/Kahan_summation_algorithm
+   */
+  double
+  kahan_sum(const std::vector<double> & input)
+  {
+    double compensation = 0.;
+    return std::accumulate(
+      input.begin(), input.end(), 0.,
+      [compensation](double sum, double element) mutable -> double
+      {
+        const double y = element - compensation;
+        const double t = sum + y;
+        compensation = (t - sum) - y;
+        return t;
+      }
+    );
   }
 }
 
@@ -35,24 +56,7 @@ JMECorrector::JetParams::JetParams(const RecoJetAK4 & jet)
   , rawFactor(jet.rawFactor())
 {}
 
-/**
- * @brief https://en.wikipedia.org/wiki/Kahan_summation_algorithm
- */
-double
-JMECorrector::kahan_sum(const std::vector<double> & input)
-{
-  double compensation = 0.;
-  return std::accumulate(
-    input.begin(), input.end(), 0.,
-    [compensation](double sum, double element) mutable -> double
-    {
-      const double y = element - compensation;
-      const double t = sum + y;
-      compensation = (t - sum) - y;
-      return t;
-    }
-  );
-}
+
 
 JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   : isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
@@ -66,6 +70,7 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   , jet_sys_(kJetMET_central)
   , met_sys_(kJetMET_central)
   , fatJet_sys_(kFatJet_central)
+  , fatJet_corr_(0)
   , enable_phiModulationCorr_(cfg.getParameter<bool>("enable_phiModulationCorr"))
   , rho_(0.)
   , rle_(0)
@@ -78,7 +83,9 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   , fatJet_cset_(nullptr)
   , jmar_cset_(nullptr)
 {
-  // TODO read the following options from cfg: fatJet_corrections
+  const std::vector<std::string> fatJet_corrections_vstring = cfg.getParameter<std::vector<std::string>>("fatJet_corrections");
+  fatJet_corr_ = get_fatJet_corrections(fatJet_corrections_vstring);
+
   switch(era_)
   {
     case Era::k2016:      globalJECTag_ = "Summer16_07Aug2017_V11"; globalJERTag_ = "Summer16_25nsV1"; break;
@@ -205,13 +212,16 @@ JMECorrector::correct(RecoJetAK4 & jet,
 
   // Re-apply JEC on the muon-subtracted jet pT, so that the difference between
   // fully-corrected and L1-corrected jet pT can be propagated to MET.
+  // A brief overiview is given in:
+  // https://indico.cern.ch/event/854654/contributions/3594580/attachments/1924445/3184422/MET_type1corrections_nanoAODtools.pdf
+  // The choice of pT threshold in the following is explained in: https://github.com/cms-nanoAOD/nanoAOD-tools/pull/240
   const double jecL1 = calibrate(jet, false, 1);
   const double muon_pt = jet_rawpt * jet.muonSubtrFactor();
   const double jet_rawpt_noMu = jet_rawpt * (1 - jet.muonSubtrFactor());
   const double jet_pt_noMuL1L2L3 = jet_rawpt_noMu * jec;
-  const double jet_pt_L1L2L3 = jet_pt_noMuL1L2L3 + muon_pt;
-  if(jet_pt_L1L2L3 > 15.)
+  if(jet_pt_noMuL1L2L3 > 15.)
   {
+    const double jet_pt_L1L2L3 = jet_pt_noMuL1L2L3 + muon_pt;
     const double jet_pt_noMuL1 = jet_rawpt_noMu * jecL1;
     const double jet_pt_L1 = jet_pt_noMuL1 + muon_pt;
 
@@ -282,8 +292,8 @@ JMECorrector::correct(RecoMEt & met,
 {
   const double rawmet_px = rawmet.pt() * std::cos(rawmet.phi());
   const double rawmet_py = rawmet.pt() * std::sin(rawmet.phi());
-  const double dpx = JMECorrector::kahan_sum(met_T1Smear_px_);
-  const double dpy = JMECorrector::kahan_sum(met_T1Smear_py_);
+  const double dpx = ::kahan_sum(met_T1Smear_px_);
+  const double dpy = ::kahan_sum(met_T1Smear_py_);
   double newmet_px = rawmet_px - dpx;
   double newmet_py = rawmet_py - dpy;
 
@@ -306,7 +316,7 @@ JMECorrector::correct(RecoMEt & met,
     newmet_py += met_pxpyCorr.second;
   }
 
-  const double newmet_pt = std::sqrt(square(newmet_px) + square(newmet_py));
+  const double newmet_pt = std::sqrt(::square(newmet_px) + ::square(newmet_py));
   double newmet_phi = 0.;
   if     (newmet_px > 0) { newmet_phi = std::atan(newmet_py / newmet_px); }
   else if(newmet_px < 0) { newmet_phi = std::atan(newmet_py / newmet_px) + ((newmet_py > 0. ? +1. : -1.) * M_PI);  }
@@ -439,7 +449,7 @@ JMECorrector::smear(const Particle::LorentzVector & jet,
       generator_.seed(seed);
     }
     std::normal_distribution<> gaus(0, reso);
-    smearFactor += gaus(generator_) * std::sqrt(std::max(square(jer_sf) - 1, 0.));
+    smearFactor += gaus(generator_) * std::sqrt(std::max(::square(jer_sf) - 1, 0.));
   }
   return smearFactor > 0 ? smearFactor : 1.;
 }
