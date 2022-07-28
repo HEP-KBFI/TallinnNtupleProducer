@@ -81,7 +81,6 @@ enum
 
 enum
 {
-  kFatJet_central_nonNominal,     // for data and sync Ntuples; todo change to uncorrected
   kFatJet_central,                // for MC
   kFatJet_jesUp,                   kFatJet_jesDown, // total JES
   // regrouped JES
@@ -348,10 +347,6 @@ bool
 isValidJESsource(Era era,
                  int central_or_shift,
                  bool isFatJet = false);
-
-bool
-isValidFatJetAttribute(int central_or_shift,
-                       const std::string & attribute_name);
 
 int
 getBTagWeight_option(const std::string & central_or_shift);

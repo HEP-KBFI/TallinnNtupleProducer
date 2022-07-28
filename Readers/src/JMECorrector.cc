@@ -12,12 +12,11 @@
 
 #include <TString.h>                                                      // Form()
 
+#include <boost/algorithm/string/join.hpp>                                // boost::algorithm::join()
 #include <boost/algorithm/string/predicate.hpp>                           // boost::ends_with()
 #include <boost/algorithm/string/replace.hpp>                             // boost::replace_all_copy()
 
 #define _USE_MATH_DEFINES // M_PI
-
-// TODO verify that it is acceptable to use the gen jet associations that are already present in NanoAOD
 
 namespace
 {
@@ -50,13 +49,18 @@ namespace
 JMECorrector::JetParams::JetParams(const RecoJetAK4 & jet)
   : pt(jet.pt())
   , eta(jet.eta())
-  , phi(jet.phi())
-  , mass(jet.mass())
   , area(jet.area())
   , rawFactor(jet.rawFactor())
+  , algo(JetAlgo::AK4)
 {}
 
-
+JMECorrector::JetParams::JetParams(const RecoJetAK8 & jet)
+  : pt(jet.pt())
+  , eta(jet.eta())
+  , area(jet.area())
+  , rawFactor(jet.rawFactor())
+  , algo(JetAlgo::AK8)
+{}
 
 JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   : isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
@@ -77,11 +81,9 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   , info_(nullptr)
   , generator_(0)
   , use_deterministic_seed_(true)
-  , jet_cset_(nullptr)
-  , jet_reso_(nullptr)
-  , jet_jer_sf_(nullptr)
-  , fatJet_cset_(nullptr)
   , jmar_cset_(nullptr)
+  , jet_jerc_cset_(nullptr)
+  , fatJet_jerc_cset_(nullptr)
 {
   const std::vector<std::string> fatJet_corrections_vstring = cfg.getParameter<std::vector<std::string>>("fatJet_corrections");
   fatJet_corr_ = get_fatJet_corrections(fatJet_corrections_vstring);
@@ -100,19 +102,26 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   const std::string jetCorrectionSetFile = LocalFileInPath(Form(
     "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jet_jerc.json.gz", era_str_.data()
   )).fullPath();
-  jet_cset_ = correction::CorrectionSet::from_file(jetCorrectionSetFile);
+  jet_jerc_cset_ = correction::CorrectionSet::from_file(jetCorrectionSetFile);
+  const std::string fatJetCorrectionSetFile = LocalFileInPath(Form(
+    "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/fatJet_jerc.json.gz", era_str_.data()
+  )).fullPath();
+  fatJet_jerc_cset_ = correction::CorrectionSet::from_file(fatJetCorrectionSetFile);
 
   // we could benefit from compound corrections here, but for now let's stack them manually
   const std::string source = isMC_ ? "MC" : "DATA";
-  jet_compound_ = {
-    jet_cset_->at(Form("%s_%s_L1FastJet_%s",    globalJECTag_.data(), source.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_%s_L2Relative_%s",   globalJECTag_.data(), source.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_%s_L3Absolute_%s",   globalJECTag_.data(), source.data(), ak4_jetType_.data())),
-    jet_cset_->at(Form("%s_%s_L2L3Residual_%s", globalJECTag_.data(), source.data(), ak4_jetType_.data())),
-  };
+  for(const std::string & correction_level: { "L1FastJet", "L2Relative", "L3Absolute", "L2L3Residual" })
+  {
+    jec_compound_[JetAlgo::AK4].push_back(
+      jet_jerc_cset_->at(boost::algorithm::join(std::vector<std::string>{ globalJECTag_, source, correction_level, ak4_jetType_ }, "_"))
+    );
+    jec_compound_[JetAlgo::AK8].push_back(
+      fatJet_jerc_cset_->at(boost::algorithm::join(std::vector<std::string>{ globalJECTag_, source, correction_level, ak8_jetType_ }, "_"))
+    );
+  }
   if(isMC_)
   {
-    jet_uncs_[kJetMET_jesUp] = jet_cset_->at(Form("%s_MC_Total_%s", globalJECTag_.data(), ak4_jetType_.data()));
+    jec_uncs_[JetAlgo::AK4][kJetMET_jesUp] = jet_jerc_cset_->at(Form("%s_MC_Total_%s", globalJECTag_.data(), ak4_jetType_.data()));
     for(const auto & kv: jesSplitAK4SysMap)
     {
       if(kv.second % 2 == 0 || kv.second >= kJetMET_jesHEMDown)
@@ -120,12 +129,27 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
         continue;
       }
       assert(boost::ends_with(kv.first, "Up"));
+      // 12 = length of string "CMS_ttHl_JES"; +2 = length of string "Up"
       const std::string sys_opt = boost::replace_all_copy(kv.first.substr(12, kv.first.size() - 14), "Era", era_str_);
-      jet_uncs_[kv.second] = jet_cset_->at(Form("%s_MC_%s_%s", globalJECTag_.data(), sys_opt.data(), ak4_jetType_.data()));
+      jec_uncs_[JetAlgo::AK4][kv.second] = jet_jerc_cset_->at(Form("%s_MC_%s_%s", globalJECTag_.data(), sys_opt.data(), ak4_jetType_.data()));
     }
+    jet_reso_[JetAlgo::AK4] = jet_jerc_cset_->at(Form("%s_MC_PtResolution_%s", globalJERTag_.data(), ak4_jetType_.data()));
+    jet_jer_sf_[JetAlgo::AK4] = jet_jerc_cset_->at(Form("%s_MC_ScaleFactor_%s", globalJERTag_.data(), ak4_jetType_.data()));
 
-    jet_reso_ = jet_cset_->at(Form("%s_MC_PtResolution_%s", globalJERTag_.data(), ak4_jetType_.data()));
-    jet_jer_sf_ = jet_cset_->at(Form("%s_MC_ScaleFactor_%s", globalJERTag_.data(), ak4_jetType_.data()));
+    jec_uncs_[JetAlgo::AK8][kFatJet_jesUp] = fatJet_jerc_cset_->at(Form("%s_MC_Total_%s", globalJECTag_.data(), ak8_jetType_.data()));
+    for(const auto & kv: jesSplitAK8SysMap)
+    {
+      if(kv.second % 2 == 0 || kv.second >= kFatJet_jesHEMDown)
+      {
+        continue;
+      }
+      assert(boost::ends_with(kv.first, "Up"));
+      // 12 = length of string "CMS_ttHl_JES"; +2 = length of string "Up"
+      const std::string sys_opt = boost::replace_all_copy(kv.first.substr(12, kv.first.size() - 14), "Era", era_str_);
+      jec_uncs_[JetAlgo::AK8][kv.second] = fatJet_jerc_cset_->at(Form("%s_MC_%s_%s", globalJECTag_.data(), sys_opt.data(), ak8_jetType_.data()));
+    }
+    jet_reso_[JetAlgo::AK8] = fatJet_jerc_cset_->at(Form("%s_MC_PtResolution_%s", globalJERTag_.data(), ak8_jetType_.data()));
+    jet_jer_sf_[JetAlgo::AK8] = fatJet_jerc_cset_->at(Form("%s_MC_ScaleFactor_%s", globalJERTag_.data(), ak8_jetType_.data()));
   }
   else
   {
@@ -155,21 +179,13 @@ JMECorrector::reset()
 }
 
 void
-JMECorrector::set_jet_opt(int central_or_shift)
+JMECorrector::set_opt(int jet_opt,
+                      int met_opt,
+                      int fatJet_opt)
 {
-  jet_sys_ = central_or_shift;
-}
-
-void
-JMECorrector::set_met_opt(int central_or_shift)
-{
-  met_sys_ = central_or_shift;
-}
-
-void
-JMECorrector::set_fatJet_opt(int central_or_shift)
-{
-  fatJet_sys_ = central_or_shift;
+  jet_sys_ = jet_opt;
+  met_sys_ = met_opt;
+  fatJet_sys_ = fatJet_opt;
 }
 
 void
@@ -199,13 +215,13 @@ JMECorrector::correct(RecoJetAK4 & jet,
       genJet_p4 = genJets.at(genJetIdx)->p4();
     }
 
-    jer = smear(jet_p4, genJet_p4);
+    jer = smear(jet_p4, genJet_p4, JetAlgo::AK4);
   }
   const double jet_pt_nom = jet_pt * jer;
   const double jet_mass_nom = jet_mass * jer;
 
   // Propagate JEC uncertainties to the smeared jets
-  const double delta = jec_unc(jet_pt_nom, jet.eta(), jet.phi(), jet.jetId());
+  const double delta = jec_unc(jet_pt_nom, jet.eta(), jet.phi(), jet.jetId(), JetAlgo::AK4);
   const double delta_shift = 1 + delta;
   const double jet_pt_shifted = jet_pt_nom * delta_shift;
   const double jet_mass_shifted = jet_mass_nom * delta_shift;
@@ -219,22 +235,16 @@ JMECorrector::correct(RecoJetAK4 & jet,
   const double muon_pt = jet_rawpt * jet.muonSubtrFactor();
   const double jet_rawpt_noMu = jet_rawpt * (1 - jet.muonSubtrFactor());
   const double jet_pt_noMuL1L2L3 = jet_rawpt_noMu * jec;
-  if(jet_pt_noMuL1L2L3 > 15.)
+  if(jet_pt_noMuL1L2L3 > 15. && (jet.chEmEF() + jet.neEmEF()) < 0.9)
   {
     const double jet_pt_L1L2L3 = jet_pt_noMuL1L2L3 + muon_pt;
     const double jet_pt_noMuL1 = jet_rawpt_noMu * jecL1;
     const double jet_pt_L1 = jet_pt_noMuL1 + muon_pt;
 
     const double jet_phi = jet.phi();
-    const double jet_cosPhi = std::cos(jet_phi);
-    const double jet_sinPhi = std::sin(jet_phi);
-
-    // Save the delta to propagate JES and JER corrections with uncertainties to MET
-    if((jet.chEmEF() + jet.neEmEF()) < 0.9)
-    {
-      met_T1Smear_px_.push_back((jet_pt_L1L2L3 * (jer + delta) - jet_pt_L1) * jet_cosPhi);
-      met_T1Smear_py_.push_back((jet_pt_L1L2L3 * (jer + delta) - jet_pt_L1) * jet_sinPhi);
-    }
+    const double jet_pt_diff = jet_pt_L1L2L3 * (jer + delta) - jet_pt_L1;
+    met_T1Smear_px_.push_back(jet_pt_diff * std::cos(jet_phi));
+    met_T1Smear_py_.push_back(jet_pt_diff * std::sin(jet_phi));
   }
 
   jet.set_ptEtaPhiMass(jet_pt_shifted, jet.eta(), jet.phi(), jet_mass_shifted);
@@ -282,7 +292,36 @@ JMECorrector::correct(RecoJetAK8 & jet,
                       const std::vector<const Particle *> & genJetsAK8,
                       const std::vector<const Particle *> & genSubJetsAK8) const
 {
-  //
+  // Recompute jet pT and mass by re-applying JEC
+  const double jec = reapply_JEC_ ? calibrate(jet, true, 4) : 1.;
+  const double jet_pt = jet.pt() * jec;
+  const double jet_mass = jet.mass() * jec;
+
+  // Smear the jets
+  double jer = 1.;
+  if(apply_smearing_)
+  {
+    const Particle::LorentzVector jet_p4 { jet_pt, jet.eta(), jet.phi(), jet_mass };
+
+    const int genJetIdx = jet.genJetAK8Idx();
+    Particle::LorentzVector genJet_p4 {0., 0., 0., 0.};
+    if(genJetIdx >= 0 && genJetIdx < static_cast<int>(genJetsAK8.size()))
+    {
+      genJet_p4 = genJetsAK8.at(genJetIdx)->p4();
+    }
+
+    jer = smear(jet_p4, genJet_p4, JetAlgo::AK8);
+  }
+  const double jet_pt_nom = jet_pt * jer;
+  const double jet_mass_nom = jet_mass * jer;
+
+  // Propagate JEC uncertainties to the smeared jets
+  const double delta = jec_unc(jet_pt_nom, jet.eta(), jet.phi(), jet.jetId(), JetAlgo::AK8);
+  const double delta_shift = 1 + delta;
+  const double jet_pt_shifted = jet_pt_nom * delta_shift;
+  const double jet_mass_shifted = jet_mass_nom * delta_shift;
+
+  jet.set_ptEtaPhiMass(jet_pt_shifted, jet.eta(), jet.phi(), jet_mass_shifted);
 }
 
 void
@@ -330,13 +369,14 @@ JMECorrector::calibrate(const JetParams & jetParams,
                         bool include_residual,
                         int max_level) const
 {
+  const std::vector<correction::Correction::Ref> & compound_corrections = jec_compound_.at(jetParams.algo);
   const double raw = 1 - jetParams.rawFactor;
   double corr = 1.;
   for(int level = 0; level < max_level; ++level)
   {
     corr *= level ?
-      jet_compound_.at(level)->evaluate({ jetParams.eta, jetParams.pt * raw }) :
-      jet_compound_.at(level)->evaluate({ jetParams.area, jetParams.eta, jetParams.pt * raw, rho_ })
+      compound_corrections.at(level)->evaluate({ jetParams.eta, jetParams.pt * raw }) :
+      compound_corrections.at(level)->evaluate({ jetParams.area, jetParams.eta, jetParams.pt * raw, rho_ })
     ;
   }
   return corr <= 0. ? 1. : corr * raw;
@@ -346,28 +386,33 @@ double
 JMECorrector::jec_unc(double jet_pt,
                       double jet_eta,
                       double jet_phi,
-                      int jet_id) const
+                      int jet_id,
+                      JetAlgo jet_algo) const
 {
   double delta = 0.;
-  if(jet_sys_ != kJetMET_central)
+  if((jet_sys_    != kJetMET_central && jet_algo == JetAlgo::AK4) ||
+     (fatJet_sys_ != kFatJet_central && jet_algo == JetAlgo::AK8)  )
   {
     assert(isMC_);
-    if(jet_sys_ < kJetMET_jesHEMDown)
+    if((jet_sys_    < kJetMET_jesHEMDown && jet_algo == JetAlgo::AK4) ||
+       (fatJet_sys_ < kFatJet_jesHEMDown && jet_algo == JetAlgo::AK8)  )
     {
-      const bool is_up = jet_sys_ % 2 == 1;
-      const int key = is_up ? jet_sys_ : (jet_sys_ - 1);
-      delta = jet_uncs_.at(key)->evaluate({ jet_eta, jet_pt });
+      const int sys_choice = jet_algo == JetAlgo::AK4 ? jet_sys_ : fatJet_sys_;
+      const bool is_up = sys_choice % 2 == 1;
+      const int key = is_up ? sys_choice : (sys_choice - 1);
+      delta = jec_uncs_.at(jet_algo).at(key)->evaluate({ jet_eta, jet_pt });
       if(! is_up)
       {
         delta *= -1;
       }
     }
-    else if(jet_sys_ == kJetMET_jesHEMDown)
+    else if((jet_sys_    == kJetMET_jesHEMDown && jet_algo == JetAlgo::AK4) ||
+            (fatJet_sys_ == kFatJet_jesHEMDown && jet_algo == JetAlgo::AK8)  )
     {
       if(era_ != Era::k2018)
       {
         throw cmsException(this, __func__, __LINE__)
-          << "Invalid combination of JES uncertainty and era: " << jet_sys_ << " and " << era_str_
+          << "Invalid combination of JES uncertainty and era: " << jet_sys_ << " / " << fatJet_sys_ << " and " << era_str_
         ;
       }
       if(jet_pt > 15. && jet_id & 2 && jet_phi > -1.57 && jet_phi < -0.87)
@@ -389,10 +434,12 @@ JMECorrector::jec_unc(double jet_pt,
 
 double
 JMECorrector::smear(const Particle::LorentzVector & jet,
-                    const Particle::LorentzVector & genJet)
+                    const Particle::LorentzVector & genJet,
+                    JetAlgo jet_algo) const
 {
   std::string sf_sys = "nom";
-  if(jet_sys_ >= kJetMET_jerUp && jet_sys_ <= kJetMET_jerForwardHighPtDown)
+  if((jet_sys_    >= kJetMET_jerUp && jet_sys_    <= kJetMET_jerForwardHighPtDown && jet_algo == JetAlgo::AK4) ||
+     (fatJet_sys_ >= kFatJet_jerUp && fatJet_sys_ <= kFatJet_jerDown              && jet_algo == JetAlgo::AK8)  )
   {
     const bool is_barrel = std::fabs(jet.Eta()) < 1.93;
     const bool is_endcap1 = ! is_barrel && std::fabs(jet.Eta()) < 2.5;
@@ -400,39 +447,64 @@ JMECorrector::smear(const Particle::LorentzVector & jet,
     const bool is_forward = ! is_barrel && ! is_endcap1 && ! is_endcap2;
     const bool is_lowpt = jet.Pt() < 50.;
 
-    if     (jet_sys_ == kJetMET_jerUp                                           ||
-           (jet_sys_ == kJetMET_jerBarrelUp        && is_barrel               ) ||
-           (jet_sys_ == kJetMET_jerEndcap1Up       && is_endcap1              ) ||
-           (jet_sys_ == kJetMET_jerEndcap2LowPtUp  && is_endcap2 &&   is_lowpt) ||
-           (jet_sys_ == kJetMET_jerEndcap2HighPtUp && is_endcap2 && ! is_lowpt) ||
-           (jet_sys_ == kJetMET_jerForwardLowPtUp  && is_forward &&   is_lowpt) ||
-           (jet_sys_ == kJetMET_jerForwardHighPtUp && is_forward && ! is_lowpt)  )
+    if     (
+             (
+               jet_algo == JetAlgo::AK4 &&
+               (
+                  jet_sys_ == kJetMET_jerUp                                           ||
+                 (jet_sys_ == kJetMET_jerBarrelUp        && is_barrel               ) ||
+                 (jet_sys_ == kJetMET_jerEndcap1Up       && is_endcap1              ) ||
+                 (jet_sys_ == kJetMET_jerEndcap2LowPtUp  && is_endcap2 &&   is_lowpt) ||
+                 (jet_sys_ == kJetMET_jerEndcap2HighPtUp && is_endcap2 && ! is_lowpt) ||
+                 (jet_sys_ == kJetMET_jerForwardLowPtUp  && is_forward &&   is_lowpt) ||
+                 (jet_sys_ == kJetMET_jerForwardHighPtUp && is_forward && ! is_lowpt)
+               )
+             ) || (
+               jet_algo == JetAlgo::AK8 &&
+               (
+                 fatJet_sys_ == kFatJet_jerUp
+               )
+             )
+           )
     {
       sf_sys = "up";
     }
-    else if(jet_sys_ == kJetMET_jerDown                                           ||
-           (jet_sys_ == kJetMET_jerBarrelDown        && is_barrel               ) ||
-           (jet_sys_ == kJetMET_jerEndcap1Down       && is_endcap1              ) ||
-           (jet_sys_ == kJetMET_jerEndcap2LowPtDown  && is_endcap2 &&   is_lowpt) ||
-           (jet_sys_ == kJetMET_jerEndcap2HighPtDown && is_endcap2 && ! is_lowpt) ||
-           (jet_sys_ == kJetMET_jerForwardLowPtDown  && is_forward &&   is_lowpt) ||
-           (jet_sys_ == kJetMET_jerForwardHighPtDown && is_forward && ! is_lowpt)  )
+    else if(
+             (
+               jet_algo == JetAlgo::AK4 &&
+               (
+                 jet_sys_ == kJetMET_jerDown                                            ||
+                 (jet_sys_ == kJetMET_jerBarrelDown        && is_barrel               ) ||
+                 (jet_sys_ == kJetMET_jerEndcap1Down       && is_endcap1              ) ||
+                 (jet_sys_ == kJetMET_jerEndcap2LowPtDown  && is_endcap2 &&   is_lowpt) ||
+                 (jet_sys_ == kJetMET_jerEndcap2HighPtDown && is_endcap2 && ! is_lowpt) ||
+                 (jet_sys_ == kJetMET_jerForwardLowPtDown  && is_forward &&   is_lowpt) ||
+                 (jet_sys_ == kJetMET_jerForwardHighPtDown && is_forward && ! is_lowpt)
+               )
+             ) || (
+               jet_algo == JetAlgo::AK8 &&
+               (
+                 fatJet_sys_ == kFatJet_jerDown
+               )
+             )
+           )
     {
       sf_sys = "down";
     }
   }
+  const correction::Correction::Ref & sf = jet_jer_sf_.at(jet_algo);
   const double jer_sf =
     era_ == Era::k2018 ?
-    jet_jer_sf_->evaluate({ jet.Eta(), jet.Pt(), sf_sys }) :
-    jet_jer_sf_->evaluate({ jet.Eta(), sf_sys })
+    sf->evaluate({ jet.Eta(), jet.Pt(), sf_sys }) :
+    sf->evaluate({ jet.Eta(), sf_sys })
   ;
 
-  const double reso = jet_reso_->evaluate({ jet.Eta(), jet.Pt(), rho_ });
+  const double sigma = jet_reso_.at(jet_algo)->evaluate({ jet.Eta(), jet.Pt(), rho_ });
   const double dPt = (jet.Pt() - genJet.Pt()) / jet.Pt();
   const bool has_genJet = genJet.Pt() > 0.;
 
   double smearFactor = 1.;
-  if(has_genJet && std::fabs(dPt) < 3 * reso && ::deltaR(jet.Eta(), jet.Phi(), genJet.Eta(), genJet.Phi()) < 0.2)
+  if(has_genJet && std::fabs(dPt) < 3 * sigma && ::deltaR(jet.Eta(), jet.Phi(), genJet.Eta(), genJet.Phi()) < 0.2)
   {
     // additional constraints on the selected gen jet are documented in:
     // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
@@ -448,7 +520,7 @@ JMECorrector::smear(const Particle::LorentzVector & jet,
       const unsigned seed = static_cast<unsigned>(jet.Eta() / 0.01) + rle_;
       generator_.seed(seed);
     }
-    std::normal_distribution<> gaus(0, reso);
+    std::normal_distribution<> gaus(0, sigma);
     smearFactor += gaus(generator_) * std::sqrt(std::max(::square(jer_sf) - 1, 0.));
   }
   return smearFactor > 0 ? smearFactor : 1.;

@@ -444,22 +444,6 @@ isValidJESsource(Era era,
   return true;
 }
 
-bool
-isValidFatJetAttribute(int central_or_shift,
-                       const std::string & attribute_name)
-{
-  std::vector<std::string> attribute_whitelist = { "mass", "msoftdrop" };
-  if(central_or_shift >= kFatJet_central_nonNominal && central_or_shift < kFatJet_jmsUp)
-  {
-    attribute_whitelist.push_back("pt");
-  }
-  if(central_or_shift >= kFatJet_jerUp || central_or_shift == kFatJet_central)
-  {
-    attribute_whitelist.push_back("msoftdrop_tau21DDT");
-  }
-  return std::find(attribute_whitelist.cbegin(), attribute_whitelist.cend(), attribute_name) != attribute_whitelist.cend();
-}
-
 int
 getBTagWeight_option(const std::string & central_or_shift)
 {
@@ -489,12 +473,15 @@ int
 getJet_option(const std::string & central_or_shift,
               bool isMC)
 {
-  for(const auto & map: { jesAK4SysMap, jesSplitAK4SysMap, jerAK4SysMap, jerSplitAK4SysMap })
+  if(isMC)
   {
-    const auto kv = map.find(central_or_shift);
-    if(kv != map.end())
+    for(const auto & map: { jesAK4SysMap, jesSplitAK4SysMap, jerAK4SysMap, jerSplitAK4SysMap })
     {
-      return kv->second;
+      const auto kv = map.find(central_or_shift);
+      if(kv != map.end())
+      {
+        return kv->second;
+      }
     }
   }
   return kJetMET_central;
@@ -529,9 +516,8 @@ getFatJet_option(const std::string & central_or_shift,
         return kv->second;
       }
     }
-    return kFatJet_central;
   }
-  return kFatJet_central_nonNominal;
+  return kFatJet_central;
 }
 
 int

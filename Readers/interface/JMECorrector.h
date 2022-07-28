@@ -1,16 +1,17 @@
 #ifndef TallinnNtupleProducer_Readers_JMECorrector_h
 #define TallinnNtupleProducer_Readers_JMECorrector_h
 
-#include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"   // RecoJetAK4
-#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h" // CorrT1METJet
-#include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"   // RecoJetAK8
-#include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"      // RecoMEt
+#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h" // EnumClassHash
+#include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"     // RecoJetAK4
+#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h"   // CorrT1METJet
+#include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"     // RecoJetAK8
+#include "TallinnNtupleProducer/Objects/interface/RecoMEt.h"        // RecoMEt
 
-#include "correction.h"                                           // correction::CorrectionSet, correction::Correction::Ref
+#include "correction.h"                                             // correction::CorrectionSet, correction::Correction::Ref
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"           // edm::ParameterSet
+#include "FWCore/ParameterSet/interface/ParameterSet.h"             // edm::ParameterSet
 
-#include <random>                                                 // std::random_device, std::mt19937
+#include <random>                                                   // std::random_device, std::mt19937
 
 // forward declarations
 class EventInfo;
@@ -31,13 +32,9 @@ public:
   reset();
 
   void
-  set_jet_opt(int central_or_shift);
-
-  void
-  set_met_opt(int central_or_shift);
-
-  void
-  set_fatJet_opt(int central_or_shift);
+  set_opt(int jet_opt,
+          int met_opt,
+          int fatJet_opt);
 
   void
   correct(RecoJetAK4 & jet,
@@ -59,20 +56,23 @@ public:
           const GenMEt & rawmet,
           const RecoVertex * const recoVertex) const;
 
-  // TODO set run/lumi/evt number for reproducible smearing
-
 protected:
+  enum class JetAlgo {
+    AK4,
+    AK8,
+  };
+
   struct JetParams
   {
     JetParams() = default;
     JetParams(const RecoJetAK4 & jet);
+    JetParams(const RecoJetAK8 & jet);
 
     double pt;
     double eta;
-    double phi;
-    double mass;
     double area;
     double rawFactor;
+    JetAlgo algo;
   };
 
   double
@@ -84,11 +84,13 @@ protected:
   jec_unc(double jet_pt,
           double jet_eta,
           double jet_phi,
-          int jet_id) const;
+          int jet_id,
+          JetAlgo jet_algo) const;
 
   double
   smear(const Particle::LorentzVector & jet,
-        const Particle::LorentzVector & genJet);
+        const Particle::LorentzVector & genJet,
+        JetAlgo jet_algo) const;
 
   bool isDEBUG_;
   bool isMC_;
@@ -113,17 +115,17 @@ protected:
   std::vector<double> met_T1Smear_px_;
   std::vector<double> met_T1Smear_py_;
 
-  std::mt19937 generator_;
+  mutable std::mt19937 generator_;
   bool use_deterministic_seed_;
 
-  std::unique_ptr<correction::CorrectionSet> jet_cset_;
-  std::vector<correction::Correction::Ref> jet_compound_;
-  std::map<int, correction::Correction::Ref> jet_uncs_;
-  correction::Correction::Ref jet_reso_;
-  correction::Correction::Ref jet_jer_sf_;
-
-  std::unique_ptr<correction::CorrectionSet> fatJet_cset_;
   std::unique_ptr<correction::CorrectionSet> jmar_cset_;
+  std::unique_ptr<correction::CorrectionSet> jet_jerc_cset_;
+  std::unique_ptr<correction::CorrectionSet> fatJet_jerc_cset_;
+
+  std::map<JetAlgo, std::vector<correction::Correction::Ref>> jec_compound_;
+  std::map<JetAlgo, std::map<int, correction::Correction::Ref>> jec_uncs_;
+  std::map<JetAlgo, correction::Correction::Ref> jet_reso_;
+  std::map<JetAlgo, correction::Correction::Ref> jet_jer_sf_;
 };
 
 #endif // TallinnNtupleProducer_Readers_JMECorrector_h

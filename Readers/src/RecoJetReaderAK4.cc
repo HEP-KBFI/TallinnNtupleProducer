@@ -244,7 +244,6 @@ RecoJetReaderAK4::get_supported_systematics(const edm::ParameterSet & cfg)
   if(supported_systematics.empty())
   {
     merge_systematic_shifts(supported_systematics, map_keys(jesAK4SysMap));
-    merge_systematic_shifts(supported_systematics, map_keys(jerAK4SysMap));
     const bool split_jes = cfg.getParameter<bool>("split_jes");
     if(split_jes)
     {
@@ -265,10 +264,13 @@ RecoJetReaderAK4::get_supported_systematics(const edm::ParameterSet & cfg)
       }
       merge_systematic_shifts(supported_systematics, jesSplitAK4SysStrs);
     }
-    const bool split_jer = cfg.getParameter<bool>("split_jer");
-    if(split_jer)
+    if(cfg.getParameter<bool>("apply_smearing"))
     {
-      merge_systematic_shifts(supported_systematics, map_keys(jerSplitAK4SysMap));
+      merge_systematic_shifts(supported_systematics, map_keys(jerAK4SysMap));
+      if(cfg.getParameter<bool>("split_jer"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(jerSplitAK4SysMap));
+      }
     }
   }
   return supported_systematics;
