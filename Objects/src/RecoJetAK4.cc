@@ -3,6 +3,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"     // as_integer()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag, pileupJetID
+#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h"       // CorrT1METJet
 
 RecoJetAK4::RecoJetAK4(const GenJet & jet,
                        Float_t BtagCSV,
@@ -34,6 +35,14 @@ RecoJetAK4::RecoJetAK4(const GenJet & jet,
   , btag_(btag)
   , isBJet_loose_(false)
   , isBJet_medium_(false)
+{}
+
+RecoJetAK4::RecoJetAK4(const CorrT1METJet & jet,
+                       Int_t genJetIdx)
+  : RecoJetAK4(
+      { jet.pt(), jet.eta(), jet.phi(), jet.mass() },
+      -1., -1., -1., -1., 0, -1, 0., jet.area(), 0., 0., jet.muonSubtrFactor(), -1, genJetIdx, Btag::kDeepJet
+    )
 {}
 
 RecoJetAK4::~RecoJetAK4()

@@ -415,6 +415,7 @@ EventReader::read() const
   if ( jetAK4_needsUpdate )
   {
     event_.jetsAK4_ = jetReaderAK4_->read();
+    event_.jet_ptrsAK4_ = convert_to_ptrs(event_.jetsAK4_);
 
     if ( isMC_ )
     {
@@ -433,11 +434,10 @@ EventReader::read() const
       {
         // We're actually not correcting these jets, we just need to store deltas and propagate them to MET, hence the const qualifier.
         // This is also to avoid re-reading the collection every time the AK4 jet systematics changes.
-        jmeCorrector_->correct(jet, event_.genJetPtrs_);
+        jmeCorrector_->correct(jet, event_.genJetPtrs_, event_.jet_ptrsAK4_);
       }
     }
 
-    event_.jet_ptrsAK4_ = convert_to_ptrs(event_.jetsAK4_);
     event_.selJetsUncleanedAK4_ = jetSelectorAK4_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
     event_.selJetsUncleanedAK4_btagLoose_ = jetSelectorAK4_btagLoose_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
     event_.selJetsUncleanedAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);

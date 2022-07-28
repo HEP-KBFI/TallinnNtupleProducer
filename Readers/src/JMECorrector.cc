@@ -171,14 +171,15 @@ JMECorrector::set_fatJet_opt(int central_or_shift)
 
 void
 JMECorrector::correct(RecoJetAK4 & jet,
-                      const std::vector<const GenJet *> & genJets)
+                      const std::vector<const GenJet *> & genJets,
+                      bool force_recalibration)
 {
   // Compute raw jet pT
   const double raw = 1 - jet.rawFactor();
   const double jet_rawpt = jet.pt() * raw;
 
   // Recompute jet pT and mass by re-applying JEC
-  const double jec = reapply_JEC_ ? calibrate(jet, true, 4) : 1.;
+  const double jec = (reapply_JEC_ || force_recalibration) ? calibrate(jet, true, 4) : 1.;
   const double jet_pt = jet.pt() * jec;
   const double jet_mass = jet.mass() * jec;
 
@@ -247,9 +248,39 @@ JMECorrector::correct(RecoJetAK4 & jet,
 
 void
 JMECorrector::correct(const CorrT1METJet & jet,
-                      const std::vector<const GenJet *> & genJets)
+                      const std::vector<const GenJet *> & genJets,
+                      const std::vector<const RecoJetAK4 *> & recoJets)
 {
-  //
+  // Collect the indices of gen jets that are matched to reco jets
+  std::vector<int> genJetIdxs;
+  std::transform(
+    recoJets.begin(), recoJets.begin(), std::back_inserter(genJetIdxs),
+    [](const RecoJetAK4 * recoJet) -> int
+    {
+      return recoJet->genJetIdx();
+    }
+  );
+  std::sort(genJetIdxs.begin(), genJetIdxs.end());
+
+  int genJetIdx_best = -1;
+  double dR_best = 1.e+3;
+  for(std::size_t genJetIdx = 0; genJetIdx < genJets.size(); ++genJetIdx)
+  {
+    if(std::find(genJetIdxs.begin(), genJetIdxs.end(), genJetIdx) != genJetIdxs.end())
+    {
+      // Gen jet has already been matched to a RecoJetAK4
+      continue;
+    }
+    const GenJet * genJet = genJets.at(genJetIdx);
+    const double dR = genJet->deltaR(jet);
+    if(dR < dR_best)
+    {
+      dR_best = dR;
+      genJetIdx_best = genJetIdx;
+    }
+  }
+  RecoJetAK4 jet_copy(jet, genJetIdx_best);
+  return correct(jet_copy, genJets, true);
 }
 
 void

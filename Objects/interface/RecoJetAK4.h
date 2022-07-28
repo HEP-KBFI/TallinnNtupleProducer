@@ -14,6 +14,8 @@
 
 #include <map>                                                   // std::map
 
+// forward declarations
+class CorrT1METJet;
 enum class Btag;
 enum class pileupJetID;
 
@@ -37,6 +39,8 @@ class RecoJetAK4
              UInt_t idx,
              Int_t genJetIdx,
              Btag btag);
+  RecoJetAK4(const CorrT1METJet & jet,
+             Int_t genJetIdx);
 
   virtual ~RecoJetAK4();
 

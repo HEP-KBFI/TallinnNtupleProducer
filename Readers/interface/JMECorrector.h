@@ -41,11 +41,13 @@ public:
 
   void
   correct(RecoJetAK4 & jet,
-          const std::vector<const GenJet *> & genJets);
+          const std::vector<const GenJet *> & genJets,
+          bool force_recalibration = false);
 
   void
   correct(const CorrT1METJet & jet,
-          const std::vector<const GenJet *> & genJets);
+          const std::vector<const GenJet *> & genJets,
+          const std::vector<const RecoJetAK4 *> & recoJets);
 
   void
   correct(RecoJetAK8 & jet,
