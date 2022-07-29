@@ -37,6 +37,9 @@ class RecoJetAK8
 
   virtual ~RecoJetAK8();
 
+  void
+  set_msoftdrop(double msoftdrop);
+
   /**
    * @brief Funtions to access data-members
    * @return Values of data-members

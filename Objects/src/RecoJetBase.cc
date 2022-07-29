@@ -18,9 +18,9 @@ RecoJetBase::~RecoJetBase()
 
 void
 RecoJetBase::set_ptEtaPhiMass(Double_t pt,
-                 Double_t eta,
-                 Double_t phi,
-                 Double_t mass)
+                              Double_t eta,
+                              Double_t phi,
+                              Double_t mass)
 {
   // recompute the new raw factor r' by equating
   // pT(raw) = pT(old) * (1 - r) with

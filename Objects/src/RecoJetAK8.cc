@@ -29,6 +29,12 @@ RecoJetAK8::RecoJetAK8(const GenJet & jet,
 RecoJetAK8::~RecoJetAK8()
 {}
 
+void
+RecoJetAK8::set_msoftdrop(double msoftdrop)
+{
+  msoftdrop_ = msoftdrop;
+}
+
 Float_t
 RecoJetAK8::msoftdrop() const
 {

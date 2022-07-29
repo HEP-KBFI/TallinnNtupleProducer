@@ -44,6 +44,20 @@ namespace
       }
     );
   }
+
+  double
+  poly(const std::vector<double> & coefs,
+       double x)
+  {
+    double result = 0.;
+    double factor = 1.;
+    for(double coef: coefs)
+    {
+      result += factor * coef;
+      factor *= x;
+    }
+    return result;
+  }
 }
 
 JMECorrector::JetParams::JetParams(const RecoJetAK4 & jet)
@@ -87,6 +101,48 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
 {
   const std::vector<std::string> fatJet_corrections_vstring = cfg.getParameter<std::vector<std::string>>("fatJet_corrections");
   fatJet_corr_ = get_fatJet_corrections(fatJet_corrections_vstring);
+  if(fatJet_corr_)
+  {
+    const std::string jmarCorrectionSetFile = LocalFileInPath(Form(
+      "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jmar.json.gz", era_str_.data()
+    )).fullPath();
+    jmar_cset_ = correction::CorrectionSet::from_file(jmarCorrectionSetFile);
+    jmar_sf_ = {
+      { kFatJetJMS, jmar_cset_->at("JMS") },
+    };
+
+    // TODO the JMR SF and uncertainties should be loaded from JMAR JSON file if possible
+    if(fatJet_corr_ & kFatJetJMR)
+    {
+      if(era_ == Era::k2016)
+      {
+        // https://twiki.cern.ch/twiki/bin/view/CMS/JetWtagging?rev=79#PUPPI_soft_drop_tau21_tau21_0_35
+        jmr_sf_ = {
+          { kFatJet_central, 1.  },
+          { kFatJet_jmrUp,   1.2 },
+          { kFatJet_jmrDown, 0.8 },
+        };
+      }
+      else
+      {
+        // https://twiki.cern.ch/twiki/bin/view/CMS/JetWtagging?rev=79#tau21_0_45_HP_0_45_tau21_0_7_AN1
+        jmr_sf_ = {
+          { kFatJet_central, 1.09 },
+          { kFatJet_jmrUp,   1.14 },
+          { kFatJet_jmrDown, 1.04 },
+        };
+      }
+      // https://github.com/thaarres/PuppiSoftdropMassCorr/raw/master/weights/puppiSoftdropResol.root
+      jmr_sd_reso_ = {
+        { true,  { 1.0927351, 4.1426227e-05, -1.3736806e-07, 1.2295818e-10, -4.1970754e-14, 4.9237927e-18 } }, // jet eta <= 1.3
+        { false, { 1.1649278, -0.00012678903, 1.0594037e-07, 6.0720870e-12, -1.9924275e-14, 3.6440065e-18 } }, // otherwise
+      };
+      jmr_sd_corr_ = {
+        { true,  { 1.0930198, -0.00015006789, 3.4486612e-07, -2.6810031e-10, 8.6744023e-14, -1.0011359e-17 } }, // jet eta <= 1.3
+        { false, { 1.2721152, -0.00057164036, 8.3728941e-07, -5.2043320e-10, 1.4537521e-13, -1.5038869e-17 } }, // otherwise
+      };
+    }
+  }
 
   switch(era_)
   {
@@ -215,7 +271,7 @@ JMECorrector::correct(RecoJetAK4 & jet,
       genJet_p4 = genJets.at(genJetIdx)->p4();
     }
 
-    jer = smear(jet_p4, genJet_p4, JetAlgo::AK4);
+    jer = smear_pt(jet_p4, genJet_p4, JetAlgo::AK4);
   }
   const double jet_pt_nom = jet_pt * jer;
   const double jet_mass_nom = jet_mass * jer;
@@ -296,13 +352,13 @@ JMECorrector::correct(RecoJetAK8 & jet,
   const double jec = reapply_JEC_ ? calibrate(jet, true, 4) : 1.;
   const double jet_pt = jet.pt() * jec;
   const double jet_mass = jet.mass() * jec;
+  const double jet_sdmass = jet.msoftdrop();
+  const Particle::LorentzVector jet_p4 { jet_pt, jet.eta(), jet.phi(), jet_mass };
 
   // Smear the jets
   double jer = 1.;
   if(apply_smearing_)
   {
-    const Particle::LorentzVector jet_p4 { jet_pt, jet.eta(), jet.phi(), jet_mass };
-
     const int genJetIdx = jet.genJetAK8Idx();
     Particle::LorentzVector genJet_p4 {0., 0., 0., 0.};
     if(genJetIdx >= 0 && genJetIdx < static_cast<int>(genJetsAK8.size()))
@@ -310,18 +366,105 @@ JMECorrector::correct(RecoJetAK8 & jet,
       genJet_p4 = genJetsAK8.at(genJetIdx)->p4();
     }
 
-    jer = smear(jet_p4, genJet_p4, JetAlgo::AK8);
+    jer = smear_pt(jet_p4, genJet_p4, JetAlgo::AK8);
   }
   const double jet_pt_nom = jet_pt * jer;
-  const double jet_mass_nom = jet_mass * jer;
 
   // Propagate JEC uncertainties to the smeared jets
   const double delta = jec_unc(jet_pt_nom, jet.eta(), jet.phi(), jet.jetId(), JetAlgo::AK8);
   const double delta_shift = 1 + delta;
   const double jet_pt_shifted = jet_pt_nom * delta_shift;
-  const double jet_mass_shifted = jet_mass_nom * delta_shift;
 
-  jet.set_ptEtaPhiMass(jet_pt_shifted, jet.eta(), jet.phi(), jet_mass_shifted);
+  // Construct groomed jet from raw AK8 subjets
+  const RecoSubjetAK8 * const subJet1 = jet.subJet1();
+  const RecoSubjetAK8 * const subJet2 = jet.subJet2();
+  Particle::LorentzVector groomedP4 { 0., 0., 0., 0. };
+  if(subJet1 && subJet2)
+  {
+    groomedP4 =
+      subJet1->p4() * (1. - subJet1->rawFactor()) +
+      subJet2->p4() * (1. - subJet2->rawFactor())
+    ;
+  }
+
+  // Compute SD mass corrections
+  double puppisd_total = 1;
+  double jet_msdcorr_raw = 1.;
+  if((fatJet_corr_ & kFatJetPUPPI) && subJet1 && subJet2)
+  {
+    const double puppisd_genCorr = 1.0062610 - 1.0616051 * std::pow(0.079990008 * jet_pt, -1.2045377);
+    const double puppisd_recoCorr = ::poly(jmr_sd_corr_.at(jet.absEta() <= 1.3), jet_pt);
+    puppisd_total = puppisd_genCorr * puppisd_recoCorr;
+
+    // TODO or should the raw SD mass be restored for any type of SD mass corrections?
+    // It's not clear because PUPPI corrections were included by default in nanoAOD-tools and
+    // not made configurable
+    jet_msdcorr_raw = groomedP4.M() / jet_sdmass;
+
+    // Apply PUPPI SD corrections to the groomed jet
+    groomedP4 *= puppisd_total;
+  }
+
+  // Compute JMS
+  const double jms_corr = jms(jet_pt, jet.eta());
+
+  // Compute JMR
+  double jmr_mass = 1.;
+  double jmr_sdmass = 1.;
+  if(fatJet_corr_ & kFatJetJMR)
+  {
+    const int genJetIdx = jet.genJetAK8Idx();
+    Particle::LorentzVector genJet_p4 {0., 0., 0., 0.};
+    const Particle * genJetAK8 = nullptr;
+    if(genJetIdx >= 0 && genJetIdx < static_cast<int>(genJetsAK8.size()))
+    {
+      genJetAK8 = genJetsAK8.at(genJetIdx);
+      genJet_p4 = genJetAK8->p4();
+    }
+    jmr_mass = smear_mass(jet_p4, genJet_p4);
+
+    if(subJet1 && subJet2)
+    {
+      // Find all generator-level subjets that amtch to the generator-level AK8 jet
+      std::vector<int> matches;
+      if(genJetAK8)
+      {
+        for(std::size_t genSubJetIdx = 0; genSubJetIdx < genSubJetsAK8.size(); ++genSubJetIdx)
+        {
+          const Particle * const genSubJet = genSubJetsAK8.at(genSubJetIdx);
+          if(::deltaR(genJetAK8->eta(), genJetAK8->phi(), genSubJet->eta(), genSubJet->phi()) < 0.8)
+          {
+            matches.push_back(genSubJetIdx);
+          }
+          if(matches.size() > 1)
+          {
+            break;
+          }
+        }
+      }
+      // Use the leading two subjets to construct the generator-level groomed jet
+      // The generator-level AK8 subjet collection is already ordered by pT in NanoAOD
+      Particle::LorentzVector genGroomedJet { 0., 0., 0., 0. };
+      if(matches.size() > 1)
+      {
+        genGroomedJet =
+          genSubJetsAK8.at(matches.at(0))->p4() +
+          genSubJetsAK8.at(matches.at(1))->p4()
+        ;
+      }
+      // This is different from nanoAOD-tools implementation, where 0 is assigned if there are not enough generator-level subjets
+      jmr_sdmass *= smear_mass(groomedP4, genGroomedJet);
+    }
+  }
+
+  // Apply the corrections to jet mass and SD mass
+  const double mass_corr      = jer * delta_shift * jms_corr * jmr_mass; // TODO should we actually include JMR here?
+  const double msoftdrop_corr = jer * delta_shift * jms_corr * jmr_sdmass * puppisd_total * jet_msdcorr_raw;
+  const double jet_mass_corrected = jet_mass * mass_corr;
+  const double jet_sdmass_corrected = jet_sdmass * msoftdrop_corr;
+
+  jet.set_ptEtaPhiMass(jet_pt_shifted, jet.eta(), jet.phi(), jet_mass_corrected);
+  jet.set_msoftdrop(jet_sdmass_corrected);
 }
 
 void
@@ -348,6 +491,7 @@ JMECorrector::correct(RecoMEt & met,
     newmet_py -= met.unclEnDeltaY();
   }
 
+  // Compensate for the modulation in MET phi
   if(enable_phiModulationCorr_)
   {
     const std::pair<double, double> met_pxpyCorr = METXYCorr_Met_MetPhi(info_, recoVertex, era_);
@@ -417,6 +561,7 @@ JMECorrector::jec_unc(double jet_pt,
       }
       if(jet_pt > 15. && jet_id & 2 && jet_phi > -1.57 && jet_phi < -0.87)
       {
+        // HEM issue described in:
         // https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
         if(jet_eta > -2.5 && jet_eta < -1.3)
         {
@@ -433,9 +578,9 @@ JMECorrector::jec_unc(double jet_pt,
 }
 
 double
-JMECorrector::smear(const Particle::LorentzVector & jet,
-                    const Particle::LorentzVector & genJet,
-                    JetAlgo jet_algo) const
+JMECorrector::smear_pt(const Particle::LorentzVector & jet,
+                       const Particle::LorentzVector & genJet,
+                       JetAlgo jet_algo) const
 {
   std::string sf_sys = "nom";
   if((jet_sys_    >= kJetMET_jerUp && jet_sys_    <= kJetMET_jerForwardHighPtDown && jet_algo == JetAlgo::AK4) ||
@@ -506,22 +651,88 @@ JMECorrector::smear(const Particle::LorentzVector & jet,
   double smearFactor = 1.;
   if(has_genJet && std::fabs(dPt) < 3 * sigma && ::deltaR(jet.Eta(), jet.Phi(), genJet.Eta(), genJet.Phi()) < 0.2)
   {
-    // additional constraints on the selected gen jet are documented in:
+    // Additional constraints on the selected gen jet are documented in:
     // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
     smearFactor += (jer_sf - 1) * dPt;
   }
   else
   {
-    // stochastic smearing
-    if(use_deterministic_seed_)
-    {
-      // inspiration from CMSSW implementation:
-      // https://github.com/cms-sw/cmssw/blob/1fef057ea0118be780f3ccd15eb7b1ce7c9a9dab/PhysicsTools/PatUtils/interface/SmearedJetProducerT.h#L208-L215
-      const unsigned seed = static_cast<unsigned>(jet.Eta() / 0.01) + rle_;
-      generator_.seed(seed);
-    }
-    std::normal_distribution<> gaus(0, sigma);
-    smearFactor += gaus(generator_) * std::sqrt(std::max(::square(jer_sf) - 1, 0.));
+    // Perform stochastic smearing
+    smearFactor += smear_stochastic(jet.Eta(), sigma, jer_sf);
   }
   return smearFactor > 0 ? smearFactor : 1.;
+}
+
+double
+JMECorrector::smear_mass(const Particle::LorentzVector & jet,
+                         const Particle::LorentzVector & genJet) const
+{
+  double smearFactor = 1.;
+  if(fatJet_corr_ & kFatJetJMR)
+  {
+    int sf_sys = kFatJet_central;
+    if(fatJet_sys_ == kFatJet_jmrUp || fatJet_sys_ == kFatJet_jmrDown)
+    {
+      sf_sys = fatJet_sys_;
+    }
+    const double sf = jmr_sf_.at(sf_sys);
+
+    // The procedure is also explained in:
+    // https://twiki.cern.ch/twiki/bin/view/Sandbox/PUPPIJetMassScaleAndResolution
+    if(genJet.M() > 0)
+    {
+      const double dM = (jet.M() - genJet.M()) / jet.M();
+      smearFactor += (sf - 1.) * dM;
+    }
+    else
+    {
+      // Perform stochastic smearing
+      const double sigma = ::poly(jmr_sd_reso_.at(std::fabs(jet.Eta()) <= 1.3), jet.Pt());
+      smearFactor += smear_stochastic(jet.Eta(), sigma, sf);
+    }
+  }
+  return smearFactor > 0 ? smearFactor : 1.;
+}
+
+double
+JMECorrector::smear_stochastic(double jet_eta,
+                               double sigma,
+                               double sf) const
+{
+  if(use_deterministic_seed_)
+  {
+    // Inspired by CMSSW implementation:
+    // https://github.com/cms-sw/cmssw/blob/1fef057ea0118be780f3ccd15eb7b1ce7c9a9dab/PhysicsTools/PatUtils/interface/SmearedJetProducerT.h#L208-L215
+    const unsigned seed = static_cast<unsigned>(jet_eta / 0.01) + rle_;
+    generator_.seed(seed);
+  }
+  std::normal_distribution<> gaus(0, sigma);
+  return gaus(generator_) * std::sqrt(std::max(::square(sf) - 1, 0.));
+}
+
+double
+JMECorrector::jms(double jet_pt,
+                  double jet_eta) const
+{
+  double jms_corr = 1.;
+  if(fatJet_corr_ & kFatJetJMS)
+  {
+    std::string sys_str = "nom";
+    if(fatJet_sys_ == kFatJet_jmsUp)
+    {
+      sys_str = "up";
+    }
+    else if(fatJet_sys_ == kFatJet_jmsDown)
+    {
+      sys_str = "down";
+    }
+    // TODO or should we skip the correction altogether if eta goes beyond the bin limits?
+    const double jet_eta_clamped = std::clamp(
+      jet_eta,
+      -2.5 + std::numeric_limits<float>::epsilon(),
+      +2.5 - std::numeric_limits<float>::epsilon()
+    );
+    jms_corr = jmar_sf_.at(kFatJetJMS)->evaluate({ jet_eta_clamped, jet_pt, sys_str });
+  }
+  return jms_corr;
 }

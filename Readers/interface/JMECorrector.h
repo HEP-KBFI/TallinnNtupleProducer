@@ -88,9 +88,22 @@ protected:
           JetAlgo jet_algo) const;
 
   double
-  smear(const Particle::LorentzVector & jet,
-        const Particle::LorentzVector & genJet,
-        JetAlgo jet_algo) const;
+  smear_pt(const Particle::LorentzVector & jet,
+           const Particle::LorentzVector & genJet,
+           JetAlgo jet_algo) const;
+
+  double
+  smear_mass(const Particle::LorentzVector & jet,
+             const Particle::LorentzVector & genJet) const;
+
+  double
+  smear_stochastic(double jet_eta,
+                   double sigma,
+                   double sf) const;
+
+  double
+  jms(double jet_pt,
+      double jet_eta) const;
 
   bool isDEBUG_;
   bool isMC_;
@@ -122,6 +135,10 @@ protected:
   std::unique_ptr<correction::CorrectionSet> jet_jerc_cset_;
   std::unique_ptr<correction::CorrectionSet> fatJet_jerc_cset_;
 
+  std::map<int, correction::Correction::Ref> jmar_sf_;
+  std::map<int, double> jmr_sf_;
+  std::map<bool, std::vector<double>> jmr_sd_reso_;
+  std::map<bool, std::vector<double>> jmr_sd_corr_;
   std::map<JetAlgo, std::vector<correction::Correction::Ref>> jec_compound_;
   std::map<JetAlgo, std::map<int, correction::Correction::Ref>> jec_uncs_;
   std::map<JetAlgo, correction::Correction::Ref> jet_reso_;
