@@ -223,6 +223,10 @@ int main(int argc, char* argv[])
   inputTree->registerReader(eventReader);
 
   eventReader->set_tauEScset(dataToMCcorrectionInterface->get_tau_energy_scale_cset());
+  if(apply_pileupJetID != pileupJetID::kPileupJetID_disabled)
+  {
+    dataToMCcorrectionInterface->load_pileupJetID(eventReader->get_JMARcset());
+  }
 
   TTree* outputTree = fs.make<TTree>("Events", "Events");
 

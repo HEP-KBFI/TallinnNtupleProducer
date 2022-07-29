@@ -28,6 +28,9 @@ class Data_to_MC_CorrectionInterface_Base
   Data_to_MC_CorrectionInterface_Base(Era era, const edm::ParameterSet & cfg);
   virtual ~Data_to_MC_CorrectionInterface_Base();
 
+  void
+  load_pileupJetID(correction::CorrectionSet * cset);
+
   double
   getSF_pileup(float nof_pileup,
                PUsys central_or_shfit) const;
@@ -141,16 +144,6 @@ class Data_to_MC_CorrectionInterface_Base
   std::vector<lutWrapperBase *> sfMuonID_and_Iso_tight_to_loose_errors_down_;
   //-----------------------------------------------------------------------------
 
-  //-----------------------------------------------------------------------------
-  // data/MC corrections for pileup jet ID
-  lutWrapperBase * effPileupJetID_;
-  lutWrapperBase * sfPileupJetID_eff_;
-  lutWrapperBase * sfPileupJetID_eff_errors_;
-  lutWrapperBase * mistagPileupJetID_;
-  lutWrapperBase * sfPileupJetID_mistag_;
-  lutWrapperBase * sfPileupJetID_mistag_errors_;
-  //-----------------------------------------------------------------------------
-
   Era era_;
   std::string era_str_;
 
@@ -174,6 +167,10 @@ class Data_to_MC_CorrectionInterface_Base
   correction::Correction::Ref pileup_cset_;
 
   pileupJetID pileupJetId_;
+  std::string pileupJetId_wp_;
+  correction::Correction::Ref pileupJetID_eff_cset_;
+  correction::Correction::Ref pileupJetID_mistag_cset_;
+
   std::unique_ptr<correction::CorrectionSet> btag_cset_;
   correction::Correction::Ref btag_shape_cset_;
 
@@ -204,11 +201,6 @@ class Data_to_MC_CorrectionInterface_Base
   std::vector<int> hadTau_genPdgId_;
   std::vector<double> hadTau_pt_;
   std::vector<double> hadTau_absEta_;
-  std::size_t numJets_;
-  std::vector<double> jet_pt_;
-  std::vector<double> jet_eta_;
-  std::vector<bool> jet_isPileup_;
-  std::vector<bool> jet_passesPileupJetId_;
 
   std::vector<lutWrapperBase *> effTrigger_1e_data_;
   std::vector<lutWrapperBase *> effTrigger_1e_mc_;

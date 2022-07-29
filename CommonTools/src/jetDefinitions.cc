@@ -81,6 +81,13 @@ const std::map<Era, std::map<Btag, std::map<BtagWP, double>>> BtagWP_map = {
   },
 };
 
+const std::map<pileupJetID, std::string> pileupJetID_map = {
+  { pileupJetID::kPileupJetID_disabled, "" },
+  { pileupJetID::kPileupJetID_loose,    "L" },
+  { pileupJetID::kPileupJetID_medium,   "M" },
+  { pileupJetID::kPileupJetID_tight,    "T" },
+};
+
 pileupJetID
 get_pileupJetID(const std::string & pileupJetID_str)
 {

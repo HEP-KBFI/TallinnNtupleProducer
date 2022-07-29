@@ -87,7 +87,10 @@ class EventReader : public ReaderBase
   get_supported_systematics(const edm::ParameterSet & cfg);
 
   void
-  set_tauEScset(correction::Correction::Ref);
+  set_tauEScset(correction::Correction::Ref cset);
+
+  correction::CorrectionSet *
+  get_JMARcset() const;
 
  protected:
   enum Level { kLepton, kHadTau };

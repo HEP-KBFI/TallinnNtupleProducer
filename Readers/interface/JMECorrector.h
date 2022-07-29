@@ -25,6 +25,9 @@ public:
   JMECorrector(const edm::ParameterSet & cfg);
   ~JMECorrector();
 
+  correction::CorrectionSet *
+  get_JMARcset() const;
+
   void
   set_info(const EventInfo * info);
 

@@ -711,6 +711,12 @@ EventReader::set_tauEScset(correction::Correction::Ref cset)
   hadTauReader_->set_tauEScset(cset);
 }
 
+correction::CorrectionSet *
+EventReader::get_JMARcset() const
+{
+  return jmeCorrector_->get_JMARcset();
+}
+
 std::vector<std::string>
 EventReader::get_supported_systematics(const edm::ParameterSet & cfg)
 {

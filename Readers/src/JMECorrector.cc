@@ -101,12 +101,14 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
 {
   const std::vector<std::string> fatJet_corrections_vstring = cfg.getParameter<std::vector<std::string>>("fatJet_corrections");
   fatJet_corr_ = get_fatJet_corrections(fatJet_corrections_vstring);
+
+  const std::string jmarCorrectionSetFile = LocalFileInPath(Form(
+    "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jmar.json.gz", era_str_.data()
+  )).fullPath();
+  jmar_cset_ = correction::CorrectionSet::from_file(jmarCorrectionSetFile);
+
   if(fatJet_corr_)
   {
-    const std::string jmarCorrectionSetFile = LocalFileInPath(Form(
-      "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jmar.json.gz", era_str_.data()
-    )).fullPath();
-    jmar_cset_ = correction::CorrectionSet::from_file(jmarCorrectionSetFile);
     jmar_sf_ = {
       { kFatJetJMS, jmar_cset_->at("JMS") },
     };
@@ -218,6 +220,12 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
 
 JMECorrector::~JMECorrector()
 {}
+
+correction::CorrectionSet *
+JMECorrector::get_JMARcset() const
+{
+  return jmar_cset_.get();
+}
 
 void
 JMECorrector::set_info(const EventInfo * info)
