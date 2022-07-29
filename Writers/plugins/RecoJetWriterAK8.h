@@ -58,13 +58,16 @@ class RecoJetWriterAK8 : public WriterBase
     Float_t * pt_;
     Float_t * eta_;
     Float_t * phi_;
-    Float_t * mass_;  // mass of the two subjets
-    Float_t * msoftdrop_;
+    Float_t * mass_;
+    Float_t * msoftdrop_; // [*]
     Float_t * tau21_; // tau2/tau1
     Int_t * jetId_;
     Float_t * subjet1_pt_;
     Float_t * subjet2_pt_;
   };
+  // [*] should be equal to the mass of the subjet pair, see:
+  // https://github.com/cms-sw/cmssw/blob/a1ee449d0c95cbe0ce77e39a3ba396879d0437a4/PhysicsTools/NanoAOD/python/jetsAK8_cff.py#L105
+  // https://github.com/cms-sw/cmssw/blob/a1ee449d0c95cbe0ce77e39a3ba396879d0437a4/DataFormats/PatCandidates/interface/Jet.h#L580-L590
   std::map<std::string, central_or_shiftEntry> central_or_shiftEntries_; // key = central_or_shift
   mutable central_or_shiftEntry * current_central_or_shiftEntry_;
 };
