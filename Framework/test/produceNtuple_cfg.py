@@ -107,10 +107,10 @@ process.produceNtuple = cms.PSet(
     #apply_genPhotonFilter = cms.string("disabled"),
     fatJet_corrections = cms.vstring(), # possible values: 'JMS', 'JMR', 'PUPPI'
     apply_chargeMisIdRate = cms.bool(True), # CV: set to True for 2lss and 2lss+1tau channels, and to False for all other channels
-    split_jes = cms.bool(False),
-    split_jer = cms.bool(False),
+    split_jes = cms.bool(True),
+    split_jer = cms.bool(True),
     isCP5 = cms.bool(False),
-    reapply_JEC = cms.bool(True),
+    reapply_JEC = cms.bool(False),
     apply_smearing = cms.bool(True),
     enable_phiModulationCorr = cms.bool(True),
 
@@ -214,14 +214,22 @@ process.produceNtuple = cms.PSet(
 
     isDEBUG = cms.bool(False)
 )
-#official nanoaod file used in pps: /hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/F1B4499C-4A59-D142-8C2E-8364C1C6F90C.root
-#with command
 
-#nano_postproc.py -s i -I tthAnalysis.NanoAODTools.postprocessing.tthModules lepJetVarBTagAll_2017,genHiggsDecayMode,genAll,genMatchCollection,puWeight2017'(/home/snandan/hh_Analysis/CMSSW_11_1_2/src/tthAnalysis/HiggsToTauTau/data/pileup_2017.root;signal_ggf_nonresonant_node_sm_hh_4v)',jetmetUncertainties2017Merged,fatjetUncertainties2017Merged . /hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/F1B4499C-4A59-D142-8C2E-8364C1C6F90C.root
-
-#nano_postproc.py -s i -I tthAnalysis.NanoAODTools.postprocessing.tthModules countHistogramAll'(;;1.0)',btagSF_deepFlav_2017 . F1B4499C-4A59-D142-8C2E-8364C1C6F90Ci.root
-
-process.fwliteInput.fileNames = cms.vstring(['/hdfs/local/snandan/hhAnalysis/2017/official_nanoaod_file/hadd.root'])
+process.fwliteInput.fileNames = cms.vstring([
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/100000/22BB5D1E-1C9A-E942-9C44-9DD9F8203E94.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/100000/AA35F93E-EA3F-3343-9447-F5B43F5458FB.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/110000/377B309D-D1B0-584B-939A-77D512468A06.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/110000/43DA8468-31F0-D841-BF3C-E7039D9DB69D.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/110000/E3A76A80-8174-9941-A366-E76B9767E155.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/120000/BC1A5455-4DAF-E840-8958-42061656D858.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/57B8E56B-E59D-874E-8270-7BA87B1DE6CF.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/8E3163C6-693A-C54B-86BE-06A9D8ADE09B.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/8EDA3901-9AB8-2D4F-9039-031D93530F06.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/F1B4499C-4A59-D142-8C2E-8364C1C6F90C.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/70000/2BC8AB2C-06AD-3345-AF12-7BF105747DB0.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/70000/5DD035DF-5383-A047-8674-F2C6E67423E1.root",
+    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/70000/6AAB84A6-8824-594A-B90B-8E7C9FBEBF76.root",
+])
 process.fwliteOutput.fileName = cms.string('produceNtuple.root')
 process.produceNtuple.era                                            = cms.string('2017')
 process.produceNtuple.redoGenMatching                                = cms.bool(True)
@@ -256,18 +264,6 @@ process.produceNtuple.lumiScale                                      = cms.VPSet
 ), cms.PSet(
     central_or_shift = cms.string('CMS_ttHl_thu_shape_y1Down'),
     lumi = cms.double(0.00014971928985888286)
-), cms.PSet(
-    central_or_shift = cms.string('CMS_ttHl_pileupUp'),
-    lumi = cms.double(0.000180930084191)
-), cms.PSet(
-    central_or_shift = cms.string('CMS_ttHl_pileupDown'),
-    lumi = cms.double(0.000180917254171)
-), cms.PSet(
-    central_or_shift = cms.string('CMS_ttHl_l1PreFireUp'),
-    lumi = cms.double(0.000182202670616)
-), cms.PSet(
-    central_or_shift = cms.string('CMS_ttHl_l1PreFireDown'),
-    lumi = cms.double(0.000179697637174)
 )])
 process.produceNtuple.ref_genWeight                                  = cms.double(1.0)
 #process.produceNtuple.applyFakeRateWeights                           = cms.string('disabled')
