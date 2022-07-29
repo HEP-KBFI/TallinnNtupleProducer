@@ -657,7 +657,8 @@ JMECorrector::smear_pt(const Particle::LorentzVector & jet,
   const bool has_genJet = genJet.Pt() > 0.;
 
   double smearFactor = 1.;
-  if(has_genJet && std::fabs(dPt) < 3 * sigma && ::deltaR(jet.Eta(), jet.Phi(), genJet.Eta(), genJet.Phi()) < 0.2)
+  const double dR = jet_algo == JetAlgo::AK4 ? 0.2 : 0.4;
+  if(has_genJet && std::fabs(dPt) < 3 * sigma && ::deltaR(jet.Eta(), jet.Phi(), genJet.Eta(), genJet.Phi()) < dR)
   {
     // Additional constraints on the selected gen jet are documented in:
     // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
