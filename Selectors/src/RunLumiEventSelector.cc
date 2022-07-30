@@ -186,8 +186,10 @@ RunLumiEventSelector::operator()(UInt_t run,
   ++numEventsProcessed_;
   if(isSelected)
   {
-    std::cout << "<RunLumiEventSelector::operator>: selecting "
-                 "run = " << run << ", ls = " << lumi << ", event = " << event << '\n';
+    std::cout
+      << get_human_line(this, __func__, __LINE__)
+      << "run = " << run << ", ls = " << lumi << ", event = " << event << '\n'
+    ;
 
     if ( run != lastRun_ || lumi != lastLumi_ || event != lastEvent_ )
     {

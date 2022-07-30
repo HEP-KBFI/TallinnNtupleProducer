@@ -348,9 +348,19 @@ int main(int argc, char* argv[])
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
     bool skipEvent = false;
+    const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
+    if (( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) ) ||
+        ( skipEvents > 0 && analyzedEntries <= skipEvents ))
+    {
+      skipEvent = true;
+    }
     for ( const std::vector<std::string> & central_or_shift : sytematics_split )
     {
-      const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
+      if(skipEvent)
+      {
+        // break out of the systematics loop
+        break;
+      }
       const bool has_central = contains(central_or_shift, "central");
       std::string default_systematics;
       if ( has_central )
@@ -375,12 +385,6 @@ int main(int argc, char* argv[])
       {
         assert(central_or_shift.size() == 1); // shifting or smearing energy scales
         default_systematics = central_or_shift.at(0);
-      }
-      if (( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) ) ||
-          ( skipEvents > 0 && analyzedEntries <= skipEvents ))
-      {
-        skipEvent = true;
-        break; // skip to the next event
       }
       if ( isDEBUG || run_lumi_eventSelector )
       {
