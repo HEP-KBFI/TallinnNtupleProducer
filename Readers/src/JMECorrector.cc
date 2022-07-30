@@ -5,6 +5,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"   // get_fatJet_corrections()
 #include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"  // LocalFileInPath
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"     // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"        // format_vdouble()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"            // EventInfo
 #include "TallinnNtupleProducer/Readers/interface/metPhiModulation.h"     // METXYCorr_Met_MetPhi()
 
@@ -301,14 +302,26 @@ JMECorrector::correct(RecoJetAK4 & jet,
   const double jet_pt_noMuL1L2L3 = jet_rawpt_noMu * jec;
   if(jet_pt_noMuL1L2L3 > 15. && (jet.chEmEF() + jet.neEmEF()) < 0.9)
   {
+    // TODO No eta cut?
     const double jet_pt_L1L2L3 = jet_pt_noMuL1L2L3 + muon_pt;
     const double jet_pt_noMuL1 = jet_rawpt_noMu * jecL1;
     const double jet_pt_L1 = jet_pt_noMuL1 + muon_pt;
 
     const double jet_phi = jet.phi();
     const double jet_pt_diff = jet_pt_L1L2L3 * (jer + delta) - jet_pt_L1;
-    met_T1Smear_px_.push_back(jet_pt_diff * std::cos(jet_phi));
-    met_T1Smear_py_.push_back(jet_pt_diff * std::sin(jet_phi));
+    const double dpx = jet_pt_diff * std::cos(jet_phi);
+    const double dpy = jet_pt_diff * std::sin(jet_phi);
+    if(isDEBUG_)
+    {
+      std::cout
+        << get_human_line(this, __func__, __LINE__)
+        << "jet: " << jet << "\n"
+           "raw = " << raw << ", jec = " << jec << ", jer = " << jer << ", delta = " << delta << ", jecL1 = " << jecL1 << " => "
+           "jet_pt_diff = " << jet_pt_diff << ", dpx = " << dpx << ", dpy = " << dpy << '\n'
+      ;
+    }
+    met_T1Smear_px_.push_back(dpx);
+    met_T1Smear_py_.push_back(dpy);
   }
 
   jet.set_ptEtaPhiMass(jet_pt_shifted, jet.eta(), jet.phi(), jet_mass_shifted);
@@ -484,6 +497,14 @@ JMECorrector::correct(RecoMEt & met,
   const double rawmet_py = rawmet.pt() * std::sin(rawmet.phi());
   const double dpx = ::kahan_sum(met_T1Smear_px_);
   const double dpy = ::kahan_sum(met_T1Smear_py_);
+  if(isDEBUG_)
+  {
+    std::cout
+      << get_human_line(this, __func__, __LINE__)
+      << "dpx = " << dpx << ' ' << format_vdouble(met_T1Smear_px_) << "\n"
+         "dpy = " << dpy << ' ' << format_vdouble(met_T1Smear_py_) << '\n'
+    ;
+  }
   double newmet_px = rawmet_px - dpx;
   double newmet_py = rawmet_py - dpy;
 
@@ -513,6 +534,13 @@ JMECorrector::correct(RecoMEt & met,
   else if(newmet_px < 0) { newmet_phi = std::atan(newmet_py / newmet_px) + ((newmet_py > 0. ? +1. : -1.) * M_PI);  }
   else                   { newmet_phi = (newmet_py > 0. ? +1. : -1.) * M_PI; }
 
+  if(isDEBUG_)
+  {
+    std::cout
+      << get_human_line(this, __func__, __LINE__)
+      << "Correcting MET pT = " << met.pt() << " to " << newmet_pt << " and phi = " << met.phi() << " to " << newmet_phi << '\n'
+    ;
+  }
   met.set(newmet_pt, newmet_phi);
 }
 
@@ -552,7 +580,12 @@ JMECorrector::jec_unc(double jet_pt,
       const int sys_choice = jet_algo == JetAlgo::AK4 ? jet_sys_ : fatJet_sys_;
       const bool is_up = sys_choice % 2 == 1;
       const int key = is_up ? sys_choice : (sys_choice - 1);
-      delta = jec_uncs_.at(jet_algo).at(key)->evaluate({ jet_eta, jet_pt });
+      // Even though the API says that overflow is fine, a very forward jet yielded
+      // delta that was equal to 999.
+      // TODO follow up with the JetMET group. The user shouldn't have to be
+      // aware of the binning of each and every SF that they use.
+      const double jet_eta_clamped = std::clamp(jet_eta, -5.4, +5.4);
+      delta = jec_uncs_.at(jet_algo).at(key)->evaluate({ jet_eta_clamped, jet_pt });
       if(! is_up)
       {
         delta *= -1;
