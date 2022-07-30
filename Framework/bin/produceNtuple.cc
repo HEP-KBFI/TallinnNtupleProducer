@@ -16,14 +16,12 @@
 #include "PhysicsTools/FWLite/interface/TFileService.h"                                         // fwlite::TFileService
 
 #include "TallinnNtupleProducer/CommonTools/interface/memory_logger.h"                          // log_memory(), display_memory()
-#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h"               // BranchAddressInitializer::print()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                               // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                              // format_vstring()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
-#include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h"                        // get_tH_SM_str()
 #include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"                           // TTreeWrapper
 #include "TallinnNtupleProducer/EvtWeightTools/interface/ChargeMisIdRateInterface.h"            // ChargeMisIdRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h" // Data_to_MC_CorrectionInterface_2016
@@ -34,21 +32,12 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"                    // EvtWeightManager
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"                   // EvtWeightRecorder
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HadTauFakeRateInterface.h"             // HadTauFakeRateInterface
-#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h"          // HHWeightInterfaceCouplings
-#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceLO.h"                 // HHWeightInterfaceLO
-#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceNLO.h"                // HHWeightInterfaceNLO
 #include "TallinnNtupleProducer/EvtWeightTools/interface/LeptonFakeRateInterface.h"             // LeptonFakeRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/LHEVpt_LOtoNLO.h"                      // LHEVpt_LOtoNLO
 #include "TallinnNtupleProducer/Objects/interface/Event.h"                                      // Event
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                  // EventInfo
-#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                                  // GenHadTau
-#include "TallinnNtupleProducer/Objects/interface/GenJet.h"                                     // GenJet
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                               // RunLumiEvent
-#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"                                // TriggerInfo
 #include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                // EventReader
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                            // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                               // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"                          // GenParticleReader
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                    // L1PreFiringWeightReader
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                              // LHEInfoReader
 #include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
