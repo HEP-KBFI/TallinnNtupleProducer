@@ -1,13 +1,16 @@
 #include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"     // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/TFileOpenWrapper.h" // TFileOpenWrapper::
-#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"           // ReaderBase
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer::reset_inputs()
+#if 0
+#include "TallinnNtupleProducer/CommonTools/interface/TFileOpenWrapper.h"         // TFileOpenWrapper::
+#endif
+#include "TallinnNtupleProducer/Readers/interface/ReaderBase.h"                   // ReaderBase
 
-#include <TFile.h>                                                        // TFile
-#include <TTree.h>                                                        // TTree
+#include <TFile.h>                                                                // TFile
+#include <TTree.h>                                                                // TTree
 
-#include <iostream>                                                       // std::cout
+#include <iostream>                                                               // std::cout
 
 TTreeWrapper::TTreeWrapper()
   : TTreeWrapper("", {})
@@ -182,6 +185,10 @@ TTreeWrapper::hasNextEvent(bool getEntry)
     {
       currentTreePtr_->SetCacheSize(cacheSize_);
     }
+
+    // reset the list of branch names that were read from the previous input file
+    BranchAddressInitializer::reset_inputs();
+
     // set the branch addresses
     std::vector<std::string> branches_enable;
     for(ReaderBase * reader: readers_)

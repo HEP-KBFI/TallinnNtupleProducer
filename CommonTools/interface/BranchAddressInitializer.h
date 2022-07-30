@@ -125,6 +125,9 @@ class BranchAddressInitializer
   void
   print(std::ostream & stream);
 
+  static void
+  reset_inputs();
+
  protected:
   bool
   hasBranchName(const std::string & branchName);
