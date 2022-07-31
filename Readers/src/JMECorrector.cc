@@ -167,7 +167,7 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   )).fullPath();
   fatJet_jerc_cset_ = correction::CorrectionSet::from_file(fatJetCorrectionSetFile);
 
-  // we could benefit from compound corrections here, but for now let's stack them manually
+  // TODO move to compound corrections instead of doing them manually
   const std::string source = isMC_ ? "MC" : "DATA";
   for(const std::string & correction_level: { "L1FastJet", "L2Relative", "L3Absolute", "L2L3Residual" })
   {
@@ -258,14 +258,18 @@ JMECorrector::correct(RecoJetAK4 & jet,
                       const std::vector<const GenJet *> & genJets,
                       bool force_recalibration)
 {
-  // Compute raw jet pT
-  const double raw = 1 - jet.rawFactor();
-  const double jet_rawpt = jet.pt() * raw;
-
   // Recompute jet pT and mass by re-applying JEC
-  const double jec = (reapply_JEC_ || force_recalibration) ? calibrate(jet, true, 4) : 1.;
-  const double jet_pt = jet.pt() * jec;
-  const double jet_mass = jet.mass() * jec;
+  const std::vector<double> jecs = calibrate(jet, 4);
+  const double & jec = jecs.back();
+  double jet_pt = jet.pt();
+  double jet_mass = jet.mass();
+  const double raw = 1 - jet.rawFactor();
+  if(reapply_JEC_ || force_recalibration)
+  {
+    // JEC is applicable only to raw jet => need to undo the previous JEC
+    jet_pt *= raw * jec;
+    jet_mass *= raw * jec;
+  }
 
   // Smear the jets
   double jer = 1.;
@@ -296,7 +300,8 @@ JMECorrector::correct(RecoJetAK4 & jet,
   // A brief overiview is given in:
   // https://indico.cern.ch/event/854654/contributions/3594580/attachments/1924445/3184422/MET_type1corrections_nanoAODtools.pdf
   // The choice of pT threshold in the following is explained in: https://github.com/cms-nanoAOD/nanoAOD-tools/pull/240
-  const double jecL1 = calibrate(jet, false, 1);
+  const double & jecL1 = jecs.front();
+  const double jet_rawpt = jet.pt() * raw;
   const double muon_pt = jet_rawpt * jet.muonSubtrFactor();
   const double jet_rawpt_noMu = jet_rawpt * (1 - jet.muonSubtrFactor());
   const double jet_pt_noMuL1L2L3 = jet_rawpt_noMu * jec;
@@ -370,7 +375,7 @@ JMECorrector::correct(RecoJetAK8 & jet,
                       const std::vector<const Particle *> & genSubJetsAK8) const
 {
   // Recompute jet pT and mass by re-applying JEC
-  const double jec = reapply_JEC_ ? calibrate(jet, true, 4) : 1.;
+  const double jec = reapply_JEC_ ? calibrate(jet, 4).back() * (1. - jet.rawFactor()) : 1.;
   const double jet_pt = jet.pt() * jec;
   const double jet_mass = jet.mass() * jec;
   const double jet_sdmass = jet.msoftdrop();
@@ -544,22 +549,26 @@ JMECorrector::correct(RecoMEt & met,
   met.set(newmet_pt, newmet_phi);
 }
 
-double
+std::vector<double>
 JMECorrector::calibrate(const JetParams & jetParams,
-                        bool include_residual,
                         int max_level) const
 {
   const std::vector<correction::Correction::Ref> & compound_corrections = jec_compound_.at(jetParams.algo);
   const double raw = 1 - jetParams.rawFactor;
   double corr = 1.;
+  std::vector<double> corrs;
   for(int level = 0; level < max_level; ++level)
   {
+    // The correction obtained at this level is used in the next level, see
+    // https://github.com/cms-sw/cmssw/blob/0dd62d13441f7f3b62b94c62c30fd2baaaba0826/CondFormats/JetMETObjects/src/FactorizedJetCorrectorCalculator.cc#L300-L302
     corr *= level ?
-      compound_corrections.at(level)->evaluate({ jetParams.eta, jetParams.pt * raw }) :
-      compound_corrections.at(level)->evaluate({ jetParams.area, jetParams.eta, jetParams.pt * raw, rho_ })
+      compound_corrections.at(level)->evaluate({ jetParams.eta, jetParams.pt * raw * corr }) :
+      compound_corrections.at(level)->evaluate({ jetParams.area, jetParams.eta, jetParams.pt * raw * corr, rho_ })
     ;
+    assert(corr > 0.);
+    corrs.push_back(corr);
   }
-  return corr <= 0. ? 1. : corr * raw;
+  return corrs;
 }
 
 double

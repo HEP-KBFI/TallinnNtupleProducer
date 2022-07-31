@@ -78,9 +78,8 @@ protected:
     JetAlgo algo;
   };
 
-  double
+  std::vector<double>
   calibrate(const JetParams & jetParams,
-            bool include_residual,
             int max_level) const;
 
   double

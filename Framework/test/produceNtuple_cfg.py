@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
 from TallinnNtupleProducer.Framework.hhWeights_cfi import hhWeights as config_hhWeights
-from TallinnNtupleProducer.Framework.recommendedMEtFilters_cfi import recommendedMEtFilters_2016 as config_recommendedMEtFilters_2016, recommendedMEtFilters_2017 as config_recommendedMEtFilters_2017, recommendedMEtFilters_2018 as config_recommendedMEtFilters_2018
-from TallinnNtupleProducer.Framework.triggers_cfi import triggers_2016 as config_triggers_2016, triggers_2017 as config_triggers_2017, triggers_2018 as config_triggers_2018
+from TallinnNtupleProducer.Framework.recommendedMEtFilters_cfi import recommendedMEtFilters_2016 as config_recommendedMEtFilters_2016, recommendedMEtFilters_2018 as config_recommendedMEtFilters_2018, recommendedMEtFilters_2018 as config_recommendedMEtFilters_2018
+from TallinnNtupleProducer.Framework.triggers_cfi import triggers_2016 as config_triggers_2016, triggers_2018 as config_triggers_2018, triggers_2018 as config_triggers_2018
 
 from TallinnNtupleProducer.Writers.BDTVarWriter_HH_2lss_cfi import bdtVariables_HH_2lss as writers_bdtVariables_HH_2lss
 from TallinnNtupleProducer.Writers.EvtReweightWriter_HH_cfi import evtReweight_HH as writers_evtReweight_HH
@@ -216,25 +216,13 @@ process.produceNtuple = cms.PSet(
 )
 
 process.fwliteInput.fileNames = cms.vstring([
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/100000/22BB5D1E-1C9A-E942-9C44-9DD9F8203E94.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/100000/AA35F93E-EA3F-3343-9447-F5B43F5458FB.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/110000/377B309D-D1B0-584B-939A-77D512468A06.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/110000/43DA8468-31F0-D841-BF3C-E7039D9DB69D.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/110000/E3A76A80-8174-9941-A366-E76B9767E155.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/120000/BC1A5455-4DAF-E840-8958-42061656D858.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/57B8E56B-E59D-874E-8270-7BA87B1DE6CF.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/8E3163C6-693A-C54B-86BE-06A9D8ADE09B.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/8EDA3901-9AB8-2D4F-9039-031D93530F06.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/270000/F1B4499C-4A59-D142-8C2E-8364C1C6F90C.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/70000/2BC8AB2C-06AD-3345-AF12-7BF105747DB0.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/70000/5DD035DF-5383-A047-8674-F2C6E67423E1.root",
-    "/hdfs/cms/store/mc/RunIIFall17NanoAODv7/GluGluToHHTo4V_node_SM_13TeV-madgraph_correctedcfg/NANOAODSIM/PU2017_12Apr2018_Nano02Apr2020_102X_mc2017_realistic_v8-v1/70000/6AAB84A6-8824-594A-B90B-8E7C9FBEBF76.root",
+    "/hdfs/cms/store/mc/RunIIAutumn18NanoAODv7/GluGluToHHTo4V_node_SM_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NANOAODSIM/Nano02Apr2020_102X_upgrade2018_realistic_v21-v1/120000/C4271AA8-1557-C846-8CAF-3F74F5AD64E3.root",
 ])
 process.fwliteOutput.fileName = cms.string('produceNtuple.root')
-process.produceNtuple.era                                            = cms.string('2017')
+process.produceNtuple.era                                            = cms.string('2018')
 process.produceNtuple.redoGenMatching                                = cms.bool(True)
 process.produceNtuple.isDEBUG                                        = cms.bool(False)
-writers_metFilters.flags                                             = config_recommendedMEtFilters_2017
+writers_metFilters.flags                                             = config_recommendedMEtFilters_2018
 process.produceNtuple.process                                        = cms.string('signal_ggf_nonresonant_hh')
 process.produceNtuple.process_hh                                     = cms.string('signal_ggf_nonresonant_hh_wwww')
 process.produceNtuple.isMC                                           = cms.bool(True)
@@ -272,16 +260,16 @@ process.produceNtuple.apply_DYMCReweighting                          = cms.bool(
 process.produceNtuple.apply_DYMCNormScaleFactors                     = cms.bool(False)
 process.produceNtuple.apply_l1PreFireWeight                          = cms.bool(True)
 process.produceNtuple.apply_pileupJetID                              = cms.string('')
-process.produceNtuple.leptonFakeRateWeight.inputFileName             = cms.string('TallinnNtupleProducer/EvtWeightTools/data/FakeRate/FR_lep_mva_hh_multilepton_wFullSyst_2017_KBFI_2020Dec21_wCERNUncs2_FRErrTheshold_0p01.root')
+process.produceNtuple.leptonFakeRateWeight.inputFileName             = cms.string('TallinnNtupleProducer/EvtWeightTools/data/FakeRate/FR_lep_mva_hh_multilepton_wFullSyst_2018_KBFI_2020Dec21_wCERNUncs2_FRErrTheshold_0p01.root')
 process.produceNtuple.leptonFakeRateWeight.histogramName_e           = cms.string('FR_mva030_el_data_comb')
 process.produceNtuple.leptonFakeRateWeight.histogramName_mu          = cms.string('FR_mva050_mu_data_comb')
 process.produceNtuple.leptonFakeRateWeight.applyNonClosureCorrection = cms.bool(True)
-process.produceNtuple.hadTauFakeRateWeight.inputFileName             = cms.string('TallinnNtupleProducer/EvtWeightTools/data/FakeRate/FR_deeptau_DYmumu_2017_v6.root')
+process.produceNtuple.hadTauFakeRateWeight.inputFileName             = cms.string('TallinnNtupleProducer/EvtWeightTools/data/FakeRate/FR_deeptau_DYmumu_2018_v6.root')
 process.produceNtuple.hadTauFakeRateWeight.lead.fitFunctionName      = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/fitFunction_data_div_mc_hadTaus_pt')
 process.produceNtuple.hadTauFakeRateWeight.sublead.fitFunctionName   = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/fitFunction_data_div_mc_hadTaus_pt')
 process.produceNtuple.hadTauFakeRateWeight.lead.graphName            = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/jetToTauFakeRate_mc_hadTaus_pt')
 process.produceNtuple.hadTauFakeRateWeight.sublead.graphName         = cms.string('jetToTauFakeRate/deepVSjMedium/$etaBin/jetToTauFakeRate_mc_hadTaus_pt')
-process.produceNtuple.triggers                                       = config_triggers_2017
+process.produceNtuple.triggers                                       = config_triggers_2018
 process.produceNtuple.triggers.type_2mu.use_it                       = cms.bool(True)
 process.produceNtuple.triggers.type_1e1mu.use_it                     = cms.bool(True)
 process.produceNtuple.triggers.type_2e.use_it                        = cms.bool(True)
@@ -289,8 +277,8 @@ process.produceNtuple.triggers.type_1mu.use_it                       = cms.bool(
 process.produceNtuple.triggers.type_1e.use_it                        = cms.bool(True)
 process.produceNtuple.jetCleaningByIndex                             = cms.bool(True)
 process.produceNtuple.genMatchingByIndex                             = cms.bool(True)
-process.produceNtuple.hhWeights.denominator_file_lo                  = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/denom_2017.root')
-process.produceNtuple.hhWeights.denominator_file_nlo                 = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/denom_2017_nlo.root')
+process.produceNtuple.hhWeights.denominator_file_lo                  = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/denom_2018.root')
+process.produceNtuple.hhWeights.denominator_file_nlo                 = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/denom_2018_nlo.root')
 process.produceNtuple.hhWeights.histtitle                            = cms.string('signal_ggf_nonresonant_hh_wwww')
 process.produceNtuple.hhWeights.JHEP04Scan_file                      = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/jhep04_scan.dat')
 process.produceNtuple.hhWeights.JHEP03Scan_file                      = cms.string('TallinnNtupleProducer/EvtWeightTools/data/HHReweighting/jhep03_scan.dat')
@@ -307,7 +295,7 @@ writers_triggerInfo.PD                                               = cms.strin
 writers_genPhotonFilter.apply_genPhotonFilter                        = cms.string('disabled')
 #process.produceNtuple.nonRes_BMs                                     = cms.vstring(['SM', 'JHEP04BM1', 'JHEP04BM2', 'JHEP04BM3', 'JHEP04BM4', 'JHEP04BM5', 'JHEP04BM6', 'JHEP04BM7', 'JHEP04BM8', 'JHEP04BM9', 'JHEP04BM10', 'JHEP04BM11', 'JHEP04BM12', 'JHEP04BM8a', 'JHEP03BM1', 'JHEP03BM2', 'JHEP03BM3', 'JHEP03BM4', 'JHEP03BM5', 'JHEP03BM6', 'JHEP03BM7', 'kl_2p45_kt_1p00_c2_0p00_BM9', 'kl_1p00_kt_1p00_c2_0p00_BM9', 'kl_5p00_kt_1p00_c2_0p00_BM9', 'kl_2p45_kt_1p00_c2_0p00_BM7', 'kl_1p00_kt_1p00_c2_0p00_BM7', 'kl_5p00_kt_1p00_c2_0p00_BM7', 'kl_1p00_kt_1p00_c2_0p35_BM9', 'kl_1p00_kt_1p00_c2_3p00_BM9', 'kl_1p00_kt_1p00_c2_0p10_BM9', 'kl_1p00_kt_1p00_c2_m2p00_BM9', 'kl_1p00_kt_1p00_c2_0p35_BM7', 'kl_1p00_kt_1p00_c2_3p00_BM7', 'kl_1p00_kt_1p00_c2_0p10_BM7', 'kl_1p00_kt_1p00_c2_m2p00_BM7', 'kl_0p00_kt_1p00_c2_0p00_BM9', 'kl_0p00_kt_1p00_c2_1p00_BM9', 'kl_0p00_kt_1p00_c2_0p00_BM7', 'kl_0p00_kt_1p00_c2_1p00_BM7'])
 process.produceNtuple.enable_blacklist                               = cms.bool(True)
-process.produceNtuple.blacklist.inputFileNames                       = cms.vstring(['TallinnNtupleProducer/Framework/data/blacklist/blacklist_postproc_2017.txt', 'TallinnNtupleProducer/Framework/data/blacklist/blacklist_skimmed_multilepton_2017.txt'])
+process.produceNtuple.blacklist.inputFileNames                       = cms.vstring(['TallinnNtupleProducer/Framework/data/blacklist/blacklist_postproc_2018.txt', 'TallinnNtupleProducer/Framework/data/blacklist/blacklist_skimmed_multilepton_2018.txt'])
 process.produceNtuple.blacklist.sampleName                           = cms.string('signal_ggf_nonresonant_node_sm_hh_4v')
 process.produceNtuple.has_pdf_weights                                = cms.bool(False)
 process.produceNtuple.pdfSettings.lhaid                              = cms.uint32(306000)
