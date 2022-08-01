@@ -123,18 +123,32 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
         }
         merge_systematic_shifts(supported_systematics, pdf_member_sys);
       }
-      if(cfg.getParameter<unsigned>("numNominalLeptons") > 0)
+      const unsigned numNominalLeptons = cfg.getParameter<unsigned>("numNominalLeptons");
+      if(numNominalLeptons > 0)
       {
         merge_systematic_shifts(supported_systematics, map_keys(leptonIDSFSysMap));
         merge_systematic_shifts(supported_systematics, map_keys(jetToLeptonFRSysMap));
       }
-      if(cfg.getParameter<unsigned>("numNominalHadTaus") > 0)
+      const unsigned numNominalHadTaus = cfg.getParameter<unsigned>("numNominalHadTaus");
+      if(numNominalHadTaus > 0)
       {
         merge_systematic_shifts(supported_systematics, map_keys(jetToTauFRSysMap));
         merge_systematic_shifts(supported_systematics, map_keys(eToTauFRSysMap));
         merge_systematic_shifts(supported_systematics, map_keys(mToTauFRSysMap));
         merge_systematic_shifts(supported_systematics, map_keys(tauIDSFSysMap));
       }
+
+      merge_systematic_shifts(supported_systematics, map_keys(triggerSFSysMap));
+      if(numNominalLeptons == 1 && numNominalHadTaus == 3)
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(triggerSFSysMap_0l_2tau));
+        merge_systematic_shifts(supported_systematics, map_keys(triggerSFSysMap_1l_1tau));
+      }
+      if(numNominalLeptons == 2 && numNominalHadTaus <= 2)
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(triggerSFSysMap_2lss));
+      }
+
       if(cfg.getParameter<bool>("apply_DYMCReweighting"))
       {
         merge_systematic_shifts(supported_systematics, map_keys(dyMCRwgtSysMap));
@@ -152,7 +166,7 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
         merge_systematic_shifts(supported_systematics, map_keys(ewkJetSysMap));
         merge_systematic_shifts(supported_systematics, map_keys(ewkBJetSysMap));
       }
-      //TODO: trigger SF, subjet b-tagging SF, Vpt
+      //TODO: subjet b-tagging SF, Vpt
     }
   }
   return supported_systematics;

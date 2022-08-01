@@ -155,7 +155,6 @@ enum class TriggerSFsys
 {
   central,
   shiftUp,          shiftDown,
-  shift_2lssUp,     shift_2lssDown,
   shift_2lssEEUp,   shift_2lssEEDown,
   shift_2lssEMuUp,  shift_2lssEMuDown,
   shift_2lssMuMuUp, shift_2lssMuMuDown,
@@ -287,7 +286,10 @@ extern const std::map<std::string, PDFSys> pdfSysMap;
 // experimental uncertainties
 extern const std::map<std::string, L1PreFiringWeightSys> l1prefireSysMap;
 extern const std::map<std::string, PUsys> puSysMap;
-extern const std::map<std::string, TriggerSFsys> triggerSFSysMap; // NOT WRITTEN YET
+extern const std::map<std::string, TriggerSFsys> triggerSFSysMap;
+extern const std::map<std::string, TriggerSFsys> triggerSFSysMap_2lss;
+extern const std::map<std::string, TriggerSFsys> triggerSFSysMap_1l_1tau;
+extern const std::map<std::string, TriggerSFsys> triggerSFSysMap_0l_2tau;
 
 // AK4 jet uncertainties
 extern const std::map<std::string, int> btagWeightSysMap;

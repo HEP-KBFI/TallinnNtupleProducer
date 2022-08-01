@@ -58,12 +58,6 @@ Data_to_MC_CorrectionInterface_1l_1tau_trigger::~Data_to_MC_CorrectionInterface_
 }
 
 void
-Data_to_MC_CorrectionInterface_1l_1tau_trigger::set_1l_1tau_trigger_sf(correction::Correction::Ref cset)
-{ 
-  sf_1l_1tau_trigger_ = cset;
-}
-
-void
 Data_to_MC_CorrectionInterface_1l_1tau_trigger::setTriggerBits(bool isTriggered_1e,
                                                                bool isTriggered_1e1tau,
                                                                bool isTriggered_1m,
@@ -107,8 +101,8 @@ Data_to_MC_CorrectionInterface_1l_1tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
     if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
     {
-      eff_1l1tau_tauLeg_data = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_data", sf_1l_1tau_trigger_);
-      eff_1l1tau_tauLeg_mc   = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_1tau_trigger_);
+      eff_1l1tau_tauLeg_data = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_data");
+      eff_1l1tau_tauLeg_mc   = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_mc");
     }
 
     isTriggered_1l     = isTriggered_1e_;
@@ -127,8 +121,8 @@ Data_to_MC_CorrectionInterface_1l_1tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
     if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
     {
-      eff_1l1tau_tauLeg_data = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mutau", wp_str_, "eff_data", sf_1l_1tau_trigger_);
-      eff_1l1tau_tauLeg_mc   = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mutau", wp_str_, "eff_mc", sf_1l_1tau_trigger_);
+      eff_1l1tau_tauLeg_data = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mutau", wp_str_, "eff_data");
+      eff_1l1tau_tauLeg_mc   = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mutau", wp_str_, "eff_mc");
     }
 
     isTriggered_1l     = isTriggered_1m_;

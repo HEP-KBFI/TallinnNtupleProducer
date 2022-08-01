@@ -7,54 +7,58 @@
  *
  */
 
-#include "DataFormats/FWLite/interface/InputSource.h"                                           // fwlite::InputSource
-#include "DataFormats/FWLite/interface/OutputFiles.h"                                           // fwlite::OutputFiles
-#include "FWCore/ParameterSet/interface/ParameterSet.h"                                         // edm::ParameterSet
-#include "FWCore/ParameterSetReader/interface/ParameterSetReader.h"                             // edm::readPSetsFrom()
-#include "FWCore/PluginManager/interface/PluginManager.h"                                       // edmplugin::PluginManager::configure()
-#include "FWCore/PluginManager/interface/standard.h"                                            // edmplugin::standard::config()
-#include "PhysicsTools/FWLite/interface/TFileService.h"                                         // fwlite::TFileService
+#include "DataFormats/FWLite/interface/InputSource.h"                                                      // fwlite::InputSource
+#include "DataFormats/FWLite/interface/OutputFiles.h"                                                      // fwlite::OutputFiles
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                                                    // edm::ParameterSet
+#include "FWCore/ParameterSetReader/interface/ParameterSetReader.h"                                        // edm::readPSetsFrom()
+#include "FWCore/PluginManager/interface/PluginManager.h"                                                  // edmplugin::PluginManager::configure()
+#include "FWCore/PluginManager/interface/standard.h"                                                       // edmplugin::standard::config()
+#include "PhysicsTools/FWLite/interface/TFileService.h"                                                    // fwlite::TFileService
 
-#include "TallinnNtupleProducer/CommonTools/interface/memory_logger.h"                          // log_memory(), display_memory()
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/contains.h"                               // contains()
-#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                              // format_vstring()
-#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
-#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
-#include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"                           // TTreeWrapper
-#include "TallinnNtupleProducer/EvtWeightTools/interface/ChargeMisIdRateInterface.h"            // ChargeMisIdRateInterface
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h" // Data_to_MC_CorrectionInterface_2016
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2017.h" // Data_to_MC_CorrectionInterface_2017
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2018.h" // Data_to_MC_CorrectionInterface_2018
-#include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCReweighting.h"                     // DYMCReweighting
-#include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCNormScaleFactors.h"                // DYMCNormScaleFactors
-#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"                    // EvtWeightManager
-#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"                   // EvtWeightRecorder
-#include "TallinnNtupleProducer/EvtWeightTools/interface/HadTauFakeRateInterface.h"             // HadTauFakeRateInterface
-#include "TallinnNtupleProducer/EvtWeightTools/interface/LeptonFakeRateInterface.h"             // LeptonFakeRateInterface
-#include "TallinnNtupleProducer/EvtWeightTools/interface/LHEVpt_LOtoNLO.h"                      // LHEVpt_LOtoNLO
-#include "TallinnNtupleProducer/Objects/interface/Event.h"                                      // Event
-#include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                  // EventInfo
-#include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                               // RunLumiEvent
-#include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                // EventReader
-#include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                    // L1PreFiringWeightReader
-#include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                              // LHEInfoReader
+#include "TallinnNtupleProducer/CommonTools/interface/memory_logger.h"                                     // log_memory(), display_memory()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                                      // cmsException
+#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                               // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/contains.h"                                          // contains()
+#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                                         // format_vstring()
+#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                                 // get_tau_id_wp_int()
+#include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                           // merge_systematic_shifts()
+#include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"                                      // TTreeWrapper
+#include "TallinnNtupleProducer/EvtWeightTools/interface/ChargeMisIdRateInterface.h"                       // ChargeMisIdRateInterface
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h"            // Data_to_MC_CorrectionInterface_2016
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2017.h"            // Data_to_MC_CorrectionInterface_2017
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2018.h"            // Data_to_MC_CorrectionInterface_2018
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_4tau_trigger.h" // Data_to_MC_CorrectionInterface_0l_4tau_trigger, Data_to_MC_CorrectionInterface_0l_2tau_trigger
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_3tau_trigger.h" // Data_to_MC_CorrectionInterface_1l_3tau_trigger, Data_to_MC_CorrectionInterface_1l_2tau_trigger
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_1tau_trigger.h" // Data_to_MC_CorrectionInterface_1l_1tau_trigger
+#include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCReweighting.h"                                // DYMCReweighting
+#include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCNormScaleFactors.h"                           // DYMCNormScaleFactors
+#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"                               // EvtWeightManager
+#include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"                              // EvtWeightRecorder
+#include "TallinnNtupleProducer/EvtWeightTools/interface/HadTauFakeRateInterface.h"                        // HadTauFakeRateInterface
+#include "TallinnNtupleProducer/EvtWeightTools/interface/LeptonFakeRateInterface.h"                        // LeptonFakeRateInterface
+#include "TallinnNtupleProducer/EvtWeightTools/interface/LHEVpt_LOtoNLO.h"                                 // LHEVpt_LOtoNLO
+#include "TallinnNtupleProducer/Objects/interface/Event.h"                                                 // Event
+#include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                             // EventInfo
+#include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                                          // RunLumiEvent
+#include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                           // EventReader
+#include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                               // L1PreFiringWeightReader
+#include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                                         // LHEInfoReader
 #include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
-#include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                             // PSWeightReader
-#include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                     // RunLumiEventSelector
-#include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                 // WriterBase, WriterPluginFactory
-#include <TBenchmark.h>                                                                         // TBenchmark
-#include <TError.h>                                                                             // gErrorAbortLevel, kError
-#include <TString.h>                                                                            // TString, Form()
-#include <TTree.h>                                                                              // TTree
+#include "TallinnNtupleProducer/Readers/interface/PSWeightReader.h"                                        // PSWeightReader
+#include "TallinnNtupleProducer/Selectors/interface/RunLumiEventSelector.h"                                // RunLumiEventSelector
+#include "TallinnNtupleProducer/Writers/interface/WriterBase.h"                                            // WriterBase, WriterPluginFactory
+
+#include <TBenchmark.h>                                                                                    // TBenchmark
+#include <TError.h>                                                                                        // gErrorAbortLevel, kError
+#include <TString.h>                                                                                       // TString, Form()
+#include <TTree.h>                                                                                         // TTree
 
 #include "correction.h"
-#include <assert.h>                                                                             // assert()
-#include <cstdlib>                                                                              // EXIT_SUCCESS, EXIT_FAILURE
-#include <iostream>                                                                             // std::cout
-#include <string>                                                                               // std::string
-#include <vector>                                                                               // std::vector
+#include <assert.h>                                                                                        // assert()
+#include <cstdlib>                                                                                         // EXIT_SUCCESS, EXIT_FAILURE
+#include <iostream>                                                                                        // std::cout
+#include <string>                                                                                          // std::string
+#include <vector>                                                                                          // std::vector
 
 typedef std::vector<std::string> vstring;
 
@@ -160,6 +164,8 @@ int main(int argc, char* argv[])
 
   edm::ParameterSet cfg_dataToMCcorrectionInterface;
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("era", era_string);
+  cfg_dataToMCcorrectionInterface.addParameter<unsigned>("numNominalLeptons", numNominalLeptons);
+  cfg_dataToMCcorrectionInterface.addParameter<unsigned>("numNominalHadTaus", numNominalHadTaus);
   cfg_dataToMCcorrectionInterface.addParameter<std::string>("hadTauSelection_againstJets", hadTauWP_againstJets);
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstElectrons", get_tau_id_wp_int(hadTauWP_againstElectrons));
   cfg_dataToMCcorrectionInterface.addParameter<int>("hadTauSelection_againstMuons", get_tau_id_wp_int(hadTauWP_againstMuons));
@@ -176,6 +182,29 @@ int main(int argc, char* argv[])
     case Era::kUndefined: __attribute__((fallthrough));
     default: throw cmsException("produceNtuple", __LINE__) << "Invalid era = " << static_cast<int>(era);
   }
+
+  Data_to_MC_CorrectionInterface_trigger_Base * dataToMCcorrectionInterface_trigger = nullptr;
+  if(numNominalLeptons == 0 && numNominalHadTaus == 4)
+  {
+    dataToMCcorrectionInterface_trigger = new Data_to_MC_CorrectionInterface_0l_4tau_trigger(cfg_dataToMCcorrectionInterface);
+  }
+  else if(numNominalLeptons == 1 && numNominalHadTaus == 3)
+  {
+    dataToMCcorrectionInterface_trigger = new Data_to_MC_CorrectionInterface_1l_3tau_trigger(cfg_dataToMCcorrectionInterface);
+  }
+  else if(numNominalLeptons == 0 && numNominalHadTaus == 2)
+  {
+    dataToMCcorrectionInterface_trigger = new Data_to_MC_CorrectionInterface_0l_2tau_trigger(cfg_dataToMCcorrectionInterface);
+  }
+  else if(numNominalLeptons == 1 && numNominalHadTaus == 1)
+  {
+    dataToMCcorrectionInterface_trigger = new Data_to_MC_CorrectionInterface_1l_1tau_trigger(cfg_dataToMCcorrectionInterface);
+  }
+  else if(numNominalLeptons == 1 && numNominalHadTaus == 2)
+  {
+    dataToMCcorrectionInterface_trigger = new Data_to_MC_CorrectionInterface_1l_2tau_trigger(cfg_dataToMCcorrectionInterface);
+  }
+
   const ChargeMisIdRateInterface chargeMisIdRateInterface(era);
 
   edm::ParameterSet cfg_leptonFakeRateWeight = cfg_produceNtuple.getParameterSet("leptonFakeRateWeight");
@@ -458,14 +487,27 @@ int main(int argc, char* argv[])
         dataToMCcorrectionInterface->setLeptons(event.fakeableLeptons(), true);
 
 //--- apply data/MC corrections for trigger efficiency
-        evtWeightRecorder.record_leptonTriggerEff(dataToMCcorrectionInterface);
+        if(event.fakeableLeptons().size() == numNominalLeptons)
+        {
+          evtWeightRecorder.record_leptonTriggerEff(dataToMCcorrectionInterface);
+        }
+        if(dataToMCcorrectionInterface_trigger)
+        {
+          dataToMCcorrectionInterface_trigger->setHadTaus(event.fakeableHadTaus());
+          dataToMCcorrectionInterface_trigger->setLeptons(event.fakeableLeptons());
+          if(event.fakeableLeptons().size() == numNominalLeptons &&
+             event.fakeableHadTaus().size() == numNominalHadTaus  )
+          {
+            evtWeightRecorder.record_tauTriggerEff(dataToMCcorrectionInterface_trigger);
+          }
+        }
 
 //--- apply data/MC corrections for efficiencies for lepton to pass loose identification and isolation criteria
         evtWeightRecorder.record_leptonIDSF_recoToLoose(dataToMCcorrectionInterface);
 
 //--- apply data/MC corrections for efficiencies of leptons passing the loose identification and isolation criteria
 //    to also pass the fakeable and/or tight identification and isolation criteria
-        evtWeightRecorder.record_leptonIDSF_looseToTight(dataToMCcorrectionInterface, false);
+        evtWeightRecorder.record_leptonIDSF_looseToTight(dataToMCcorrectionInterface, apply_chargeMisIdRate);
 
 //--- apply data/MC corrections for hadronic tau identification efficiency
 //    and for e->tau and mu->tau misidentification rates

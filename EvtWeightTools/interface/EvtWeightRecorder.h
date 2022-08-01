@@ -21,9 +21,7 @@ class RecoHadTau;
 class EvtWeightManager;
 class DYMCReweighting;
 class DYMCNormScaleFactors;
-class Data_to_MC_CorrectionInterface_0l_2tau_trigger;
-class Data_to_MC_CorrectionInterface_1l_1tau_trigger;
-class Data_to_MC_CorrectionInterface_1l_2tau_trigger;
+class Data_to_MC_CorrectionInterface_trigger_Base;
 class HHWeightInterfaceLO;
 class HHWeightInterfaceNLO;
 class LHEVpt_LOtoNLO;
@@ -279,13 +277,7 @@ class EvtWeightRecorder
   record_leptonTriggerEff(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface);
 
   void
-  record_tauTriggerEff(const Data_to_MC_CorrectionInterface_0l_2tau_trigger * const dataToMCcorrectionInterface_0l_2tau_trigger);
-
-  void
-  record_tauTriggerEff(const Data_to_MC_CorrectionInterface_1l_1tau_trigger * const dataToMCcorrectionInterface_1l_1tau_trigger);
-
-  void
-  record_tauTriggerEff(const Data_to_MC_CorrectionInterface_1l_2tau_trigger * const dataToMCcorrectionInterface_1l_2tau_trigger);
+  record_tauTriggerEff(const Data_to_MC_CorrectionInterface_trigger_Base * const dataToMCcorrectionInterface_trigger);
 
   void
   record_hadTauID_and_Iso(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface);

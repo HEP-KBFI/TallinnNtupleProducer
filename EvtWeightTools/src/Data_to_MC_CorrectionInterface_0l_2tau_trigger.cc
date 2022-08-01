@@ -14,12 +14,6 @@ Data_to_MC_CorrectionInterface_0l_2tau_trigger::~Data_to_MC_CorrectionInterface_
 {}
 
 void
-Data_to_MC_CorrectionInterface_0l_2tau_trigger::set_0l_2tau_trigger_sf(correction::Correction::Ref cset)
-{
-  sf_0l_2tau_trigger_ = cset;
-}
-
-void
 Data_to_MC_CorrectionInterface_0l_2tau_trigger::setTriggerBits(bool isTriggered_2tau)
 {
   isTriggered_2tau_ = isTriggered_2tau;
@@ -55,14 +49,14 @@ Data_to_MC_CorrectionInterface_0l_2tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
   if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
   {
-    eff_2tau_tauLeg1_data = sf_0l_2tau_trigger_->evaluate({hadTau1_pt_, hadTau1_decayMode_, "diTau", wp_str_, "eff_data", sys});
-    eff_2tau_tauLeg1_mc   = sf_0l_2tau_trigger_->evaluate({hadTau1_pt_, hadTau1_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+    eff_2tau_tauLeg1_data = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "ditau", wp_str_, "eff_data", sys);
+    eff_2tau_tauLeg1_mc   = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "ditau", wp_str_, "eff_mc", sys);
   }
 
   if(std::fabs(hadTau2_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau2_decayMode_))
   {
-    eff_2tau_tauLeg2_data = sf_0l_2tau_trigger_->evaluate({hadTau2_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_data", sys});
-    eff_2tau_tauLeg2_mc   = sf_0l_2tau_trigger_->evaluate({hadTau2_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+    eff_2tau_tauLeg2_data = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_data", sys);
+    eff_2tau_tauLeg2_mc   = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_mc", sys);
   }
 
   if(isDEBUG_)
