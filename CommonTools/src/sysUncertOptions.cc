@@ -355,11 +355,6 @@ const std::map<std::string, LHEVptSys> lheVptSysMap = {
   { "Vpt_nloDown", LHEVptSys::down },
 };
 
-const std::map<std::string, SubjetBtagSys> subjetBtagSysMap = {
-  { "CMS_btag_subjetUp",   SubjetBtagSys::up   },
-  { "CMS_btag_subjetDown", SubjetBtagSys::down },
-};
-
 extern const std::map<int, std::string> btagWeightSysMap_correctionLib = {
   { kBtag_central,                   "central"                    },
   { kBtag_hfUp,                      "up_hf"                      },
@@ -777,17 +772,6 @@ getLHEVptSys_option(const std::string & central_or_shift)
     return kv->second;
   }
   return LHEVptSys::central;
-}
-
-SubjetBtagSys
-getSubjetBtagSys_option(const std::string & central_or_shift)
-{
-  const auto kv = subjetBtagSysMap.find(central_or_shift);
-  if(kv != subjetBtagSysMap.end())
-  {
-    return kv->second;
-  }
-  return SubjetBtagSys::central;
 }
 
 bool

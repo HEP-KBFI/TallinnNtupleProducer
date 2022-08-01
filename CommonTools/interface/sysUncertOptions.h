@@ -269,12 +269,6 @@ enum class LHEVptSys
   up, down,
 };
 
-enum class SubjetBtagSys
-{
-  central,
-  up, down,
-};
-
 extern const std::string pdfSysStr;
 extern const std::string noBtagWeightStr;
 
@@ -311,7 +305,6 @@ extern const std::map<std::string, int> jerAK8SysMap;
 extern const std::map<std::string, int> jerSplitAK8SysMap;
 extern const std::map<std::string, int> jmsAK8SysMap;
 extern const std::map<std::string, int> jmrAK8SysMap;
-extern const std::map<std::string, SubjetBtagSys> subjetBtagSysMap; // NOT WRITTEN YET
 
 // tau uncertainties
 extern const std::map<std::string, int> hadTauESSysMap;
@@ -433,9 +426,6 @@ getPDFSys_option(const std::string & central_or_shift);
 
 LHEVptSys
 getLHEVptSys_option(const std::string & central_or_shift);
-
-SubjetBtagSys
-getSubjetBtagSys_option(const std::string & central_or_shift);
 
 bool
 isPDFsys_member(const std::string & central_or_shift);

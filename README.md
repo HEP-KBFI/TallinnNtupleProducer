@@ -13,7 +13,6 @@ cmsenv
 cd $CMSSW_BASE/src
 
 git clone git@github.com:HEP-KBFI/TallinnNtupleProducer.git
-git clone https://github.com/HEP-KBFI/nanoAOD-tools PhysicsTools/NanoAODTools
 git clone -b run2_SFs https://github.com/HEP-KBFI/TauTriggerSFs TauAnalysisTools/TauTriggerSFs
 git clone https://github.com/cms-tau-pog/TauIDSFs TauPOG/TauIDSFs
 

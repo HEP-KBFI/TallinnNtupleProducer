@@ -166,7 +166,6 @@ EvtWeightWriter::get_supported_systematics(const edm::ParameterSet & cfg)
         merge_systematic_shifts(supported_systematics, map_keys(ewkJetSysMap));
         merge_systematic_shifts(supported_systematics, map_keys(ewkBJetSysMap));
       }
-      //TODO: subjet b-tagging SF, Vpt
     }
   }
   return supported_systematics;
