@@ -113,7 +113,8 @@ Data_to_MC_CorrectionInterface_trigger_Base::tau_leg_efficiency(double pt,
                                                                const std::string & data_type,
                                                                const std::string & sys) const
 {
-  return sf_trigger_->evaluate({ std::max(pt, tau_trigger_ptThresholds_.at(trigger_type)), dm, trigger_type, wp, data_type, sys });
+  const double pt_threshold = tau_trigger_ptThresholds_.at(trigger_type);
+  return pt >= pt_threshold ? sf_trigger_->evaluate({ pt, dm, trigger_type, wp, data_type, sys }) : 0.;
 }
 
 TauTriggerSFValues
