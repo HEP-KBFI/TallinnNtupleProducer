@@ -1,7 +1,5 @@
 #include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h"
 
-#include "TallinnNtupleProducer/Objects/interface/GenJet.h"
-
 CorrT1METJet::CorrT1METJet(Double_t rawPt,
                            Double_t eta,
                            Double_t phi,

@@ -4,7 +4,10 @@
 #include "TallinnNtupleProducer/Objects/interface/Particle.h"                       // Particle::Point
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                     // RecoHadTau
 #include "TallinnNtupleProducer/Objects/interface/RecoVertex.h"                     // RecoVertex
-#include "TallinnNtupleProducer/Selectors/interface/RecoHadTauCollectionSelector.h" // RecoHadTauCollectionSelector
+#include "TallinnNtupleProducer/Selectors/interface/ParticleCollectionSelector.h"   // ParticleCollectionSelector
+
+// forward declarations
+enum class Era;
 
 class RecoHadTauSelectorECalCrack
 {

@@ -6,7 +6,6 @@
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TString.h"                                                              // Form()
 #include "TTree.h"                                                                // TTree
-#include "correction.h"
 
 #include <assert.h>                                                               // assert()
 

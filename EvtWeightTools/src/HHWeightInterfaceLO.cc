@@ -1,6 +1,5 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceLO.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                  // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"                  // get_fullpath()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h" // HHWeightInterfaceCouplings
 

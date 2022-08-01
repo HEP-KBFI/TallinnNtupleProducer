@@ -1,7 +1,6 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException()
 
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()

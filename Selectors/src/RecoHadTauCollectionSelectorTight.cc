@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"      // get_human_line()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"               // Era
-#include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h" // TauID
 
 RecoHadTauSelectorTight::RecoHadTauSelectorTight(Era era,
                                                  int index,

@@ -4,8 +4,6 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"    // lutWrapperBase, vLutWrapperBase
 #include "TallinnNtupleProducer/EvtWeightTools/interface/TauTriggerSFValues.h" // TauTriggerSFValues
 
-#include "correction.h"
-
 #include <map>                                                                 // std::map
 #include <string>                                                              // std::string
 #include <vector>                                                              // std::vector

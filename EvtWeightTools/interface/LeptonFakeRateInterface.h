@@ -3,8 +3,6 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                   // edm::ParameterSet
 
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kFRl_*
-
 #include <map>                                                            // std::map
 
 // forward declarations

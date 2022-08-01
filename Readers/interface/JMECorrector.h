@@ -1,7 +1,6 @@
 #ifndef TallinnNtupleProducer_Readers_JMECorrector_h
 #define TallinnNtupleProducer_Readers_JMECorrector_h
 
-#include "TallinnNtupleProducer/CommonTools/interface/as_integer.h" // EnumClassHash
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"     // RecoJetAK4
 #include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h"   // CorrT1METJet
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK8.h"     // RecoJetAK8

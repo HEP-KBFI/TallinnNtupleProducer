@@ -3,7 +3,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag
 
 #include <TString.h>                                                              // Form
 #include <TTree.h>                                                                // TTree

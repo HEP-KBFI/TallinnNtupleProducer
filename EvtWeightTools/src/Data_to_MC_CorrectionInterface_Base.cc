@@ -14,8 +14,6 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoJetAK4.h"                                 // RecoJetAK4
 #include "TallinnNtupleProducer/Objects/interface/RecoMuon.h"                                   // RecoMuon
 
-#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"                                              // TauIDSFTool
-
 #include "TFile.h"                                                                              // TFile
 #include "TString.h"                                                                            // Form()
 

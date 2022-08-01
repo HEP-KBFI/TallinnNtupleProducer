@@ -2,9 +2,9 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/leptonTypes.h"                            // kElectron, kMuon
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys, getTriggerSF_option()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
+
 #include <TString.h> // Form()
 
 #include <boost/algorithm/string/predicate.hpp> // boost::ends_with()

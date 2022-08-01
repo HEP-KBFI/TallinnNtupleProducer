@@ -1,10 +1,7 @@
 #ifndef TallinnNtupleProducer_Objects_RunLumiEvent_h
 #define TallinnNtupleProducer_Objects_RunLumiEvent_h
 
-#include "TallinnNtupleProducer/CommonTools/interface/AnalysisConfig.h" // AnalysisConfig
-#include "TallinnNtupleProducer/CommonTools/interface/HTXS.h"           // HTXS
-
-#include "FWCore/ParameterSet/interface/ParameterSet.h"                 // edm::ParameterSet
+#include "RtypesCore.h" // UInt_t, ULong64_t
 
 #include <iostream>                                                     // std::ostream
 #include <string>                                                       // std::string

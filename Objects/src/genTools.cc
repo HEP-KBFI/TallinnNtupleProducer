@@ -1,7 +1,6 @@
 #include "TallinnNtupleProducer/Objects/interface/genTools.h"
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
-#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h" // format_vint()
 #include "TallinnNtupleProducer/CommonTools/interface/topPtRwgt.h" // TopPtRwgtOption::
 
 #include <algorithm> // std::sort()

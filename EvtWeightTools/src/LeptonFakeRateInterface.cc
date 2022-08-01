@@ -2,6 +2,7 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"       // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                // Era, get_era()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"   // kFRl_*
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h" // lutWrapperTH2
 
 #include <TFile.h>                                                          // TFile

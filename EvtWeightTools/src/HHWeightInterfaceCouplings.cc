@@ -1,6 +1,5 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException(), get_human_line()
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                // format_vstring()

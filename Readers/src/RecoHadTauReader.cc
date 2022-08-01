@@ -7,7 +7,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // TauID
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // kHadTauPt_central, kHadTauPt_shiftUp, kHadTauPt_shiftDown
 
-#include "TMath.h"
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
 

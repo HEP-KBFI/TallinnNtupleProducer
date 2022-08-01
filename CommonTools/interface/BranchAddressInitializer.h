@@ -19,7 +19,6 @@
  *
  */
 
-#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/TypeTraits.h"   // Traits<>
 
 #include <TTree.h>                                                    // TTree

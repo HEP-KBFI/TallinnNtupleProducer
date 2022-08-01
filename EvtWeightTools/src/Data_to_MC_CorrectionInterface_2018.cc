@@ -6,7 +6,7 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::compSF(), aux::loadTriggerEff_1e_2016(), aux::loadTriggerEff_1m_2016()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"                     // lutWrapperTH2
 
-#include "TauPOG/TauIDSFs/interface/TauIDSFTool.h"                                              // TauIDSFTool
+#include <cassert>                                                                              // assert()
 
 Data_to_MC_CorrectionInterface_2018::Data_to_MC_CorrectionInterface_2018(const edm::ParameterSet & cfg)
   : Data_to_MC_CorrectionInterface_Base(Era::k2018, cfg)

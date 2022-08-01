@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h" // BranchAddressInitializer
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // kLHE_scale_*, PDFSys
 #include "TallinnNtupleProducer/Readers/interface/clip.h"                         // clip()
 

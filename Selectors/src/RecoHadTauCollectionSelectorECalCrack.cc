@@ -1,7 +1,5 @@
 #include "TallinnNtupleProducer/Selectors/interface/RecoHadTauCollectionSelectorECalCrack.h"
 
-#include "DataFormats/Math/interface/Vector3D.h"                      // math::XYZVector
-
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"          // Era
 

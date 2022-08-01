@@ -1,7 +1,7 @@
 #ifndef TallinnNtupleProducer_Objects_GenMEt_h
 #define TallinnNtupleProducer_Objects_GenMEt_h
 
-#include "TallinnNtupleProducer/Objects/interface/GenParticle.h" // Particle::LorentzVector
+#include "TallinnNtupleProducer/Objects/interface/Particle.h"    // Particle::LorentzVector
 
 #include <TMatrixD.h>                                            // TMatrixD
 

@@ -1,10 +1,11 @@
 #include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h" // format_vstring()
+#include "TallinnNtupleProducer/CommonTools/interface/cmsException.h" // cmsException()
+#include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"    // format_vstring()
 
-#include <TString.h>                                               // Form()
+#include <TString.h>                                                  // Form()
 
-#include <algorithm>                                               // std::sort()
+#include <algorithm>                                                  // std::sort()
 
 std::set<std::string> BranchAddressInitializer::gBoundBranchNames_read_;
 std::set<std::string> BranchAddressInitializer::gBoundBranchNames_write_;
