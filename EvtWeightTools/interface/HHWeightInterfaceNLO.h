@@ -10,7 +10,8 @@
  */
 
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"             // Era
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h" // LocalFileInPath
+
+#include <FWCore/Utilities/interface/FileInPath.h>                       // edm::FileInPath
 
 #include <map>                                                           // std::map
 
@@ -184,8 +185,8 @@ class HHWeightInterfaceNLO
   const HHWeightInterfaceCouplings * const couplings_;
   const HHWeightInterfaceNLOMode mode_;
 
-  LocalFileInPath xsecFileName_V1_lo_;
-  LocalFileInPath xsecFileName_V1_nlo_;
+  edm::FileInPath xsecFileName_V1_lo_;
+  edm::FileInPath xsecFileName_V1_nlo_;
 
   std::map<std::string, double>      totalXsec_V1_lo_;     // key = bmName
   std::map<std::string, double>      totalXsec_V1_nlo_;    // key = bmName
@@ -194,8 +195,8 @@ class HHWeightInterfaceNLO
   std::map<std::string, const TH1 *> weights_LOtoNLO_V1_;  // key = bmName
   std::map<std::string, const TH1 *> weights_NLOtoNLO_V1_; // key = bmName
 
-  LocalFileInPath xsecFileName_V2_lo_;
-  LocalFileInPath xsecFileName_V2_nlo_;
+  edm::FileInPath xsecFileName_V2_lo_;
+  edm::FileInPath xsecFileName_V2_nlo_;
 
   std::map<std::string, double>      totalXsec_V2_lo_;     // key = bmName
   std::map<std::string, double>      totalXsec_V2_nlo_;    // key = bmName

@@ -9,7 +9,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"                             // isHigherPt()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"                         // Btag, BtagWP, get_BtagWP()
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"                        // LocalFileInPath
+#include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"                           // get_fullpath()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // SubjetBtagSys::
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::compSF()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"                     // lutWrapperTH2
@@ -60,7 +60,7 @@ SubjetBtagSFInterface::SubjetBtagSFInterface(Era era,
     }
     assert(0);
   }();
-  const std::string csvFullPath = LocalFileInPath(Form("PhysicsTools/NanoAODTools/data/btagSF/%s", csvBaseName.data())).fullPath();
+  const std::string csvFullPath = get_fullpath(Form("PhysicsTools/NanoAODTools/data/btagSF/%s", csvBaseName.data()));
   calibration_ = new BTagCalibration("deepcsv", csvFullPath, true);
 
   for(const auto & kv: flavorMap_)

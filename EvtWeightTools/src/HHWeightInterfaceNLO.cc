@@ -25,7 +25,7 @@ enum { kLO, kNLO };
 namespace
 {
   std::vector<std::vector<double>>
-  loadCoeffFile(const LocalFileInPath & fileName)
+  loadCoeffFile(const edm::FileInPath & fileName)
   {
     std::vector<std::vector<double>> retVal;
     if ( fileName.fullPath().empty() )
@@ -51,7 +51,7 @@ namespace
   }
 
   std::vector<std::vector<double>>
-  loadCoeffFile_V2(const LocalFileInPath & fileName,
+  loadCoeffFile_V2(const edm::FileInPath & fileName,
                    const std::string & error_set)
   {
     std::vector<std::vector<double>> retVal;

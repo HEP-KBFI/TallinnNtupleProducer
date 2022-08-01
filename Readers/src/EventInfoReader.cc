@@ -4,7 +4,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/get_htxs_binning.h"         // get_htxs_binning()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                    // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"
 #include "TString.h"                                                              // Form()
 #include "TTree.h"                                                                // TTree
 #include "correction.h"

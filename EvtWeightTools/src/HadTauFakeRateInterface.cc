@@ -55,7 +55,7 @@ HadTauFakeRateInterface::HadTauFakeRateInterface(const edm::ParameterSet & cfg, 
   , isInitialized_fourth_(false)
 {
   const std::string inputFileName = cfg.getParameter<std::string>("inputFileName");
-  inputFile_ = openFile(LocalFileInPath(inputFileName));
+  inputFile_ = openFile(edm::FileInPath(inputFileName));
 
   const std::string hadTauSelection = cfg.getParameter<std::string>("hadTauSelection");
 

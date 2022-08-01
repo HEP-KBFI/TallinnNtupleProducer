@@ -3,7 +3,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"              // get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h" // kJetMET_*
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"   // get_fatJet_corrections()
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"  // LocalFileInPath
+#include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"     // get_fullpath()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"     // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"        // format_vdouble()
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"            // EventInfo
@@ -103,9 +103,9 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   const std::vector<std::string> fatJet_corrections_vstring = cfg.getParameter<std::vector<std::string>>("fatJet_corrections");
   fatJet_corr_ = get_fatJet_corrections(fatJet_corrections_vstring);
 
-  const std::string jmarCorrectionSetFile = LocalFileInPath(Form(
+  const std::string jmarCorrectionSetFile = get_fullpath(Form(
     "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jmar.json.gz", era_str_.data()
-  )).fullPath();
+  ));
   jmar_cset_ = correction::CorrectionSet::from_file(jmarCorrectionSetFile);
 
   if(fatJet_corr_)
@@ -158,13 +158,13 @@ JMECorrector::JMECorrector(const edm::ParameterSet & cfg)
   assert(! globalJECTag_.empty());
   assert(! globalJERTag_.empty());
 
-  const std::string jetCorrectionSetFile = LocalFileInPath(Form(
+  const std::string jetCorrectionSetFile = get_fullpath(Form(
     "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/jet_jerc.json.gz", era_str_.data()
-  )).fullPath();
+  ));
   jet_jerc_cset_ = correction::CorrectionSet::from_file(jetCorrectionSetFile);
-  const std::string fatJetCorrectionSetFile = LocalFileInPath(Form(
+  const std::string fatJetCorrectionSetFile = get_fullpath(Form(
     "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/jme/%s/fatJet_jerc.json.gz", era_str_.data()
-  )).fullPath();
+  ));
   fatJet_jerc_cset_ = correction::CorrectionSet::from_file(fatJetCorrectionSetFile);
 
   // TODO move to compound corrections instead of doing them manually

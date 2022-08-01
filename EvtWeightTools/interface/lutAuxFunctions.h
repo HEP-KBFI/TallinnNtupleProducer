@@ -3,7 +3,7 @@
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"                  // edm::ParameterSet
 
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h" // LocalFileInPath
+#include <FWCore/Utilities/interface/FileInPath.h>                       // edm::FileInPath
 
 #include <type_traits>                                                   // std::enable_if, std::is_arithmetic
 
@@ -22,7 +22,7 @@ namespace lut
 
 // define auxiliary functions
 TFile *
-openFile(const LocalFileInPath & fileName);
+openFile(const edm::FileInPath & fileName);
 
 TH1 *
 loadTH1(TFile * inputFile,

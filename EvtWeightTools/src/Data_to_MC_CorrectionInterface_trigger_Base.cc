@@ -1,6 +1,6 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_trigger_Base.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h"                        // LocalFileInPath
+#include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"                           // get_fullpath()
 #include "TallinnNtupleProducer/CommonTools/interface/leptonTypes.h"                            // getLeptonType()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
@@ -53,7 +53,9 @@ Data_to_MC_CorrectionInterface_trigger_Base::Data_to_MC_CorrectionInterface_trig
   , tau_tigger_cset_(nullptr)
   , sf_trigger_(nullptr)
 {
-  const std::string tauTriggerCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", era_str_.data())).fullPath();
+  const std::string tauTriggerCorrectionSetFile = get_fullpath(Form(
+    "TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", era_str_.data()
+  ));
   tau_tigger_cset_ = correction::CorrectionSet::from_file(tauTriggerCorrectionSetFile);
   sf_trigger_ = tau_tigger_cset_->at("tau_trigger");
 }

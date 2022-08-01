@@ -1,9 +1,9 @@
 #include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"
 
-#include "TallinnNtupleProducer/CommonTools/interface/LocalFileInPath.h" // LocalFileInPath
+#include <FWCore/Utilities/interface/FileInPath.h> // edm::FileInPath
 
 std::string
 get_fullpath(const std::string & path)
 {
-  return LocalFileInPath(path).fullPath();
+  return edm::FileInPath(path).fullPath();
 }

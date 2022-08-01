@@ -26,7 +26,7 @@ EvtWeightManager::EvtWeightManager(const edm::ParameterSet & cfg, bool isDebug)
   const edm::VParameterSet histograms = cfg.getParameter<edm::VParameterSet>("histograms");
 
   assert(! histogramFile.empty() && ! branchNameXaxis.empty() && ! branchTypeXaxis.empty());
-  histogram_file_ = openFile(LocalFileInPath(histogramFile));
+  histogram_file_ = openFile(edm::FileInPath(histogramFile));
 
   binnedHistogram_varName_x_ = branchNameXaxis;
   binnedHistogram_varType_x_ = branchTypeXaxis;

@@ -45,7 +45,7 @@ namespace
  * @return pointer to TFile object
  */
 TFile *
-openFile(const LocalFileInPath & fileName)
+openFile(const edm::FileInPath & fileName)
 {
   if(fileName.fullPath().empty())
   {
@@ -262,7 +262,7 @@ lutWrapperBase::lutWrapperBase(std::map<std::string, TFile *> & inputFiles,
   }
   else
   {
-    inputFile_ = openFile(LocalFileInPath(inputFileName_));
+    inputFile_ = openFile(edm::FileInPath(inputFileName_));
     inputFiles[inputFileName] = inputFile_;
   }
   initialize(lutType);

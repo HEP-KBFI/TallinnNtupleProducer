@@ -6,6 +6,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"                         // pileupJetID, pileupJetIDSFsys, get_pileupJetID()
 #include "TallinnNtupleProducer/CommonTools/interface/leptonTypes.h"                            // kElectron, kMuon
+#include "TallinnNtupleProducer/CommonTools/interface/get_fullpath.h"                           // get_fullpath()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::clearCollection(), aux::compSF(), aux::getHadTauIdxLabel()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/lutAuxFunctions.h"                     // get_from_lut()
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h"                               // RecoElectron
@@ -60,10 +61,10 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   , numHadTaus_(0)
 {
   const std::string era_last_two_digit = era_str_.substr(era_str_.size()-2);
-  const std::string pileupCorrectionSet = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/pu/%s/puWeights.json.gz", era_str_.data())).fullPath();
+  const std::string pileupCorrectionSet = get_fullpath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/pu/%s/puWeights.json.gz", era_str_.data()));
   pileup_cset_ = correction::CorrectionSet::from_file(pileupCorrectionSet)->at(Form("Collisions%s_goldenJSON", era_last_two_digit.data()));
 
-  const std::string tauCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", era_str_.data())).fullPath();
+  const std::string tauCorrectionSetFile = get_fullpath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/tau/%s/tau.json.gz", era_str_.data()));
   tau_cset_ = correction::CorrectionSet::from_file(tauCorrectionSetFile);
 
   hadTauID_and_Iso_cset_ = tau_cset_->at(TauID_names.at(hadTauId_));
@@ -129,7 +130,7 @@ Data_to_MC_CorrectionInterface_Base::Data_to_MC_CorrectionInterface_Base(Era era
   {
     era_str_btag += "cp5";
   }
-  const std::string btagCorrectionSetFile = LocalFileInPath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/btv/%s/btagging.json.gz", era_str_btag.data())).fullPath();
+  const std::string btagCorrectionSetFile = get_fullpath(Form("TallinnNtupleProducer/EvtWeightTools/data/correctionlib/btv/%s/btagging.json.gz", era_str_btag.data()));
   btag_cset_ = correction::CorrectionSet::from_file(btagCorrectionSetFile);
   btag_shape_cset_ = btag_cset_->at("deepJet_shape");
   
