@@ -402,16 +402,14 @@ Data_to_MC_CorrectionInterface_Base::check_triggerSFsys_opt(TriggerSFsys central
   {
     return true;
   }
-  if(central_or_shift == TriggerSFsys::shift_2lssUp      ||
-     central_or_shift == TriggerSFsys::shift_2lssDown    ||
-     central_or_shift == TriggerSFsys::shift_2lssEEUp    ||
+  if(central_or_shift == TriggerSFsys::shift_2lssEEUp    ||
      central_or_shift == TriggerSFsys::shift_2lssEEDown  ||
      central_or_shift == TriggerSFsys::shift_2lssEMuUp   ||
      central_or_shift == TriggerSFsys::shift_2lssEMuDown ||
      central_or_shift == TriggerSFsys::shift_2lssMuMuUp  ||
      central_or_shift == TriggerSFsys::shift_2lssMuMuDown)
   {
-    return numLeptons_ <= 2 && numHadTaus_ <= 2;
+    return numLeptons_ == 2 && numHadTaus_ <= 2;
   }
   return false;
 }
@@ -429,7 +427,6 @@ Data_to_MC_CorrectionInterface_Base::comp_triggerSFsys_opt(double sf,
     return sf;
   }
   else if(central_or_shift == TriggerSFsys::shiftUp          ||
-          central_or_shift == TriggerSFsys::shift_2lssUp     ||
           central_or_shift == TriggerSFsys::shift_2lssEEUp   ||
           central_or_shift == TriggerSFsys::shift_2lssEMuUp  ||
           central_or_shift == TriggerSFsys::shift_2lssMuMuUp)
@@ -437,7 +434,6 @@ Data_to_MC_CorrectionInterface_Base::comp_triggerSFsys_opt(double sf,
     return sf * (1. + sfErr);
   }
   else if(central_or_shift == TriggerSFsys::shiftDown          ||
-          central_or_shift == TriggerSFsys::shift_2lssDown     ||
           central_or_shift == TriggerSFsys::shift_2lssEEDown   ||
           central_or_shift == TriggerSFsys::shift_2lssEMuDown  ||
           central_or_shift == TriggerSFsys::shift_2lssMuMuDown)

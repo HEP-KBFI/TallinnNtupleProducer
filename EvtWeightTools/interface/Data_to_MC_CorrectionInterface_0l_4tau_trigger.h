@@ -12,8 +12,8 @@ public:
 
   //-----------------------------------------------------------------------------
   // data/MC correction for trigger efficiency 
-  double
-  getSF_triggerEff(TriggerSFsys central_or_shift) const;
+  virtual double
+  getSF_triggerEff(TriggerSFsys central_or_shift) const override;
   //-----------------------------------------------------------------------------
 
 protected:

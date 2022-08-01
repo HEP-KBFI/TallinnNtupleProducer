@@ -52,26 +52,26 @@ Data_to_MC_CorrectionInterface_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
   if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
   {
-    eff_2tau_tauLeg1_data = sf_0l_2tau_trigger_->evaluate({hadTau1_pt_, hadTau1_decayMode_, "diTau", wp_str_, "eff_data", sys});
-    eff_2tau_tauLeg1_mc   = sf_0l_2tau_trigger_->evaluate({hadTau1_pt_, hadTau1_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+    eff_2tau_tauLeg1_data = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "ditau", wp_str_, "eff_data", sys);
+    eff_2tau_tauLeg1_mc   = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "ditau", wp_str_, "eff_mc", sys);
   }
 
   if(std::fabs(hadTau2_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau2_decayMode_))
   {
-    eff_2tau_tauLeg2_data = sf_0l_2tau_trigger_->evaluate({hadTau2_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_data", sys});
-    eff_2tau_tauLeg2_mc   = sf_0l_2tau_trigger_->evaluate({hadTau2_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+    eff_2tau_tauLeg2_data = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_data", sys);
+    eff_2tau_tauLeg2_mc   = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_mc", sys);
   }
 
   if(std::fabs(hadTau3_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau3_decayMode_))
   {
-    eff_2tau_tauLeg3_data = sf_0l_2tau_trigger_->evaluate({hadTau3_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_data", sys});
-    eff_2tau_tauLeg3_mc   = sf_0l_2tau_trigger_->evaluate({hadTau3_pt_, hadTau3_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+    eff_2tau_tauLeg3_data = tau_leg_efficiency(hadTau3_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_data", sys);
+    eff_2tau_tauLeg3_mc   = tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "ditau", wp_str_, "eff_mc", sys);
   }
 
   if(std::fabs(hadTau4_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau4_decayMode_))
   {
-    eff_2tau_tauLeg4_data = sf_0l_2tau_trigger_->evaluate({hadTau4_pt_, hadTau4_decayMode_, "diTau", wp_str_, "eff_data", sys});
-    eff_2tau_tauLeg4_mc   = sf_0l_2tau_trigger_->evaluate({hadTau4_pt_, hadTau4_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+    eff_2tau_tauLeg4_data = tau_leg_efficiency(hadTau4_pt_, hadTau4_decayMode_, "ditau", wp_str_, "eff_data", sys);
+    eff_2tau_tauLeg4_mc   = tau_leg_efficiency(hadTau4_pt_, hadTau4_decayMode_, "ditau", wp_str_, "eff_mc", sys);
   }
 
   double prob_data = 0.;

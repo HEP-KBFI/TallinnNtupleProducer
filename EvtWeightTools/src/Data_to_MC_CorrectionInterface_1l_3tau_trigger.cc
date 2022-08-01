@@ -19,12 +19,6 @@ Data_to_MC_CorrectionInterface_1l_3tau_trigger::~Data_to_MC_CorrectionInterface_
 {}
 
 void
-Data_to_MC_CorrectionInterface_1l_3tau_trigger::set_0l_2tau_trigger_sf(correction::Correction::Ref cset)
-{
-  sf_0l_2tau_trigger_ = cset;
-}
-
-void
 Data_to_MC_CorrectionInterface_1l_3tau_trigger::setTriggerBits(bool isTriggered_1e,
                                                                bool isTriggered_1e1tau,
                                                                bool isTriggered_1m,
@@ -87,20 +81,20 @@ Data_to_MC_CorrectionInterface_1l_3tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
     if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
     {
-      eff_1l1tau_tauLeg1_data = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_data", sf_1l_2tau_trigger_, sys);
-      eff_1l1tau_tauLeg1_mc = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_2tau_trigger_, sys);
+      eff_1l1tau_tauLeg1_data = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_data", sys);
+      eff_1l1tau_tauLeg1_mc = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "etau", wp_str_, "eff_mc", sys);
     }
 
     if(std::fabs(hadTau2_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau2_decayMode_))
     {
-      eff_1l1tau_tauLeg2_data = aux::tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "etau", wp_str_, "eff_data", sf_1l_2tau_trigger_, sys);
-      eff_1l1tau_tauLeg2_mc = aux::tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_2tau_trigger_, sys);
+      eff_1l1tau_tauLeg2_data = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "etau", wp_str_, "eff_data", sys);
+      eff_1l1tau_tauLeg2_mc = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "etau", wp_str_, "eff_mc", sys);
     }
 
     if(std::fabs(hadTau3_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau3_decayMode_))
     {
-      eff_1l1tau_tauLeg3_data = aux::tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "etau", wp_str_, "eff_data", sf_1l_2tau_trigger_, sys);
-      eff_1l1tau_tauLeg3_mc = aux::tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "etau", wp_str_, "eff_mc", sf_1l_2tau_trigger_, sys);
+      eff_1l1tau_tauLeg3_data = tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "etau", wp_str_, "eff_data", sys);
+      eff_1l1tau_tauLeg3_mc = tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "etau", wp_str_, "eff_mc", sys);
     }
 
     isTriggered_1l     = isTriggered_1e_;
@@ -119,20 +113,20 @@ Data_to_MC_CorrectionInterface_1l_3tau_trigger::getSF_triggerEff(TriggerSFsys ce
 
     if(std::fabs(hadTau1_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau1_decayMode_))
     {
-      eff_1l1tau_tauLeg1_data = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mtau", wp_str_, "eff_data", sf_1l_2tau_trigger_, sys);
-      eff_1l1tau_tauLeg1_mc = aux::tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mtau", wp_str_, "eff_mc", sf_1l_2tau_trigger_, sys);
+      eff_1l1tau_tauLeg1_data = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mtau", wp_str_, "eff_data", sys);
+      eff_1l1tau_tauLeg1_mc = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "mtau", wp_str_, "eff_mc", sys);
     }
 
     if(std::fabs(hadTau2_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau2_decayMode_))
     {
-      eff_1l1tau_tauLeg2_data = aux::tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "mtau", wp_str_, "eff_data", sf_1l_2tau_trigger_, sys);
-      eff_1l1tau_tauLeg2_mc = aux::tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "mtau", wp_str_, "eff_mc", sf_1l_2tau_trigger_, sys);
+      eff_1l1tau_tauLeg2_data = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "mtau", wp_str_, "eff_data", sys);
+      eff_1l1tau_tauLeg2_mc = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "mtau", wp_str_, "eff_mc", sys);
     }
 
     if(std::fabs(hadTau3_eta_) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau3_decayMode_))
     {
-      eff_1l1tau_tauLeg3_data = aux::tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "mtau", wp_str_, "eff_data", sf_1l_2tau_trigger_, sys);
-      eff_1l1tau_tauLeg3_mc = aux::tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "mtau", wp_str_, "eff_mc", sf_1l_2tau_trigger_, sys);
+      eff_1l1tau_tauLeg3_data = tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "mtau", wp_str_, "eff_data", sys);
+      eff_1l1tau_tauLeg3_mc = tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "mtau", wp_str_, "eff_mc", sys);
     }
 
     isTriggered_1l     = isTriggered_1m_;
@@ -161,14 +155,14 @@ Data_to_MC_CorrectionInterface_1l_3tau_trigger::getSF_triggerEff(TriggerSFsys ce
     std::cout << "eff_1l1tau_tauLeg3_mc = " << eff_1l1tau_tauLeg3_mc << '\n';
   }
 
-  const double eff_2tau_tauLeg1_data = sf_0l_2tau_trigger_->evaluate({hadTau1_pt_, hadTau1_decayMode_, "diTau", wp_str_, "eff_data", sys});
-  const double eff_2tau_tauLeg1_mc   = sf_0l_2tau_trigger_->evaluate({hadTau1_pt_, hadTau1_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+  const double eff_2tau_tauLeg1_data = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "ditau", wp_str_, "eff_data", sys);
+  const double eff_2tau_tauLeg1_mc   = tau_leg_efficiency(hadTau1_pt_, hadTau1_decayMode_, "ditau", wp_str_, "eff_mc", sys);
 
-  const double eff_2tau_tauLeg2_data = sf_0l_2tau_trigger_->evaluate({hadTau2_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_data", sys});
-  const double eff_2tau_tauLeg2_mc   = sf_0l_2tau_trigger_->evaluate({hadTau2_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+  const double eff_2tau_tauLeg2_data = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_data", sys);
+  const double eff_2tau_tauLeg2_mc   = tau_leg_efficiency(hadTau2_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_mc", sys);
 
-  const double eff_2tau_tauLeg3_data = sf_0l_2tau_trigger_->evaluate({hadTau3_pt_, hadTau2_decayMode_, "diTau", wp_str_, "eff_data", sys});
-  const double eff_2tau_tauLeg3_mc   = sf_0l_2tau_trigger_->evaluate({hadTau3_pt_, hadTau3_decayMode_, "diTau", wp_str_, "eff_mc", sys});
+  const double eff_2tau_tauLeg3_data = tau_leg_efficiency(hadTau3_pt_, hadTau2_decayMode_, "ditau", wp_str_, "eff_data", sys);
+  const double eff_2tau_tauLeg3_mc   = tau_leg_efficiency(hadTau3_pt_, hadTau3_decayMode_, "ditau", wp_str_, "eff_mc", sys);
 
   if(isDEBUG_)
   {

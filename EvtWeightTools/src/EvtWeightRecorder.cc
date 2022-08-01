@@ -3,13 +3,10 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                                      // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                                  // EWKJetSys, EWKBJetSys, getJetToLeptonFR_option(), getJetToTauFR_option(), kFRjt_central, kFRl_central, TriggerSFsysChoice
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_Base.h"            // Data_to_MC_CorrectionInterface_Base
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_2tau_trigger.h" // Data_to_MC_CorrectionInterface_0l_2tau_trigger
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_1tau_trigger.h" // Data_to_MC_CorrectionInterface_1l_1tau_trigger
-#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_1l_2tau_trigger.h" // Data_to_MC_CorrectionInterface_1l_2tau_trigger
+#include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_trigger_Base.h"    // Data_to_MC_CorrectionInterface_trigger_Base
 #include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCNormScaleFactors.h"                           // DYMCNormScaleFactors
 #include "TallinnNtupleProducer/EvtWeightTools/interface/DYMCReweighting.h"                                // DYMCReweighting
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"                               // EvtWeightManager
-#include "TallinnNtupleProducer/EvtWeightTools/interface/fakeBackgroundAuxFunctions.h"                     // getWeight_1L(), getWeight_2L(), getWeight_3L(),getWeight_4L()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HadTauFakeRateInterface.h"                        // HadTauFakeRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceLO.h"                            // HHWeightInterfaceLO
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceNLO.h"                           // HHWeightInterfaceNLO
@@ -1043,7 +1040,7 @@ EvtWeightRecorder::record_leptonTriggerEff(const Data_to_MC_CorrectionInterface_
 }
 
 void
-EvtWeightRecorder::record_tauTriggerEff(const Data_to_MC_CorrectionInterface_0l_2tau_trigger * const dataToMCcorrectionInterface_0l_2tau_trigger)
+EvtWeightRecorder::record_tauTriggerEff(const Data_to_MC_CorrectionInterface_trigger_Base * const dataToMCcorrectionInterface_trigger)
 {
   assert(isMC_);
   weights_tauTriggerEff_.clear();
@@ -1054,39 +1051,7 @@ EvtWeightRecorder::record_tauTriggerEff(const Data_to_MC_CorrectionInterface_0l_
     {
       continue;
     }
-    weights_tauTriggerEff_[triggerSF_option] = dataToMCcorrectionInterface_0l_2tau_trigger->getSF_triggerEff(triggerSF_option);
-  }
-}
-
-void
-EvtWeightRecorder::record_tauTriggerEff(const Data_to_MC_CorrectionInterface_1l_1tau_trigger * const dataToMCcorrectionInterface_1l_1tau_trigger)
-{
-  assert(isMC_);
-  weights_tauTriggerEff_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const TriggerSFsys triggerSF_option = getTriggerSF_option(central_or_shift, TriggerSFsysChoice::hadTauOnly);
-    if(weights_tauTriggerEff_.count(triggerSF_option))
-    {
-      continue;
-    }
-    weights_tauTriggerEff_[triggerSF_option] = dataToMCcorrectionInterface_1l_1tau_trigger->getSF_triggerEff(triggerSF_option);
-  }
-}
-
-void
-EvtWeightRecorder::record_tauTriggerEff(const Data_to_MC_CorrectionInterface_1l_2tau_trigger * const dataToMCcorrectionInterface_1l_2tau_trigger)
-{
-  assert(isMC_);
-  weights_tauTriggerEff_.clear();
-  for(const std::string & central_or_shift: central_or_shifts_)
-  {
-    const TriggerSFsys triggerSF_option = getTriggerSF_option(central_or_shift, TriggerSFsysChoice::hadTauOnly);
-    if(weights_tauTriggerEff_.count(triggerSF_option))
-    {
-      continue;
-    }
-    weights_tauTriggerEff_[triggerSF_option] = dataToMCcorrectionInterface_1l_2tau_trigger->getSF_triggerEff(triggerSF_option);
+    weights_tauTriggerEff_[triggerSF_option] = dataToMCcorrectionInterface_trigger->getSF_triggerEff(triggerSF_option);
   }
 }
 

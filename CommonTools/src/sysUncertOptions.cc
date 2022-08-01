@@ -2,7 +2,6 @@
 
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"            // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                     // Era
-#include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"          // Btag
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h" // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                // map_keys()
@@ -233,16 +232,23 @@ const std::map<std::string, TauIDSFsys> tauIDSFSysMap = {
 const std::map<std::string, TriggerSFsys> triggerSFSysMap = {
   { "CMS_ttHl_triggerUp",            TriggerSFsys::shiftUp            },
   { "CMS_ttHl_triggerDown",          TriggerSFsys::shiftDown          },
-  { "CMS_ttHl_trigger_2lssUp",       TriggerSFsys::shift_2lssUp       },
-  { "CMS_ttHl_trigger_2lssDown",     TriggerSFsys::shift_2lssDown     },
+};
+
+const std::map<std::string, TriggerSFsys> triggerSFSysMap_2lss = {
   { "CMS_ttHl_trigger_2lssEEUp",     TriggerSFsys::shift_2lssEEUp     },
   { "CMS_ttHl_trigger_2lssEEDown",   TriggerSFsys::shift_2lssEEDown   },
   { "CMS_ttHl_trigger_2lssEMuUp",    TriggerSFsys::shift_2lssEMuUp    },
   { "CMS_ttHl_trigger_2lssEMuDown",  TriggerSFsys::shift_2lssEMuDown  },
   { "CMS_ttHl_trigger_2lssMuMuUp",   TriggerSFsys::shift_2lssMuMuUp   },
   { "CMS_ttHl_trigger_2lssMuMuDown", TriggerSFsys::shift_2lssMuMuDown },
+};
+
+const std::map<std::string, TriggerSFsys> triggerSFSysMap_1l_1tau = {
   { "CMS_ttHl_trigger_1l1tauUp",     TriggerSFsys::shift_1l1tauUp     },
   { "CMS_ttHl_trigger_1l1tauDown",   TriggerSFsys::shift_1l1tauDown   },
+};
+
+const std::map<std::string, TriggerSFsys> triggerSFSysMap_0l_2tau = {
   { "CMS_ttHl_trigger_0l2tauUp",     TriggerSFsys::shift_0l2tauUp     },
   { "CMS_ttHl_trigger_0l2tauDown",   TriggerSFsys::shift_0l2tauDown   },
 };
@@ -594,15 +600,18 @@ getTriggerSF_option(const std::string & central_or_shift,
   const bool isHadTauCompatible = choice == TriggerSFsysChoice::any || choice == TriggerSFsysChoice::hadTauOnly;
   const bool isAnyCompatible = isLeptonCompatible || isHadTauCompatible;
 
-  const auto kv = triggerSFSysMap.find(central_or_shift);
-  if(kv != triggerSFSysMap.end())
+  for(const auto & sysMap: { triggerSFSysMap, triggerSFSysMap_2lss, triggerSFSysMap_1l_1tau, triggerSFSysMap_0l_2tau })
   {
-    const TriggerSFsys central_or_shift_int = kv->second;
-    if(((central_or_shift_int == TriggerSFsys::shiftUp || central_or_shift_int == TriggerSFsys::shiftDown) && isAnyCompatible) ||
-       (central_or_shift.find("tau") == std::string::npos && isLeptonCompatible) ||
-       (central_or_shift.find("tau") != std::string::npos && isHadTauCompatible))
+    const auto kv = sysMap.find(central_or_shift);
+    if(kv != sysMap.end())
     {
-      return central_or_shift_int;
+      const TriggerSFsys central_or_shift_int = kv->second;
+      if(((central_or_shift_int == TriggerSFsys::shiftUp || central_or_shift_int == TriggerSFsys::shiftDown) && isAnyCompatible) ||
+         (central_or_shift.find("tau") == std::string::npos && isLeptonCompatible) ||
+         (central_or_shift.find("tau") != std::string::npos && isHadTauCompatible))
+      {
+        return central_or_shift_int;
+      }
     }
   }
   return TriggerSFsys::central;

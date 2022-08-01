@@ -1,8 +1,13 @@
 #ifndef TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_trigger_Base_h
 #define TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_trigger_Base_h
 
-#include "FWCore/ParameterSet/interface/ParameterSet.h"                  // edm::ParameterSet
-#include <iostream>                                                      // std::cout
+#include "TallinnNtupleProducer/EvtWeightTools/interface/TauTriggerSFValues.h" // TauTriggerSFValues
+
+#include "FWCore/ParameterSet/interface/ParameterSet.h"                        // edm::ParameterSet
+
+#include "correction.h"                                                        // correction::CorrectionSet, correction::Correction::Ref
+
+#include <iostream>                                                            // std::cout
 
 // forward declarations
 class RecoHadTau;
@@ -10,12 +15,13 @@ class RecoLepton;
 
 enum class Era;
 enum class TauID;
+enum class TriggerSFsys;
 
 class Data_to_MC_CorrectionInterface_trigger_Base
 {
  public:
   Data_to_MC_CorrectionInterface_trigger_Base(const edm::ParameterSet & cfg);
-  ~Data_to_MC_CorrectionInterface_trigger_Base();
+  virtual ~Data_to_MC_CorrectionInterface_trigger_Base() = default;
 
   //-----------------------------------------------------------------------------
 
@@ -23,17 +29,37 @@ class Data_to_MC_CorrectionInterface_trigger_Base
   // set hadTau pT, eta and decay mode
   // (to be called once per event, before calling any of the getSF.. functions)
   void
-  setHadTaus(const std::vector<const RecoHadTau * >& hadTaus);
+  setHadTaus(const std::vector<const RecoHadTau * > & hadTaus);
   //-----------------------------------------------------------------------------
 
   // set lepton type, pT and eta as well as hadTau pT, eta and decay mode
   // (to be called once per event, before calling any of the getSF.. functions)
   void
-    setLepton(const RecoLepton * const lepton);
+  setLeptons(const std::vector<const RecoLepton *> & leptons);
 
+  // data/MC correction for trigger efficiency
+  virtual double
+  getSF_triggerEff(TriggerSFsys central_or_shift) const = 0;
   //----------------------------------------------------------------------------- 
 
  protected:
+
+  static const std::map<std::string, double> tau_trigger_ptThresholds_;
+
+  double
+  tau_leg_efficiency(double pt,
+                     int dm,
+                     const std::string & trigger_type,
+                     const std::string & wp,
+                     const std::string & data_type,
+                     const std::string & sys) const;
+
+  TauTriggerSFValues
+  tau_leg_efficiency(double pt,
+                     int dm,
+                     const std::string & trigger_type,
+                     const std::string & wp,
+                     const std::string & data_type) const;
 
   std::string era_str_;
   Era era_;
@@ -71,6 +97,9 @@ class Data_to_MC_CorrectionInterface_trigger_Base
 
   const TauID tauId_;
   const std::string wp_str_;
+
+  std::unique_ptr<correction::CorrectionSet> tau_tigger_cset_;
+  correction::Correction::Ref sf_trigger_;
   //-----------------------------------------------------------------------------
   // data/MC corrections for trigger efficiencies
   //-----------------------------------------------------------------------------

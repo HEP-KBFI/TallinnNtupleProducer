@@ -12,9 +12,6 @@ public:
 
   //-----------------------------------------------------------------------------
 
-  void
-  set_0l_2tau_trigger_sf(correction::Correction::Ref cset);
-
   // set HLT trigger bits
   // (to be called once per event, before calling any of the getSF.. functions)
   void
@@ -32,8 +29,8 @@ public:
 
   //-----------------------------------------------------------------------------
   // data/MC correction for trigger efficiency 
-  double
-  getSF_triggerEff(TriggerSFsys central_or_shift) const;
+  virtual double
+  getSF_triggerEff(TriggerSFsys central_or_shift) const override;
   //-----------------------------------------------------------------------------
 
 protected:
@@ -71,8 +68,6 @@ protected:
               double eff_2tau_tauLeg) const;
 
   bool isTriggered_2tau_;
-
-  correction::Correction::Ref sf_0l_2tau_trigger_;
 };
 
 #endif // TallinnNtupleProducer_EvtWeightTools_Data_to_MC_CorrectionInterface_1l_3tau_trigger_h

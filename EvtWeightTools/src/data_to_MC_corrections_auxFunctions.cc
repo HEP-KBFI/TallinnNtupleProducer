@@ -154,7 +154,7 @@ namespace aux
   {
     if(eff_data == 0. && eff_mc == 0.)
     {
-      std::cout << "WARNING: efficiency in data and in MC are both zero -> returning SF = 1 instead\n";
+      //std::cout << "WARNING: efficiency in data and in MC are both zero -> returning SF = 1 instead\n";
       return 1.;
     }
     return std::min(eff_data / std::max(1.e-6, eff_mc), 1.e+1);
@@ -171,14 +171,12 @@ namespace aux
     {
       case TriggerSFsys::central:            return aux::compSF(eff_data.central, eff_mc.central);
       case TriggerSFsys::shiftUp:            __attribute__((fallthrough));
-      case TriggerSFsys::shift_2lssUp:       __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssEEUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssEMuUp:    __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuUp:   __attribute__((fallthrough));
       case TriggerSFsys::shift_1l1tauUp:     __attribute__((fallthrough));
       case TriggerSFsys::shift_0l2tauUp:     return aux::compSF(eff_data.max, eff_mc.min);
       case TriggerSFsys::shiftDown:          __attribute__((fallthrough));
-      case TriggerSFsys::shift_2lssDown:     __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssEEDown:   __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssEMuDown:  __attribute__((fallthrough));
       case TriggerSFsys::shift_2lssMuMuDown: __attribute__((fallthrough));
@@ -571,32 +569,6 @@ namespace aux
         16., 100., lut::kLimit, etaMin, etaMax, lut::kCut
       ));
     }
-  }
-
-  double
-  tau_leg_efficiency(const double pt, 
-                     const int dm, 
-                     const std::string trigger_type, 
-                     const std::string wp, 
-                     const std::string data_type, 
-                     const correction::Correction::Ref cset,
-                     const std::string & sys)
-  {
-    return cset->evaluate({ pt, dm, trigger_type, wp, data_type, sys });
-  }
-
-  TauTriggerSFValues
-  tau_leg_efficiency(const double pt, 
-                     const int dm, 
-                     const std::string trigger_type, 
-                     const std::string wp, 
-                     const std::string data_type, 
-                     const correction::Correction::Ref cset)
-  {
-    const double nom = tau_leg_efficiency(pt, dm, trigger_type, wp, data_type, cset, "nom");
-    const double up = tau_leg_efficiency(pt, dm, trigger_type, wp, data_type, cset, "up");
-    const double down = tau_leg_efficiency(pt, dm, trigger_type, wp, data_type, cset, "down");
-    return { down, nom, up };
   }
 
   int
