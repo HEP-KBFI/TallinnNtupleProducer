@@ -14,14 +14,12 @@ class TTree;
 enum class Btag;
 enum class Era;
 
-class RecoJetReaderAK4 : public ReaderBase
+class RecoJetReaderAK4
+  : public ReaderBase
 {
  public:
   RecoJetReaderAK4(const edm::ParameterSet & cfg);
   ~RecoJetReaderAK4() override;
-
-  void
-  setPtMass_central_or_shift(int central_or_shift);
 
   void
   read_Btag(Btag btag);
@@ -56,11 +54,13 @@ class RecoJetReaderAK4 : public ReaderBase
   Era era_;
   bool isMC_;
   unsigned int max_nJets_;
-  std::string branchName_num_;
   std::string branchName_obj_;
+  std::string branchName_num_;
  
+  std::string branchName_pt_;
   std::string branchName_eta_;
   std::string branchName_phi_;
+  std::string branchName_mass_;
   std::string branchName_QGDiscr_;
   std::string branchName_bRegCorr_;
   std::string branchName_bRegRes_;
@@ -70,19 +70,20 @@ class RecoJetReaderAK4 : public ReaderBase
   std::string branchName_genJetIdx_;
   std::string branchName_partonFlavour_;
   std::string branchName_hadronFlavour_;
+  std::string branchName_rawFactor_;
+  std::string branchName_area_;
+  std::string branchName_neEmEF_;
+  std::string branchName_chEmEF_;
+  std::string branchName_muonSubtrFactor_;
 
-  std::map<int, std::string> branchNames_pt_systematics_;
-  std::map<int, std::string> branchNames_mass_systematics_;
   std::map<Btag, std::string> branchNames_btag_;
-
   Btag btag_;
-  int btag_central_or_shift_;
-  int ptMassOption_central_;
-  int ptMassOption_;
 
   UInt_t nJets_;
+  Float_t * jet_pt_;
   Float_t * jet_eta_;
   Float_t * jet_phi_;
+  Float_t * jet_mass_;
   Float_t * jet_QGDiscr_;
   Float_t * jet_bRegCorr_;
   Float_t * jet_bRegRes_;
@@ -92,9 +93,11 @@ class RecoJetReaderAK4 : public ReaderBase
   Int_t * jet_genJetIdx_;
   Int_t * jet_partonFlavour_;
   Int_t * jet_hadronFlavour_;
-
-  std::map<int, Float_t *> jet_pt_systematics_;
-  std::map<int, Float_t *> jet_mass_systematics_;
+  Float_t * jet_rawFactor_;
+  Float_t * jet_area_;
+  Float_t * jet_neEmEF_;
+  Float_t * jet_chEmEF_;
+  Float_t * jet_muonSubtrFactor_;
 
   // CV: make sure that only one RecoJetReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

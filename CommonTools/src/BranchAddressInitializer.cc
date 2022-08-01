@@ -143,3 +143,9 @@ BranchAddressInitializer::BranchAddressInitializer::print(std::ostream & stream)
   stream << " list of branches = " << format_vstring(branchNames_write) << std::endl;
   stream << std::endl;
 }
+
+void
+BranchAddressInitializer::reset_inputs()
+{
+  BranchAddressInitializer::gBoundBranchNames_read_.clear();
+}

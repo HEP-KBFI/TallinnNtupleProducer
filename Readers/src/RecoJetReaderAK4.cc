@@ -6,7 +6,7 @@
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h"           // Btag, kBtag_*
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
 #include "TallinnNtupleProducer/CommonTools/interface/map_keys.h"                 // map_keys()
-#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // getBranchName_jetMET()
+#include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"         // jesAK4SysMap, jerAK4SysMap, jesSplitAK4SysMap, jerSplitAK4SysMap
 
 #include "TTree.h"                                                                // TTree
 #include "TString.h"                                                              // Form()
@@ -16,17 +16,16 @@ std::map<std::string, RecoJetReaderAK4 *> RecoJetReaderAK4::instances_;
 
 RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   : ReaderBase(cfg)
-  , era_(Era::kUndefined)
-  , isMC_(false)
+  , era_(get_era(cfg.getParameter<std::string>("era")))
+  , isMC_(cfg.getParameter<bool>("isMC"))
   , max_nJets_(256)
-  , branchName_num_("")
-  , branchName_obj_("")
+  , branchName_obj_(cfg.getParameter<std::string>("branchName"))
+  , branchName_num_(Form("n%s", branchName_obj_.data()))
   , btag_(Btag::kDeepJet)
-  , btag_central_or_shift_(kBtag_central)
-  , ptMassOption_central_(-1)
-  , ptMassOption_(-1)
+  , jet_pt_(nullptr)
   , jet_eta_(nullptr)
   , jet_phi_(nullptr)
+  , jet_mass_(nullptr)
   , jet_QGDiscr_(nullptr)
   , jet_bRegCorr_(nullptr)
   , jet_bRegRes_(nullptr)
@@ -36,13 +35,12 @@ RecoJetReaderAK4::RecoJetReaderAK4(const edm::ParameterSet & cfg)
   , jet_genJetIdx_(nullptr)
   , jet_partonFlavour_(nullptr)
   , jet_hadronFlavour_(nullptr)
+  , jet_rawFactor_(nullptr)
+  , jet_area_(nullptr)
+  , jet_neEmEF_(nullptr)
+  , jet_chEmEF_(nullptr)
+  , jet_muonSubtrFactor_(nullptr)
 {
-  era_ = get_era(cfg.getParameter<std::string>("era"));
-  branchName_obj_ = cfg.getParameter<std::string>("branchName"); // default = "Jet"
-  branchName_num_ = Form("n%s", branchName_obj_.data());
-  isMC_ = cfg.getParameter<bool>("isMC");
-  ptMassOption_central_ = ( isMC_ ) ? kJetMET_central : kJetMET_central_nonNominal;
-  ptMassOption_ = ptMassOption_central_;
   setBranchNames();
 }
 
@@ -54,8 +52,10 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
   {
     RecoJetReaderAK4 * const gInstance = instances_[branchName_obj_];
     assert(gInstance);
+    delete[] gInstance->jet_pt_;
     delete[] gInstance->jet_eta_;
     delete[] gInstance->jet_phi_;
+    delete[] gInstance->jet_mass_;
     delete[] gInstance->jet_QGDiscr_;
     delete[] gInstance->jet_bRegCorr_;
     delete[] gInstance->jet_bRegRes_;
@@ -65,30 +65,13 @@ RecoJetReaderAK4::~RecoJetReaderAK4()
     delete[] gInstance->jet_genJetIdx_;
     delete[] gInstance->jet_partonFlavour_;
     delete[] gInstance->jet_hadronFlavour_;
-    for(auto & kv: gInstance->jet_pt_systematics_)
-    {
-      delete[] kv.second;
-    }
-    for(auto & kv: gInstance->jet_mass_systematics_)
-    {
-      delete[] kv.second;
-    }
+    delete[] gInstance->jet_rawFactor_;
+    delete[] gInstance->jet_area_;
+    delete[] gInstance->jet_neEmEF_;
+    delete[] gInstance->jet_chEmEF_;
+    delete[] gInstance->jet_muonSubtrFactor_;
     instances_[branchName_obj_] = nullptr;
   }
-}
-
-void
-RecoJetReaderAK4::setPtMass_central_or_shift(int central_or_shift)
-{
-  if(! isMC_ && central_or_shift != kJetMET_central_nonNominal)
-  {
-    throw cmsException(this, __func__, __LINE__) << "Data has only non-nominal pt and mass";
-  }
-  if(! isValidJESsource(era_, central_or_shift))
-  {
-    ptMassOption_ = ptMassOption_central_;
-  }
-  ptMassOption_ = central_or_shift;
 }
 
 void
@@ -102,16 +85,10 @@ RecoJetReaderAK4::setBranchNames()
 {
   if(numInstances_[branchName_obj_] == 0)
   {
+    branchName_pt_ = Form("%s_%s", branchName_obj_.data(), "pt");
     branchName_eta_ = Form("%s_%s", branchName_obj_.data(), "eta");
     branchName_phi_ = Form("%s_%s", branchName_obj_.data(), "phi");
-    for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_jerForwardHighPtDown; ++idxShift)
-    {
-      if( (idxShift == ptMassOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
-      {
-        branchNames_pt_systematics_[idxShift]   = getBranchName_jetMET(branchName_obj_, era_, idxShift, true);
-        branchNames_mass_systematics_[idxShift] = getBranchName_jetMET(branchName_obj_, era_, idxShift, false);
-      }
-    }
+    branchName_mass_ = Form("%s_%s", branchName_obj_.data(), "mass");
 
     for(const auto & kv: BtagWP_map.at(era_))
     {
@@ -136,6 +113,12 @@ RecoJetReaderAK4::setBranchNames()
     branchName_genJetIdx_ = Form("%s_%s", branchName_obj_.data(), "genJetIdx");
     branchName_partonFlavour_ = Form("%s_%s", branchName_obj_.data(), "partonFlavour");
     branchName_hadronFlavour_ = Form("%s_%s", branchName_obj_.data(), "hadronFlavour");
+    branchName_rawFactor_ = Form("%s_%s", branchName_obj_.data(), "rawFactor");
+    branchName_area_ = Form("%s_%s", branchName_obj_.data(), "area");
+    branchName_neEmEF_ = Form("%s_%s", branchName_obj_.data(), "neEmEF");
+    branchName_chEmEF_ = Form("%s_%s", branchName_obj_.data(), "chEmEF");
+    branchName_muonSubtrFactor_ = Form("%s_%s", branchName_obj_.data(), "muonSubtrFactor");
+
     instances_[branchName_obj_] = this;
   }
   else
@@ -159,17 +142,11 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
   if(instances_[branchName_obj_] == this)
   {
     BranchAddressInitializer bai(tree, max_nJets_);
-    for(int idxShift = kJetMET_central_nonNominal; idxShift <= kJetMET_jerForwardHighPtDown; ++idxShift)
-    {
-      if( (idxShift == ptMassOption_central_) || (isMC_ && isValidJESsource(era_, idxShift)) )
-      {
-        bai.setBranchAddress(jet_pt_systematics_[idxShift],   branchNames_pt_systematics_[idxShift]);
-        bai.setBranchAddress(jet_mass_systematics_[idxShift], branchNames_mass_systematics_[idxShift]);
-      }
-    }
     bai.setBranchAddress(nJets_, branchName_num_);
+    bai.setBranchAddress(jet_pt_, branchName_pt_);
     bai.setBranchAddress(jet_eta_, branchName_eta_);
     bai.setBranchAddress(jet_phi_, branchName_phi_);
+    bai.setBranchAddress(jet_mass_, branchName_mass_);
     bai.setBranchAddress(jet_QGDiscr_, branchName_QGDiscr_, 1.);
     bai.setBranchAddress(jet_bRegCorr_, branchName_bRegCorr_, 1.);
     bai.setBranchAddress(jet_bRegRes_, branchName_bRegRes_, 0.);
@@ -179,6 +156,11 @@ RecoJetReaderAK4::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(jet_genJetIdx_, isMC_ && branchName_obj_ == "Jet" ? branchName_genJetIdx_ : "", -1);
     bai.setBranchAddress(jet_partonFlavour_, branchName_partonFlavour_);
     bai.setBranchAddress(jet_hadronFlavour_, branchName_hadronFlavour_);
+    bai.setBranchAddress(jet_rawFactor_, branchName_rawFactor_);
+    bai.setBranchAddress(jet_area_, branchName_area_);
+    bai.setBranchAddress(jet_neEmEF_, branchName_neEmEF_);
+    bai.setBranchAddress(jet_chEmEF_, branchName_chEmEF_);
+    bai.setBranchAddress(jet_muonSubtrFactor_, branchName_muonSubtrFactor_);
 
     const std::vector<std::string> recoJetBranches = bai.getBoundBranchNames_read();
     bound_branches.insert(bound_branches.end(), recoJetBranches.begin(), recoJetBranches.end());
@@ -209,35 +191,29 @@ RecoJetReaderAK4::read() const
       // set QGL to -1. if:
       // 1) the value is nan
       // 2) the value is invalid: https://twiki.cern.ch/twiki/bin/view/CMS/QuarkGluonLikelihood#Return_codes
-      double qgl = gInstance->jet_QGDiscr_[idxJet];
+      float qgl = gInstance->jet_QGDiscr_[idxJet];
       if(std::isnan(qgl))
       {
         qgl = -1.;
       }
-      qgl = std::max(-1., qgl);
+      qgl = std::max(-1.f, qgl);
 
       // According to the log files of NanoAOD production, some jets might have nan as the value for DeepJet
       // b-tagging discriminator. In the past we've seen similar issues with DeepCSV score as well. Will set the value
       // of b-tagging discriminant to -2. in case the score is nan (as we already did with lepton-to-jet variables).
       // Not sure how nan values affect the b-tagging scale factors, though.
-      double btagCSV = gInstance->jet_BtagScore_[idxJet];
+      float btagCSV = gInstance->jet_BtagScore_[idxJet];
       if(std::isnan(btagCSV))
       {
         btagCSV = -2.;
       }
 
-      double jet_pt = gInstance->jet_pt_systematics_.at(ptMassOption_)[idxJet];
-      const double jet_eta = gInstance->jet_eta_[idxJet];
-      const double jet_phi = gInstance->jet_phi_[idxJet];
-      double jet_mass = gInstance->jet_mass_systematics_.at(ptMassOption_)[idxJet];
-      const int jet_id = gInstance->jet_jetId_[idxJet];
-
       jets.push_back({
         {
-          jet_pt,
-          jet_eta,
-          jet_phi,
-          jet_mass,
+          gInstance->jet_pt_[idxJet],
+          gInstance->jet_eta_[idxJet],
+          gInstance->jet_phi_[idxJet],
+          gInstance->jet_mass_[idxJet],
           gInstance->jet_partonFlavour_[idxJet],
           gInstance->jet_hadronFlavour_[idxJet],
         },
@@ -245,12 +221,16 @@ RecoJetReaderAK4::read() const
         qgl,
         gInstance->jet_bRegCorr_[idxJet],
         gInstance->jet_bRegRes_[idxJet],
-        jet_id,
+        gInstance->jet_jetId_[idxJet],
         gInstance->jet_puId_[idxJet],
+        gInstance->jet_rawFactor_[idxJet],
+        gInstance->jet_area_[idxJet],
+        gInstance->jet_neEmEF_[idxJet],
+        gInstance->jet_chEmEF_[idxJet],
+        gInstance->jet_muonSubtrFactor_[idxJet],
         idxJet,
         gInstance->jet_genJetIdx_[idxJet],
         btag_,
-        ptMassOption_,
       });
     } // idxJet
   } // nJets > 0
@@ -264,7 +244,6 @@ RecoJetReaderAK4::get_supported_systematics(const edm::ParameterSet & cfg)
   if(supported_systematics.empty())
   {
     merge_systematic_shifts(supported_systematics, map_keys(jesAK4SysMap));
-    merge_systematic_shifts(supported_systematics, map_keys(jerAK4SysMap));
     const bool split_jes = cfg.getParameter<bool>("split_jes");
     if(split_jes)
     {
@@ -285,10 +264,13 @@ RecoJetReaderAK4::get_supported_systematics(const edm::ParameterSet & cfg)
       }
       merge_systematic_shifts(supported_systematics, jesSplitAK4SysStrs);
     }
-    const bool split_jer = cfg.getParameter<bool>("split_jer");
-    if(split_jer)
+    if(cfg.getParameter<bool>("apply_smearing"))
     {
-      merge_systematic_shifts(supported_systematics, map_keys(jerSplitAK4SysMap));
+      merge_systematic_shifts(supported_systematics, map_keys(jerAK4SysMap));
+      if(cfg.getParameter<bool>("split_jer"))
+      {
+        merge_systematic_shifts(supported_systematics, map_keys(jerSplitAK4SysMap));
+      }
     }
   }
   return supported_systematics;

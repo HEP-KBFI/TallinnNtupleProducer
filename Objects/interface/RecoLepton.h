@@ -4,7 +4,6 @@
 #include "TallinnNtupleProducer/Objects/interface/ChargedParticle.h" // ChargedParticle
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag::kCSVv2, Btag::kDeepCSV, Btag::kDeepJet
 
-#include <memory>                                                    // std::shared_ptr
 #include <map>                                                       // std::map
 
 // forward declarations

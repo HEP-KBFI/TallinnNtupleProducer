@@ -52,7 +52,6 @@ enum class pileupJetIDSFsys
 //--- declare systematic uncertainties on data/MC corrections for jet pt & mass and MET pt & phi
 enum
 {
-  kJetMET_central_nonNominal,  // for data and sync Ntuples
   kJetMET_central,             // for MC
   kJetMET_jesUp,                   kJetMET_jesDown, // total JES
   // regrouped, sources with era in their names are treated as uncorrelated, the remaining are correlated
@@ -67,7 +66,7 @@ enum
   kJetMET_jesHF_EraUp,             kJetMET_jesHF_EraDown,
   kJetMET_jesRelativeBalUp,        kJetMET_jesRelativeBalDown,
   kJetMET_jesRelativeSample_EraUp, kJetMET_jesRelativeSample_EraDown,
-  kJetMET_jesHEMUp,                kJetMET_jesHEMDown,
+  kJetMET_jesHEMDown,
   // JER
   kJetMET_jerUp,                   kJetMET_jerDown, // total JER
   kJetMET_jerBarrelUp,             kJetMET_jerBarrelDown,
@@ -82,7 +81,6 @@ enum
 
 enum
 {
-  kFatJet_central_nonNominal,     // for data and sync Ntuples
   kFatJet_central,                // for MC
   kFatJet_jesUp,                   kFatJet_jesDown, // total JES
   // regrouped JES
@@ -97,7 +95,7 @@ enum
   kFatJet_jesHF_EraUp,             kFatJet_jesHF_EraDown,
   kFatJet_jesRelativeBalUp,        kFatJet_jesRelativeBalDown,
   kFatJet_jesRelativeSample_EraUp, kFatJet_jesRelativeSample_EraDown,
-  kFatJet_jesHEMUp,                kFatJet_jesHEMDown,
+  kFatJet_jesHEMDown,
   kFatJet_jerUp,                   kFatJet_jerDown, // total JER
   // split JER
 //  kFatJet_jerBarrelUp,             kFatJet_jerBarrelDown,
@@ -350,10 +348,6 @@ isValidJESsource(Era era,
                  int central_or_shift,
                  bool isFatJet = false);
 
-bool
-isValidFatJetAttribute(int central_or_shift,
-                       const std::string & attribute_name);
-
 int
 getBTagWeight_option(const std::string & central_or_shift);
 
@@ -450,22 +444,5 @@ getPDFsys_str(int memberIdx);
 void
 checkOptionValidity(const std::string & central_or_shift,
                     bool isMC);
-
-/**
- * @brief Return branch name to read RecoJet pt and mass
- *
- * isPt -- if true, return pT branch name; if false, return mass branch name
- */
-std::string
-getBranchName_jetMET(const std::string & default_branchName,
-                     Era era,
-                     int central_or_shift,
-                     bool isPt);
-
-std::string
-getBranchName_fatJet(const std::string & default_branchName,
-                     Era era,
-                     const std::string & attribute_name,
-                     int central_or_shift);
 
 #endif // TallinnNtupleProducer_CommonTools_sysUncertOptions_h

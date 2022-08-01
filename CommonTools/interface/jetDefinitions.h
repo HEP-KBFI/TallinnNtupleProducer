@@ -42,10 +42,14 @@ enum
 enum class BtagWP { kUndefined, kLoose, kMedium, kTight };
 
 extern const std::map<Era, std::map<Btag, std::map<BtagWP, double>>> BtagWP_map;
+extern const std::map<pileupJetID, std::string> pileupJetID_map;
 
 double
 get_BtagWP(Era era,
            Btag btag,
            BtagWP wp);
+
+int
+get_fatJet_corrections(const std::vector<std::string> & corrections);
 
 #endif // TallinnNtupleProducer_CommonTools_jetDefinitions_h

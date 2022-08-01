@@ -3,7 +3,6 @@
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"             // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                 // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                      // Era, get_era()
-#include "TallinnNtupleProducer/CommonTools/interface/get_ignore_ak8_sys.h"       // get_ignore_ak8_sys()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"        // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/isHigherPt.h"               // isHigherPt()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"  // merge_systematic_shifts()
@@ -13,7 +12,31 @@
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                 // RunLumiEvent
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
 #include "TallinnNtupleProducer/Readers/interface/setFilterBits.h"                // setFilterBits()
-#include "TallinnNtupleProducer/Readers/interface/setJetBtagScore.h"
+#include "TallinnNtupleProducer/Readers/interface/setJetBtagScore.h"              // setJetBtagScore
+
+#include "TallinnNtupleProducer/Readers/interface/RunLumiEventReader.h"                       // RunLumiEventReader
+#include "TallinnNtupleProducer/Readers/interface/TriggerInfoReader.h"                        // TriggerInfoReader
+#include "TallinnNtupleProducer/Readers/interface/EventInfoReader.h"                          // EventInfoReader
+#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                          // GenHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                             // GenJetReader
+#include "TallinnNtupleProducer/Readers/interface/CorrT1METJetReader.h"                       // CorrT1METJetReader
+#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"                        // GenParticleReader
+#include "TallinnNtupleProducer/Readers/interface/MEtFilterReader.h"                          // MEtFilterReader
+#include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorFakeable.h" // RecoElectronCollectionSelectorFakeable
+#include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorLoose.h"    // RecoElectronCollectionSelectorLoose
+#include "TallinnNtupleProducer/Selectors/interface/RecoElectronCollectionSelectorTight.h"    // RecoElectronCollectionSelectorTight
+#include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorFakeable.h"     // RecoMuonCollectionSelectorFakeable
+#include "TallinnNtupleProducer/Selectors/interface/RecoMuonCollectionSelectorTight.h"        // RecoMuonCollectionSelectorTight
+#include "TallinnNtupleProducer/Readers/interface/RecoElectronReader.h"                       // RecoElectronReader
+#include "TallinnNtupleProducer/Readers/interface/RecoHadTauReader.h"                         // RecoHadTauReader
+#include "TallinnNtupleProducer/Readers/interface/GenMEtReader.h"                             // GenMEtReader
+#include "TallinnNtupleProducer/Readers/interface/RecoMEtReader.h"                            // RecoMEtReader
+#include "TallinnNtupleProducer/Readers/interface/RecoMuonReader.h"                           // RecoMuonReader
+#include "TallinnNtupleProducer/Readers/interface/RecoVertexReader.h"                         // RecoVertexReader
+#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK4.h"                         // RecoJetReaderAK4
+#include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"                         // RecoJetReaderAK8
+#include "TallinnNtupleProducer/Readers/interface/ParticleReader.h"                           // ParticleReader
+#include "TallinnNtupleProducer/Readers/interface/JMECorrector.h"                             // JMECorrector
 
 namespace
 {
@@ -52,170 +75,131 @@ EventReader::EventReader(const edm::ParameterSet& cfg)
   : ReaderBase(cfg)
   , cfg_(cfg)
   , isDEBUG_(cfg.getParameter<bool>("isDEBUG"))
-  , numNominalLeptons_(0)
-  , applyNumNominalLeptonsCut_(false)
-  , numNominalHadTaus_(0)
-  , applyNumNominalHadTausCut_(false)
-  , era_(Era::kUndefined)
-  , isMC_(false)
+  , numNominalLeptons_(cfg_.getParameter<unsigned>("numNominalLeptons"))
+  , applyNumNominalLeptonsCut_(cfg_.getParameter<bool>("applyNumNominalLeptonsCut"))
+  , numNominalHadTaus_(cfg_.getParameter<unsigned>("numNominalHadTaus"))
+  , applyNumNominalHadTausCut_(cfg_.getParameter<bool>("applyNumNominalHadTausCut"))
+  , era_(get_era(cfg_.getParameter<std::string>("era")))
+  , isMC_(cfg_.getParameter<bool>("isMC"))
+  , jetCleaningByIndex_(cfg_.getParameter<bool>("jetCleaningByIndex"))
+  , genMatchRecoJets_(cfg_.getParameter<bool>("genMatchRecoJets"))
   , lastRun_(0)
   , lastLumi_(0)
   , lastEvent_(0)
   , current_central_or_shift_("central")
-  , runLumiEventReader_(nullptr)
-  , eventInfoReader_(nullptr)
-  , eventInfo_supported_systematics_(make_supported_systematics(EventInfoReader::get_supported_systematics(cfg)))
-  , triggerInfoReader_(nullptr)
-  , triggerInfo_supported_systematics_(make_supported_systematics(TriggerInfoReader::get_supported_systematics(cfg)))
-  , muonReader_(nullptr)
-  , looseMuonSelector_(nullptr)
-  , fakeableMuonSelector_(nullptr)
-  , tightMuonSelector_(nullptr)
-  , muon_supported_systematics_(make_supported_systematics(RecoMuonReader::get_supported_systematics(cfg)))
-  , electronReader_(nullptr)
+  , runLumiEventReader_(new RunLumiEventReader(cfg_))
+  , eventInfoReader_(new EventInfoReader(cfg_))
+  , eventInfo_supported_systematics_(make_supported_systematics(EventInfoReader::get_supported_systematics(cfg_)))
+  , triggerInfoReader_(new TriggerInfoReader(cfg_.getParameter<edm::ParameterSet>("triggers")))
+  , triggerInfo_supported_systematics_(make_supported_systematics(TriggerInfoReader::get_supported_systematics(cfg_)))
+  , muonReader_(new RecoMuonReader(make_cfg(cfg_, "branchName_muons")))
+  , looseMuonSelector_(new RecoMuonCollectionSelectorLoose(era_, -1, isDEBUG_))
+  , fakeableMuonSelector_(new RecoMuonCollectionSelectorFakeable(era_, -1, isDEBUG_))
+  , tightMuonSelector_(new RecoMuonCollectionSelectorTight(era_, -1, isDEBUG_))
+  , muon_supported_systematics_(make_supported_systematics(RecoMuonReader::get_supported_systematics(cfg_)))
+  , electronReader_(new RecoElectronReader(make_cfg(cfg_, "branchName_electrons")))
   , electronCleaner_(0.3, isDEBUG_)
-  , looseElectronSelector_(nullptr)
-  , fakeableElectronSelector_(nullptr)
-  , tightElectronSelector_(nullptr)
-  , electron_supported_systematics_(make_supported_systematics(RecoElectronReader::get_supported_systematics(cfg)))
-  , hadTauReader_(nullptr)
+  , looseElectronSelector_(new RecoElectronCollectionSelectorLoose(era_, -1, isDEBUG_))
+  , fakeableElectronSelector_(new RecoElectronCollectionSelectorFakeable(era_, -1, isDEBUG_))
+  , tightElectronSelector_(new RecoElectronCollectionSelectorTight(era_, -1, isDEBUG_))
+  , electron_supported_systematics_(make_supported_systematics(RecoElectronReader::get_supported_systematics(cfg_)))
+  , hadTauReader_(new RecoHadTauReader(make_cfg(cfg_, "branchName_hadTaus")))
   , hadTauCleaner_(0.3, isDEBUG_)
-  , looseHadTauSelector_(nullptr)
-  , fakeableHadTauSelector_(nullptr)
-  , tightHadTauSelector_(nullptr)
+  , looseHadTauSelector_(new RecoHadTauCollectionSelectorLoose(era_, -1, isDEBUG_))
+  , fakeableHadTauSelector_(new RecoHadTauCollectionSelectorFakeable(era_, -1, isDEBUG_))
+  , tightHadTauSelector_(new RecoHadTauCollectionSelectorTight(era_, -1, isDEBUG_))
   , hadTau_supported_systematics_(make_supported_systematics(RecoHadTauReader::get_supported_systematics(cfg)))
   , hadTau_isInvalid_(false)
-  , jetReaderAK4_(nullptr)
+  , jmeCorrector_(new JMECorrector(cfg_))
+  , jetReaderAK4_(new RecoJetReaderAK4(make_cfg(cfg_, "branchName_jets_ak4")))
   , jetCleanerAK4_dR04_(0.4, isDEBUG_)
   , jetCleanerAK4ByIndex_dR04_(isDEBUG_)
   , jetCleanerAK4_dR12_(1.2, isDEBUG_)
-  , jetSelectorAK4_(nullptr)
-  , jetSelectorAK4_btagLoose_(nullptr)
-  , jetSelectorAK4_btagMedium_(nullptr)
+  , jetSelectorAK4_(new RecoJetCollectionSelectorAK4(era_, -1, isDEBUG_))
+  , jetSelectorAK4_btagLoose_(new RecoJetCollectionSelectorAK4_btagLoose(era_, -1, isDEBUG_))
+  , jetSelectorAK4_btagMedium_(new RecoJetCollectionSelectorAK4_btagMedium(era_, -1, isDEBUG_))
   , jetsAK4_supported_systematics_(make_supported_systematics(RecoJetReaderAK4::get_supported_systematics(cfg)))
   , jetAK4_isInvalid_(false)
-  , apply_pileupJetID_(pileupJetID::kPileupJetID_disabled)
+  , apply_pileupJetID_(get_pileupJetID(cfg_.getParameter<std::string>("apply_pileupJetID")))
   , genParticleReader_(nullptr)
   , genHadTauReader_(nullptr)
   , genJetReader_(nullptr)
+  , corrT1METJetReader_(nullptr)
   , muonGenMatcher_(nullptr)
   , electronGenMatcher_(nullptr)
   , hadTauGenMatcher_(nullptr)
   , jetGenMatcherAK4_(nullptr)
-  , jetReaderAK8_Hbb_(nullptr)
-  , jetReaderAK8_Wjj_(nullptr)
+  , corrT1METJetGenMatcher_(nullptr)
+  , jetReaderAK8_(new RecoJetReaderAK8(make_cfg_jetsAK8(cfg_, "branchName_jets_ak8", "branchName_subjets_ak8")))
   , jetCleanerAK8_dR08_(0.8, isDEBUG_)
-  , jetSelectorAK8_Hbb_(nullptr)
-  , jetSelectorAK8_Wjj_(nullptr)
-  , jetsAK8_Hbb_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg)))
+  , jetSelectorAK8_Hbb_(new RecoJetCollectionSelectorAK8_Hbb(era_, -1, isDEBUG_))
+  , jetSelectorAK8_Wjj_(new RecoJetCollectionSelectorAK8_Wjj(era_, -1, isDEBUG_))
+  , jetsAK8_Hbb_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg_)))
   , jetAK8_Hbb_isInvalid_(false)
-  , jetsAK8_Wjj_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg)))
+  , jetsAK8_Wjj_supported_systematics_(make_supported_systematics(RecoJetReaderAK8::get_supported_systematics(cfg_)))
   , jetAK8_Wjj_isInvalid_(false)
-  , metReader_(nullptr)
-  , met_supported_systematics_(make_supported_systematics(RecoMEtReader::get_supported_systematics(cfg)))
+  , genJetAK8Reader_(nullptr)
+  , genSubJetAK8Reader_(nullptr)
+  , rawmetReader_(new GenMEtReader(make_cfg(cfg, "branchName_rawMet")))
+  , metReader_(new RecoMEtReader(make_cfg(cfg, "branchName_met")))
+  , met_supported_systematics_(make_supported_systematics(RecoMEtReader::get_supported_systematics(cfg_)))
   , met_isInvalid_(false)
-  , metFilterReader_(nullptr)
-  , metFilter_supported_systematics_(make_supported_systematics(MEtFilterReader::get_supported_systematics(cfg)))
+  , metFilterReader_(new MEtFilterReader(cfg))
+  , metFilter_supported_systematics_(make_supported_systematics(MEtFilterReader::get_supported_systematics(cfg_)))
   , metFilter_isInvalid_(false)
-  , vertexReader_(nullptr)
-  , vertex_supported_systematics_(make_supported_systematics(RecoVertexReader::get_supported_systematics(cfg)))
+  , vertexReader_(new RecoVertexReader(make_cfg(cfg, "branchName_vertex")))
+  , vertex_supported_systematics_(make_supported_systematics(RecoVertexReader::get_supported_systematics(cfg_)))
   , vertex_isInvalid_(false)
 {
-  numNominalLeptons_ = cfg.getParameter<unsigned>("numNominalLeptons");
-  applyNumNominalLeptonsCut_ = cfg.getParameter<bool>("applyNumNominalLeptonsCut");
-  numNominalHadTaus_ = cfg.getParameter<unsigned>("numNominalHadTaus");
-  applyNumNominalHadTausCut_ = cfg.getParameter<bool>("applyNumNominalHadTausCut");
-
-  const std::string apply_pileupJetID_string = cfg.getParameter<std::string>("apply_pileupJetID");
-  apply_pileupJetID_ = get_pileupJetID(apply_pileupJetID_string);
-
-  era_ = get_era(cfg.getParameter<std::string>("era"));
-  isMC_ = cfg.getParameter<bool>("isMC");
-  readGenMatching_ = isMC_;
-  runLumiEventReader_ = new RunLumiEventReader(cfg);
-
-  eventInfoReader_ = new EventInfoReader(cfg);
-
-  edm::ParameterSet cfg_triggers = cfg.getParameter<edm::ParameterSet>("triggers");
-  triggerInfoReader_ = new TriggerInfoReader(cfg_triggers);
-
-  muonReader_ = new RecoMuonReader(make_cfg(cfg, "branchName_muons"));
-  const double lep_mva_cut_mu = cfg.getParameter<double>("lep_mva_cut_mu");
+  const double lep_mva_cut_mu = cfg_.getParameter<double>("lep_mva_cut_mu");
   muonReader_->set_mvaTTH_wp(lep_mva_cut_mu);
-  looseMuonSelector_ = new RecoMuonCollectionSelectorLoose(era_, -1, isDEBUG_);
-  fakeableMuonSelector_ = new RecoMuonCollectionSelectorFakeable(era_, -1, isDEBUG_);
-  tightMuonSelector_ = new RecoMuonCollectionSelectorTight(era_, -1, isDEBUG_);
 
-  electronReader_ = new RecoElectronReader(make_cfg(cfg, "branchName_electrons"));
-  const double lep_mva_cut_e = cfg.getParameter<double>("lep_mva_cut_e");
+  const double lep_mva_cut_e = cfg_.getParameter<double>("lep_mva_cut_e");
   electronReader_->set_mvaTTH_wp(lep_mva_cut_e);
-  looseElectronSelector_ = new RecoElectronCollectionSelectorLoose(era_, -1, isDEBUG_);
-  fakeableElectronSelector_ = new RecoElectronCollectionSelectorFakeable(era_, -1, isDEBUG_);
-  tightElectronSelector_ = new RecoElectronCollectionSelectorTight(era_, -1, isDEBUG_);
 
-  hadTauReader_ = new RecoHadTauReader(make_cfg(cfg, "branchName_hadTaus"));
   hadTauReader_->setHadTauPt_central_or_shift(kHadTauPt_central);
 
-  looseHadTauSelector_ = new RecoHadTauCollectionSelectorLoose(era_, -1, isDEBUG_);
-  fakeableHadTauSelector_ = new RecoHadTauCollectionSelectorFakeable(era_, -1, isDEBUG_);
-  tightHadTauSelector_ = new RecoHadTauCollectionSelectorTight(era_, -1, isDEBUG_);
-  std::string hadTauWP_againstJets_fakeable = cfg.getParameter<std::string>("hadTauWP_againstJets_fakeable");
-  std::string hadTauWP_againstJets_tight = cfg.getParameter<std::string>("hadTauWP_againstJets_tight");
+  const std::string hadTauWP_againstJets_fakeable = cfg.getParameter<std::string>("hadTauWP_againstJets_fakeable");
+  const std::string hadTauWP_againstJets_tight = cfg.getParameter<std::string>("hadTauWP_againstJets_tight");
   if ( get_tau_id_wp_int(hadTauWP_againstJets_tight) <= get_tau_id_wp_int(hadTauWP_againstJets_fakeable) )
-    throw cmsException("EventReader", __LINE__) << "Selection of 'tight' taus must be more stringent than selection of 'fakeable' taus !!";
+  {
+    throw cmsException(this, __func__, __LINE__) << "Selection of 'tight' taus must be more stringent than selection of 'fakeable' taus !!";
+  }
   fakeableHadTauSelector_->set(hadTauWP_againstJets_fakeable);
   tightHadTauSelector_->set(hadTauWP_againstJets_tight);
-  int hadTauWP_againstElectrons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstElectrons"));
+  const int hadTauWP_againstElectrons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstElectrons"));
   fakeableHadTauSelector_->set_min_antiElectron(hadTauWP_againstElectrons);
   tightHadTauSelector_->set_min_antiElectron(hadTauWP_againstElectrons);
-  int hadTauWP_againstMuons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstMuons"));
+  const int hadTauWP_againstMuons = get_tau_id_wp_int(cfg.getParameter<std::string>("hadTauWP_againstMuons"));
   fakeableHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
   tightHadTauSelector_->set_min_antiMuon(hadTauWP_againstMuons);
   if ( applyNumNominalHadTausCut_ )
   {
     // CV: relax tau pT cut from 20 to 19 GeV, to allow for tau energy scale shifts
-    std::cout << "Relaxing tau pT cut to 19 GeV, as applyNumNominalHadTausCut is enabled." << std::endl;
+    std::cout << "Relaxing tau pT cut to 19 GeV, as applyNumNominalHadTausCut is enabled\n";
     fakeableHadTauSelector_->set_min_pt(19.);
     tightHadTauSelector_->set_min_pt(19.);
   }
-
-  jetReaderAK4_ = new RecoJetReaderAK4(make_cfg(cfg, "branchName_jets_ak4"));
-  jetCleaningByIndex_ = cfg.getParameter<bool>("jetCleaningByIndex");
-  genMatchRecoJets_ = cfg.getParameter<bool>("genMatchRecoJets");
-
-  jetSelectorAK4_ = new RecoJetCollectionSelectorAK4(era_, -1, isDEBUG_);
-  jetSelectorAK4_btagLoose_ = new RecoJetCollectionSelectorAK4_btagLoose(era_, -1, isDEBUG_);
-  jetSelectorAK4_btagMedium_ = new RecoJetCollectionSelectorAK4_btagMedium(era_, -1, isDEBUG_);
 
   jetSelectorAK4_->getSelector().set_pileupJetId(apply_pileupJetID_);
   jetSelectorAK4_btagLoose_->getSelector().set_pileupJetId(apply_pileupJetID_);
   jetSelectorAK4_btagMedium_->getSelector().set_pileupJetId(apply_pileupJetID_);
 
-  if ( readGenMatching_ )
+  if ( isMC_ )
   {
     genParticleReader_ = new GenParticleReader(make_cfg(cfg, "branchName_genPart"));
     genHadTauReader_ = new GenHadTauReader(make_cfg(cfg, "branchName_genHadTaus"));
     genJetReader_ = new GenJetReader(make_cfg(cfg, "branchName_genJets"));
+    corrT1METJetReader_ = new CorrT1METJetReader(make_cfg(cfg, "branchName_corrT1METJet"));
+    genJetAK8Reader_ = new ParticleReader(make_cfg(cfg, "branchName_genJetAK8"));
+    genSubJetAK8Reader_ = new ParticleReader(make_cfg(cfg, "branchName_genSubJetAK8"));
 
     muonGenMatcher_ = new RecoMuonCollectionGenMatcher();
     electronGenMatcher_ = new RecoElectronCollectionGenMatcher();
     hadTauGenMatcher_ = new RecoHadTauCollectionGenMatcher();
     jetGenMatcherAK4_ = new RecoJetCollectionGenMatcherAK4();
+    corrT1METJetGenMatcher_ = new CorrT1METJetCollectionGenMatcher();
   }
-
-  jetReaderAK8_Hbb_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Hbb", "branchName_subjets_ak8_Hbb"));
-  jetReaderAK8_Wjj_ = new RecoJetReaderAK8(make_cfg_jetsAK8(cfg, "branchName_jets_ak8_Wjj", "branchName_subjets_ak8_Wjj"));
-  const std::vector<std::string> disable_ak8_corr = cfg.getParameter<std::vector<std::string>>("disable_ak8_corr");
-  const int ignore_ak8_sys = get_ignore_ak8_sys(disable_ak8_corr);
-  jetReaderAK8_Hbb_->ignoreSys(ignore_ak8_sys);
-  jetReaderAK8_Wjj_->ignoreSys(ignore_ak8_sys);
-  jetSelectorAK8_Hbb_ = new RecoJetCollectionSelectorAK8_Hbb(era_, -1, isDEBUG_);
-  jetSelectorAK8_Wjj_ = new RecoJetCollectionSelectorAK8_Wjj(era_, -1, isDEBUG_);
-
-  metReader_ = new RecoMEtReader(make_cfg(cfg, "branchName_met"));
-  metFilterReader_ = new MEtFilterReader(cfg);
-
-  vertexReader_ = new RecoVertexReader(make_cfg(cfg, "branchName_vertex"));
 }
 
 EventReader::~EventReader()
@@ -233,6 +217,7 @@ EventReader::~EventReader()
   delete looseHadTauSelector_;
   delete fakeableHadTauSelector_;
   delete tightHadTauSelector_;
+  delete jmeCorrector_;
   delete jetReaderAK4_;
   delete jetSelectorAK4_;
   delete jetSelectorAK4_btagLoose_;
@@ -240,14 +225,18 @@ EventReader::~EventReader()
   delete genParticleReader_;
   delete genHadTauReader_;
   delete genJetReader_;
+  delete corrT1METJetReader_;
+  delete genJetAK8Reader_;
+  delete genSubJetAK8Reader_;
   delete muonGenMatcher_;
   delete electronGenMatcher_;
   delete hadTauGenMatcher_;
   delete jetGenMatcherAK4_;
-  delete jetReaderAK8_Hbb_;
-  delete jetReaderAK8_Wjj_;
+  delete corrT1METJetGenMatcher_;
+  delete jetReaderAK8_;
   delete jetSelectorAK8_Hbb_;
   delete jetSelectorAK8_Wjj_;
+  delete rawmetReader_;
   delete metReader_;
   delete metFilterReader_;
   delete vertexReader_;
@@ -257,39 +246,12 @@ void
 EventReader::set_central_or_shift(const std::string& central_or_shift)
 {
   eventInfoReader_->set_central_or_shift(central_or_shift);
-  if ( central_or_shift == "central" || contains(muonReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    // CV: muon momentum scale uncertainty not implemented yet
-  }
-  if ( central_or_shift == "central" || contains(electronReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    // CV: electron energy scale uncertainty not implemented yet 
-  }
-  if ( central_or_shift == "central" || contains(hadTauReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int hadTauPt_option = getHadTauPt_option(central_or_shift);
-    hadTauReader_->setHadTauPt_central_or_shift(hadTauPt_option);
-  }
-  if ( central_or_shift == "central" || contains(jetReaderAK4_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int jetPt_option = getJet_option(central_or_shift, isMC_);
-    jetReaderAK4_->setPtMass_central_or_shift(jetPt_option);
-  }
-  if ( central_or_shift == "central" || contains(jetReaderAK8_Hbb_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-    jetReaderAK8_Hbb_->set_central_or_shift(fatJetPt_option);
-  }
-  if ( central_or_shift == "central" || contains(jetReaderAK8_Wjj_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int fatJetPt_option = getFatJet_option(central_or_shift, isMC_);
-    jetReaderAK8_Wjj_->set_central_or_shift(fatJetPt_option);
-  }
-  if ( central_or_shift == "central" || contains(metReader_->get_supported_systematics(cfg_), central_or_shift) )
-  {
-    const int met_option = getMET_option(central_or_shift, isMC_);
-    metReader_->setMEt_central_or_shift(met_option);
-  }
+  hadTauReader_->setHadTauPt_central_or_shift(getHadTauPt_option(central_or_shift));
+  jmeCorrector_->set_opt(
+    getJet_option(central_or_shift, isMC_),
+    getMET_option(central_or_shift, isMC_),
+    getFatJet_option(central_or_shift, isMC_)
+  );
   current_central_or_shift_ = central_or_shift;
 }
 
@@ -303,12 +265,16 @@ EventReader::setBranchAddresses(TTree * inputTree)
   const std::vector<std::string> hadTauBranches = hadTauReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> jetBranchesAK4 = jetReaderAK4_->setBranchAddresses(inputTree);
 
+  // TODO by the looks of it, it won't work on data
   const std::vector<std::string> genPartBranches = genParticleReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> genHadTauBranches = genHadTauReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> genJetBranches = genJetReader_->setBranchAddresses(inputTree);
+  const std::vector<std::string> corrT1METJetBranches = corrT1METJetReader_->setBranchAddresses(inputTree);
+  const std::vector<std::string> genJetAKBranches = genJetAK8Reader_->setBranchAddresses(inputTree);
+  const std::vector<std::string> genSubJetAKBranches = genSubJetAK8Reader_->setBranchAddresses(inputTree);
 
-  const std::vector<std::string> jetBranchesAK8_Hbb = jetReaderAK8_Hbb_->setBranchAddresses(inputTree);
-  const std::vector<std::string> jetBranchesAK8_Wjj = jetReaderAK8_Wjj_->setBranchAddresses(inputTree);
+  const std::vector<std::string> jetBranchesAK8 = jetReaderAK8_->setBranchAddresses(inputTree);
+  const std::vector<std::string> rawmetBranches = rawmetReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> metBranches = metReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> metFilterBranches = metFilterReader_->setBranchAddresses(inputTree);
   const std::vector<std::string> vertexBranches = vertexReader_->setBranchAddresses(inputTree);
@@ -324,9 +290,12 @@ EventReader::setBranchAddresses(TTree * inputTree)
   bound_branches.insert(bound_branches.end(), genPartBranches.begin(), genPartBranches.end());
   bound_branches.insert(bound_branches.end(), genHadTauBranches.begin(), genHadTauBranches.end());
   bound_branches.insert(bound_branches.end(), genJetBranches.begin(), genJetBranches.end());
+  bound_branches.insert(bound_branches.end(), corrT1METJetBranches.begin(), corrT1METJetBranches.end());
+  bound_branches.insert(bound_branches.end(), genJetAKBranches.begin(), genJetAKBranches.end());
+  bound_branches.insert(bound_branches.end(), genSubJetAKBranches.begin(), genSubJetAKBranches.end());
 
-  bound_branches.insert(bound_branches.end(), jetBranchesAK8_Hbb.begin(), jetBranchesAK8_Hbb.end());
-  bound_branches.insert(bound_branches.end(), jetBranchesAK8_Wjj.begin(), jetBranchesAK8_Wjj.end());
+  bound_branches.insert(bound_branches.end(), jetBranchesAK8.begin(), jetBranchesAK8.end());
+  bound_branches.insert(bound_branches.end(), rawmetBranches.begin(), rawmetBranches.end());
   bound_branches.insert(bound_branches.end(), metBranches.begin(), metBranches.end());
   bound_branches.insert(bound_branches.end(), metFilterBranches.begin(), metFilterBranches.end());
   bound_branches.insert(bound_branches.end(), vertexBranches.begin(), vertexBranches.end());
@@ -427,6 +396,7 @@ EventReader::read() const
   if ( isEventInfoSystematic || isNewEvent )
   {
     event_.eventInfo_ = &eventInfoReader_->read();
+    jmeCorrector_->set_info(event_.eventInfo_);
   }
   if ( event_.isInvalid() && !isNewEvent )
   {
@@ -445,6 +415,28 @@ EventReader::read() const
   {
     event_.jetsAK4_ = jetReaderAK4_->read();
     event_.jet_ptrsAK4_ = convert_to_ptrs(event_.jetsAK4_);
+
+    if ( isMC_ )
+    {
+      if ( isNewEvent )
+      {
+        event_.genJets_ = genJetReader_->read();
+        event_.genJetPtrs_ = convert_to_ptrs(event_.genJets_);
+        event_.corrT1METJets_ = corrT1METJetReader_->read();
+      }
+      jmeCorrector_->reset();
+      for(RecoJetAK4 & jet: event_.jetsAK4_)
+      {
+        jmeCorrector_->correct(jet, event_.genJetPtrs_);
+      }
+      for(const CorrT1METJet & jet: event_.corrT1METJets_)
+      {
+        // We're actually not correcting these jets, we just need to store deltas and propagate them to MET, hence the const qualifier.
+        // This is also to avoid re-reading the collection every time the AK4 jet systematics changes.
+        jmeCorrector_->correct(jet, event_.genJetPtrs_, event_.jet_ptrsAK4_);
+      }
+    }
+
     event_.selJetsUncleanedAK4_ = jetSelectorAK4_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
     event_.selJetsUncleanedAK4_btagLoose_ = jetSelectorAK4_btagLoose_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
     event_.selJetsUncleanedAK4_btagMedium_ = jetSelectorAK4_btagMedium_->operator()(event_.jet_ptrsAK4_, isHigherPt<RecoJetAK4>);
@@ -555,13 +547,12 @@ EventReader::read() const
   }
   jetAK4_isInvalid_ = false;
 
-  if ( readGenMatching_ )
+  if ( isMC_ )
   {
     if ( isNewEvent )
     {
       event_.genParticles_ = genParticleReader_->read();
       event_.genHadTaus_ = genHadTauReader_->read();
-      event_.genJets_ = genJetReader_->read();
     }
 
     // CV: performing the gen-matching on the muon_ptrs, electron_ptrs, and hadTau_ptrs collections
@@ -592,7 +583,7 @@ EventReader::read() const
     if ( genMatchRecoJets_ && isUpdatedJetsAK4 )
     {
       jetGenMatcherAK4_->addGenLeptonMatch(event_.jet_ptrsAK4_, event_.genParticles_);
-      jetGenMatcherAK4_->addGenHadTauMatch(event_.jet_ptrsAK4_, event_.genHadTaus_);
+      jetGenMatcherAK4_->addGenHadTauMatch(event_.jet_ptrsAK4_, event_.genHadTaus_); 
       jetGenMatcherAK4_->addGenJetMatchByIdx(event_.jet_ptrsAK4_, event_.genJets_);
     }
   }
@@ -617,16 +608,27 @@ EventReader::read() const
   bool jetAK8_Hbb_needsUpdate = isJetSystematicAK8_Hbb || isNewEvent || jetAK8_Hbb_isInvalid_ || (jetAK8_Hbb_lastSystematic_ != "central" && !isJetSystematicAK8_Hbb);
   if ( jetAK8_Hbb_needsUpdate )
   {
-    event_.jetsAK8_Hbb_ = jetReaderAK8_Hbb_->read();
-    event_.jet_ptrsAK8_Hbb_ = convert_to_ptrs(event_.jetsAK8_Hbb_);
-    event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_Hbb_, isHigherPt<RecoJetAK8>);
+    event_.jetsAK8_ = jetReaderAK8_->read();
+    if ( isMC_ && isNewEvent )
+    {
+      event_.genJetsAK8_ = genJetAK8Reader_->read();
+      event_.genJetPtrsAK8_ = convert_to_ptrs(event_.genJetsAK8_);
+      event_.genSubJetsAK8_ = genSubJetAK8Reader_->read();
+      event_.genSubJetPtrsAK8_ = convert_to_ptrs(event_.genSubJetsAK8_);
+    }
+    for(RecoJetAK8 & jet: event_.jetsAK8_)
+    {
+      jmeCorrector_->correct(jet, event_.genJetPtrsAK8_, event_.genSubJetPtrsAK8_);
+    }
+    event_.jet_ptrsAK8_ = convert_to_ptrs(event_.jetsAK8_);
+    event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_, isHigherPt<RecoJetAK8>);
     isUpdatedJetsAK8_Hbb = true;
   }
   if ( isUpdatedJetsAK8_Hbb || isUpdatedLeptons )
   {
     // CV: clean AK8_Hbb jets wrt leptons only (not wrt hadronic taus)
     event_.selJetsAK8_Hbb_ = jetCleanerAK8_dR08_(event_.selJetsUncleanedAK8_Hbb_, event_.fakeableLeptons_);
-    jetAK8_Hbb_lastSystematic_ = ( isJetSystematicAK8_Hbb ) ? current_central_or_shift_ : "central";
+    jetAK8_Hbb_lastSystematic_ = isJetSystematicAK8_Hbb ? current_central_or_shift_ : "central";
   }
   if ( isDEBUG_ )
   {
@@ -636,28 +638,21 @@ EventReader::read() const
   jetAK8_Hbb_isInvalid_ = false;
 
   bool isJetSystematicAK8_Wjj = contains(jetsAK8_Wjj_supported_systematics_, current_central_or_shift_);
-  bool isUpdatedJetsAK8_Wjj = false;
   bool jetAK8_Wjj_needsUpdate = isJetSystematicAK8_Wjj || isNewEvent || jetAK8_Wjj_isInvalid_ || (jetAK8_Wjj_lastSystematic_ != "central" && !isJetSystematicAK8_Wjj);
-  if ( jetAK8_Wjj_needsUpdate )
-  {
-    event_.jetsAK8_Wjj_ = jetReaderAK8_Wjj_->read();
-    event_.jet_ptrsAK8_Wjj_ = convert_to_ptrs(event_.jetsAK8_Wjj_);
-    isUpdatedJetsAK8_Wjj = true;
-  }
-  if ( isUpdatedJetsAK8_Wjj || isUpdatedLeptons )
+  if ( jetAK8_Wjj_needsUpdate || isUpdatedLeptons )
   {
     // CV: AK8_Wjj jets must NOT be cleaned wrt leptons,
     //     as the lepton produced in H->WW*->lnu qq decays often ends up near the two quarks in the detector (in dR)
     if ( event_.fakeableLeptons_.size() > 0 )
     {
       jetSelectorAK8_Wjj_->getSelector().set_leptons(event_.fakeableLeptons_);
-      event_.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(event_.jet_ptrsAK8_Wjj_, isHigherPt<RecoJetAK8>);
+      event_.selJetsAK8_Wjj_ = jetSelectorAK8_Wjj_->operator()(event_.jet_ptrsAK8_, isHigherPt<RecoJetAK8>);
     }
     else
     {
       event_.selJetsAK8_Wjj_.clear();
     }
-    jetAK8_Wjj_lastSystematic_ = ( isJetSystematicAK8_Wjj ) ? current_central_or_shift_ : "central";
+    jetAK8_Wjj_lastSystematic_ = isJetSystematicAK8_Wjj ? current_central_or_shift_ : "central";
   }
   if ( isDEBUG_ )
   {
@@ -679,9 +674,17 @@ EventReader::read() const
   bool met_needsUpdate = isMEtSystematic || isUpdatedVertex || isNewEvent || met_isInvalid_ || (met_lastSystematic_ != "central" && !isMEtSystematic);
   if ( met_needsUpdate )
   {
-    metReader_->set_phiModulationCorrDetails(event_.eventInfo_, &event_.vertex_);
-    event_.met_ = metReader_->read();
+    event_.met_ = std::move(metReader_->read());
+    event_.rawmet_ = std::move(rawmetReader_->read());
+    jmeCorrector_->correct(event_.met_, event_.rawmet_, &event_.vertex_);
     met_lastSystematic_ = ( isMEtSystematic ) ? current_central_or_shift_ : "central";
+    if(isDEBUG_)
+    {
+      std::cout
+        << "Raw MEt: " << event_.rawmet_ << "\n"
+           "RecoMEt: " << event_.met_ << '\n'
+      ;
+    }
   }
   met_isInvalid_ = false;
 
@@ -706,6 +709,12 @@ void
 EventReader::set_tauEScset(correction::Correction::Ref cset)
 {
   hadTauReader_->set_tauEScset(cset);
+}
+
+correction::CorrectionSet *
+EventReader::get_JMARcset() const
+{
+  return jmeCorrector_->get_JMARcset();
 }
 
 std::vector<std::string>

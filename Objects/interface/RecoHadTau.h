@@ -3,7 +3,6 @@
 
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h" // GenHadTau
 
-#include <memory>                                              // std::shared_ptr
 #include <map>                                                 // std::map
 
 // forward declarations

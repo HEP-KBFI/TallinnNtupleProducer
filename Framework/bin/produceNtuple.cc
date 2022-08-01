@@ -16,14 +16,12 @@
 #include "PhysicsTools/FWLite/interface/TFileService.h"                                         // fwlite::TFileService
 
 #include "TallinnNtupleProducer/CommonTools/interface/memory_logger.h"                          // log_memory(), display_memory()
-#include "TallinnNtupleProducer/CommonTools/interface/BranchAddressInitializer.h"               // BranchAddressInitializer::print()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException
 #include "TallinnNtupleProducer/CommonTools/interface/Era.h"                                    // Era, get_era()
 #include "TallinnNtupleProducer/CommonTools/interface/contains.h"                               // contains()
 #include "TallinnNtupleProducer/CommonTools/interface/format_vT.h"                              // format_vstring()
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_wp_int()
 #include "TallinnNtupleProducer/CommonTools/interface/merge_systematic_shifts.h"                // merge_systematic_shifts()
-#include "TallinnNtupleProducer/CommonTools/interface/tH_auxFunctions.h"                        // get_tH_SM_str()
 #include "TallinnNtupleProducer/CommonTools/interface/TTreeWrapper.h"                           // TTreeWrapper
 #include "TallinnNtupleProducer/EvtWeightTools/interface/ChargeMisIdRateInterface.h"            // ChargeMisIdRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_2016.h" // Data_to_MC_CorrectionInterface_2016
@@ -34,21 +32,12 @@
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightManager.h"                    // EvtWeightManager
 #include "TallinnNtupleProducer/EvtWeightTools/interface/EvtWeightRecorder.h"                   // EvtWeightRecorder
 #include "TallinnNtupleProducer/EvtWeightTools/interface/HadTauFakeRateInterface.h"             // HadTauFakeRateInterface
-#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceCouplings.h"          // HHWeightInterfaceCouplings
-#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceLO.h"                 // HHWeightInterfaceLO
-#include "TallinnNtupleProducer/EvtWeightTools/interface/HHWeightInterfaceNLO.h"                // HHWeightInterfaceNLO
 #include "TallinnNtupleProducer/EvtWeightTools/interface/LeptonFakeRateInterface.h"             // LeptonFakeRateInterface
 #include "TallinnNtupleProducer/EvtWeightTools/interface/LHEVpt_LOtoNLO.h"                      // LHEVpt_LOtoNLO
 #include "TallinnNtupleProducer/Objects/interface/Event.h"                                      // Event
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"                                  // EventInfo
-#include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"                                  // GenHadTau
-#include "TallinnNtupleProducer/Objects/interface/GenJet.h"                                     // GenJet
 #include "TallinnNtupleProducer/Objects/interface/RunLumiEvent.h"                               // RunLumiEvent
-#include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"                                // TriggerInfo
 #include "TallinnNtupleProducer/Readers/interface/EventReader.h"                                // EventReader
-#include "TallinnNtupleProducer/Readers/interface/GenHadTauReader.h"                            // GenHadTauReader
-#include "TallinnNtupleProducer/Readers/interface/GenJetReader.h"                               // GenJetReader
-#include "TallinnNtupleProducer/Readers/interface/GenParticleReader.h"                          // GenParticleReader
 #include "TallinnNtupleProducer/Readers/interface/L1PreFiringWeightReader.h"                    // L1PreFiringWeightReader
 #include "TallinnNtupleProducer/Readers/interface/LHEInfoReader.h"                              // LHEInfoReader
 #include "TallinnNtupleProducer/Readers/interface/LHEParticleReader.h"
@@ -223,6 +212,10 @@ int main(int argc, char* argv[])
   inputTree->registerReader(eventReader);
 
   eventReader->set_tauEScset(dataToMCcorrectionInterface->get_tau_energy_scale_cset());
+  if(apply_pileupJetID != pileupJetID::kPileupJetID_disabled)
+  {
+    dataToMCcorrectionInterface->load_pileupJetID(eventReader->get_JMARcset());
+  }
 
   TTree* outputTree = fs.make<TTree>("Events", "Events");
 
@@ -298,7 +291,7 @@ int main(int argc, char* argv[])
     const std::string pluginType = cfg_writer.getParameter<std::string>("pluginType");
     cfg_writer.addParameter<unsigned int>("numNominalLeptons", numNominalLeptons);
     cfg_writer.addParameter<unsigned int>("numNominalHadTaus", numNominalHadTaus);
-    copyParameter<vstring>(cfg_produceNtuple, cfg_writer, "disable_ak8_corr");
+    copyParameter<vstring>(cfg_produceNtuple, cfg_writer, "fatJet_corrections");
     cfg_writer.addParameter<std::string>("era", get_era(era));
     cfg_writer.addParameter<bool>("isMC", isMC);
     cfg_writer.addParameter<std::string>("process", process);
@@ -355,9 +348,19 @@ int main(int argc, char* argv[])
   while ( inputTree->hasNextEvent() && (!run_lumi_eventSelector || (run_lumi_eventSelector && !run_lumi_eventSelector->areWeDone())) )
   {
     bool skipEvent = false;
+    const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
+    if (( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) ) ||
+        ( skipEvents > 0 && analyzedEntries <= skipEvents ))
+    {
+      skipEvent = true;
+    }
     for ( const std::vector<std::string> & central_or_shift : sytematics_split )
     {
-      const RunLumiEvent & runLumiEvent = eventReader->read_runLumiEvent();
+      if(skipEvent)
+      {
+        // break out of the systematics loop
+        break;
+      }
       const bool has_central = contains(central_or_shift, "central");
       std::string default_systematics;
       if ( has_central )
@@ -382,12 +385,6 @@ int main(int argc, char* argv[])
       {
         assert(central_or_shift.size() == 1); // shifting or smearing energy scales
         default_systematics = central_or_shift.at(0);
-      }
-      if (( run_lumi_eventSelector && !(*run_lumi_eventSelector)(runLumiEvent) ) ||
-          ( skipEvents > 0 && analyzedEntries <= skipEvents ))
-      {
-        skipEvent = true;
-        break; // skip to the next event
       }
       if ( isDEBUG || run_lumi_eventSelector )
       {
@@ -442,7 +439,7 @@ int main(int argc, char* argv[])
           const LHEParticleCollection lheParticles = lheParticleReader->read();
           evtWeightRecorder.record_gen_mHH_cosThetaStar(lheParticles);
         }
-        evtWeightRecorder.record_puWeight(&event.eventInfo());
+        evtWeightRecorder.record_puWeight(dataToMCcorrectionInterface, &event.eventInfo());
         evtWeightRecorder.record_nom_tH_weight(&event.eventInfo());
         evtWeightRecorder.record_lumiScale(lumiScale);
 

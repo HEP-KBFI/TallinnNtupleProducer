@@ -63,6 +63,9 @@ class Particle
   bool isValid_; ///< true if the particle is physical (meaning that its pT > 0)
 };
 
+typedef std::vector<Particle> ParticleCollection;
+typedef std::vector<const Particle *> ParticlePtrCollection;
+
 std::ostream &
 operator<<(std::ostream & stream,
            const Particle & particle);

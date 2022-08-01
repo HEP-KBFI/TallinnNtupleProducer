@@ -137,9 +137,6 @@ RecoElectronReader::setBranchAddresses(TTree * tree)
         );
       }
     }
-    bai.ignoreErrors(false); // [*]
-    // [*] TODO remove once all Ntuples have the EGamma ISO ID branches
-
     bai.setBranchAddress(eCorr_, branchName_eCorr_);
     bai.setBranchAddress(sigmaEtaEta_, branchName_sigmaEtaEta_);
     bai.setBranchAddress(HoE_, branchName_HoE_);

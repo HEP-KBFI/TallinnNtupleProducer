@@ -14,7 +14,8 @@ class TTree;
 enum class Btag;
 enum class Era;
 
-class RecoSubjetReaderAK8 : public ReaderBase
+class RecoSubjetReaderAK8
+  : public ReaderBase
 {
  public:
   RecoSubjetReaderAK8(const edm::ParameterSet & cfg);
@@ -43,14 +44,15 @@ class RecoSubjetReaderAK8 : public ReaderBase
   Era era_;
   Btag btag_;
   const unsigned int max_nJets_;
-  std::string branchName_num_;
   std::string branchName_obj_;
+  std::string branchName_num_;
   std::string branchName_btag_;
 
   std::string branchName_pt_;
   std::string branchName_eta_;
   std::string branchName_phi_;
   std::string branchName_mass_;
+  std::string branchName_rawFactor_;
   std::string branchName_BtagCSV_;
 
   UInt_t nJets_;
@@ -58,6 +60,7 @@ class RecoSubjetReaderAK8 : public ReaderBase
   Float_t * jet_eta_;
   Float_t * jet_phi_;
   Float_t * jet_mass_;
+  Float_t * jet_rawFactor_;
   Float_t * jet_BtagCSV_;
 
   // CV: make sure that only one RecoSubjetReaderAK8 instance exists for a given branchName,

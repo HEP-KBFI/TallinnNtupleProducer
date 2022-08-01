@@ -72,8 +72,8 @@ const std::map<std::string, pileupJetIDSFsys> pileupJetIDSysMap = {
 };
 
 const std::map<std::string, int> jesAK4SysMap = {
-  { "CMS_ttHl_JESUp",                     kJetMET_jesUp                     },
-  { "CMS_ttHl_JESDown",                   kJetMET_jesDown                   },
+  { "CMS_ttHl_JESTotalUp",                kJetMET_jesUp                     },
+  { "CMS_ttHl_JESTotalDown",              kJetMET_jesDown                   },
 };
 
 const std::map<std::string, int> jesSplitAK4SysMap = {
@@ -99,7 +99,6 @@ const std::map<std::string, int> jesSplitAK4SysMap = {
   { "CMS_ttHl_JESRelativeBalDown",        kJetMET_jesRelativeBalDown        },
   { "CMS_ttHl_JESRelativeSample_EraUp",   kJetMET_jesRelativeSample_EraUp   },
   { "CMS_ttHl_JESRelativeSample_EraDown", kJetMET_jesRelativeSample_EraDown },
-  { "CMS_ttHl_JESHEMUp",                  kJetMET_jesHEMUp                  },
   { "CMS_ttHl_JESHEMDown",                kJetMET_jesHEMDown                },
 };
 
@@ -129,8 +128,8 @@ const std::map<std::string, int> metSysMap = {
 };
 
 const std::map<std::string, int> jesAK8SysMap = {
-  { "CMS_ttHl_JESUp",                     kFatJet_jesUp                     },
-  { "CMS_ttHl_JESDown",                   kFatJet_jesDown                   },
+  { "CMS_ttHl_JESTotalUp",                kFatJet_jesUp                     },
+  { "CMS_ttHl_JESTotalDown",              kFatJet_jesDown                   },
 };
 
 const std::map<std::string, int> jesSplitAK8SysMap = {
@@ -156,7 +155,6 @@ const std::map<std::string, int> jesSplitAK8SysMap = {
   { "CMS_ttHl_JESRelativeBalDown",        kFatJet_jesRelativeBalDown        },
   { "CMS_ttHl_JESRelativeSample_EraUp",   kFatJet_jesRelativeSample_EraUp   },
   { "CMS_ttHl_JESRelativeSample_EraDown", kFatJet_jesRelativeSample_EraDown },
-  { "CMS_ttHl_JESHEMUp",                  kFatJet_jesHEMUp                  },
   { "CMS_ttHl_JESHEMDown",                kFatJet_jesHEMDown                },
 };
 
@@ -437,29 +435,13 @@ isValidJESsource(Era era,
                  int central_or_shift,
                  bool isFatJet)
 {
-  if((((central_or_shift == kJetMET_jesHEMUp || central_or_shift == kJetMET_jesHEMDown) && ! isFatJet) ||
-      ((central_or_shift == kFatJet_jesHEMUp || central_or_shift == kFatJet_jesHEMDown) &&   isFatJet)  ) &&
+  if(((central_or_shift == kJetMET_jesHEMDown && ! isFatJet) ||
+      (central_or_shift == kFatJet_jesHEMDown &&   isFatJet)  ) &&
      era != Era::k2018)
   {
     return false;
   }
   return true;
-}
-
-bool
-isValidFatJetAttribute(int central_or_shift,
-                       const std::string & attribute_name)
-{
-  std::vector<std::string> attribute_whitelist = { "mass", "msoftdrop" };
-  if(central_or_shift >= kFatJet_central_nonNominal && central_or_shift < kFatJet_jmsUp)
-  {
-    attribute_whitelist.push_back("pt");
-  }
-  if(central_or_shift >= kFatJet_jerUp || central_or_shift == kFatJet_central)
-  {
-    attribute_whitelist.push_back("msoftdrop_tau21DDT");
-  }
-  return std::find(attribute_whitelist.cbegin(), attribute_whitelist.cend(), attribute_name) != attribute_whitelist.cend();
 }
 
 int
@@ -501,9 +483,8 @@ getJet_option(const std::string & central_or_shift,
         return kv->second;
       }
     }
-    return kJetMET_central;
   }
-  return kJetMET_central_nonNominal;
+  return kJetMET_central;
 }
 
 int
@@ -535,9 +516,8 @@ getFatJet_option(const std::string & central_or_shift,
         return kv->second;
       }
     }
-    return kFatJet_central;
   }
-  return kFatJet_central_nonNominal;
+  return kFatJet_central;
 }
 
 int
@@ -832,142 +812,4 @@ checkOptionValidity(const std::string & central_or_shift,
       throw cmsException(__func__, __LINE__) << "Non-central MC systematics option not ending with Up or Down: " << central_or_shift;
     }
   }
-}
-
-std::string
-getBranchName_jetMET(const std::string & default_branchName,
-                     Era era,
-                     int central_or_shift,
-                     bool isPt)
-{
-  static std::map<int, std::string> branchNames_sys;
-  const bool isJet = boost::starts_with(default_branchName, "Jet");
-  const bool isMET = default_branchName == "MET";
-  const std::string era_str = get_era(era);
-  if(! isJet && ! isMET)
-  {
-    throw cmsException(__func__, __LINE__) << "Invalid branch name provided: " << default_branchName;
-  }
-  branchNames_sys[kJetMET_central_nonNominal] = Form(
-    "%s_%s", default_branchName.data(), isPt ? "pt" : (isJet ? "mass" : "phi")
-  );
-  const std::string branchName_corrected = Form(
-    "%s%s_%s", default_branchName.data(), isMET ? "_T1Smear" : "", isPt ? "pt" : (isJet ? "mass" : "phi")
-  );
-  branchNames_sys[kJetMET_central]                   = branchName_corrected + (isMET ? "" : "_nom");
-  branchNames_sys[kJetMET_jesUp]                     = branchName_corrected + "_jesTotalUp";
-  branchNames_sys[kJetMET_jesDown]                   = branchName_corrected + "_jesTotalDown";
-  //
-  branchNames_sys[kJetMET_jesAbsoluteUp]             = branchName_corrected + "_jesAbsoluteUp";
-  branchNames_sys[kJetMET_jesAbsoluteDown]           = branchName_corrected + "_jesAbsoluteDown";
-  branchNames_sys[kJetMET_jesAbsolute_EraUp]         = branchName_corrected + Form("_jesAbsolute_%sUp",    era_str.data());
-  branchNames_sys[kJetMET_jesAbsolute_EraDown]       = branchName_corrected + Form("_jesAbsolute_%sDown", era_str.data());
-  branchNames_sys[kJetMET_jesBBEC1Up]                = branchName_corrected + "_jesBBEC1Up";
-  branchNames_sys[kJetMET_jesBBEC1Down]              = branchName_corrected + "_jesBBEC1Down";
-  branchNames_sys[kJetMET_jesBBEC1_EraUp]            = branchName_corrected + Form("_jesBBEC1_%sUp",   era_str.data());
-  branchNames_sys[kJetMET_jesBBEC1_EraDown]          = branchName_corrected + Form("_jesBBEC1_%sDown", era_str.data());
-  branchNames_sys[kJetMET_jesEC2Up]                  = branchName_corrected + "_jesEC2Up";
-  branchNames_sys[kJetMET_jesEC2Down]                = branchName_corrected + "_jesEC2Down";
-  branchNames_sys[kJetMET_jesEC2_EraUp]              = branchName_corrected + Form("_jesEC2_%sUp",   era_str.data());
-  branchNames_sys[kJetMET_jesEC2_EraDown]            = branchName_corrected + Form("_jesEC2_%sDown", era_str.data());
-  branchNames_sys[kJetMET_jesFlavorQCDUp]            = branchName_corrected + "_jesFlavorQCDUp";
-  branchNames_sys[kJetMET_jesFlavorQCDDown]          = branchName_corrected + "_jesFlavorQCDDown";
-  branchNames_sys[kJetMET_jesHFUp]                   = branchName_corrected + "_jesHFUp";
-  branchNames_sys[kJetMET_jesHFDown]                 = branchName_corrected + "_jesHFDown";
-  branchNames_sys[kJetMET_jesHF_EraUp]               = branchName_corrected + Form("_jesHF_%sUp",   era_str.data());
-  branchNames_sys[kJetMET_jesHF_EraDown]             = branchName_corrected + Form("_jesHF_%sDown", era_str.data());
-  branchNames_sys[kJetMET_jesRelativeBalUp]          = branchName_corrected + "_jesRelativeBalUp";
-  branchNames_sys[kJetMET_jesRelativeBalDown]        = branchName_corrected + "_jesRelativeBalDown";
-  branchNames_sys[kJetMET_jesRelativeSample_EraUp]   = branchName_corrected + Form("_jesRelativeSample_%sUp",   era_str.data());
-  branchNames_sys[kJetMET_jesRelativeSample_EraDown] = branchName_corrected + Form("_jesRelativeSample_%sDown", era_str.data());
-  branchNames_sys[kJetMET_jesHEMUp]                  = branchName_corrected + "_jesHEMIssueUp";
-  branchNames_sys[kJetMET_jesHEMDown]                = branchName_corrected + "_jesHEMIssueDown";
-  //
-  branchNames_sys[kJetMET_jerUp]                     = branchName_corrected + "_jerUp";
-  branchNames_sys[kJetMET_jerDown]                   = branchName_corrected + "_jerDown";
-  branchNames_sys[kJetMET_jerBarrelUp]               = branchName_corrected + "_jer0Up";
-  branchNames_sys[kJetMET_jerBarrelDown]             = branchName_corrected + "_jer0Down";
-  branchNames_sys[kJetMET_jerEndcap1Up]              = branchName_corrected + "_jer1Up";
-  branchNames_sys[kJetMET_jerEndcap1Down]            = branchName_corrected + "_jer1Down";
-  branchNames_sys[kJetMET_jerEndcap2LowPtUp]         = branchName_corrected + "_jer2Up";
-  branchNames_sys[kJetMET_jerEndcap2LowPtDown]       = branchName_corrected + "_jer2Down";
-  branchNames_sys[kJetMET_jerEndcap2HighPtUp]        = branchName_corrected + "_jer3Up";
-  branchNames_sys[kJetMET_jerEndcap2HighPtDown]      = branchName_corrected + "_jer3Down";
-  branchNames_sys[kJetMET_jerForwardLowPtUp]         = branchName_corrected + "_jer4Up";
-  branchNames_sys[kJetMET_jerForwardLowPtDown]       = branchName_corrected + "_jer4Down";
-  branchNames_sys[kJetMET_jerForwardHighPtUp]        = branchName_corrected + "_jer5Up";
-  branchNames_sys[kJetMET_jerForwardHighPtDown]      = branchName_corrected + "_jer5Down";
-  //
-  branchNames_sys[kJetMET_UnclusteredEnUp]           = branchName_corrected + "_unclustEnUp";
-  branchNames_sys[kJetMET_UnclusteredEnDown]         = branchName_corrected + "_unclustEnDown";
-  //
-  assert(branchNames_sys.count(central_or_shift));
-  assert(isValidJESsource(era, central_or_shift));
-  assert((isJet && central_or_shift != kJetMET_UnclusteredEnUp && central_or_shift != kJetMET_UnclusteredEnDown) || ! isJet);
-  return branchNames_sys.at(central_or_shift);
-}
-
-std::string
-getBranchName_fatJet(const std::string & default_branchName,
-                     Era era,
-                     const std::string & attribute_name,
-                     int central_or_shift)
-{
-  assert(boost::starts_with(default_branchName, "FatJet"));
-  const std::string era_str = get_era(era);
-  static std::map<int, std::string> branchNames_sys;
-  branchNames_sys[kFatJet_central_nonNominal] = Form(
-    "%s_%s", default_branchName.data(), attribute_name.data()
-  );
-  branchNames_sys[kFatJet_central]                   = branchNames_sys[kFatJet_central_nonNominal] + "_nom";
-  branchNames_sys[kFatJet_jesUp]                     = branchNames_sys[kFatJet_central_nonNominal] + "_jesTotalUp";
-  branchNames_sys[kFatJet_jesDown]                   = branchNames_sys[kFatJet_central_nonNominal] + "_jesTotalDown";
-  branchNames_sys[kFatJet_jesAbsoluteUp]             = branchNames_sys[kFatJet_central_nonNominal] + "_jesAbsoluteUp";
-  branchNames_sys[kFatJet_jesAbsoluteDown]           = branchNames_sys[kFatJet_central_nonNominal] + "_jesAbsoluteDown";
-  branchNames_sys[kFatJet_jesAbsolute_EraUp]         = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesAbsolute_%sUp",    era_str.data());
-  branchNames_sys[kFatJet_jesAbsolute_EraDown]       = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesAbsolute_%sDown", era_str.data());
-  branchNames_sys[kFatJet_jesBBEC1Up]                = branchNames_sys[kFatJet_central_nonNominal] + "_jesBBEC1Up";
-  branchNames_sys[kFatJet_jesBBEC1Down]              = branchNames_sys[kFatJet_central_nonNominal] + "_jesBBEC1Down";
-  branchNames_sys[kFatJet_jesBBEC1_EraUp]            = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesBBEC1_%sUp",   era_str.data());
-  branchNames_sys[kFatJet_jesBBEC1_EraDown]          = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesBBEC1_%sDown", era_str.data());
-  branchNames_sys[kFatJet_jesEC2Up]                  = branchNames_sys[kFatJet_central_nonNominal] + "_jesEC2Up";
-  branchNames_sys[kFatJet_jesEC2Down]                = branchNames_sys[kFatJet_central_nonNominal] + "_jesEC2Down";
-  branchNames_sys[kFatJet_jesEC2_EraUp]              = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesEC2_%sUp",   era_str.data());
-  branchNames_sys[kFatJet_jesEC2_EraDown]            = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesEC2_%sDown", era_str.data());
-  branchNames_sys[kFatJet_jesFlavorQCDUp]            = branchNames_sys[kFatJet_central_nonNominal] + "_jesFlavorQCDUp";
-  branchNames_sys[kFatJet_jesFlavorQCDDown]          = branchNames_sys[kFatJet_central_nonNominal] + "_jesFlavorQCDDown";
-  branchNames_sys[kFatJet_jesHFUp]                   = branchNames_sys[kFatJet_central_nonNominal] + "_jesHFUp";
-  branchNames_sys[kFatJet_jesHFDown]                 = branchNames_sys[kFatJet_central_nonNominal] + "_jesHFDown";
-  branchNames_sys[kFatJet_jesHF_EraUp]               = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesHF_%sUp",   era_str.data());
-  branchNames_sys[kFatJet_jesHF_EraDown]             = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesHF_%sDown", era_str.data());
-  branchNames_sys[kFatJet_jesRelativeBalUp]          = branchNames_sys[kFatJet_central_nonNominal] + "_jesRelativeBalUp";
-  branchNames_sys[kFatJet_jesRelativeBalDown]        = branchNames_sys[kFatJet_central_nonNominal] + "_jesRelativeBalDown";
-  branchNames_sys[kFatJet_jesRelativeSample_EraUp]   = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesRelativeSample_%sUp",   era_str.data());
-  branchNames_sys[kFatJet_jesRelativeSample_EraDown] = branchNames_sys[kFatJet_central_nonNominal] + Form("_jesRelativeSample_%sDown", era_str.data());
-  branchNames_sys[kFatJet_jesHEMUp]                  = branchNames_sys[kFatJet_central_nonNominal] + "_jesHEMIssueUp";
-  branchNames_sys[kFatJet_jesHEMDown]                = branchNames_sys[kFatJet_central_nonNominal] + "_jesHEMIssueDown";
-  //
-  branchNames_sys[kFatJet_jerUp]                     = branchNames_sys[kFatJet_central_nonNominal] + "_jerUp";
-  branchNames_sys[kFatJet_jerDown]                   = branchNames_sys[kFatJet_central_nonNominal] + "_jerDown";
-//  branchNames_sys[kFatJet_jerBarrelUp]               = branchNames_sys[kFatJet_central_nonNominal] + "_jer0Up";
-//  branchNames_sys[kFatJet_jerBarrelDown]             = branchNames_sys[kFatJet_central_nonNominal] + "_jer0Down";
-//  branchNames_sys[kFatJet_jerEndcap1Up]              = branchNames_sys[kFatJet_central_nonNominal] + "_jer1Up";
-//  branchNames_sys[kFatJet_jerEndcap1Down]            = branchNames_sys[kFatJet_central_nonNominal] + "_jer1Down";
-//  branchNames_sys[kFatJet_jerEndcap2LowPtUp]         = branchNames_sys[kFatJet_central_nonNominal] + "_jer2Up";
-//  branchNames_sys[kFatJet_jerEndcap2LowPtDown]       = branchNames_sys[kFatJet_central_nonNominal] + "_jer2Down";
-//  branchNames_sys[kFatJet_jerEndcap2HighPtUp]        = branchNames_sys[kFatJet_central_nonNominal] + "_jer3Up";
-//  branchNames_sys[kFatJet_jerEndcap2HighPtDown]      = branchNames_sys[kFatJet_central_nonNominal] + "_jer3Down";
-//  branchNames_sys[kFatJet_jerForwardLowPtUp]         = branchNames_sys[kFatJet_central_nonNominal] + "_jer4Up";
-//  branchNames_sys[kFatJet_jerForwardLowPtDown]       = branchNames_sys[kFatJet_central_nonNominal] + "_jer4Down";
-//  branchNames_sys[kFatJet_jerForwardHighPtUp]        = branchNames_sys[kFatJet_central_nonNominal] + "_jer5Up";
-//  branchNames_sys[kFatJet_jerForwardHighPtDown]      = branchNames_sys[kFatJet_central_nonNominal] + "_jer5Down";
-  //
-  branchNames_sys[kFatJet_jmsUp]                     = branchNames_sys[kFatJet_central_nonNominal] + "_jmsUp";
-  branchNames_sys[kFatJet_jmsDown]                   = branchNames_sys[kFatJet_central_nonNominal] + "_jmsDown";
-  branchNames_sys[kFatJet_jmrUp]                     = branchNames_sys[kFatJet_central_nonNominal] + "_jmrUp";
-  branchNames_sys[kFatJet_jmrDown]                   = branchNames_sys[kFatJet_central_nonNominal] + "_jmrDown";
-  assert(branchNames_sys.count(central_or_shift));
-  assert(isValidJESsource(era, central_or_shift, false));
-  assert(isValidFatJetAttribute(central_or_shift, attribute_name));
-  return branchNames_sys.at(central_or_shift);
 }

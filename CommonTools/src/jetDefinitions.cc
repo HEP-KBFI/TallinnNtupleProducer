@@ -81,6 +81,13 @@ const std::map<Era, std::map<Btag, std::map<BtagWP, double>>> BtagWP_map = {
   },
 };
 
+const std::map<pileupJetID, std::string> pileupJetID_map = {
+  { pileupJetID::kPileupJetID_disabled, "" },
+  { pileupJetID::kPileupJetID_loose,    "L" },
+  { pileupJetID::kPileupJetID_medium,   "M" },
+  { pileupJetID::kPileupJetID_tight,    "T" },
+};
+
 pileupJetID
 get_pileupJetID(const std::string & pileupJetID_str)
 {
@@ -97,4 +104,30 @@ get_BtagWP(Era era,
            BtagWP wp)
 {
   return BtagWP_map.at(era).at(btag).at(wp);
+}
+
+int
+get_fatJet_corrections(const std::vector<std::string> & corrections)
+{
+  int code = 0;
+  for(const std::string & correction: corrections)
+  {
+    if(correction == "JMS")
+    {
+      code |= kFatJetJMS;
+    }
+    else if(correction == "JMR")
+    {
+      code |= kFatJetJMR;
+    }
+    else if(correction == "PUPPI")
+    {
+      code |= kFatJetPUPPI;
+    }
+    else
+    {
+      throw cmsException(__func__, __LINE__) << "Invalid correction name: " << correction;
+    }
+  }
+  return code;
 }

@@ -3,29 +3,46 @@
 #include "TallinnNtupleProducer/CommonTools/interface/as_integer.h"     // as_integer()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"   // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/jetDefinitions.h" // Btag, pileupJetID
+#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h"       // CorrT1METJet
 
 RecoJetAK4::RecoJetAK4(const GenJet & jet,
-                       Double_t BtagCSV,
-                       Double_t QGDiscr,
-                       Double_t bRegCorr,
-                       Double_t bRegRes,
+                       Float_t BtagCSV,
+                       Float_t QGDiscr,
+                       Float_t bRegCorr,
+                       Float_t bRegRes,
                        Int_t jetId,
                        Int_t puId,
+                       Float_t rawFactor,
+                       Float_t area,
+                       Float_t neEmEF,
+                       Float_t chEmEF,
+                       Float_t muonSubtrFactor,
                        UInt_t idx,
                        Int_t genJetIdx,
-                       Btag btag,
-                       Int_t central_or_shift)
-: RecoJetBase(jet, idx)
+                       Btag btag)
+  : RecoJetBase(jet, rawFactor, idx)
   , BtagCSV_(BtagCSV)
   , QGDiscr_(QGDiscr)
   , bRegCorr_(bRegCorr)
   , bRegRes_(bRegRes)
   , jetId_(jetId)
   , puId_(puId)
+  , area_(area)
+  , neEmEF_(neEmEF)
+  , chEmEF_(chEmEF)
+  , muonSubtrFactor_(muonSubtrFactor)
   , genJetIdx_(genJetIdx)
   , btag_(btag)
   , isBJet_loose_(false)
   , isBJet_medium_(false)
+{}
+
+RecoJetAK4::RecoJetAK4(const CorrT1METJet & jet,
+                       Int_t genJetIdx)
+  : RecoJetAK4(
+      { jet.pt(), jet.eta(), jet.phi(), jet.mass() },
+      -1., -1., -1., -1., 0, -1, 0., jet.area(), 0., 0., jet.muonSubtrFactor(), -1, genJetIdx, Btag::kDeepJet
+    )
 {}
 
 RecoJetAK4::~RecoJetAK4()
@@ -43,13 +60,13 @@ RecoJetAK4::set_isBJet_medium() const
   isBJet_medium_ = true;
 }
 
-Double_t
+Float_t
 RecoJetAK4::BtagCSV() const
 {
   return BtagCSV_;
 }
 
-Double_t
+Float_t
 RecoJetAK4::BtagCSV(Btag btag) const
 {
   if(! BtagCSV_systematics_.count(btag))
@@ -61,13 +78,13 @@ RecoJetAK4::BtagCSV(Btag btag) const
   return BtagCSV_systematics_.at(btag);
 }
 
-Double_t
+Float_t
 RecoJetAK4::QGDiscr() const
 {
   return QGDiscr_;
 }
 
-Double_t
+Float_t
 RecoJetAK4::bRegCorr() const
 {
   return bRegCorr_;
@@ -82,7 +99,7 @@ RecoJetAK4::p4_bRegCorr() const
   return math::PtEtaPhiMLorentzVector(this->pt()*bRegCorr_, this->eta(), this->phi(), this->mass()*bRegCorr_);
 }
 
-Double_t
+Float_t
 RecoJetAK4::bRegRes() const
 {
   return bRegRes_;
@@ -98,6 +115,30 @@ Int_t
 RecoJetAK4::puId() const
 {
   return puId_;
+}
+
+Float_t
+RecoJetAK4::area() const
+{
+  return area_;
+}
+
+Float_t
+RecoJetAK4::neEmEF() const
+{
+  return neEmEF_;
+}
+
+Float_t
+RecoJetAK4::chEmEF() const
+{
+  return chEmEF_;
+}
+
+Float_t
+RecoJetAK4::muonSubtrFactor() const
+{
+  return muonSubtrFactor_;
 }
 
 Int_t
@@ -144,9 +185,13 @@ operator<<(std::ostream & stream,
 {
   stream << static_cast<const RecoJetBase &>(jet)                            << ",\n"
             " genJetIdx = "       << jet.genJetIdx()                         << ","
-            " CSV = "             << jet.BtagCSV()                           << ","
+            " btag score = "      << jet.BtagCSV()                           << ","
             " jet ID = "          << jet.jetId()                             << ","
             " PU ID = "           << jet.puId()                              << ","
+            " area = "            << jet.area()                              << ","
+            " neEmEF = "          << jet.neEmEF()                            << ","
+            " chEmEF = "          << jet.chEmEF()                            << ","
+            " muonSubtrFactor = " << jet.muonSubtrFactor()                   << ","
             " QGL = "             << jet.QGDiscr()                           << ","
             " bReg corr (res) = " << jet.bRegCorr() << " (" << jet.bRegRes() << ")\n"
   ;

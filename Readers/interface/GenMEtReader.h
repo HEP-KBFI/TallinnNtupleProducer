@@ -28,6 +28,8 @@ class GenMEtReader : public ReaderBase
   GenMEt
   read() const;
 
+  friend class RecoMEtReader;
+
  protected:
   /**
    * @brief Initialize names of branches to be read from tree
@@ -40,7 +42,8 @@ class GenMEtReader : public ReaderBase
   std::string branchName_pt_;
   std::string branchName_phi_;
 
-  GenMEt met_;
+  Float_t pt_;
+  Float_t phi_;
 
   // CV: make sure that only one GenMEtReader instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.

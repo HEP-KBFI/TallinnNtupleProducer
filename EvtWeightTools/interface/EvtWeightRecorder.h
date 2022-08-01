@@ -252,7 +252,8 @@ class EvtWeightRecorder
   record_psWeight(const PSWeightReader * const psWeightReader);
 
   void
-  record_puWeight(const EventInfo * const eventInfo);
+  record_puWeight(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface,
+                  const EventInfo * const eventInfo);
 
   void
   record_pileupJetIDSF(const Data_to_MC_CorrectionInterface_Base * const dataToMCcorrectionInterface,

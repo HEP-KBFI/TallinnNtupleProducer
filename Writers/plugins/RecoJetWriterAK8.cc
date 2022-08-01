@@ -136,7 +136,7 @@ RecoJetWriterAK8::writeImp(const Event & event, const EvtWeightRecorder & evtWei
         it->pt_[idxJet] = jet->pt();
         it->eta_[idxJet] = jet->eta();
         it->phi_[idxJet] = jet->phi();
-        it->mass_[idxJet] = ( jet->subJet1() && jet->subJet2() ) ? (jet->subJet1()->p4() + jet->subJet2()->p4()).mass() : 0.;
+        it->mass_[idxJet] = jet->mass();
         it->msoftdrop_[idxJet] = jet->msoftdrop();
         it->tau21_[idxJet] = jet->tau1() > 0. ? jet->tau2()/jet->tau1() : 1.;
         it->jetId_[idxJet] = jet->jetId();

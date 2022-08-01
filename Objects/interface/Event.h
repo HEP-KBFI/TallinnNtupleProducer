@@ -4,6 +4,7 @@
 #include "TallinnNtupleProducer/Objects/interface/EventInfo.h"    // EventInfo
 #include "TallinnNtupleProducer/Objects/interface/GenHadTau.h"    // GenHadTauCollection
 #include "TallinnNtupleProducer/Objects/interface/GenJet.h"       // GenJetCollection
+#include "TallinnNtupleProducer/Objects/interface/CorrT1METJet.h" // CorrT1METJetCollection
 #include "TallinnNtupleProducer/Objects/interface/MEtFilter.h"    // MEtFilter
 #include "TallinnNtupleProducer/Objects/interface/TriggerInfo.h"  // TriggerInfo
 #include "TallinnNtupleProducer/Objects/interface/RecoElectron.h" // RecoElectronCollection, RecoElectronPtrCollection
@@ -131,15 +132,21 @@ class Event
   GenParticleCollection genParticles_;
   GenHadTauCollection genHadTaus_;
   GenJetCollection genJets_;
+  GenJetPtrCollection genJetPtrs_;
+  CorrT1METJetCollection corrT1METJets_;
 
-  RecoJetCollectionAK8 jetsAK8_Hbb_;
-  RecoJetPtrCollectionAK8 jet_ptrsAK8_Hbb_;
+  RecoJetCollectionAK8 jetsAK8_;
+  RecoJetPtrCollectionAK8 jet_ptrsAK8_;
   RecoJetPtrCollectionAK8 selJetsUncleanedAK8_Hbb_;
   RecoJetPtrCollectionAK8 selJetsAK8_Hbb_;
-  RecoJetCollectionAK8 jetsAK8_Wjj_;
-  RecoJetPtrCollectionAK8 jet_ptrsAK8_Wjj_;
   RecoJetPtrCollectionAK8 selJetsAK8_Wjj_;
 
+  ParticleCollection genJetsAK8_;
+  ParticlePtrCollection genJetPtrsAK8_;
+  ParticleCollection genSubJetsAK8_;
+  ParticlePtrCollection genSubJetPtrsAK8_;
+
+  GenMEt rawmet_;
   RecoMEt met_;
   MEtFilter metFilters_;
 

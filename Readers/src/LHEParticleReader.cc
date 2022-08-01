@@ -89,9 +89,7 @@ LHEParticleReader::setBranchAddresses(TTree * tree)
     bai.setBranchAddress(particle_phi_, branchName_particle_phi_);
     bai.setBranchAddress(particle_mass_, branchName_particle_mass_);
     bai.setBranchAddress(particle_pdgId_, branchName_particle_pdgId_);
-    bai.ignoreErrors(true);
     bai.setBranchAddress(particle_status_, branchName_particle_status_);
-    bai.ignoreErrors(false);
     return bai.getBoundBranchNames_read();
   }
   return {};
