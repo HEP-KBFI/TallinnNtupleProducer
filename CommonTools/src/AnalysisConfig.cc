@@ -11,11 +11,9 @@
 AnalysisConfig::AnalysisConfig(const std::string & analysis, const edm::ParameterSet & cfg)
   : analysis_string_(analysis)
   , process_string_(cfg.getParameter<std::string>("process"))
-  , process_string_hh_(cfg.exists("process_hh") ? cfg.getParameter<std::string>("process_hh") : process_string_)
   , mass_HH_resonant_(-1.)
   , apply_topPtReweighting_(TopPtRwgtOption::Disable)
 {
-  assert(boost::starts_with(process_string_hh_, process_string_) || process_string_.find("signal") != std::string::npos || process_string_ == "HH");
   isMC_       = cfg.getParameter<bool>("isMC");
   isData_     = !isMC_;
   isMC_DY_    = process_string_ == "DY";
@@ -76,12 +74,6 @@ const std::string &
 AnalysisConfig::process() const
 {
   return process_string_;
-}
-
-const std::string &
-AnalysisConfig::process_hh() const
-{
-  return process_string_hh_;
 }
 
 bool

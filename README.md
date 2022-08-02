@@ -65,9 +65,9 @@ The following lists primary `PSet`s in the configuration file of `produceNtuple`
 | `maxEvents`                | `int32`   | `-1`; `> 0`     | How many events to process (-1 = all events)   |
 | `outputEvery`              | `uint32`  | `> 0`           | How often to log run:lumi:event nrs and memory |
 
-| Parameter in `fwliteOutput` | Type     | Possible values | Description      |
-|:----------------------------|:---------|:----------------|:-----------------|
-| `fileName`                  | `string` |                 | Output file name |
+| Parameter in `fwliteOutput` | Type     | Descriptio n     |
+|:----------------------------|:---------|:-----------------|
+| `fileName`                  | `string` | Output file name |
 
 | Parameter in `produceNtuple`                      | Type      | Possible values                     | Modify depending on the...? | Description                                                                                                 |
 |:--------------------------------------------------|:----------|:------------------------------------|:----------------------------|:------------------------------------------------------------------------------------------------------------|
