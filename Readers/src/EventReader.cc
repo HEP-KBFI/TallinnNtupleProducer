@@ -616,9 +616,12 @@ EventReader::read() const
       event_.genSubJetsAK8_ = genSubJetAK8Reader_->read();
       event_.genSubJetPtrsAK8_ = convert_to_ptrs(event_.genSubJetsAK8_);
     }
-    for(RecoJetAK8 & jet: event_.jetsAK8_)
+    if(isMC_)
     {
-      jmeCorrector_->correct(jet, event_.genJetPtrsAK8_, event_.genSubJetPtrsAK8_);
+      for(RecoJetAK8 & jet: event_.jetsAK8_)
+      {
+        jmeCorrector_->correct(jet, event_.genJetPtrsAK8_, event_.genSubJetPtrsAK8_);
+      }
     }
     event_.jet_ptrsAK8_ = convert_to_ptrs(event_.jetsAK8_);
     event_.selJetsUncleanedAK8_Hbb_ = jetSelectorAK8_Hbb_->operator()(event_.jet_ptrsAK8_, isHigherPt<RecoJetAK8>);
@@ -676,7 +679,10 @@ EventReader::read() const
   {
     event_.met_ = std::move(metReader_->read());
     event_.rawmet_ = std::move(rawmetReader_->read());
-    jmeCorrector_->correct(event_.met_, event_.rawmet_, &event_.vertex_);
+    if(isMC_)
+    {
+      jmeCorrector_->correct(event_.met_, event_.rawmet_, &event_.vertex_);
+    }
     met_lastSystematic_ = ( isMEtSystematic ) ? current_central_or_shift_ : "central";
     if(isDEBUG_)
     {

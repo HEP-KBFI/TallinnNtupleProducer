@@ -27,11 +27,9 @@ type_x = cms.PSet(
     hltFilterBits_mu = cms.vuint32(0),
     hltFilterBits_tau = cms.vuint32(0),
     in_PD = cms.string(""),
-    use_it = cms.bool(True),
+    use_it = cms.bool(False),
 ),
 """
-
-#TODO is it sensible to default all use_it flags to True?
 
 triggers_2016 = cms.PSet(
     branchName = cms.string("TrigObj"),
@@ -43,7 +41,7 @@ triggers_2016 = cms.PSet(
         ]),
         hltFilterBits_tau = cms.vuint32(64),
         in_PD = cms.string("Tau"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1mu1tau = cms.PSet(
         type = cms.string("1mu1tau"),
@@ -51,7 +49,7 @@ triggers_2016 = cms.PSet(
         hltFilterBits_mu = cms.vuint32(64),
         hltFilterBits_tau = cms.vuint32(256),
         in_PD = cms.string("SingleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e1tau = cms.PSet(
         type = cms.string("1e1tau"),
@@ -63,21 +61,21 @@ triggers_2016 = cms.PSet(
         hltFilterBits_e = cms.vuint32(64),
         hltFilterBits_tau = cms.vuint32(128),
         in_PD = cms.string("SingleElectron"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_3mu = cms.PSet(
         type = cms.string("3mu"),
         hltPaths = cms.vstring(['HLT_TripleMu_12_10_5']),
         hltFilterBits_mu = cms.vuint32(128),
         in_PD = cms.string("DoubleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_3e = cms.PSet(
         type = cms.string("3e"),
         hltPaths = cms.vstring(['HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL']),
         hltFilterBits_e = cms.vuint32(128),
         in_PD = cms.string("DoubleEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2e1mu = cms.PSet(
         type = cms.string("2e1mu"),
@@ -85,7 +83,7 @@ triggers_2016 = cms.PSet(
         hltFilterBits_e = cms.vuint32(256),
         hltFilterBits_mu = cms.vuint32(512),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e2mu = cms.PSet(
         type = cms.string("1e2mu"),
@@ -93,7 +91,7 @@ triggers_2016 = cms.PSet(
         hltFilterBits_e = cms.vuint32(512),
         hltFilterBits_mu = cms.vuint32(256),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2mu = cms.PSet(
         type = cms.string("2mu"),
@@ -105,7 +103,7 @@ triggers_2016 = cms.PSet(
         ]),
         hltFilterBits_mu = cms.vuint32(16),
         in_PD = cms.string("DoubleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e1mu = cms.PSet(
         type = cms.string("1e1mu"),
@@ -118,14 +116,14 @@ triggers_2016 = cms.PSet(
         hltFilterBits_e = cms.vuint32(32),
         hltFilterBits_mu = cms.vuint32(32),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2e = cms.PSet(
         type = cms.string("2e"),
         hltPaths = cms.vstring(['HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ']),
         hltFilterBits_e = cms.vuint32(16),
         in_PD = cms.string("DoubleEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1mu = cms.PSet(
         type = cms.string("1mu"),
@@ -139,7 +137,7 @@ triggers_2016 = cms.PSet(
         ]),
         hltFilterBits_mu = cms.vuint32(8),
         in_PD = cms.string("SingleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e = cms.PSet(
         type = cms.string("1e"),
@@ -150,7 +148,7 @@ triggers_2016 = cms.PSet(
          ]),
         hltFilterBits_e = cms.vuint32(2),
         in_PD = cms.string("SingleElectron"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
 )
 
@@ -166,7 +164,7 @@ triggers_2017 = cms.PSet(
         ]),
         hltFilterBits_tau = cms.vuint32(64),
         in_PD = cms.string("Tau"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1mu1tau = cms.PSet(
         type = cms.string("1mu1tau"),
@@ -174,7 +172,7 @@ triggers_2017 = cms.PSet(
         hltFilterBits_mu = cms.vuint32(64),
         hltFilterBits_tau = cms.vuint32(256),
         in_PD = cms.string("SingleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e1tau = cms.PSet(
         type = cms.string("1e1tau"),
@@ -182,21 +180,21 @@ triggers_2017 = cms.PSet(
         hltFilterBits_e = cms.vuint32(64),
         hltFilterBits_tau = cms.vuint32(128),
         in_PD = cms.string("SingleElectron"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_3mu = cms.PSet(
         type = cms.string("3mu"),
         hltPaths = cms.vstring(['HLT_TripleMu_12_10_5']),
         hltFilterBits_mu = cms.vuint32(128),
         in_PD = cms.string("DoubleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_3e = cms.PSet(
         type = cms.string("3e"),
         hltPaths = cms.vstring(['HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL']),
         hltFilterBits_e = cms.vuint32(128),
         in_PD = cms.string("DoubleEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2e1mu = cms.PSet(
         type = cms.string("2e1mu"),
@@ -204,7 +202,7 @@ triggers_2017 = cms.PSet(
         hltFilterBits_e = cms.vuint32(256),
         hltFilterBits_mu = cms.vuint32(512),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e2mu = cms.PSet(
         type = cms.string("1e2mu"),
@@ -212,7 +210,7 @@ triggers_2017 = cms.PSet(
         hltFilterBits_e = cms.vuint32(512),
         hltFilterBits_mu = cms.vuint32(256),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2mu = cms.PSet(
         type = cms.string("2mu"),
@@ -222,7 +220,7 @@ triggers_2017 = cms.PSet(
         ]),
         hltFilterBits_mu = cms.vuint32(16),
         in_PD = cms.string("DoubleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e1mu = cms.PSet(
         type = cms.string("1e1mu"),
@@ -235,14 +233,14 @@ triggers_2017 = cms.PSet(
         hltFilterBits_e = cms.vuint32(32),
         hltFilterBits_mu = cms.vuint32(32),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2e = cms.PSet(
         type = cms.string("2e"),
         hltPaths = cms.vstring(['HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL']),
         hltFilterBits_e = cms.vuint32(16),
         in_PD = cms.string("DoubleEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1mu = cms.PSet(
         type = cms.string("1mu"),
@@ -252,7 +250,7 @@ triggers_2017 = cms.PSet(
         ]),
         hltFilterBits_mu = cms.vuint32(8),
         in_PD = cms.string("SingleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e = cms.PSet(
         type = cms.string("1e"),
@@ -262,7 +260,7 @@ triggers_2017 = cms.PSet(
         ]),
         hltFilterBits_e = cms.vuint32(2),
         in_PD = cms.string("SingleElectron"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
 )
 
@@ -278,7 +276,7 @@ triggers_2018 = cms.PSet(
         ]),
         hltFilterBits_tau = cms.vuint32(64),
         in_PD = cms.string("Tau"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1mu1tau = cms.PSet(
         type = cms.string("1mu1tau"),
@@ -289,7 +287,7 @@ triggers_2018 = cms.PSet(
         hltFilterBits_mu = cms.vuint32(64),
         hltFilterBits_tau = cms.vuint32(256),
         in_PD = cms.string("SingleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e1tau = cms.PSet(
         type = cms.string("1e1tau"),
@@ -300,21 +298,21 @@ triggers_2018 = cms.PSet(
         hltFilterBits_e = cms.vuint32(64),
         hltFilterBits_tau = cms.vuint32(128),
         in_PD = cms.string("SingleElectron"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_3mu = cms.PSet(
         type = cms.string("3mu"),
         hltPaths = cms.vstring(['HLT_TripleMu_12_10_5']),
         hltFilterBits_mu = cms.vuint32(128),
         in_PD = cms.string("DoubleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_3e = cms.PSet(
         type = cms.string("3e"),
         hltPaths = cms.vstring(['HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL']),
         hltFilterBits_e = cms.vuint32(128),
         in_PD = cms.string("DoubleEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2e1mu = cms.PSet(
         type = cms.string("2e1mu"),
@@ -322,7 +320,7 @@ triggers_2018 = cms.PSet(
         hltFilterBits_e = cms.vuint32(256),
         hltFilterBits_mu = cms.vuint32(512),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e2mu = cms.PSet(
         type = cms.string("1e2mu"),
@@ -330,14 +328,14 @@ triggers_2018 = cms.PSet(
         hltFilterBits_e = cms.vuint32(512),
         hltFilterBits_mu = cms.vuint32(256),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2mu = cms.PSet(
         type = cms.string("2mu"),
         hltPaths = cms.vstring(['HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8']),
         hltFilterBits_mu = cms.vuint32(16),
         in_PD = cms.string("DoubleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e1mu = cms.PSet(
         type = cms.string("1e1mu"),
@@ -349,14 +347,14 @@ triggers_2018 = cms.PSet(
         hltFilterBits_e = cms.vuint32(32),
         hltFilterBits_mu = cms.vuint32(32),
         in_PD = cms.string("MuonEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_2e = cms.PSet(
         type = cms.string("2e"),
         hltPaths = cms.vstring(['HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL']),
         hltFilterBits_e = cms.vuint32(16),
         in_PD = cms.string("DoubleEG"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1mu = cms.PSet(
         type = cms.string("1mu"),
@@ -366,13 +364,13 @@ triggers_2018 = cms.PSet(
         ]),
         hltFilterBits_mu = cms.vuint32(8),
         in_PD = cms.string("SingleMuon"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
     type_1e = cms.PSet(
         type = cms.string("1e"),
         hltPaths = cms.vstring(['HLT_Ele32_WPTight_Gsf']),
         hltFilterBits_e = cms.vuint32(2),
         in_PD = cms.string("SingleElectron"),
-        use_it = cms.bool(True),
+        use_it = cms.bool(False),
     ),
 )

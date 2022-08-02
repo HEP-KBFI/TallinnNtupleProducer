@@ -18,6 +18,6 @@ class ReaderBase
 };
 
 edm::ParameterSet
-makeReader_cfg(Era era, const std::string& branchName, bool isMC, bool redoGenMatching = false);
+makeReader_cfg(Era era, const std::string& branchName, bool isMC);
 
 #endif // TallinnNtupleProducer_Readers_ReaderBase_h
