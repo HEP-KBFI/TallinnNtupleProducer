@@ -140,12 +140,6 @@ class RecoLepton : public ChargedParticle
   void
   setjetBtagCSV(double btag, Btag btagAlgo=Btag::kDeepJet);
 
-  void
-  setLeptonSF3(bool isLSF3);
-
-  bool
-  isLeptonSF3() const;
-
   bool hasJetBtagCSV(Btag btag) const;
 
   bool isGenMatched(bool requireChargeMatch) const;
@@ -196,7 +190,7 @@ class RecoLepton : public ChargedParticle
   Double_t mvaRawTTH_cut_;     ///< cut on prompt lepton MVA score
 
   std::map<Btag, Double_t> assocJetBtagCSVs_; ///< CSV b-tagging discriminator values of nearby jet found via jetIdx branch
-  bool isLeptonSF3_;
+
   Double_t assocJet_pt_;
   Particle::LorentzVector assocJet_p4_;
 

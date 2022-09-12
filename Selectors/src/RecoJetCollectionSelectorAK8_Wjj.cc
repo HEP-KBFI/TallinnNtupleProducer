@@ -113,16 +113,13 @@ RecoJetSelectorAK8_Wjj::disable_dR_lepton_cut()
 void
 RecoJetSelectorAK8_Wjj::set_lepton(const RecoLepton * lepton) const
 {
-  if ( lepton->isLeptonSF3() )
-    leptons_ = { lepton } ;
-  else leptons_ = { };
+  leptons_ = { lepton };
 }
 
 void
 RecoJetSelectorAK8_Wjj::set_leptons(const std::vector<const RecoLepton *> & leptons) const
 {
-  for( const auto lepton : leptons)
-    if ( lepton->isLeptonSF3() ) leptons_.push_back(lepton);
+  leptons_ = leptons;
 }
 
 double

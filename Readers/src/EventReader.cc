@@ -13,7 +13,6 @@
 #include "TallinnNtupleProducer/Readers/interface/convert_to_ptrs.h"              // convert_to_ptrs()
 #include "TallinnNtupleProducer/Readers/interface/setFilterBits.h"                // setFilterBits()
 #include "TallinnNtupleProducer/Readers/interface/setJetBtagScore.h"              // setJetBtagScore
-#include "TallinnNtupleProducer/Readers/interface/setLeptonSF3.h"              //setLeptonLSF3
 
 #include "TallinnNtupleProducer/Readers/interface/RunLumiEventReader.h"                       // RunLumiEventReader
 #include "TallinnNtupleProducer/Readers/interface/TriggerInfoReader.h"                        // TriggerInfoReader
@@ -610,8 +609,6 @@ EventReader::read() const
   if ( jetAK8_Hbb_needsUpdate )
   {
     event_.jetsAK8_ = jetReaderAK8_->read();
-    setLeptonSF3(event_.muons_, event_.jetsAK8_);
-    setLeptonSF3(event_.electrons_, event_.jetsAK8_);
     if ( isMC_ && isNewEvent )
     {
       event_.genJetsAK8_ = genJetAK8Reader_->read();
