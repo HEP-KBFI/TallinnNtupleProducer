@@ -33,6 +33,9 @@ class RecoJetAK8
              Float_t rawFactor,
              Float_t area,
              Int_t genJetAK8Idx,
+             Float_t lsf3,
+             Int_t muonIdx3SJ,
+             Int_t electronIdx3SJ,
              UInt_t idx);
 
   virtual ~RecoJetAK8();
@@ -54,6 +57,9 @@ class RecoJetAK8
   Int_t jetId() const;
   Float_t area() const;
   Int_t genJetAK8Idx() const;
+  Float_t lsf3() const;
+  Int_t muonIdx3SJ() const;
+  Int_t electronIdx3SJ() const;
   Int_t get_default_systematics() const;
   Int_t get_ignored_corrections() const;
 
@@ -71,6 +77,9 @@ class RecoJetAK8
   Int_t jetId_;     ///< jet ID, as explained in https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2017
   Float_t area_;    ///< jet catchment area
   Int_t genJetAK8Idx_;
+  Float_t lsf3_;
+  Int_t muonIdx3SJ_;
+  Int_t electronIdx3SJ_;
 };
 
 typedef std::vector<RecoJetAK8> RecoJetCollectionAK8;
