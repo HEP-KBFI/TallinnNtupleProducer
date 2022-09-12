@@ -238,6 +238,30 @@ RecoLepton::setjetBtagCSV(double btagscore, Btag btagAlgo)
   assocJetBtagCSVs_[btagAlgo] = btagscore;
 }
 
+void
+RecoLepton::setBoostedLepton(bool isboosted)
+{
+  isBoostedLepton_ = isboosted;
+}
+
+void
+RecoLepton::setlsf3(float lsf3)
+{
+  lsf3_ = lsf3;
+}
+
+float
+RecoLepton::getlsf3() const
+{
+  return lsf3_;
+}
+
+bool
+RecoLepton::isBoostedLepton() const
+{
+  return isBoostedLepton_;
+}
+
 Double_t
 RecoLepton::jetBtagCSV(Btag btag) const
 {

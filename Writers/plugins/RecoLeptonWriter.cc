@@ -35,6 +35,8 @@ RecoLeptonWriter::RecoLeptonWriter(const edm::ParameterSet & cfg)
   genMatch_ = new Int_t[max_nLeptons_];
   isFake_ = new Bool_t[max_nLeptons_];
   isFlip_ = new Bool_t[max_nLeptons_];
+  isBoosted_ = new Bool_t[max_nLeptons_];
+  lsf3_ = new Float_t[max_nLeptons_];
 }
 
 RecoLeptonWriter::~RecoLeptonWriter()
@@ -53,6 +55,8 @@ RecoLeptonWriter::~RecoLeptonWriter()
   delete[] genMatch_;
   delete[] isFake_;
   delete[] isFlip_;
+  delete[] isBoosted_;
+  delete[] lsf3_;
 }
 
 namespace
@@ -90,6 +94,8 @@ RecoLeptonWriter::setBranches(TTree * outputTree)
     bai.setBranch(genMatch_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "genMatch"));
     bai.setBranch(isFake_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "isFake"));
     bai.setBranch(isFlip_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "isFlip"));
+    bai.setBranch(isBoosted_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "isBoosted"));
+    bai.setBranch(lsf3_[idxLepton], get_branchName_obj(branchName_obj_.data(), (int)idxLepton, "lsf3"));
   }
 }
 
@@ -144,6 +150,8 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
       genMatch_[idxLepton] = compGenMatch(lepton);
       isFake_[idxLepton] = (genMatch_[idxLepton] == 16);
       isFlip_[idxLepton] = (genMatch_[idxLepton] == 2);
+      isBoosted_[idxLepton] = lepton->isBoostedLepton();
+      lsf3_[idxLepton] = lepton->getlsf3();
     }
     else
     {
@@ -161,6 +169,8 @@ RecoLeptonWriter::writeImp(const Event & event, const EvtWeightRecorder & evtWei
       genMatch_[idxLepton] = 0;
       isFake_[idxLepton] = false;
       isFlip_[idxLepton] = false;
+      isBoosted_[idxLepton] = false;
+      lsf3_[idxLepton] = -1;
     }
   }
 }
