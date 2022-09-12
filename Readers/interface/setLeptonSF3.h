@@ -7,24 +7,22 @@
 
 template <typename T>
 void
-setLeptonSF3(std::vector<T> & particles,
-                const std::vector<RecoJetAK8> & jets)
+setLeptonSF3(std::vector<T> & leptons,
+             const std::vector<RecoJetAK8> & jets) // leptons -> only electron and muon
 {
-  if ( particles.size() )
+  if ( leptons.size() )
   {
-    bool is_electron = std::fabs(particles.at(0).pdgId()) == 11;
+    bool is_electron = std::fabs(leptons.at(0).pdgId()) == 11;
 
-    for ( unsigned int lepidx=0; lepidx<particles.size(); lepidx++ )
+    for ( unsigned int lepidx=0; lepidx<leptons.size(); ++lepidx )
     {
-      particles.at(lepidx).setBoostedLepton(false);
-      particles.at(lepidx).setlsf3(-1);
       for ( const RecoJetAK8 & jet : jets)
       {
-        int jet_leptonSF3Idx = (is_electron) ? jet.electronIdx3SJ() : jet.muonIdx3SJ();
+        int jet_leptonSF3Idx = is_electron ? jet.electronIdx3SJ() : jet.muonIdx3SJ();
         if ( jet_leptonSF3Idx == (int)lepidx ) 
         {
-          particles.at(lepidx).setBoostedLepton( true );
-          particles.at(lepidx).setlsf3( jet.lsf3() );
+          leptons.at(lepidx).setBoostedLepton( true );
+          leptons.at(lepidx).setlsf3( jet.lsf3() );
           break;
         }
       }

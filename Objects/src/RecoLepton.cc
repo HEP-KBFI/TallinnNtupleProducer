@@ -25,7 +25,9 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
                        Int_t    tightCharge,
                        Int_t    jetIdx,
                        UChar_t  genPartFlav,
-                       Int_t    genPartIdx)
+                       Int_t    genPartIdx,
+                       bool     isBoosted,
+                       Float_t  lsf3)
   : ChargedParticle(lepton)
   , dxy_(dxy)
   , dz_(dz)
@@ -39,6 +41,8 @@ RecoLepton::RecoLepton(const ChargedParticle & lepton,
   , jetIdx_(jetIdx)
   , genPartFlav_(genPartFlav)
   , genPartIdx_(genPartIdx)
+  , isBoostedLepton_(isBoosted)
+  , lsf3_(lsf3)
   , mvaRawTTH_cut_(-1.)
   , assocJet_pt_(get_assocJet_pt(pt_, jetRelIso_))
   , assocJet_p4_(assocJet_pt_, eta_, phi_, mass_)

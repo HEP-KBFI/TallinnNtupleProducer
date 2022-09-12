@@ -29,7 +29,9 @@ class RecoLepton : public ChargedParticle
              Int_t    tightCharge,
              Int_t    jetIdx,
              UChar_t  genPartFlav,
-             Int_t    genPartIdx);
+             Int_t    genPartIdx,
+             Bool_t   isBoosted=false,
+             Float_t  lsf3=-1);
 
   virtual ~RecoLepton();
 
@@ -199,11 +201,11 @@ class RecoLepton : public ChargedParticle
   Int_t jetIdx_;               ///< index of jet from initial jet collection that the lepton is constituent of (-1 if no match)
   UChar_t genPartFlav_;        ///< generator-level parton flavor
   Int_t genPartIdx_;          ///< index to matched gen particle (-1 if no match)
+  Bool_t isBoostedLepton_;    ///< is lepton boosted
+  Float_t lsf3_;              ///< lsf3 value
   Double_t mvaRawTTH_cut_;     ///< cut on prompt lepton MVA score
 
   std::map<Btag, Double_t> assocJetBtagCSVs_; ///< CSV b-tagging discriminator values of nearby jet found via jetIdx branch
-  bool isBoostedLepton_;
-  float lsf3_;
 
   Double_t assocJet_pt_;
   Particle::LorentzVector assocJet_p4_;

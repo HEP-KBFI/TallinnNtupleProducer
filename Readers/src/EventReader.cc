@@ -37,7 +37,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"                         // RecoJetReaderAK8
 #include "TallinnNtupleProducer/Readers/interface/ParticleReader.h"                           // ParticleReader
 #include "TallinnNtupleProducer/Readers/interface/JMECorrector.h"                             // JMECorrector
-#include "TallinnNtupleProducer/Readers/interface/setLeptonSF3.h"              //setLeptonLSF3
+#include "TallinnNtupleProducer/Readers/interface/setLeptonSF3.h"                             //setLeptonLSF3
 
 namespace
 {
