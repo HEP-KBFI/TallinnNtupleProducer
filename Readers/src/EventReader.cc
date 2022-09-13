@@ -37,6 +37,7 @@
 #include "TallinnNtupleProducer/Readers/interface/RecoJetReaderAK8.h"                         // RecoJetReaderAK8
 #include "TallinnNtupleProducer/Readers/interface/ParticleReader.h"                           // ParticleReader
 #include "TallinnNtupleProducer/Readers/interface/JMECorrector.h"                             // JMECorrector
+#include "TallinnNtupleProducer/Readers/interface/setLeptonSF3.h"                             //setLeptonLSF3
 
 namespace
 {
@@ -609,6 +610,8 @@ EventReader::read() const
   if ( jetAK8_Hbb_needsUpdate )
   {
     event_.jetsAK8_ = jetReaderAK8_->read();
+    setLeptonSF3(event_.muons_, event_.jetsAK8_);
+    setLeptonSF3(event_.electrons_, event_.jetsAK8_);
     if ( isMC_ && isNewEvent )
     {
       event_.genJetsAK8_ = genJetAK8Reader_->read();

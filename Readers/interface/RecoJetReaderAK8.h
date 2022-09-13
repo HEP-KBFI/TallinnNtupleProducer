@@ -71,6 +71,9 @@ class RecoJetReaderAK8
   std::string branchName_rawFactor_;
   std::string branchName_area_;
   std::string branchName_genJetAK8Idx_;
+  std::string branchName_lsf3_;
+  std::string branchName_muonIdx3SJ_;
+  std::string branchName_electronIdx3SJ_;
 
   UInt_t nJets_;
   Float_t * jet_pt_;
@@ -88,6 +91,9 @@ class RecoJetReaderAK8
   Float_t * jet_rawFactor_;
   Float_t * jet_area_;
   Int_t * jet_genJetAK8Idx_;
+  Float_t * jet_lsf3_;
+  Int_t * jet_muonIdx3SJ_;
+  Int_t * jet_electronIdx3SJ_;
 
   // CV: make sure that only one RecoJetReaderAK8 instance exists for a given branchName,
   //     as ROOT cannot handle multiple TTree::SetBranchAddress calls for the same branch.
