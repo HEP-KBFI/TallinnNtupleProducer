@@ -29,9 +29,7 @@ class RecoLepton : public ChargedParticle
              Int_t    tightCharge,
              Int_t    jetIdx,
              UChar_t  genPartFlav,
-             Int_t    genPartIdx,
-             Bool_t   isBoosted=false,
-             Float_t  lsf3=-1);
+             Int_t    genPartIdx);
 
   virtual ~RecoLepton();
 
