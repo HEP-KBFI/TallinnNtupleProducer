@@ -1,8 +1,6 @@
-#include <DataFormats/Math/interface/deltaR.h>                        // deltaR()
-#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"       // RecoHadTau::filterBits()
 #include "TallinnNtupleProducer/EvtWeightTools/interface/Data_to_MC_CorrectionInterface_0l_4tau_trigger.h"
 #include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
-
+#include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau::filterBits()
 #include "TallinnNtupleProducer/CommonTools/interface/cmsException.h"                           // cmsException()
 #include "TallinnNtupleProducer/CommonTools/interface/sysUncertOptions.h"                       // TriggerSFsys, getTriggerSF_option()
 
