@@ -12,6 +12,9 @@ RecoJetAK8::RecoJetAK8(const GenJet & jet,
                        Float_t rawFactor,
                        Float_t area,
                        Int_t genJetAK8Idx,
+                       Float_t lsf3,
+                       Int_t muonIdx3SJ,
+                       Int_t electronIdx3SJ,
                        UInt_t idx)
   : RecoJetBase(jet, rawFactor, idx)
   , msoftdrop_(msoftdrop)
@@ -24,6 +27,9 @@ RecoJetAK8::RecoJetAK8(const GenJet & jet,
   , jetId_(jetId)
   , area_(area)
   , genJetAK8Idx_(genJetAK8Idx)
+  , lsf3_(lsf3)
+  , muonIdx3SJ_(muonIdx3SJ)
+  , electronIdx3SJ_(electronIdx3SJ)
 {}
 
 RecoJetAK8::~RecoJetAK8()
@@ -93,6 +99,24 @@ Int_t
 RecoJetAK8::genJetAK8Idx() const
 {
   return genJetAK8Idx_;
+}
+
+Float_t
+RecoJetAK8::lsf3() const
+{
+  return lsf3_;
+}
+
+Int_t
+RecoJetAK8::muonIdx3SJ() const
+{
+  return muonIdx3SJ_;
+}
+
+Int_t
+RecoJetAK8::electronIdx3SJ() const
+{
+  return electronIdx3SJ_;
 }
 
 std::ostream &

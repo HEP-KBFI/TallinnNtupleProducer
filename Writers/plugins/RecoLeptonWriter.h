@@ -67,6 +67,8 @@ class RecoLeptonWriter : public WriterBase
   Int_t * genMatch_;
   Bool_t * isFake_; // true if genMatch = 16, false otherwise
   Bool_t * isFlip_; // true if genMatch = 2, false otherwise
+  Bool_t * isBoosted_;
+  Float_t * lsf3_;
 };
 
 #endif // TallinnNtupleProducer_Writers_RecoLeptonWriter_h

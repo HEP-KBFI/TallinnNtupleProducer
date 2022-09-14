@@ -140,6 +140,18 @@ class RecoLepton : public ChargedParticle
   void
   setjetBtagCSV(double btag, Btag btagAlgo=Btag::kDeepJet);
 
+  void
+  setBoostedLepton(bool isboosted);
+
+  void
+  setlsf3(float lsf3);
+  
+  bool
+  isBoostedLepton() const;
+
+  float
+  getlsf3() const;
+
   bool hasJetBtagCSV(Btag btag) const;
 
   bool isGenMatched(bool requireChargeMatch) const;
@@ -187,6 +199,8 @@ class RecoLepton : public ChargedParticle
   Int_t jetIdx_;               ///< index of jet from initial jet collection that the lepton is constituent of (-1 if no match)
   UChar_t genPartFlav_;        ///< generator-level parton flavor
   Int_t genPartIdx_;          ///< index to matched gen particle (-1 if no match)
+  Bool_t isBoostedLepton_;    ///< is lepton boosted
+  Float_t lsf3_;              ///< lsf3 value
   Double_t mvaRawTTH_cut_;     ///< cut on prompt lepton MVA score
 
   std::map<Btag, Double_t> assocJetBtagCSVs_; ///< CSV b-tagging discriminator values of nearby jet found via jetIdx branch
