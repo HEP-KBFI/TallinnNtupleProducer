@@ -49,6 +49,8 @@ Data_to_MC_CorrectionInterface_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys ce
     if ( hadTau_recObj->filterBits() ) matched_hadTaus.push_back(hadTau_recObj);
   }
 
+  assert( matched_hadTaus.size() >= 2 );
+
   double prob_data(1);
   double prob_mc(1);
   for( auto matched_hadTau : matched_hadTaus)
@@ -64,20 +66,6 @@ Data_to_MC_CorrectionInterface_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys ce
   return sf;
 }
  
-double
-Data_to_MC_CorrectionInterface_0l_4tau_trigger::getProb_tau(int tau_status,
-                                                            double eff_2tau_tauLeg) const
-{
-  double prob = 0.;
-  switch(tau_status)
-  {
-    case k2tau:    prob = eff_2tau_tauLeg;      break;
-    case kNot2tau: prob = 1. - eff_2tau_tauLeg; break;
-    default:       assert(0);
-  }
-  return prob;
-}
-
 bool
 Data_to_MC_CorrectionInterface_0l_4tau_trigger::check_triggerSFsys_opt(TriggerSFsys central_or_shift) const
 {
