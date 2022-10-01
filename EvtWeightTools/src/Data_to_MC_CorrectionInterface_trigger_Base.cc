@@ -6,7 +6,7 @@
 #include "TallinnNtupleProducer/Objects/interface/RecoHadTau.h"                                 // RecoHadTau
 #include "TallinnNtupleProducer/Objects/interface/RecoLepton.h"                                 // RecoLepton
 #include "TallinnNtupleProducer/CommonTools/interface/hadTauDefinitions.h"                      // get_tau_id_enum(), get_tau_id_wp_str()
-
+#include "TallinnNtupleProducer/EvtWeightTools/interface/data_to_MC_corrections_auxFunctions.h" // aux::
 #include "TString.h"                                                                            // Form()
 
 #include <assert.h>                                                                             // assert()
@@ -74,36 +74,13 @@ Data_to_MC_CorrectionInterface_trigger_Base::setLeptons(const std::vector<const 
 void
 Data_to_MC_CorrectionInterface_trigger_Base::setHadTaus(const std::vector<const RecoHadTau *>& hadTaus)
 {
-  if(! hadTaus.empty())
+  hadTau_recObjs.clear();
+  for (auto hadTau : hadTaus)
   {
-    hadTau1_pt_ = hadTaus[0]->pt();
-    hadTau1_eta_ = hadTaus[0]->eta();
-    hadTau1_phi_ = hadTaus[0]->phi();
-    hadTau1_decayMode_ = hadTaus[0]->decayMode();
-  }
-
-  if ( hadTaus.size() >1 )
-  {
-    hadTau2_pt_ = hadTaus[1]->pt();
-    hadTau2_eta_ = hadTaus[1]->eta();
-    hadTau2_phi_ = hadTaus[1]->phi();
-    hadTau2_decayMode_ = hadTaus[1]->decayMode();
-  }
-
-  if ( hadTaus.size() >2 )
-  {
-    hadTau3_pt_ = hadTaus[2]->pt();
-    hadTau3_eta_ = hadTaus[2]->eta();
-    hadTau3_phi_ = hadTaus[2]->phi();
-    hadTau3_decayMode_ = hadTaus[2]->decayMode();
-  }
-  
-  if ( hadTaus.size() >3 )
-  {
-    hadTau4_pt_ = hadTaus[3]->pt();
-    hadTau4_eta_ = hadTaus[3]->eta();
-    hadTau4_phi_ = hadTaus[3]->phi();
-    hadTau4_decayMode_ = hadTaus[3]->decayMode();
+    if ( isDEBUG_ )
+      std::cout << "hadTau pt: " << hadTau->pt() << "\t eta: " << hadTau->eta() << "\t decayMode: " << hadTau->decayMode() << std::endl;
+    if ( std::fabs(hadTau->eta()) <= 2.1 && aux::hasDecayMode(allowedDecayModes_, hadTau->decayMode()))
+    hadTau_recObjs.push_back(hadTau);
   }
 }
 

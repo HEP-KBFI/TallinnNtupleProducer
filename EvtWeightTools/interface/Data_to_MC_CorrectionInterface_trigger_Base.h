@@ -98,6 +98,8 @@ class Data_to_MC_CorrectionInterface_trigger_Base
   const TauID tauId_;
   const std::string wp_str_;
 
+  std::vector<const RecoHadTau*> hadTau_recObjs;
+
   std::unique_ptr<correction::CorrectionSet> tau_tigger_cset_;
   correction::Correction::Ref sf_trigger_;
   //-----------------------------------------------------------------------------
