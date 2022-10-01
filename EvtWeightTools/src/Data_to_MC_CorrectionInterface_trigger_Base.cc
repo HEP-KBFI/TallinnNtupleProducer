@@ -74,6 +74,7 @@ Data_to_MC_CorrectionInterface_trigger_Base::setLeptons(const std::vector<const 
 void
 Data_to_MC_CorrectionInterface_trigger_Base::setHadTaus(const std::vector<const RecoHadTau *>& hadTaus)
 {
+  hadTau_recObjs.clear();
   for (auto hadTau : hadTaus)
   {
     if ( isDEBUG_ )

@@ -49,8 +49,6 @@ Data_to_MC_CorrectionInterface_0l_4tau_trigger::getSF_triggerEff(TriggerSFsys ce
     if ( hadTau_recObj->filterBits() ) matched_hadTaus.push_back(hadTau_recObj);
   }
 
-  assert( matched_hadTaus.size() >= 2 );
-
   double prob_data(1);
   double prob_mc(1);
   for( auto matched_hadTau : matched_hadTaus)
